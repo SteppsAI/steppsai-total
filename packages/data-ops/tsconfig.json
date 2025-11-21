@@ -3,7 +3,6 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
-
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": false,
@@ -11,11 +10,21 @@
     "strict": true,
     "skipLibCheck": true,
     "outDir": "./dist",
-    "types": ["@cloudflare/workers-types"],
-    "lib": ["ESNext"],
+    "types": [
+      "@cloudflare/workers-types",
+      "node"
+    ],
+    "lib": [
+      "ESNext"
+    ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
-  "include": ["src", "auth-gen"]
+  "include": [
+    "src",
+    "auth-gen"
+  ]
 }

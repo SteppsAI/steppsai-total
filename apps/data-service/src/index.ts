@@ -15,7 +15,7 @@ export default class DataService extends WorkerEntrypoint<Env> {
 	fetch(request: Request) {
 		return App.fetch(request, this.env, this.ctx)
 	}
-	async queue(batch: MessageBatch<unknown>){
+	async queue(batch: MessageBatch<unknown>) {
 		for (const message of batch.messages) {
 			const parsedEvent = QueueMessageSchema.safeParse(message.body);
 			if (parsedEvent.success) {

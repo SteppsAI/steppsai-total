@@ -6,13 +6,12 @@ export function Navigation() {
         <nav className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/80 backdrop-blur-md">
             <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center gap-2">
-                    <Link to="/" className="flex items-center gap-2">
+                    <Link to="/" className="flex items-center">
                         <img
-                            src="/public/logos/logo-symbol.svg"
+                            src="/brand/logo-symbol.svg"
                             alt="Stepps.ai"
                             className="h-8 w-8"
                         />
-                        <span className="font-heading text-xl font-bold text-gray-900">Stepps.ai</span>
                     </Link>
                 </div>
 

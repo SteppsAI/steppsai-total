@@ -12,7 +12,7 @@ export function LandingPage() {
                             <span className="sr-only">Stepps.ai</span>
                             <img
                                 className="h-8 w-auto"
-                                src="/src/public/logos/logo.svg"
+                                src="/brand/logo.svg"
                                 alt="Stepps.ai"
                             />
                         </a>

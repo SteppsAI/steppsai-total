@@ -1,0 +1,27 @@
+{
+  "name": "Stepps - AI-Powered SOP and Process Documentation",
+  "short_name": "Stepps",
+  "description": "Transform any workflow into professional SOPs and visual guides. AI-powered documentation that keeps your team aligned and productive.",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/",
+  "orientation": "portrait-primary"
+}

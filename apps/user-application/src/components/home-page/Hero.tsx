@@ -8,7 +8,7 @@ export function Hero() {
             {/* Logo at Top */}
             <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-20">
                 <img
-                    src="/public/logos/logo.svg"
+                    src="/brand/logo.svg"
                     alt="stepps.ai"
                     className="h-8 md:h-10 lg:h-12 w-auto"
                 />

@@ -109,7 +109,7 @@ export function Footer() {
               <div className="md:col-span-1">
                 <Link to="/" className="flex justify-center md:justify-start mb-6">
                   <img
-                    src="/public/logos/logo-symbol.svg"
+                    src="/brand/logo-symbol.svg"
                     alt="stepps.ai Symbol"
                     className="h-10 w-auto"
                   />

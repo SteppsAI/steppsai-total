@@ -8,7 +8,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { siGoogle } from "simple-icons";
-
 import { useState } from "react";
 
 // Mock authClient with dummy data

@@ -11,20 +11,32 @@
   },
   "exports": {
     "./database": {
-      "types": "./dist/src/db/database.d.ts",
-      "default": "./dist/src/db/database.js"
+      "types": "./dist/db/database.d.ts",
+      "default": "./dist/db/database.js"
+    },
+    "./queries": {
+      "types": "./dist/queries/index.d.ts",
+      "default": "./dist/queries/index.js"
     },
     "./queries/*": {
-      "types": "./dist/src/queries/*.d.ts",
-      "default": "./dist/src/queries/*.js"
+      "types": "./dist/queries/*.d.ts",
+      "default": "./dist/queries/*.js"
+    },
+    "./zod-schema": {
+      "types": "./dist/zod/index.d.ts",
+      "default": "./dist/zod/index.js"
     },
     "./zod-schema/*": {
-      "types": "./dist/src/zod/*.d.ts",
-      "default": "./dist/src/zod/*.js"
+      "types": "./dist/zod/*.d.ts",
+      "default": "./dist/zod/*.js"
+    },
+    "./drizzle-out/*": {
+      "types": "./dist/drizzle-out/*.d.ts",
+      "default": "./dist/drizzle-out/*.js"
     },
     "./durable-objects-helpers": {
-      "types": "./dist/src/durable-objects-helpers/*.d.ts",
-      "default": "./dist/src/durable-objects-helpers/*.js"
+      "types": "./dist/durable-object-helpers/*.d.ts",
+      "default": "./dist/durable-object-helpers/*.js"
     }
   },
   "keywords": [],

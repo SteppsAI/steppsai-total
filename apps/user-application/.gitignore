@@ -4,3 +4,9 @@ dist
 dist-ssr
 *.local
 .wrangler
+
+# Environment variables - NEVER commit these!
+.env
+.env.*
+.dev.vars
+!.env.example

@@ -1,10 +1,10 @@
 import { t } from "@/worker/trpc/trpc-instance";
-import { linksTrpcRoutes } from "@/worker/trpc/routers/links";
-import { evaluationsTrpcRoutes } from "@/worker/trpc/routers/evaluations";
+import { guidesRouter } from "@/worker/trpc/routers/guides";
+import { stepsRouter } from "@/worker/trpc/routers/steps";
 
 export const appRouter = t.router({
-  links: linksTrpcRoutes,
-  evaluations: evaluationsTrpcRoutes,
+  guides: guidesRouter,
+  steps: stepsRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -1,82 +1,71 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { GuideCard } from "@/components/dashboard/guide-card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
-  MetricsCards,
-  ActiveAreasMap,
-  TopCountriesTable,
-  ProblematicLinksTable,
-  ActiveLinksTable,
-  ActiveRegionMap,
-} from "@/components/dashboard";
-import { useClickSocket } from "@/hooks/clicks-socket";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Plus, Search } from "lucide-react";
 
 export const Route = createFileRoute("/app/_authed/")({
-  component: RouteComponent,
-  loader: async ({ context }) => {
-    await Promise.all([
-      context.queryClient.prefetchQuery(
-        context.trpc.links.activeLinks.queryOptions(),
-      ),
-      context.queryClient.prefetchQuery(
-        context.trpc.links.totalLinkClickLastHour.queryOptions(),
-      ),
-      context.queryClient.prefetchQuery(
-        context.trpc.links.last24HourClicks.queryOptions(),
-      ),
-      context.queryClient.prefetchQuery(
-        context.trpc.links.last30DaysClicks.queryOptions(),
-      ),
-      context.queryClient.prefetchQuery(
-        context.trpc.evaluations.problematicDestinations.queryOptions(),
-      ),
-      context.queryClient.prefetchQuery(
-        context.trpc.links.clicksByCountry.queryOptions(),
-      ),
-    ]);
-  },
+  component: DashboardPage,
 });
 
-function RouteComponent() {
-  const { isConnected } = useClickSocket();
+import { useQuery } from "@tanstack/react-query";
+import { trpc } from "@/router";
+
+// ...
+
+function DashboardPage() {
+  const { data: guides, isLoading } = useQuery(trpc.guides.getAll.queryOptions());
 
   return (
-    <div className="flex w-full min-w-0">
-      <main className="flex-1 min-w-0">
-        <div className="container mx-auto p-6 space-y-6 max-w-full">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-            <div className="flex items-center gap-2">
-              <div
-                className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`}
-              />
-              <span className="text-sm text-muted-foreground">
-                {isConnected ? "Connected" : "Disconnected"}
-              </span>
-            </div>
-          </div>
-
-          {/* Metrics Cards */}
-          <MetricsCards />
-
-          {/* Map and Geography Section */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            <ActiveRegionMap />
-            <ActiveAreasMap />
-          </div>
-
-          {/* Cities and Issues Section */}
-          <div className="grid gap-6 lg:grid-cols-2 ">
-            <div className="min-w-0">
-              <TopCountriesTable />
-            </div>
-            <div className="min-w-0">
-              <ProblematicLinksTable />
-            </div>
-          </div>
-
-          {/* Active Links Table */}
-          <ActiveLinksTable />
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">My Guides</h1>
+          <p className="text-muted-foreground">
+            Create and manage your documentation
+          </p>
         </div>
-      </main>
+        <Button size="lg">
+          <Plus className="w-4 h-4 mr-2" />
+          New Guide
+        </Button>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+          <Input placeholder="Search guides..." className="pl-9" />
+        </div>
+        <Select>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="published">Published</SelectItem>
+            <SelectItem value="draft">Draft</SelectItem>
+            <SelectItem value="recording">Recording</SelectItem>
+            <SelectItem value="processing">Processing</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {isLoading ? (
+        <div>Loading...</div>
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {guides?.map((guide) => (
+            <GuideCard key={guide.id} guide={guide} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

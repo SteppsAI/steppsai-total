@@ -14,10 +14,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppAuthedRouteImport } from './routes/app/_authed'
 import { Route as AppAuthedIndexRouteImport } from './routes/app/_authed/index'
-import { Route as AppAuthedLinksRouteImport } from './routes/app/_authed/links'
-import { Route as AppAuthedEvaluationsRouteImport } from './routes/app/_authed/evaluations'
-import { Route as AppAuthedCreateRouteImport } from './routes/app/_authed/create'
-import { Route as AppAuthedLinkIdRouteImport } from './routes/app/_authed/link.$id'
+import { Route as AppAuthedEditorGuideIdRouteImport } from './routes/app/_authed/editor/$guideId'
 
 const AppRouteImport = createFileRoute('/app')()
 
@@ -40,83 +37,43 @@ const AppAuthedIndexRoute = AppAuthedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppAuthedRoute,
 } as any)
-const AppAuthedLinksRoute = AppAuthedLinksRouteImport.update({
-  id: '/links',
-  path: '/links',
-  getParentRoute: () => AppAuthedRoute,
-} as any)
-const AppAuthedEvaluationsRoute = AppAuthedEvaluationsRouteImport.update({
-  id: '/evaluations',
-  path: '/evaluations',
-  getParentRoute: () => AppAuthedRoute,
-} as any)
-const AppAuthedCreateRoute = AppAuthedCreateRouteImport.update({
-  id: '/create',
-  path: '/create',
-  getParentRoute: () => AppAuthedRoute,
-} as any)
-const AppAuthedLinkIdRoute = AppAuthedLinkIdRouteImport.update({
-  id: '/link/$id',
-  path: '/link/$id',
+const AppAuthedEditorGuideIdRoute = AppAuthedEditorGuideIdRouteImport.update({
+  id: '/editor/$guideId',
+  path: '/editor/$guideId',
   getParentRoute: () => AppAuthedRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppAuthedRouteWithChildren
-  '/app/create': typeof AppAuthedCreateRoute
-  '/app/evaluations': typeof AppAuthedEvaluationsRoute
-  '/app/links': typeof AppAuthedLinksRoute
   '/app/': typeof AppAuthedIndexRoute
-  '/app/link/$id': typeof AppAuthedLinkIdRoute
+  '/app/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppAuthedIndexRoute
-  '/app/create': typeof AppAuthedCreateRoute
-  '/app/evaluations': typeof AppAuthedEvaluationsRoute
-  '/app/links': typeof AppAuthedLinksRoute
-  '/app/link/$id': typeof AppAuthedLinkIdRoute
+  '/app/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/app/_authed': typeof AppAuthedRouteWithChildren
-  '/app/_authed/create': typeof AppAuthedCreateRoute
-  '/app/_authed/evaluations': typeof AppAuthedEvaluationsRoute
-  '/app/_authed/links': typeof AppAuthedLinksRoute
   '/app/_authed/': typeof AppAuthedIndexRoute
-  '/app/_authed/link/$id': typeof AppAuthedLinkIdRoute
+  '/app/_authed/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/app'
-    | '/app/create'
-    | '/app/evaluations'
-    | '/app/links'
-    | '/app/'
-    | '/app/link/$id'
+  fullPaths: '/' | '/app' | '/app/' | '/app/editor/$guideId'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/app'
-    | '/app/create'
-    | '/app/evaluations'
-    | '/app/links'
-    | '/app/link/$id'
+  to: '/' | '/app' | '/app/editor/$guideId'
   id:
     | '__root__'
     | '/'
     | '/app'
     | '/app/_authed'
-    | '/app/_authed/create'
-    | '/app/_authed/evaluations'
-    | '/app/_authed/links'
     | '/app/_authed/'
-    | '/app/_authed/link/$id'
+    | '/app/_authed/editor/$guideId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -154,51 +111,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthedIndexRouteImport
       parentRoute: typeof AppAuthedRoute
     }
-    '/app/_authed/links': {
-      id: '/app/_authed/links'
-      path: '/links'
-      fullPath: '/app/links'
-      preLoaderRoute: typeof AppAuthedLinksRouteImport
-      parentRoute: typeof AppAuthedRoute
-    }
-    '/app/_authed/evaluations': {
-      id: '/app/_authed/evaluations'
-      path: '/evaluations'
-      fullPath: '/app/evaluations'
-      preLoaderRoute: typeof AppAuthedEvaluationsRouteImport
-      parentRoute: typeof AppAuthedRoute
-    }
-    '/app/_authed/create': {
-      id: '/app/_authed/create'
-      path: '/create'
-      fullPath: '/app/create'
-      preLoaderRoute: typeof AppAuthedCreateRouteImport
-      parentRoute: typeof AppAuthedRoute
-    }
-    '/app/_authed/link/$id': {
-      id: '/app/_authed/link/$id'
-      path: '/link/$id'
-      fullPath: '/app/link/$id'
-      preLoaderRoute: typeof AppAuthedLinkIdRouteImport
+    '/app/_authed/editor/$guideId': {
+      id: '/app/_authed/editor/$guideId'
+      path: '/editor/$guideId'
+      fullPath: '/app/editor/$guideId'
+      preLoaderRoute: typeof AppAuthedEditorGuideIdRouteImport
       parentRoute: typeof AppAuthedRoute
     }
   }
 }
 
 interface AppAuthedRouteChildren {
-  AppAuthedCreateRoute: typeof AppAuthedCreateRoute
-  AppAuthedEvaluationsRoute: typeof AppAuthedEvaluationsRoute
-  AppAuthedLinksRoute: typeof AppAuthedLinksRoute
   AppAuthedIndexRoute: typeof AppAuthedIndexRoute
-  AppAuthedLinkIdRoute: typeof AppAuthedLinkIdRoute
+  AppAuthedEditorGuideIdRoute: typeof AppAuthedEditorGuideIdRoute
 }
 
 const AppAuthedRouteChildren: AppAuthedRouteChildren = {
-  AppAuthedCreateRoute: AppAuthedCreateRoute,
-  AppAuthedEvaluationsRoute: AppAuthedEvaluationsRoute,
-  AppAuthedLinksRoute: AppAuthedLinksRoute,
   AppAuthedIndexRoute: AppAuthedIndexRoute,
-  AppAuthedLinkIdRoute: AppAuthedLinkIdRoute,
+  AppAuthedEditorGuideIdRoute: AppAuthedEditorGuideIdRoute,
 }
 
 const AppAuthedRouteWithChildren = AppAuthedRoute._addFileChildren(

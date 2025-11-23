@@ -1,80 +1,142 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { StepEditor } from "@/components/editor/step-editor";
+import { EditorHeader } from "@/components/editor/editor-header";
+import { EditorToolbar } from "@/components/editor/editor-toolbar";
 import { Canvas } from "@/components/editor/canvas";
-import { Button } from "@/components/ui/button";
-import { Save, Share } from "lucide-react";
+import { StepSidebar } from "@/components/editor/step-sidebar";
+import { useState } from "react";
+// import { useQuery } from "@tanstack/react-query";
+// import { trpc } from "@/router";
 
 export const Route = createFileRoute("/app/_authed/editor/$guideId")({
   component: EditorPage,
 });
 
-import { useQuery } from "@tanstack/react-query";
-import { trpc } from "@/router";
-
-// ...
+// Mock data for development
+const MOCK_GUIDE = {
+  id: "test-guide-1",
+  title: "How to Create a New Project",
+  updatedAt: new Date().toISOString(),
+  steps: [
+    {
+      id: "step-1",
+      title: "Click on 'Create New'",
+      orderIndex: 0,
+      screenshotUrl: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1974&auto=format&fit=crop",
+      finalCaption: "Start by clicking the 'Create New' button in the top right corner.",
+      overlays: [
+        {
+          type: "arrow",
+          from: [20, 20],
+          to: [40, 40]
+        }
+      ]
+    },
+    {
+      id: "step-2",
+      title: "Select Project Type",
+      orderIndex: 1,
+      screenshotUrl: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?q=80&w=1974&auto=format&fit=crop",
+      finalCaption: "Choose 'Web Application' from the dropdown menu.",
+      overlays: []
+    },
+    {
+      id: "step-3",
+      title: "Configure Settings",
+      orderIndex: 2,
+      screenshotUrl: "https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?q=80&w=1974&auto=format&fit=crop",
+      finalCaption: "Fill in the project details and click 'Next'.",
+      overlays: []
+    }
+  ]
+};
 
 function EditorPage() {
-  const { guideId } = Route.useParams();
-  const { data: guide, isLoading } = useQuery(trpc.guides.getById.queryOptions({ id: guideId }));
+  // const { guideId } = Route.useParams();
+  // const { data: guide, isLoading } = useQuery(trpc.guides.getById.queryOptions({ id: guideId }));
+
+  // Use mock data instead of real data for now
+  const guide = MOCK_GUIDE;
+  const isLoading = false;
+
+  const [title, setTitle] = useState(guide.title || "Untitled Stepps");
+  const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
+  const [activeStepId, setActiveStepId] = useState<string>("");
 
   const handleUpdateStep = (id: string, caption: string) => {
     console.log("Update step:", id, caption);
+    setStatus("saving");
+    // Simulate save
+    setTimeout(() => setStatus("saved"), 1000);
   };
 
   const handleDeleteStep = (id: string) => {
     console.log("Delete step:", id);
   };
 
-  const handleSave = () => {
-    console.log("Save guide");
-  };
-
-  const handleShare = () => {
-    console.log("Share guide");
+  const handleReorderSteps = (steps: any[]) => {
+    console.log("Reorder steps:", steps);
   };
 
   if (isLoading) {
-    return <div className="h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="h-screen flex items-center justify-center bg-background">
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    );
   }
 
   if (!guide) {
-    return <div className="h-screen flex items-center justify-center">Guide not found</div>;
+    return (
+      <div className="h-screen flex items-center justify-center bg-background">
+        <div className="text-muted-foreground">Guide not found</div>
+      </div>
+    );
   }
 
   // Sort steps by orderIndex
   const sortedSteps = guide.steps?.sort((a: any, b: any) => a.orderIndex - b.orderIndex) || [];
-  const currentStep = sortedSteps[0]; // For now just show first step or handle selection state
+
+  // Set initial active step if not set
+  if (!activeStepId && sortedSteps.length > 0) {
+    setActiveStepId(sortedSteps[0].id);
+  }
+
+  // Get the current active step
+  const currentStep = sortedSteps.find((step: any) => step.id === activeStepId) || sortedSteps[0];
+
+  // Update title from guide if not already set
+  if (guide.title && title === "Untitled Stepps") {
+    setTitle(guide.title);
+  }
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen w-full flex flex-col overflow-hidden bg-background">
+      <EditorHeader
+        title={title}
+        status={status}
+        onTitleChange={(newTitle) => {
+          setTitle(newTitle);
+          setStatus("saving");
+          setTimeout(() => setStatus("saved"), 1000);
+        }}
+      />
+
       <div className="flex-1 flex overflow-hidden">
-        <StepEditor
-          steps={sortedSteps}
-          onUpdateStep={handleUpdateStep}
-          onDeleteStep={handleDeleteStep}
-        />
+        <EditorToolbar />
+
         <Canvas
           screenshotUrl={currentStep?.screenshotUrl || undefined}
           overlays={currentStep?.overlays as any || []}
         />
-      </div>
 
-      <div className="border-t bg-background p-4">
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            {sortedSteps.length} steps • Last edited {new Date(guide.updatedAt || "").toLocaleDateString()}
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleShare}>
-              <Share className="w-4 h-4 mr-2" />
-              Share
-            </Button>
-            <Button onClick={handleSave}>
-              <Save className="w-4 h-4 mr-2" />
-              Save Changes
-            </Button>
-          </div>
-        </div>
+        <StepSidebar
+          steps={sortedSteps}
+          activeStepId={activeStepId}
+          onStepSelect={setActiveStepId}
+          onUpdateStep={handleUpdateStep}
+          onDeleteStep={handleDeleteStep}
+          onReorderSteps={handleReorderSteps}
+        />
       </div>
     </div>
   );

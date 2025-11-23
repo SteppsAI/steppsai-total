@@ -8,6 +8,7 @@ import {
   BookOpen,
   MessageSquare,
   Plus,
+  Edit,
 } from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
 
@@ -68,6 +69,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Link to="/app" className="flex items-center gap-3">
                     <Home className="size-5" />
                     <span className="text-sm">Home</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith("/app/editor")}
+                  tooltip="Editor (Demo)"
+                  className={`h-12 px-4 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground font-medium transition-all duration-200 rounded-lg ${isMobile ? 'min-h-[44px]' : ''}`}
+                >
+                  <Link to="/app/editor/$guideId" params={{ guideId: "test-guide-1" }} className="flex items-center gap-3">
+                    <Edit className="size-5" />
+                    <span className="text-sm">Editor (Demo)</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

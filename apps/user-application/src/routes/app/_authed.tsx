@@ -1,6 +1,6 @@
 import { AppSidebar } from "@/components/common/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Outlet, createFileRoute } from "@tanstack/react-router";
+import { Outlet, createFileRoute, useLocation } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 // import { authClient } from "@/components/auth/client";
 // import { redirect } from "@tanstack/react-router";
@@ -20,6 +20,11 @@ export const Route = createFileRoute("/app/_authed")({
 });
 function RouteComponent() {
   const isMobile = useIsMobile();
+  const location = useLocation();
+  const pathname = location.pathname;
+
+  // Check if we're on an editor route
+  const isEditorRoute = pathname.startsWith('/app/editor');
 
   // Add swipe gesture to open sidebar on mobile
   const handleOpenSidebar = () => {
@@ -31,6 +36,17 @@ function RouteComponent() {
 
   useSwipeToOpen(handleOpenSidebar, 60);
 
+  // Fullscreen layout for editor (no sidebar, no dashboard chrome)
+  if (isEditorRoute) {
+    return (
+      <div className="h-screen w-full overflow-hidden bg-background">
+        <Outlet />
+        <Toaster />
+      </div>
+    );
+  }
+
+  // Normal dashboard layout with sidebar
   return (
     <div className="h-screen w-full overflow-hidden flex bg-muted">
       <SidebarProvider

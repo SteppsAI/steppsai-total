@@ -61,11 +61,20 @@ function EditorPage() {
   const [title, setTitle] = useState(guide.title || "Untitled Stepps");
   const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const [activeStepId, setActiveStepId] = useState<string>("");
+  const [activeTool, setActiveTool] = useState<"pointer" | "arrow" | "highlight" | "blur">("pointer");
 
   const handleUpdateStep = (id: string, caption: string) => {
     console.log("Update step:", id, caption);
     setStatus("saving");
     // Simulate save
+    setTimeout(() => setStatus("saved"), 1000);
+  };
+
+  const handleAddOverlay = (overlay: any) => {
+    console.log("Add overlay:", overlay);
+    // In a real app, we would update the step's overlays here
+    // For now, we'll just log it
+    setStatus("saving");
     setTimeout(() => setStatus("saved"), 1000);
   };
 
@@ -122,11 +131,16 @@ function EditorPage() {
       />
 
       <div className="flex-1 flex overflow-hidden relative">
-        <EditorToolbar />
+        <EditorToolbar
+          activeTool={activeTool}
+          onToolChange={setActiveTool}
+        />
 
         <Canvas
           screenshotUrl={currentStep?.screenshotUrl || undefined}
           overlays={currentStep?.overlays as any || []}
+          activeTool={activeTool}
+          onAddOverlay={handleAddOverlay}
         />
 
         <StepSidebar

@@ -2,12 +2,22 @@ import { Button } from "@/components/ui/button";
 import {
     ArrowRight,
     Circle,
-    Droplets
+    Droplets,
+    MousePointer2
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
-export function EditorToolbar() {
+export type EditorTool = "pointer" | "arrow" | "highlight" | "blur";
+
+interface EditorToolbarProps {
+    activeTool: EditorTool;
+    onToolChange: (tool: EditorTool) => void;
+}
+
+export function EditorToolbar({ activeTool, onToolChange }: EditorToolbarProps) {
     const tools = [
+        { icon: MousePointer2, label: "Pointer", id: "pointer" },
         { icon: ArrowRight, label: "Arrow", id: "arrow" },
         { icon: Circle, label: "Highlight", id: "highlight" },
         { icon: Droplets, label: "Blur", id: "blur" },
@@ -20,9 +30,15 @@ export function EditorToolbar() {
                     <Tooltip key={tool.id}>
                         <TooltipTrigger asChild>
                             <Button
-                                variant="ghost"
+                                variant={activeTool === tool.id ? "secondary" : "ghost"}
                                 size="icon"
-                                className="rounded-full w-10 h-10 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                                onClick={() => onToolChange(tool.id as EditorTool)}
+                                className={cn(
+                                    "rounded-full w-10 h-10",
+                                    activeTool === tool.id
+                                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                                        : "text-muted-foreground hover:text-primary hover:bg-primary/10"
+                                )}
                             >
                                 <tool.icon className="w-5 h-5" />
                             </Button>

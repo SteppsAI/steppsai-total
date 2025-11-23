@@ -34,7 +34,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar collapsible="offcanvas" className="bg-sidebar" {...props}>
       <SidebarHeader className="h-16 flex items-center justify-center px-4 border-b border-sidebar-border/50">
         <div className="flex items-center justify-start w-full pl-2">
-          <img src="/brand/logo.svg" alt="Stepps.ai" className="h-7 w-auto" />
+          <img src="/brand/logo-light.svg" alt="Stepps.ai" className="h-7 w-auto" />
         </div>
       </SidebarHeader>
 
@@ -83,7 +83,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator className="bg-sidebar-border/50 w-[85%] mx-auto my-2" />
+        <SidebarSeparator className="bg-sidebar-border/30 w-[85%] mx-auto my-2" />
 
         <SidebarGroup>
           <SidebarGroupContent>

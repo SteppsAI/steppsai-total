@@ -1,6 +1,6 @@
 import { Hero } from "./Hero";
 import { Features } from "./Features";
-import { Footer } from "./Footer";
+import { Footer } from "./footer";
 
 export function LandingPage() {
     return (

@@ -1,6 +1,5 @@
 import { AppSidebar } from "@/components/common/app-sidebar";
-import { SiteHeader } from "@/components/common/site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { authClient } from "@/components/auth/client";
@@ -17,21 +16,45 @@ export const Route = createFileRoute("/app/_authed")({
 });
 function RouteComponent() {
   return (
-    <div className="h-screen w-full overflow-hidden flex bg-[#F1F5F9]">
+    <div className="h-screen w-full overflow-hidden flex bg-muted">
       <SidebarProvider
         style={
           {
-            "--sidebar-width": "calc(var(--spacing) * 72)",
+            "--sidebar-width": "calc(var(--spacing) * 64)",
             "--header-height": "calc(var(--spacing) * 12)",
           } as React.CSSProperties
         }
       >
         <AppSidebar />
-        <SidebarInset className="flex-1 flex flex-col w-full h-full m-0 rounded-none shadow-none overflow-hidden">
+        <SidebarInset className="flex-1 flex flex-col w-full h-full m-0 rounded-none shadow-none overflow-hidden bg-muted">
           {/* Scrollable Content Area */}
           <div className="flex-1 overflow-y-auto w-full h-full">
-            <SiteHeader />
-            <div className="p-6 md:p-8 max-w-[1600px] mx-auto">
+
+            {/* Dashboard Content */}
+            <div className="px-4 md:px-8 py-6 max-w-[1600px] mx-auto">
+              {/* Mobile Sidebar Trigger & Search Bar Area */}
+              <div className="mb-8 flex flex-col gap-4">
+                <div className="md:hidden">
+                  <SidebarTrigger className="text-muted-foreground hover:text-primary" />
+                </div>
+
+                <div className="max-w-2xl w-full">
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <svg className="size-5 text-muted-foreground group-focus-within:text-primary transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.3-4.3" />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Search for Stepps, templates, or folders..."
+                      className="w-full pl-11 pr-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm hover:border-primary/50"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <Outlet />
             </div>
             <Toaster />

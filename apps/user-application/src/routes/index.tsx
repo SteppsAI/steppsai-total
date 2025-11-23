@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Hero } from '@/components/home-page/Hero'
-import { Footer } from '@/components/home-page/Footer'
-import { Navigation } from '@/components/home-page/Navigation'
+import { Footer } from '@/components/home-page/footer'
+import { Navigation } from '@/components/home-page/navigation'
 import HowItWorks from '@/components/home-page/HowItWorks'
 import BuiltForTeams from '@/components/home-page/BuiltForTeams'
 

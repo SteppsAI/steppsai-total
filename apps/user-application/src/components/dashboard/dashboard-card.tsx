@@ -13,7 +13,7 @@ export function DashboardCard({ title, image, onEdit, onShare, onDelete }: Dashb
         <div className="flex flex-col gap-3 group">
             {/* Card Image */}
             <div
-                className="aspect-video w-full rounded-[15px] border-secondary overflow-hidden bg-white relative transition-all duration-300 cursor-pointer shadow-md"
+                className="aspect-video w-full rounded-[15px] border border-secondary overflow-hidden bg-white relative transition-all duration-300 cursor-pointer shadow-md"
             >
                 <img src={image} alt={title} className="w-full h-full object-cover" />
             </div>

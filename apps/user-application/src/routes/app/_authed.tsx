@@ -1,9 +1,9 @@
 import { AppSidebar } from "@/components/common/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Outlet, createFileRoute} from "@tanstack/react-router";
+import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
-import { authClient } from "@/components/auth/client";
-import { redirect } from "@tanstack/react-router";
+// import { authClient } from "@/components/auth/client";
+// import { redirect } from "@tanstack/react-router";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSwipeToOpen } from "@/hooks/use-swipe";
 import { Button } from "@/components/ui/button";
@@ -11,12 +11,12 @@ import { Plus } from "lucide-react";
 
 export const Route = createFileRoute("/app/_authed")({
   component: RouteComponent,
-  beforeLoad: async () => {
-    const session = await authClient.getSession();
-    if (!session.data?.session) {
-      throw redirect({ to: "/" });
-    }
-  }
+  //beforeLoad: async () => {
+  //const session = await authClient.getSession();
+  //if (!session.data?.session) {
+  //throw redirect({ to: "/" });
+  //}
+  //}
 });
 function RouteComponent() {
   const isMobile = useIsMobile();

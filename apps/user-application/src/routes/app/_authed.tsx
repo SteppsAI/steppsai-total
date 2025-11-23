@@ -4,6 +4,8 @@ import { Outlet, createFileRoute, Link } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { authClient } from "@/components/auth/client";
 import { redirect } from "@tanstack/react-router";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useSwipeToOpen } from "@/hooks/use-swipe";
 
 export const Route = createFileRoute("/app/_authed")({
   component: RouteComponent,
@@ -15,6 +17,18 @@ export const Route = createFileRoute("/app/_authed")({
   }
 });
 function RouteComponent() {
+  const isMobile = useIsMobile();
+
+  // Add swipe gesture to open sidebar on mobile
+  const handleOpenSidebar = () => {
+    const sidebarTrigger = document.querySelector('[data-sidebar="trigger"]') as HTMLButtonElement;
+    if (sidebarTrigger && isMobile) {
+      sidebarTrigger.click();
+    }
+  };
+
+  useSwipeToOpen(handleOpenSidebar, 60);
+
   return (
     <div className="h-screen w-full overflow-hidden flex bg-muted">
       <SidebarProvider
@@ -22,6 +36,7 @@ function RouteComponent() {
           {
             "--sidebar-width": "calc(var(--spacing) * 64)",
             "--header-height": "calc(var(--spacing) * 12)",
+            "--sidebar-width-mobile": "calc(var(--spacing) * 72)",
           } as React.CSSProperties
         }
       >
@@ -32,29 +47,12 @@ function RouteComponent() {
 
             {/* Dashboard Content */}
             <div className="px-4 md:px-8 py-6 max-w-[1600px] mx-auto">
-              {/* Mobile Sidebar Trigger & Search Bar Area */}
-              {/* Mobile Header (Visible only on mobile) */}
-              <div className="md:hidden mb-6 flex items-center justify-between bg-sidebar border border-sidebar-border/50 rounded-xl p-3 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <SidebarTrigger className="text-muted-foreground hover:text-primary" />
-                  <div className="h-4 w-px bg-border/50" />
-                  <Link to="/app" className="flex items-center gap-2 text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-home"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
-                    <span>Home</span>
-                  </Link>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button className="flex items-center justify-center size-8 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
-                  </button>
-                  <button className="flex items-center justify-center size-8 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-search"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-                  </button>
-                  <div className="size-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 p-[1px]">
-                    <div className="size-full rounded-full bg-background flex items-center justify-center overflow-hidden">
-                      <span className="text-xs font-bold text-foreground">VB</span>
-                    </div>
-                  </div>
+              {/* Minimal Mobile Header (Visible only on mobile) */}
+              <div className="md:hidden mb-6 flex items-center justify-between">
+                <SidebarTrigger className="text-sidebar-foreground hover:text-primary size-10 min-h-[44px] touch-manipulation" />
+                <h1 className="text-lg font-semibold text-sidebar-foreground">Dashboard</h1>
+                <div className="size-10 min-h-[44px] flex items-center justify-center">
+                  {/* Placeholder for balance */}
                 </div>
               </div>
 

@@ -29,14 +29,14 @@
 
   /* Brand Specifics */
   --brand-dark: #0B0F19;
-  --sidebar: hsl(0 0% 98%);
-  --sidebar-foreground: hsl(240 5.3% 26.1%);
-  --sidebar-primary: hsl(240 5.9% 10%);
-  --sidebar-primary-foreground: hsl(0 0% 98%);
-  --sidebar-accent: hsl(240 4.8% 95.9%);
-  --sidebar-accent-foreground: hsl(240 5.9% 10%);
-  --sidebar-border: hsl(220 13% 91%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #374151;
+  --sidebar-primary: #6366F1;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F3F4F6;
+  --sidebar-accent-foreground: #111827;
+  --sidebar-border: #E5E7EB;
+  --sidebar-ring: #6366F1;
 }
 
 @theme inline {
@@ -104,4 +104,33 @@
   --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
   --sidebar-border: hsl(240 3.7% 15.9%);
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+/* Mobile sidebar enhancements */
+@media (max-width: 767px) {
+  [data-sidebar="sidebar"] {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  [data-sidebar="menu-button"] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  /* Improved touch feedback */
+  [data-sidebar="menu-button"]:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease-in-out;
+  }
+
+  /* Smooth sheet animations */
+  .sheet {
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+
+  /* Better backdrop blur on mobile */
+  .sheet-overlay {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
 }

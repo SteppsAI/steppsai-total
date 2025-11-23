@@ -17,7 +17,7 @@ export const Route = createFileRoute("/app/_authed")({
 });
 function RouteComponent() {
   return (
-    <div className="h-screen overflow-hidden flex">
+    <div className="h-screen w-full overflow-hidden flex bg-slate-50/80">
       <SidebarProvider
         style={
           {
@@ -26,14 +26,15 @@ function RouteComponent() {
           } as React.CSSProperties
         }
       >
-        <AppSidebar variant="inset" />
-        <SidebarInset className="flex flex-col w-full">
-          <SiteHeader />
-          <div className="flex-1 overflow-auto @container/main px-4 lg:px-6">
-            <div className="flex flex-col gap-6 py-6 md:gap-8 md:py-8">
+        <AppSidebar />
+        <SidebarInset className="flex-1 flex flex-col w-full h-full m-0 rounded-none shadow-none overflow-hidden">
+          {/* Scrollable Content Area */}
+          <div className="flex-1 overflow-y-auto w-full h-full">
+            <SiteHeader />
+            <div className="p-6 md:p-8 max-w-[1600px] mx-auto">
               <Outlet />
-              <Toaster />
             </div>
+            <Toaster />
           </div>
         </SidebarInset>
       </SidebarProvider>

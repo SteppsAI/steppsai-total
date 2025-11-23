@@ -17,7 +17,7 @@ export const Route = createFileRoute("/app/_authed")({
 });
 function RouteComponent() {
   return (
-    <div className="h-screen w-full overflow-hidden flex bg-slate-50/80">
+    <div className="h-screen w-full overflow-hidden flex bg-[#F1F5F9]">
       <SidebarProvider
         style={
           {

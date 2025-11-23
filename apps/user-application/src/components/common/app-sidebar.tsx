@@ -27,7 +27,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar collapsible="offcanvas" className="bg-white border-r border-secondary" {...props}>
       <SidebarHeader className="h-24 flex items-center justify-center px-6">
         <div className="flex items-center justify-center w-full">
-          <img src="/brand/logo.svg" alt="stepps.ai" className="h-12 w-auto" />
+          <img src="/brand/logo.svg" alt="stepps.ai" className="h-8 w-auto" />
         </div>
       </SidebarHeader>
       <SidebarContent className="px-3 py-2 gap-6">

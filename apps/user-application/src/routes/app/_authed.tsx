@@ -1,11 +1,13 @@
 import { AppSidebar } from "@/components/common/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Outlet, createFileRoute, Link } from "@tanstack/react-router";
+import { Outlet, createFileRoute} from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { authClient } from "@/components/auth/client";
 import { redirect } from "@tanstack/react-router";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSwipeToOpen } from "@/hooks/use-swipe";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 export const Route = createFileRoute("/app/_authed")({
   component: RouteComponent,
@@ -44,18 +46,33 @@ function RouteComponent() {
         <SidebarInset className="flex-1 flex flex-col w-full h-full m-0 rounded-none shadow-none overflow-hidden bg-muted">
           {/* Scrollable Content Area */}
           <div className="flex-1 overflow-y-auto w-full h-full">
+            {/* Mobile Navigation Header (Visible only on mobile) */}
+            <div className="md:hidden sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
+              <div className="flex items-center justify-between p-4">
+                {/* Left: Hamburger Menu */}
+                <SidebarTrigger className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 size-10 min-h-[44px] rounded-lg touch-manipulation transition-colors" />
+
+                {/* Center: Logo */}
+                <img
+                  src="/brand/logo-symbol.svg"
+                  alt="Stepps.ai"
+                  className="h-8 w-8"
+                />
+
+                {/* Right: CTA Button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 size-10 min-h-[44px] rounded-lg touch-manipulation transition-colors"
+                  aria-label="Create new Stepps"
+                >
+                  <Plus className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
 
             {/* Dashboard Content */}
             <div className="px-4 md:px-8 py-6 max-w-[1600px] mx-auto">
-              {/* Minimal Mobile Header (Visible only on mobile) */}
-              <div className="md:hidden mb-6 flex items-center justify-between">
-                <SidebarTrigger className="text-sidebar-foreground hover:text-primary size-10 min-h-[44px] touch-manipulation" />
-                <h1 className="text-lg font-semibold text-sidebar-foreground">Dashboard</h1>
-                <div className="size-10 min-h-[44px] flex items-center justify-center">
-                  {/* Placeholder for balance */}
-                </div>
-              </div>
-
               {/* Desktop Search Bar Area (Hidden on mobile) */}
               <div className="mb-8 hidden md:block max-w-2xl">
                 <div className="relative group">

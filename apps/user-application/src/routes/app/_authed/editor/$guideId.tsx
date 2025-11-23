@@ -114,14 +114,14 @@ function EditorPage() {
       <EditorHeader
         title={title}
         status={status}
-        onTitleChange={(newTitle) => {
+        onTitleChange={(newTitle: string) => {
           setTitle(newTitle);
           setStatus("saving");
           setTimeout(() => setStatus("saved"), 1000);
         }}
       />
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         <EditorToolbar />
 
         <Canvas

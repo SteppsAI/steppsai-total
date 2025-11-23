@@ -30,9 +30,9 @@ export function Canvas({ screenshotUrl, overlays = [] }: CanvasProps) {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center bg-muted p-8">
-      <div className="max-w-4xl w-full space-y-4">
-        <div className="bg-background rounded-lg shadow-lg overflow-hidden">
+    <div className="flex-1 flex items-center justify-center bg-muted p-8 relative overflow-hidden">
+      <div className="max-w-5xl w-full space-y-4 z-10">
+        <div className="bg-background rounded-xl shadow-2xl overflow-hidden border border-border/50">
           <div
             className="relative aspect-video bg-muted cursor-crosshair select-none"
             onMouseDown={handleMouseDown}
@@ -45,7 +45,7 @@ export function Canvas({ screenshotUrl, overlays = [] }: CanvasProps) {
                 No screenshot available
               </div>
             )}
-            
+
             {overlays.map((overlay, index) => {
               if (overlay.type === "arrow" && overlay.from && overlay.to) {
                 return (
@@ -115,9 +115,9 @@ export function Canvas({ screenshotUrl, overlays = [] }: CanvasProps) {
             )}
           </div>
         </div>
-        
+
         <div className="flex justify-center gap-2">
-          <div className="text-xs text-muted-foreground bg-background px-3 py-1 rounded-md">
+          <div className="text-xs font-medium text-muted-foreground bg-white/50 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm border border-white/20">
             Click and drag to draw arrows
           </div>
         </div>

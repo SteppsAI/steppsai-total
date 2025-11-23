@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { GripVertical, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Step {
@@ -23,20 +23,16 @@ export function StepSidebar({
     steps,
     activeStepId,
     onStepSelect,
-    onUpdateStep,
     onDeleteStep,
 }: StepSidebarProps) {
     return (
-        <div className="w-80 border-l bg-background flex flex-col z-10">
-            <div className="p-4 border-b">
-                <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Steps</h2>
-            </div>
+        <div className="w-[300px] bg-muted flex flex-col z-10 border-l border-border">
             <ScrollArea className="flex-1">
-                <div className="p-4 space-y-4">
+                <div className="p-4 space-y-6">
                     {steps.map((step, index) => (
-                        <div key={step.id} className="group relative">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm font-medium text-muted-foreground">
+                        <div key={step.id} className="group relative flex flex-col gap-2">
+                            <div className="flex items-center justify-between px-1">
+                                <span className="text-sm font-medium text-foreground">
                                     {index + 1}. {step.title}
                                 </span>
                             </div>
@@ -44,8 +40,8 @@ export function StepSidebar({
                             <div
                                 onClick={() => onStepSelect(step.id)}
                                 className={cn(
-                                    "relative aspect-video rounded-lg overflow-hidden border-2 cursor-pointer transition-all hover:border-primary/50",
-                                    activeStepId === step.id ? "border-primary ring-2 ring-primary/20" : "border-transparent ring-1 ring-border"
+                                    "relative aspect-video rounded-xl overflow-hidden cursor-pointer transition-all shadow-sm hover:shadow-md bg-background",
+                                    activeStepId === step.id ? "ring-2 ring-primary ring-offset-2" : "border border-border/50"
                                 )}
                             >
                                 {step.screenshotUrl ? (
@@ -68,17 +64,17 @@ export function StepSidebar({
                             </div>
 
                             {/* Actions (visible on hover) */}
-                            <div className="absolute top-8 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                            <div className="absolute top-8 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Button
                                     variant="secondary"
                                     size="icon"
-                                    className="h-6 w-6 shadow-sm"
+                                    className="h-6 w-6 shadow-sm bg-white/90 hover:bg-white"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         onDeleteStep(step.id);
                                     }}
                                 >
-                                    <Trash2 className="w-3 h-3" />
+                                    <Trash2 className="w-3 h-3 text-destructive" />
                                 </Button>
                             </div>
                         </div>

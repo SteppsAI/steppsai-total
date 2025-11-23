@@ -11,37 +11,36 @@ interface EditorHeaderProps {
 
 export function EditorHeader({ title, status, onTitleChange }: EditorHeaderProps) {
     return (
-        <header className="h-[var(--header-height)] border-b bg-background flex items-center justify-between px-4 shrink-0 z-20">
-            <div className="flex items-center gap-4 flex-1">
-                <Button variant="ghost" size="sm" asChild className="gap-2 text-muted-foreground hover:text-foreground">
+        <header className="h-14 border-b bg-background flex items-center justify-between px-4 shrink-0 z-10">
+            <div className="flex items-center flex-1">
+                <Button variant="ghost" size="icon" asChild className="mr-2">
                     <Link to="/app">
                         <ArrowLeft className="w-4 h-4" />
-                        Back
                     </Link>
                 </Button>
             </div>
 
-            <div className="flex items-center justify-center flex-1 gap-2">
+            <div className="flex items-center justify-center flex-1 gap-3">
                 <Input
                     value={title}
                     onChange={(e) => onTitleChange(e.target.value)}
-                    className="text-center font-medium border-transparent hover:border-input focus:border-input bg-transparent w-[300px] h-9"
+                    className="text-center font-medium text-lg border-transparent hover:border-input focus:border-input bg-transparent w-[400px] h-9 px-0 shadow-none focus-visible:ring-0"
                 />
-                <span className="text-xs text-muted-foreground italic min-w-[60px]">
-                    {status === "saving" ? "saving..." : status === "saved" ? "saved" : "unsaved"}
+                <span className="text-sm text-muted-foreground italic">
+                    ({status === "saving" ? "saving..." : status === "saved" ? "saved" : "unsaved"})
                 </span>
             </div>
 
             <div className="flex items-center justify-end gap-2 flex-1">
-                <div className="flex items-center gap-1 text-sm text-muted-foreground mr-4">
+                <div className="flex items-center gap-1 text-sm font-medium text-muted-foreground mr-4">
                     {status === "saved" && <Check className="w-4 h-4" />}
                     {status === "saved" ? "Save" : "Saving..."}
                 </div>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground">
                     <Share2 className="w-4 h-4" />
                     Share
                 </Button>
-                <Button variant="ghost" size="sm" className="gap-2">
+                <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground">
                     <Upload className="w-4 h-4" />
                     Export
                 </Button>

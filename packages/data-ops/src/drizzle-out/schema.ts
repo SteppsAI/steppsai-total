@@ -51,7 +51,7 @@ export const guides = pgTable("guides", {
 	title: text("title").default('Untitled Guide'),
 	description: text("description"),
 	slug: text("slug").notNull().unique(),
-	status: text("status"),
+	status: text("status").default('draft'), // 'draft' | 'recording' | 'processing' | 'published'
 	visibility: text("visibility"),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
@@ -67,6 +67,7 @@ export const steps = pgTable("steps", {
 	aiCaption: text("ai_caption"),
 	finalCaption: text("final_caption"),
 	overlays: jsonb("overlays"),
+	metadata: jsonb("metadata"),
 	isExcluded: boolean("is_excluded").default(false),
 });
 

@@ -8,8 +8,11 @@ type RecordingState = 'idle' | 'recording' | 'paused';
 function SidePanelApp() {
     const [recordingState, setRecordingState] = useState<RecordingState>('idle');
 
-    const handleStartRecording = () => {
-        setRecordingState('recording');
+    const handleStartRecording = async () => {
+        const response = await chrome.runtime.sendMessage({ type: 'START_RECORDING' });
+        if (response && response.success) {
+            setRecordingState('recording');
+        }
     };
 
     const handlePauseRecording = () => {
@@ -20,9 +23,11 @@ function SidePanelApp() {
         setRecordingState('recording');
     };
 
-    const handleEndRecording = () => {
-        console.log('End Recording');
-        setRecordingState('idle');
+    const handleEndRecording = async () => {
+        const response = await chrome.runtime.sendMessage({ type: 'STOP_RECORDING' });
+        if (response && response.success) {
+            setRecordingState('idle');
+        }
     };
 
     return (

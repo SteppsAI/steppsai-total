@@ -17,3 +17,22 @@ export const createGuideSchema = guidesSchema.omit({ id: true, createdAt: true, 
 
 export type GuidesSchemaType = z.infer<typeof guidesSchema>;
 export type CreateGuideSchemaType = z.infer<typeof createGuideSchema>;
+
+export const ingestGuideSchema = z.object({
+	guide: z.object({
+		title: z.string().optional(),
+		description: z.string().optional(),
+	}),
+	steps: z.array(
+		z.object({
+			stepId: z.string().uuid(),
+			orderIndex: z.number(),
+			pageUrl: z.string(),
+			domSelector: z.string().optional(),
+			imageKey: z.string(), // The key in R2
+			timestamp: z.number(),
+		})
+	),
+});
+
+export type IngestGuideSchemaType = z.infer<typeof ingestGuideSchema>;

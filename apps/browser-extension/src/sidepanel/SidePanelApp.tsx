@@ -27,17 +27,17 @@ function SidePanelApp() {
 
     return (
         <div className="w-full h-screen flex flex-col items-center py-8 px-6 relative overflow-hidden font-inter bg-background">
-            {/* Background Gradient - More colorful and vibrant */}
+            {/* Background Gradient - White -> Secondary (Cyan) -> Primary (Indigo) */}
             <div
                 className="absolute inset-0 z-0 pointer-events-none"
                 style={{
-                    background: 'radial-gradient(circle at 50% 0%, #ffffff 0%, rgba(6, 182, 212, 0.2) 40%, rgba(99, 102, 241, 0.2) 70%, rgba(244, 63, 94, 0.1) 100%)'
+                    background: 'radial-gradient(circle at 50% 30%, #ffffff 10%, #06B6D440 50%, #6366F140 90%)'
                 }}
             />
 
-            {/* Additional decorative blur blobs for more color */}
-            <div className="absolute top-[-10%] left-[-20%] w-[50%] h-[50%] bg-cyan-400/20 blur-[100px] rounded-full pointer-events-none" />
-            <div className="absolute bottom-[-10%] right-[-20%] w-[50%] h-[50%] bg-indigo-400/20 blur-[100px] rounded-full pointer-events-none" />
+            {/* Additional decorative blur blobs for more color depth */}
+            <div className="absolute top-[-20%] left-[-20%] w-[70%] h-[70%] bg-[#06B6D4] opacity-20 blur-[120px] rounded-full pointer-events-none" />
+            <div className="absolute bottom-[-20%] right-[-20%] w-[70%] h-[70%] bg-[#6366F1] opacity-20 blur-[120px] rounded-full pointer-events-none" />
 
             {/* Content */}
             <div className="z-10 flex flex-col items-center w-full h-full space-y-6">

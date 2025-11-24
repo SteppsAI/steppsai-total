@@ -170,7 +170,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter className="p-4 border-t border-sidebar-border gap-4">
         <button className={`w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg active:scale-[0.98] ${isMobile ? 'min-h-[44px] text-sm' : 'py-2.5'}`}>
           <Plus className="size-5" />
-          <span>Create Stepp</span>
+          <span>Create Stepps</span>
         </button>
 
         <div className={`flex items-center gap-3 p-3 rounded-xl hover:bg-sidebar-accent transition-colors cursor-pointer group ${isMobile ? 'min-h-[44px]' : ''}`}>

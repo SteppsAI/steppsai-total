@@ -5,10 +5,17 @@
     "description": "Turn any workflow into SOP in seconds.",
     "permissions": [
         "activeTab",
-        "scripting"
+        "scripting",
+        "sidePanel"
     ],
+    "side_panel": {
+        "default_path": "sidepanel.html"
+    },
+    "background": {
+        "service_worker": "assets/background.js",
+        "type": "module"
+    },
     "action": {
-        "default_popup": "popup.html",
         "default_icon": {
             "16": "icons/icon16.png",
             "48": "icons/icon48.png",

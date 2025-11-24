@@ -9,7 +9,8 @@ export default defineConfig({
         outDir: 'dist',
         rollupOptions: {
             input: {
-                popup: resolve(__dirname, 'popup.html'),
+                sidepanel: resolve(__dirname, 'sidepanel.html'),
+                background: resolve(__dirname, 'src/background/index.ts'),
             },
             output: {
                 entryFileNames: 'assets/[name].js',

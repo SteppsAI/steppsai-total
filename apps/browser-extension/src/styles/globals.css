@@ -23,6 +23,8 @@
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
+    --color-brand-dark: var(--brand-dark);
+    --color-destructive-foreground: var(--destructive-foreground);
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -40,7 +42,6 @@
         --primary-foreground: #FFFFFF;
 
         --secondary: #06B6D4;
-        /* Fixed from #f to match design intent */
         --secondary-foreground: #FFFFFF;
 
         --accent: #F43F5E;
@@ -54,12 +55,15 @@
         --ring: #6366F1;
 
         --radius: 0.5rem;
+
+        /* Brand Specifics */
+        --brand-dark: #0B0F19;
+        --destructive-foreground: oklch(1 0 0);
     }
 
     .dark {
         --background: #0B0F19;
         --foreground: #FFFFFF;
-        /* Add other dark mode vars if needed, keeping it simple for now */
     }
 
     * {

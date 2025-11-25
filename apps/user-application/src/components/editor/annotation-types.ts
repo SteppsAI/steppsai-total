@@ -31,12 +31,12 @@ export type Annotation = ArrowAnnotation | CircleAnnotation | HideAnnotation;
 // Configuration constants for annotations
 export const ANNOTATION_DEFAULTS = {
     arrow: {
-        color: '#6366F1', // indigo-500
-        strokeWidth: 3,
+        color: '#4F46E5', // indigo-600 - better contrast
+        strokeWidth: 4, // increased for better visibility
     },
     circle: {
-        color: '#EAB308', // yellow-500
-        strokeWidth: 4,
+        color: '#F59E0B', // amber-500 - better contrast than yellow
+        strokeWidth: 5, // increased for better visibility
     },
     hide: {
         color: '#000000',

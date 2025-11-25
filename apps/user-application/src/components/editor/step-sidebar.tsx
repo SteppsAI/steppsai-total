@@ -41,7 +41,7 @@ export function StepSidebar({
                                 onClick={() => onStepSelect(step.id)}
                                 className={cn(
                                     "relative aspect-video rounded-xl overflow-hidden cursor-pointer transition-all shadow-sm hover:shadow-md bg-background",
-                                    activeStepId === step.id ? "ring-2 ring-primary ring-offset-2" : "border border-border/50"
+                                    activeStepId === step.id ? "ring-3 ring-primary ring-offset-2 ring-offset-background" : "border border-border/50"
                                 )}
                             >
                                 {step.screenshotUrl ? (
@@ -68,13 +68,13 @@ export function StepSidebar({
                                 <Button
                                     variant="secondary"
                                     size="icon"
-                                    className="h-6 w-6 shadow-sm bg-white/90 hover:bg-white"
+                                    className="h-6 w-6 shadow-md bg-white hover:bg-white"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         onDeleteStep(step.id);
                                     }}
                                 >
-                                    <Trash2 className="w-3 h-3 text-destructive" />
+                                    <Trash2 className="w-3 h-3 text-red-600" />
                                 </Button>
                             </div>
                         </div>

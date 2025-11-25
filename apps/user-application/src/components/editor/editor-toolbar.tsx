@@ -37,7 +37,7 @@ export function EditorToolbar({ activeTool, onToolChange }: EditorToolbarProps) 
                                     "rounded-full w-10 h-10",
                                     activeTool === tool.id
                                         ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                                        : "text-muted-foreground hover:text-primary hover:bg-primary/10"
+                                        : "text-slate-600 hover:text-primary hover:bg-primary/15"
                                 )}
                             >
                                 <tool.icon className="w-5 h-5" />

@@ -396,14 +396,14 @@ export function Canvas({
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center bg-muted p-8 pb-16 relative overflow-hidden">
+    <div className="flex-1 flex flex-col items-center justify-center bg-slate-100 p-8 pb-16 relative overflow-hidden">
       <div className="max-w-5xl w-full space-y-4 z-10">
         {/* Toolbar for undo/redo/delete with icons */}
 
         {/* Canvas */}
         <div
           ref={containerRef}
-          className="bg-background rounded-xl shadow-2xl overflow-hidden border border-border/50"
+          className="bg-background rounded-xl shadow-2xl overflow-hidden border border-border"
         >
           <Stage
             ref={stageRef}
@@ -452,7 +452,7 @@ export function Canvas({
 
         {/* Action buttons at bottom */}
         <div className="flex justify-center items-center gap-3">
-          <div className="flex items-center gap-2 bg-background/95 backdrop-blur-sm px-4 py-2.5 rounded-full shadow-lg border border-border/50">
+          <div className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-full shadow-xl border border-border">
             <Button
               onClick={undo}
               disabled={!canUndo}
@@ -486,7 +486,7 @@ export function Canvas({
               disabled={!selectedId}
               variant="ghost"
               size="icon"
-              className="h-9 w-9 rounded-full hover:bg-destructive/10 text-destructive"
+              className="h-9 w-9 rounded-full hover:bg-red-50 text-red-600 disabled:opacity-40 disabled:cursor-not-allowed"
               title="Delete"
             >
               <Trash2 className="w-4 h-4" />

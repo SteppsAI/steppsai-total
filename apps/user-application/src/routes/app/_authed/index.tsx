@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { RecentStepps } from "@/components/dashboard/recent-stepps";
-import { TemplatesSection } from "@/components/dashboard/templates-section";
-import { EmbedSteppsSection } from "@/components/dashboard/embed-stepps-section";
+import { TutorialsSection } from "@/components/dashboard/tutorials-section";
+import { FeedbackSection } from "@/components/dashboard/feedback-section";
 
 export const Route = createFileRoute("/app/_authed/")({
   component: Dashboard,
@@ -9,18 +9,15 @@ export const Route = createFileRoute("/app/_authed/")({
 
 function Dashboard() {
   return (
-    <div className="flex flex-col gap-8 w-full max-w-[1400px] mx-auto pb-8 h-full">
+    <div className="flex flex-col gap-12 w-full max-w-[1400px] mx-auto pb-8">
       {/* Recents Section */}
       <RecentStepps />
 
-      {/* Bottom Section: Templates & Embeds */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1 min-h-0">
-        {/* Templates */}
-        <TemplatesSection />
+      {/* Tutorials Section - Full Width */}
+      <TutorialsSection />
 
-        {/* Embed Stepps */}
-        <EmbedSteppsSection />
-      </div>
+      {/* Feedback Section - Compact Bottom */}
+      <FeedbackSection />
     </div>
   );
 }

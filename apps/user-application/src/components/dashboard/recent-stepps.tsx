@@ -1,4 +1,9 @@
 import { DashboardCard } from "./dashboard-card";
+import { Plus } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+
+
 
 export function RecentStepps() {
     // Mock data - in a real app this would come from props or a query
@@ -22,9 +27,21 @@ export function RecentStepps() {
 
     return (
         <section className="flex flex-col gap-4">
-            <h2 className="text-2xl font-normal text-foreground">Recent Stepps:</h2>
+            <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-normal text-foreground">Recent Stepps:</h2>
+                <div className="flex items-center gap-4">
+                    <Link to="/app" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        View all
+                    </Link>
+                    <Button size="sm" className="gap-2" onClick={() => console.log("Create new Stepp")}>
+                        <Plus className="size-4" />
+                        Create New
+                    </Button>
+                </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
                 {recentStepps.map((stepp) => (
                     <DashboardCard
                         key={stepp.id}

@@ -3,7 +3,8 @@ import { EditorHeader } from "@/components/editor/editor-header";
 import { EditorToolbar } from "@/components/editor/editor-toolbar";
 import { Canvas } from "@/components/editor/canvas";
 import { StepSidebar } from "@/components/editor/step-sidebar";
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { Annotation } from "@/components/editor/annotation-types";
 // import { useQuery } from "@tanstack/react-query";
 // import { trpc } from "@/router";
 
@@ -12,7 +13,23 @@ export const Route = createFileRoute("/app/_authed/editor/$guideId")({
 });
 
 // Mock data for development
-const MOCK_GUIDE = {
+interface Step {
+  id: string;
+  title: string;
+  orderIndex: number;
+  screenshotUrl: string;
+  finalCaption: string;
+  overlays: Annotation[];
+}
+
+interface Guide {
+  id: string;
+  title: string;
+  updatedAt: string;
+  steps: Step[];
+}
+
+const MOCK_GUIDE: Guide = {
   id: "test-guide-1",
   title: "How to Create a New Project",
   updatedAt: new Date().toISOString(),
@@ -23,13 +40,7 @@ const MOCK_GUIDE = {
       orderIndex: 0,
       screenshotUrl: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1974&auto=format&fit=crop",
       finalCaption: "Start by clicking the 'Create New' button in the top right corner.",
-      overlays: [
-        {
-          type: "arrow",
-          from: [20, 20],
-          to: [40, 40]
-        }
-      ]
+      overlays: []
     },
     {
       id: "step-2",
@@ -55,28 +66,36 @@ function EditorPage() {
   // const { data: guide, isLoading } = useQuery(trpc.guides.getById.queryOptions({ id: guideId }));
 
   // Use mock data instead of real data for now
-  const guide = MOCK_GUIDE;
+  const [guide, setGuide] = useState(MOCK_GUIDE);
   const isLoading = false;
 
   const [title, setTitle] = useState(guide.title || "Untitled Stepps");
   const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const [activeStepId, setActiveStepId] = useState<string>("");
-  const [activeTool, setActiveTool] = useState<"pointer" | "arrow" | "highlight" | "blur">("pointer");
+  const [activeTool, setActiveTool] = useState<"pointer" | "arrow" | "highlight" | "hide">("pointer");
 
-  const handleUpdateStep = (id: string, caption: string) => {
+  const handleUpdateStep = useCallback((id: string, caption: string) => {
     console.log("Update step:", id, caption);
     setStatus("saving");
     // Simulate save
     setTimeout(() => setStatus("saved"), 1000);
-  };
+  }, []);
 
-  const handleAddOverlay = (overlay: any) => {
-    console.log("Add overlay:", overlay);
-    // In a real app, we would update the step's overlays here
-    // For now, we'll just log it
+  const handleAnnotationsChange = useCallback((annotations: Annotation[]) => {
+    if (!activeStepId) return;
+
+    setGuide(prev => ({
+      ...prev,
+      steps: prev.steps.map(step =>
+        step.id === activeStepId
+          ? { ...step, overlays: annotations }
+          : step
+      )
+    }));
+
     setStatus("saving");
     setTimeout(() => setStatus("saved"), 1000);
-  };
+  }, [activeStepId]);
 
   const handleDeleteStep = (id: string) => {
     console.log("Delete step:", id);
@@ -138,9 +157,9 @@ function EditorPage() {
 
         <Canvas
           screenshotUrl={currentStep?.screenshotUrl || undefined}
-          overlays={currentStep?.overlays as any || []}
+          overlays={currentStep?.overlays as Annotation[] || []}
           activeTool={activeTool}
-          onAddOverlay={handleAddOverlay}
+          onAnnotationsChange={handleAnnotationsChange}
         />
 
         <StepSidebar

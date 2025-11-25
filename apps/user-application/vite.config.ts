@@ -20,7 +20,7 @@ export default defineConfig({
   ],
   server: {
     watch: {
-      ignored: ["**/.wrangler/state/**"],
+      ignored: ["**/.wrangler/state/**", "**/routeTree.gen.ts"],
     },
   },
 });

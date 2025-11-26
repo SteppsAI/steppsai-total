@@ -24,6 +24,10 @@
 
   --border: #E2E8F0;
   --input: #E2E8F0;
+  --ring: #6366F1;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #0B0F19;
 
   --radius: 0.5rem;
 
@@ -60,6 +64,8 @@
   --color-muted-foreground: var(--muted-foreground);
 
   --color-border: var(--border);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-brand-dark: var(--brand-dark);
 
   --radius-sm: calc(var(--radius) - 4px);
@@ -106,6 +112,10 @@
   --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
   --sidebar-border: hsl(240 3.7% 15.9%);
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  
+  --popover: hsl(240 5.9% 10%);
+  --popover-foreground: hsl(240 4.8% 95.9%);
+  
   --destructive-foreground: oklch(1 0 0);
 }
 

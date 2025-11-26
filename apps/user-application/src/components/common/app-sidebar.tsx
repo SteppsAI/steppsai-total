@@ -85,7 +85,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   isActive={isActive("/app/library")}
                   tooltip="My Stepps"
                 >
-                  <Link to="/app/folders">
+                  <Link to="/app/folders" search={{ search: "" }}>
                     <Library />
                     <span>My Stepps</span>
                   </Link>
@@ -128,11 +128,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
           >
+            <div className="flex flex-col gap-1 px-2 py-2">
+              <p className="text-sm font-semibold">Vilém Barnet</p>
+              <p className="text-xs text-muted-foreground">Pro Plan</p>
+            </div>
+            <DropdownMenuSeparator />
             <DropdownMenuItem>
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>

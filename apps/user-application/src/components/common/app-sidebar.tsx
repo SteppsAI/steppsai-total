@@ -7,6 +7,7 @@ import {
   LogOut,
   Edit,
   Plus,
+  MessageSquare,
 } from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
 
@@ -130,7 +131,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <DropdownMenuContent
             side={isMobile ? "bottom" : "right"}
             align="end"
-            sideOffset={4}
+            sideOffset={6}
+            className="w-56"
           >
             <DropdownMenuItem>
               <User className="mr-2 h-4 w-4" />
@@ -138,12 +140,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
+              <span>Workspace settings</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a
+                href="https://feedback.stepps.ai"
+                target="_blank"
+                rel="noreferrer"
+                className="flex w-full items-center"
+              >
+                <MessageSquare className="mr-2 h-4 w-4" />
+                <span>Send feedback</span>
+              </a>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive focus:bg-destructive focus:text-destructive-foreground">
+            <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive">
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
+              <span>Sign out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -132,11 +132,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             align="end"
             sideOffset={4}
           >
-            <div className="flex flex-col gap-1 px-2 py-2">
-              <p className="text-sm font-semibold">Vilém Barnet</p>
-              <p className="text-xs text-muted-foreground">Pro Plan</p>
-            </div>
-            <DropdownMenuSeparator />
             <DropdownMenuItem>
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>
@@ -146,7 +141,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <span>Settings</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive focus:text-destructive">
+            <DropdownMenuItem className="text-destructive focus:bg-destructive focus:text-destructive-foreground">
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
             </DropdownMenuItem>

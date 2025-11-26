@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-    Folder,
+    Folder as FolderIcon,
     Plus,
     Search,
     MoreVertical,
     FileText,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,8 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { FolderCard } from "@/components/folder-card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TEST_FOLDERS, TEST_GUIDES, FolderWithCount, GuideWithFolder } from "@/types/test-data";
 
 export const Route = createFileRoute("/app/_authed/folders")({
     component: FoldersPage,
@@ -46,58 +48,28 @@ export const Route = createFileRoute("/app/_authed/folders")({
     },
 });
 
-// Mock Data - aligned with database schema
-const MOCK_FOLDERS = [
-    { id: "1", name: "Onboarding", guideCount: 5 },
-    { id: "2", name: "Product Demos", guideCount: 12 },
-    { id: "3", name: "Internal SOPs", guideCount: 8 },
-    { id: "4", name: "Marketing Assets", guideCount: 3 },
-];
-
-const MOCK_GUIDES = [
-    {
-        id: "101",
-        title: "Searching using Google",
-        folder_id: "1",
-        folderName: "Onboarding",
-        status: "published",
-        visibility: "public",
-        updated_at: "2024-11-25T10:30:00Z",
-    },
-    {
-        id: "102",
-        title: "Setting up Render account",
-        folder_id: "2",
-        folderName: "Product Demos",
-        status: "draft",
-        visibility: "private",
-        updated_at: "2024-11-24T14:20:00Z",
-    },
-    {
-        id: "103",
-        title: "How to send email",
-        folder_id: null,
-        folderName: null,
-        status: "published",
-        visibility: "public",
-        updated_at: "2024-11-23T09:15:00Z",
-    },
-    {
-        id: "104",
-        title: "Q4 Sales Report Export",
-        folder_id: "3",
-        folderName: "Internal SOPs",
-        status: "published",
-        visibility: "private",
-        updated_at: "2024-11-26T08:45:00Z",
-    },
-];
-
 function FoldersPage() {
     const { search } = Route.useSearch();
     const [searchQuery, setSearchQuery] = useState(search || "");
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
     const [newFolderName, setNewFolderName] = useState("");
+
+    // Data state
+    const [isLoading, setIsLoading] = useState(true);
+    const [folders, setFolders] = useState<FolderWithCount[]>([]);
+    const [guides, setGuides] = useState<GuideWithFolder[]>([]);
+
+    useEffect(() => {
+        // Simulate data fetching
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+            // Use test data
+            setFolders(TEST_FOLDERS);
+            setGuides(TEST_GUIDES);
+        }, 1500);
+
+        return () => clearTimeout(timer);
+    }, []);
 
     const handleCreateFolder = () => {
         console.log("Creating folder:", newFolderName);
@@ -106,7 +78,8 @@ function FoldersPage() {
     };
 
     // Helper function to format date
-    const formatDate = (dateString: string) => {
+    const formatDate = (dateString: string | null) => {
+        if (!dateString) return "N/A";
         const date = new Date(dateString);
         const now = new Date();
         const diffTime = Math.abs(now.getTime() - date.getTime());
@@ -145,7 +118,7 @@ function FoldersPage() {
                     <Dialog open={isCreateFolderOpen} onOpenChange={setIsCreateFolderOpen}>
                         <DialogTrigger asChild>
                             <Button variant="outline" className="gap-2">
-                                <Folder className="size-4" />
+                                <FolderIcon className="size-4" />
                                 New Folder
                             </Button>
                         </DialogTrigger>
@@ -189,11 +162,31 @@ function FoldersPage() {
             {/* Folders Section */}
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold text-foreground">Folders</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    {MOCK_FOLDERS.map((folder) => (
-                        <FolderCard key={folder.id} folder={folder} />
-                    ))}
-                </div>
+                {isLoading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        {[1, 2, 3, 4].map((i) => (
+                            <Skeleton key={i} className="h-24 w-full rounded-xl" />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        {folders.map((folder) => (
+                            <FolderCard
+                                key={folder.id}
+                                folder={{
+                                    id: folder.id,
+                                    name: folder.name,
+                                    guideCount: folder.guide_count || 0
+                                }}
+                            />
+                        ))}
+                        {folders.length === 0 && (
+                            <div className="col-span-full flex flex-col items-center justify-center py-8 text-center border border-dashed rounded-xl bg-muted/30">
+                                <p className="text-muted-foreground text-sm">No folders yet.</p>
+                            </div>
+                        )}
+                    </div>
+                )}
             </section>
 
             {/* All Stepps Section - Table View */}
@@ -212,75 +205,94 @@ function FoldersPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {MOCK_GUIDES.map((guide) => (
-                                <TableRow key={guide.id} className="cursor-pointer">
-                                    <TableCell className="font-medium">
-                                        <div className="flex items-center gap-2">
-                                            <FileText className="size-4 text-muted-foreground" />
-                                            {guide.title}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        {guide.folderName ? (
-                                            <div className="flex items-center gap-1.5 text-muted-foreground">
-                                                <Folder className="size-3.5" />
-                                                <span className="text-sm">{guide.folderName}</span>
+                            {isLoading ? (
+                                [1, 2, 3, 4, 5].map((i) => (
+                                    <TableRow key={i}>
+                                        <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                        <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                                        <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                        <TableCell><Skeleton className="h-8 w-8 rounded-md" /></TableCell>
+                                    </TableRow>
+                                ))
+                            ) : guides.length > 0 ? (
+                                guides.map((guide) => (
+                                    <TableRow key={guide.id} className="cursor-pointer">
+                                        <TableCell className="font-medium">
+                                            <div className="flex items-center gap-2">
+                                                <FileText className="size-4 text-muted-foreground" />
+                                                {guide.title || "Untitled"}
                                             </div>
-                                        ) : (
-                                            <span className="text-muted-foreground text-sm">—</span>
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge
-                                            variant={guide.status === "published" ? "default" : "secondary"}
-                                            className="capitalize"
-                                        >
-                                            {guide.status}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge
-                                            variant={guide.visibility === "public" ? "outline" : "secondary"}
-                                            className="capitalize"
-                                        >
-                                            {guide.visibility}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-muted-foreground text-sm">
-                                        {formatDate(guide.updated_at)}
-                                    </TableCell>
-                                    <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button
-                                                    variant="ghost"
-                                                    className="size-8 p-0"
-                                                >
-                                                    <span className="sr-only">Open menu</span>
-                                                    <MoreVertical className="size-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => console.log("Edit", guide.id)}>
-                                                    Edit
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => console.log("Share", guide.id)}>
-                                                    Share
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => console.log("Move", guide.id)}>
-                                                    Move to folder
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem
-                                                    className="text-destructive"
-                                                    onClick={() => console.log("Delete", guide.id)}
-                                                >
-                                                    Delete
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                        </TableCell>
+                                        <TableCell>
+                                            {guide.folderName ? (
+                                                <div className="flex items-center gap-1.5 text-muted-foreground">
+                                                    <FolderIcon className="size-3.5" />
+                                                    <span className="text-sm">{guide.folderName}</span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-muted-foreground text-sm">—</span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge
+                                                variant={guide.status === "published" ? "default" : "secondary"}
+                                                className="capitalize"
+                                            >
+                                                {guide.status || "draft"}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge
+                                                variant={guide.visibility === "public" ? "outline" : "secondary"}
+                                                className="capitalize"
+                                            >
+                                                {guide.visibility || "private"}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground text-sm">
+                                            {formatDate(guide.updated_at)}
+                                        </TableCell>
+                                        <TableCell>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="size-8 p-0"
+                                                    >
+                                                        <span className="sr-only">Open menu</span>
+                                                        <MoreVertical className="size-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem onClick={() => console.log("Edit", guide.id)}>
+                                                        Edit
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => console.log("Share", guide.id)}>
+                                                        Share
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => console.log("Move", guide.id)}>
+                                                        Move to folder
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        className="text-destructive"
+                                                        onClick={() => console.log("Delete", guide.id)}
+                                                    >
+                                                        Delete
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="h-24 text-center">
+                                        No stepps found.
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            )}
                         </TableBody>
                     </Table>
                 </div>

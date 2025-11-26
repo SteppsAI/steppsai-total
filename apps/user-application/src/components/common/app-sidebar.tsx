@@ -85,7 +85,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   isActive={isActive("/app/library")}
                   tooltip="My Stepps"
                 >
-                  <Link to="/app">
+                  <Link to="/app/folders">
                     <Library />
                     <span>My Stepps</span>
                   </Link>

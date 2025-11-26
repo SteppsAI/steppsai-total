@@ -14,6 +14,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppAuthedRouteImport } from './routes/app/_authed'
 import { Route as AppAuthedIndexRouteImport } from './routes/app/_authed/index'
+import { Route as AppAuthedFoldersRouteImport } from './routes/app/_authed/folders'
 import { Route as AppAuthedEditorGuideIdRouteImport } from './routes/app/_authed/editor/$guideId'
 
 const AppRouteImport = createFileRoute('/app')()
@@ -37,6 +38,11 @@ const AppAuthedIndexRoute = AppAuthedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppAuthedRoute,
 } as any)
+const AppAuthedFoldersRoute = AppAuthedFoldersRouteImport.update({
+  id: '/folders',
+  path: '/folders',
+  getParentRoute: () => AppAuthedRoute,
+} as any)
 const AppAuthedEditorGuideIdRoute = AppAuthedEditorGuideIdRouteImport.update({
   id: '/editor/$guideId',
   path: '/editor/$guideId',
@@ -46,12 +52,14 @@ const AppAuthedEditorGuideIdRoute = AppAuthedEditorGuideIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppAuthedRouteWithChildren
+  '/app/folders': typeof AppAuthedFoldersRoute
   '/app/': typeof AppAuthedIndexRoute
   '/app/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppAuthedIndexRoute
+  '/app/folders': typeof AppAuthedFoldersRoute
   '/app/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
 }
 export interface FileRoutesById {
@@ -59,19 +67,21 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/app/_authed': typeof AppAuthedRouteWithChildren
+  '/app/_authed/folders': typeof AppAuthedFoldersRoute
   '/app/_authed/': typeof AppAuthedIndexRoute
   '/app/_authed/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/app/' | '/app/editor/$guideId'
+  fullPaths: '/' | '/app' | '/app/folders' | '/app/' | '/app/editor/$guideId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/app/editor/$guideId'
+  to: '/' | '/app' | '/app/folders' | '/app/editor/$guideId'
   id:
     | '__root__'
     | '/'
     | '/app'
     | '/app/_authed'
+    | '/app/_authed/folders'
     | '/app/_authed/'
     | '/app/_authed/editor/$guideId'
   fileRoutesById: FileRoutesById
@@ -111,6 +121,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthedIndexRouteImport
       parentRoute: typeof AppAuthedRoute
     }
+    '/app/_authed/folders': {
+      id: '/app/_authed/folders'
+      path: '/folders'
+      fullPath: '/app/folders'
+      preLoaderRoute: typeof AppAuthedFoldersRouteImport
+      parentRoute: typeof AppAuthedRoute
+    }
     '/app/_authed/editor/$guideId': {
       id: '/app/_authed/editor/$guideId'
       path: '/editor/$guideId'
@@ -122,11 +139,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppAuthedRouteChildren {
+  AppAuthedFoldersRoute: typeof AppAuthedFoldersRoute
   AppAuthedIndexRoute: typeof AppAuthedIndexRoute
   AppAuthedEditorGuideIdRoute: typeof AppAuthedEditorGuideIdRoute
 }
 
 const AppAuthedRouteChildren: AppAuthedRouteChildren = {
+  AppAuthedFoldersRoute: AppAuthedFoldersRoute,
   AppAuthedIndexRoute: AppAuthedIndexRoute,
   AppAuthedEditorGuideIdRoute: AppAuthedEditorGuideIdRoute,
 }

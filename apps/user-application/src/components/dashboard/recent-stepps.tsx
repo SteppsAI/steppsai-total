@@ -30,7 +30,7 @@ export function RecentStepps() {
             <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-normal text-foreground">Recent Stepps:</h2>
                 <div className="flex items-center gap-4">
-                    <Link to="/app" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    <Link to="/app/folders" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                         View all
                     </Link>
                     <Button size="sm" className="gap-2" onClick={() => console.log("Create new Stepp")}>

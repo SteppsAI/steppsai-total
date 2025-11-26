@@ -8,6 +8,13 @@
         "scripting",
         "sidePanel"
     ],
+    "externally_connectable": {
+        "matches": [
+            "http://localhost:3000/*",
+            "http://localhost:3001/*",
+            "https://stepps.ai/*"
+        ]
+    },
     "side_panel": {
         "default_path": "sidepanel.html"
     },

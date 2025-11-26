@@ -38,6 +38,7 @@ import { Badge } from "@/components/ui/badge";
 import { FolderCard } from "@/components/folder-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TEST_FOLDERS, TEST_GUIDES, FolderWithCount, GuideWithFolder } from "@/types/test-data";
+import { triggerExtensionSidePanel } from "@/lib/extension";
 
 export const Route = createFileRoute("/app/_authed/folders")({
     component: FoldersPage,
@@ -152,7 +153,10 @@ function FoldersPage() {
                         </DialogContent>
                     </Dialog>
 
-                    <Button className="gap-2">
+                    <Button
+                        className="gap-2 cursor-pointer"
+                        onClick={() => triggerExtensionSidePanel().catch((e) => alert(e.message))}
+                    >
                         <Plus className="size-4" />
                         New Stepp
                     </Button>

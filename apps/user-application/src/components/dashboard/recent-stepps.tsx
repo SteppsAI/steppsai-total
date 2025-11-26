@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Guide } from "@/types/db";
+import { triggerExtensionSidePanel } from "@/lib/extension";
 
 interface RecentSteppsProps {
   isLoading?: boolean;
@@ -48,6 +49,14 @@ export function RecentStepps({ isLoading, stepps = [] }: RecentSteppsProps) {
     );
   }
 
+  const handleCreateStepp = async () => {
+    try {
+      await triggerExtensionSidePanel();
+    } catch (error) {
+      alert((error as Error).message);
+    }
+  };
+
   return (
     <section className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -62,8 +71,8 @@ export function RecentStepps({ isLoading, stepps = [] }: RecentSteppsProps) {
           </Link>
           <Button
             size="sm"
-            className="gap-1.5 text-xs h-8 px-3"
-            onClick={() => console.log("Create new Stepp")}
+            className="gap-1.5 text-xs h-8 px-3 cursor-pointer"
+            onClick={handleCreateStepp}
           >
             <Plus className="size-3.5" />
             New
@@ -87,7 +96,7 @@ export function RecentStepps({ isLoading, stepps = [] }: RecentSteppsProps) {
       ) : (
         <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed rounded-xl bg-muted/30">
           <p className="text-muted-foreground text-sm">No recent stepps found.</p>
-          <Button variant="link" className="mt-2 h-auto p-0 text-sm">
+          <Button variant="link" className="mt-2 h-auto p-0 text-sm cursor-pointer" onClick={handleCreateStepp}>
             Create your first Stepp
           </Button>
         </div>

@@ -24,7 +24,8 @@ export function ShareDialog({ open, onOpenChange, guideTitle, guideId }: ShareDi
     const [email, setEmail] = useState("");
 
     // In a real app, this would be the actual public URL
-    const shareUrl = `${window.location.origin}/share/${guideId}`;
+    // For now, we share the internal app link which requires authentication (safer for internal use)
+    const shareUrl = `${window.location.origin}/app/stepps/${guideId}`;
 
     const handleCopy = () => {
         navigator.clipboard.writeText(shareUrl);

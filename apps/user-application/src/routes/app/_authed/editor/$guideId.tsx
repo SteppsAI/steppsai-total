@@ -7,6 +7,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Annotation } from "@/components/editor/annotation-types";
 import { useStepp } from "@/hooks/use-stepps";
 import { Guide, Step } from "@/types/db"; // Or reuse internal types if db types don't match exactly
+import { ShareDialog } from "@/components/share-dialog";
 
 export const Route = createFileRoute("/app/_authed/editor/$guideId")({
   component: EditorPage,
@@ -22,6 +23,7 @@ function EditorPage() {
   const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const [activeStepId, setActiveStepId] = useState<string>("");
   const [activeTool, setActiveTool] = useState<"pointer" | "arrow" | "highlight" | "hide">("pointer");
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   // Sync fetched guide to local state
   useEffect(() => {
@@ -113,6 +115,7 @@ function EditorPage() {
           setStatus("saving");
           setTimeout(() => setStatus("saved"), 1000);
         }}
+        onShare={() => setIsShareOpen(true)}
       />
 
       <div className="flex-1 flex overflow-hidden relative">
@@ -137,6 +140,13 @@ function EditorPage() {
           onReorderSteps={handleReorderSteps}
         />
       </div>
+
+      <ShareDialog 
+        open={isShareOpen} 
+        onOpenChange={setIsShareOpen}
+        guideTitle={title}
+        guideId={guideId}
+      />
     </div>
   );
 }

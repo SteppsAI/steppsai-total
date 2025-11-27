@@ -22,14 +22,17 @@ function RouteComponent() {
   const location = useLocation();
   const pathname = location.pathname;
 
-  // Check if we're on an editor route
+  // Check if we're on an editor route or guide view route
   const isEditorRoute = pathname.startsWith('/app/editor');
+  const isGuideViewRoute = /^\/app\/stepps\/[^/]+$/.test(pathname);
+  const isFullscreenRoute = isEditorRoute || isGuideViewRoute;
 
-  // Fullscreen layout for editor (no sidebar, no dashboard chrome)
-  if (isEditorRoute) {
+  // Fullscreen layout for editor/guide view (no sidebar, no dashboard chrome)
+  if (isFullscreenRoute) {
     return (
       <SidebarProvider>
-        <div className="h-screen w-full overflow-hidden bg-background">
+        {/* Editor needs overflow-hidden for its own layout, Guide View needs overflow-auto (or default) to scroll */}
+        <div className={`h-screen w-full bg-background ${isEditorRoute ? 'overflow-hidden' : 'overflow-y-auto'}`}>
           <Outlet />
           <Toaster />
         </div>

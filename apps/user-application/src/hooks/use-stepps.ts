@@ -8,25 +8,25 @@ const MOCK_STEPS = [
   {
     id: "step-1",
     title: "Click on 'Create New'",
-    orderIndex: 0,
-    screenshotUrl: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1974&auto=format&fit=crop",
-    finalCaption: "Start by clicking the 'Create New' button in the top right corner.",
+    order_index: 0,
+    screenshot_url: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1974&auto=format&fit=crop",
+    final_caption: "Start by clicking the 'Create New' button in the top right corner.",
     overlays: []
   },
   {
     id: "step-2",
     title: "Select Project Type",
-    orderIndex: 1,
-    screenshotUrl: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?q=80&w=1974&auto=format&fit=crop",
-    finalCaption: "Choose 'Web Application' from the dropdown menu.",
+    order_index: 1,
+    screenshot_url: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?q=80&w=1974&auto=format&fit=crop",
+    final_caption: "Choose 'Web Application' from the dropdown menu.",
     overlays: []
   },
   {
     id: "step-3",
     title: "Configure Settings",
-    orderIndex: 2,
-    screenshotUrl: "https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?q=80&w=1974&auto=format&fit=crop",
-    finalCaption: "Fill in the project details and click 'Next'.",
+    order_index: 2,
+    screenshot_url: "https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?q=80&w=1974&auto=format&fit=crop",
+    final_caption: "Fill in the project details and click 'Next'.",
     overlays: []
   }
 ];

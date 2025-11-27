@@ -1,12 +1,13 @@
 import { DashboardCard } from "./dashboard-card";
 import { Plus } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Guide } from "@/types/db";
 import { triggerExtensionSidePanel } from "@/lib/extension";
 import { MobileCreationDialog } from "@/components/mobile-creation-dialog";
+import { ShareDialog } from "@/components/share-dialog";
 import { useState } from "react";
 import { useSidebar } from "@/components/ui/sidebar";
 
@@ -21,18 +22,9 @@ interface RecentSteppsProps {
 
 export function RecentStepps({ isLoading, stepps = [] }: RecentSteppsProps) {
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
+  const [shareGuide, setShareGuide] = useState<Guide | null>(null);
   const { isMobile } = useSidebar();
-  // Mock data commented out for real data integration
-  /*
-  const recentStepps = [
-    {
-      id: 1,
-      title: "Searching using Google",
-      image: "https://placehold.co/600x400/png",
-    },
-    ...
-  ];
-  */
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -102,9 +94,11 @@ export function RecentStepps({ isLoading, stepps = [] }: RecentSteppsProps) {
               <DashboardCard
                 title={stepp.title || "Untitled Stepp"}
                 image={"https://placehold.co/600x400/png"} // Fallback image since Guide doesn't have screenshot_url yet
-                onEdit={() => console.log("Edit", stepp.id)}
-                onShare={() => console.log("Share", stepp.id)}
-                onDelete={() => console.log("Delete", stepp.id)}
+                viewUrl={`/app/stepps/${stepp.id}`}
+                onEdit={() => navigate({ to: `/app/editor/${stepp.id}` })}
+                onShare={() => setShareGuide(stepp)}
+                onDelete={() => toast.info("Delete functionality coming soon")}
+                onExport={() => toast.info("Export functionality coming soon")}
               />
             </div>
           ))}
@@ -118,6 +112,15 @@ export function RecentStepps({ isLoading, stepps = [] }: RecentSteppsProps) {
         </div>
       )}
       <MobileCreationDialog open={isMobileDialogOpen} onOpenChange={setIsMobileDialogOpen} />
+      
+      {shareGuide && (
+        <ShareDialog 
+            open={!!shareGuide} 
+            onOpenChange={(open) => !open && setShareGuide(null)}
+            guideTitle={shareGuide.title || "Untitled Stepp"}
+            guideId={shareGuide.id}
+        />
+      )}
     </section>
   );
 }

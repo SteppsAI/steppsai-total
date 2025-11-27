@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppAuthedRouteImport } from './routes/app/_authed'
 import { Route as AppAuthedIndexRouteImport } from './routes/app/_authed/index'
 import { Route as AppAuthedSteppsRouteImport } from './routes/app/_authed/stepps'
+import { Route as AppAuthedSteppsIndexRouteImport } from './routes/app/_authed/stepps/index'
 import { Route as AppAuthedEditorIndexRouteImport } from './routes/app/_authed/editor/index'
 import { Route as AppAuthedSteppsGuideIdRouteImport } from './routes/app/_authed/stepps/$guideId'
 import { Route as AppAuthedEditorGuideIdRouteImport } from './routes/app/_authed/editor/$guideId'
@@ -45,6 +46,11 @@ const AppAuthedSteppsRoute = AppAuthedSteppsRouteImport.update({
   path: '/stepps',
   getParentRoute: () => AppAuthedRoute,
 } as any)
+const AppAuthedSteppsIndexRoute = AppAuthedSteppsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppAuthedSteppsRoute,
+} as any)
 const AppAuthedEditorIndexRoute = AppAuthedEditorIndexRouteImport.update({
   id: '/editor/',
   path: '/editor/',
@@ -69,14 +75,15 @@ export interface FileRoutesByFullPath {
   '/app/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
   '/app/stepps/$guideId': typeof AppAuthedSteppsGuideIdRoute
   '/app/editor': typeof AppAuthedEditorIndexRoute
+  '/app/stepps/': typeof AppAuthedSteppsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppAuthedIndexRoute
-  '/app/stepps': typeof AppAuthedSteppsRouteWithChildren
   '/app/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
   '/app/stepps/$guideId': typeof AppAuthedSteppsGuideIdRoute
   '/app/editor': typeof AppAuthedEditorIndexRoute
+  '/app/stepps': typeof AppAuthedSteppsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -88,6 +95,7 @@ export interface FileRoutesById {
   '/app/_authed/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
   '/app/_authed/stepps/$guideId': typeof AppAuthedSteppsGuideIdRoute
   '/app/_authed/editor/': typeof AppAuthedEditorIndexRoute
+  '/app/_authed/stepps/': typeof AppAuthedSteppsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -99,14 +107,15 @@ export interface FileRouteTypes {
     | '/app/editor/$guideId'
     | '/app/stepps/$guideId'
     | '/app/editor'
+    | '/app/stepps/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/app'
-    | '/app/stepps'
     | '/app/editor/$guideId'
     | '/app/stepps/$guideId'
     | '/app/editor'
+    | '/app/stepps'
   id:
     | '__root__'
     | '/'
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/app/_authed/editor/$guideId'
     | '/app/_authed/stepps/$guideId'
     | '/app/_authed/editor/'
+    | '/app/_authed/stepps/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -161,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthedSteppsRouteImport
       parentRoute: typeof AppAuthedRoute
     }
+    '/app/_authed/stepps/': {
+      id: '/app/_authed/stepps/'
+      path: '/'
+      fullPath: '/app/stepps/'
+      preLoaderRoute: typeof AppAuthedSteppsIndexRouteImport
+      parentRoute: typeof AppAuthedSteppsRoute
+    }
     '/app/_authed/editor/': {
       id: '/app/_authed/editor/'
       path: '/editor'
@@ -187,10 +204,12 @@ declare module '@tanstack/react-router' {
 
 interface AppAuthedSteppsRouteChildren {
   AppAuthedSteppsGuideIdRoute: typeof AppAuthedSteppsGuideIdRoute
+  AppAuthedSteppsIndexRoute: typeof AppAuthedSteppsIndexRoute
 }
 
 const AppAuthedSteppsRouteChildren: AppAuthedSteppsRouteChildren = {
   AppAuthedSteppsGuideIdRoute: AppAuthedSteppsGuideIdRoute,
+  AppAuthedSteppsIndexRoute: AppAuthedSteppsIndexRoute,
 }
 
 const AppAuthedSteppsRouteWithChildren = AppAuthedSteppsRoute._addFileChildren(

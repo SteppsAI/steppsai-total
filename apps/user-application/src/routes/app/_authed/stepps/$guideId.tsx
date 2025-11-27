@@ -1,206 +1,145 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Share2, Edit, Download, ChevronLeft, ChevronRight, Printer } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Annotation } from "@/components/editor/annotation-types";
+import { Share2, Pencil, ChevronLeft } from "lucide-react";
 import { ShareDialog } from "@/components/share-dialog";
 import { useStepp } from "@/hooks/use-stepps";
+import { Guide, Step } from "@/types/db";
 
 export const Route = createFileRoute("/app/_authed/stepps/$guideId")({
   component: GuideViewPage,
 });
 
+// Extend Guide to include steps for this view (handling mock data vs DB schema)
+interface GuideWithSteps extends Guide {
+  steps: (Step & { title?: string })[];
+}
+
 function GuideViewPage() {
   const { guideId } = Route.useParams();
   const { data: fetchedGuide, isLoading, error } = useStepp(guideId);
-  const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [isShareOpen, setIsShareOpen] = useState(false);
 
+  const guide = fetchedGuide as unknown as GuideWithSteps;
+  const steps = guide?.steps || [];
+
   if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="flex flex-col gap-4 items-center">
-          <Skeleton className="h-12 w-12 rounded-full" />
-          <div className="space-y-2">
-             <Skeleton className="h-4 w-[250px]" />
-             <Skeleton className="h-4 w-[200px]" />
-          </div>
-        </div>
-      </div>
-    );
+    return <GuideLoadingSkeleton />;
   }
 
-  if (error || !fetchedGuide) {
+  if (error || !guide) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen items-center justify-center bg-background">
         <div className="text-muted-foreground">Guide not found</div>
       </div>
     );
   }
 
-  // Use fetched guide
-  const guide = fetchedGuide;
-  const steps = (guide as any).steps || []; // Cast to any to access steps if type definition is strict
-
-  const activeStep = steps[activeStepIndex];
-  const hasNext = activeStepIndex < steps.length - 1;
-  const hasPrev = activeStepIndex > 0;
-
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] bg-background">
-      {/* Header */}
-      <header className="border-b px-6 py-3 flex items-center justify-between bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex items-center gap-4">
-          <Link to="/app/stepps" search={{ search: "" }} className="text-muted-foreground hover:text-foreground transition-colors">
-            <ChevronLeft className="size-5" />
-          </Link>
-          <div>
-            <h1 className="text-lg font-semibold flex items-center gap-2">
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Minimal Sticky Header */}
+      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-14">
+        <div className="container max-w-5xl h-full mx-auto flex items-center justify-between px-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" asChild className="-ml-2 hover:bg-muted/50">
+              <Link to="/app/stepps">
+                <ChevronLeft className="size-5 text-muted-foreground" />
+                <span className="sr-only">Back</span>
+              </Link>
+            </Button>
+            <span className="font-medium text-sm hidden sm:inline-block truncate max-w-[300px]">
               {guide.title}
-              <Badge variant="secondary" className="text-xs font-normal">
-                {guide.status}
-              </Badge>
-            </h1>
-            <p className="text-sm text-muted-foreground line-clamp-1 max-w-md">
-              {guide.description}
-            </p>
+            </span>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => setIsShareOpen(true)}>
-            <Share2 className="size-4" />
-            Share
-          </Button>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Download className="size-4" />
-            Export
-          </Button>
-           <Button variant="outline" size="sm" className="gap-2">
-            <Printer className="size-4" />
-            Print
-          </Button>
-          <Button size="sm" className="gap-2" asChild>
-            <Link to="/app/editor/$guideId" params={{ guideId: guide.id }}>
-              <Edit className="size-4" />
-              Edit Stepp
-            </Link>
-          </Button>
+
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" className="h-8 gap-2 text-muted-foreground hover:text-foreground" onClick={() => setIsShareOpen(true)}>
+              <Share2 className="size-4" />
+              <span className="hidden sm:inline">Share</span>
+            </Button>
+            <Button variant="ghost" size="sm" className="h-8 gap-2 text-muted-foreground hover:text-foreground" asChild>
+              <Link to="/app/editor/$guideId" params={{ guideId: guide.id }}>
+                <Pencil className="size-4" />
+                <span className="hidden sm:inline">Edit</span>
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar - Steps Navigation */}
-        <aside className="w-80 border-r bg-muted/10 flex flex-col">
-          <div className="p-4 border-b">
-            <h3 className="font-medium mb-1">Steps</h3>
-            <p className="text-xs text-muted-foreground">
-              {steps.length} steps in this guide
-            </p>
+      {/* Main Content */}
+      <main className="flex-1 w-full max-w-3xl mx-auto p-6 py-12 md:py-16 space-y-16">
+        {/* Guide Header */}
+        <div className="space-y-6 text-center border-b pb-12">
+          <div className="space-y-4">
+            <Badge variant={guide.status === 'published' ? 'default' : 'secondary'} className="uppercase tracking-wider text-[10px]">
+              {guide.status || 'Draft'}
+            </Badge>
+            <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground">{guide.title}</h1>
+            {guide.description && (
+              <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+                {guide.description}
+              </p>
+            )}
           </div>
-          <ScrollArea className="flex-1">
-            <div className="p-4 space-y-2">
-              {steps.map((step: any, index: number) => (
-                <button
-                  key={step.id}
-                  onClick={() => setActiveStepIndex(index)}
-                  className={`w-full text-left p-3 rounded-lg border transition-all hover:shadow-sm ${
-                    index === activeStepIndex
-                      ? "bg-background border-primary shadow-sm ring-1 ring-primary/20"
-                      : "bg-background/50 border-transparent hover:bg-background hover:border-border"
-                  }`}
-                >
-                  <div className="flex gap-3">
-                    <div className="flex-shrink-0 flex items-center justify-center size-6 rounded-full bg-muted text-xs font-medium">
+          <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+            <span>{steps.length} steps</span>
+            <span>•</span>
+            <span>Last updated {new Date(guide.updated_at || new Date()).toLocaleDateString()}</span>
+          </div>
+        </div>
+
+        {/* Steps List */}
+        {steps.length > 0 ? (
+          <div className="space-y-20">
+            {steps.map((step, index) => (
+              <div key={step.id || index} className="space-y-6 group">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-none flex items-center justify-center size-8 rounded-full bg-primary/10 text-primary font-bold text-sm mt-1">
                       {index + 1}
                     </div>
-                    <div className="space-y-1 min-w-0">
-                      <p className={`text-sm font-medium truncate ${index === activeStepIndex ? "text-primary" : "text-foreground"}`}>
-                        {step.title}
-                      </p>
-                      <p className="text-xs text-muted-foreground line-clamp-2">
-                        {step.finalCaption}
-                      </p>
+                    <div className="space-y-2 pt-1">
+                      <h2 className="text-xl md:text-2xl font-medium text-foreground leading-snug">
+                        {/* Prefer final_caption/ai_caption as the main instruction */}
+                        {step.final_caption || step.ai_caption || step.title || `Step ${index + 1}`}
+                      </h2>
                     </div>
                   </div>
-                </button>
-              ))}
-            </div>
-          </ScrollArea>
-        </aside>
-
-        {/* Main Content - Step Display */}
-        <main className="flex-1 flex flex-col overflow-hidden bg-muted/20">
-          <div className="flex-1 p-8 overflow-y-auto flex items-center justify-center">
-             {activeStep ? (
-             <div className="w-full max-w-5xl bg-background rounded-xl shadow-sm border overflow-hidden flex flex-col h-[calc(100%-2rem)]">
-                {/* Step Header inside view */}
-                <div className="p-4 border-b bg-muted/5 flex items-center justify-between">
-                   <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center size-8 rounded-full bg-primary/10 text-primary font-semibold">
-                         {activeStepIndex + 1}
-                      </div>
-                      <h2 className="text-lg font-medium">{activeStep.title}</h2>
-                   </div>
-                   <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setActiveStepIndex(prev => Math.max(0, prev - 1))}
-                        disabled={!hasPrev}
-                      >
-                        <ChevronLeft className="size-5" />
-                      </Button>
-                       <span className="text-sm text-muted-foreground w-12 text-center">
-                        {activeStepIndex + 1} / {steps.length}
-                       </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setActiveStepIndex(prev => Math.min(steps.length - 1, prev + 1))}
-                        disabled={!hasNext}
-                      >
-                         <ChevronRight className="size-5" />
-                      </Button>
-                   </div>
                 </div>
-
-                {/* Image/Canvas Area */}
-                <div className="flex-1 relative bg-muted/10 overflow-hidden">
-                   {activeStep.screenshotUrl ? (
-                      <div className="absolute inset-0 flex items-center justify-center p-4">
-                         <div className="relative max-h-full max-w-full shadow-lg rounded-lg overflow-hidden">
-                            <img
-                              src={activeStep.screenshotUrl}
-                              alt={activeStep.title}
-                              className="max-h-full max-w-full object-contain"
-                            />
-                         </div>
-                      </div>
+                
+                {/* Screenshot */}
+                <div className="rounded-xl border overflow-hidden shadow-sm bg-muted/10 ring-1 ring-black/5">
+                   {step.screenshot_url ? (
+                       <img
+                           src={step.screenshot_url}
+                           alt={`Step ${index + 1}`}
+                           className="w-full h-auto object-contain bg-white"
+                           loading="lazy"
+                       />
                    ) : (
-                      <div className="flex items-center justify-center h-full text-muted-foreground">
-                         No image available
-                      </div>
+                       <div className="aspect-video flex flex-col items-center justify-center text-muted-foreground gap-2 bg-muted/20">
+                           <div className="size-12 rounded-full bg-muted flex items-center justify-center">
+                               <span className="text-2xl">?</span>
+                           </div>
+                           <p>No image available</p>
+                       </div>
                    )}
                 </div>
-
-                {/* Caption Footer */}
-                <div className="p-6 border-t bg-background">
-                   <h3 className="text-sm font-medium text-muted-foreground mb-2">Instruction</h3>
-                   <p className="text-base leading-relaxed">
-                      {activeStep.finalCaption}
-                   </p>
-                </div>
-             </div>
-             ) : (
-               <div className="text-muted-foreground">No steps found</div>
-             )}
+              </div>
+            ))}
           </div>
-        </main>
-      </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground border-2 border-dashed rounded-xl">
+            <p className="text-lg">No steps in this guide.</p>
+            <Button variant="link" asChild className="mt-2">
+              <Link to="/app/editor/$guideId" params={{ guideId: guide.id }}>Add steps in Editor</Link>
+            </Button>
+          </div>
+        )}
+      </main>
 
       <ShareDialog 
           open={isShareOpen} 
@@ -208,6 +147,35 @@ function GuideViewPage() {
           guideTitle={guide.title || ""}
           guideId={guide.id}
       />
+    </div>
+  );
+}
+
+function GuideLoadingSkeleton() {
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <div className="h-14 border-b flex items-center justify-between px-4 bg-background">
+        <Skeleton className="h-8 w-8 rounded-full" />
+        <Skeleton className="h-4 w-32" />
+        <div className="flex gap-2">
+          <Skeleton className="h-8 w-20" />
+        </div>
+      </div>
+      <div className="flex-1 w-full max-w-3xl mx-auto p-6 py-12 space-y-12">
+        <div className="space-y-4 text-center pb-8">
+          <Skeleton className="h-12 w-3/4 mx-auto" />
+          <Skeleton className="h-6 w-1/2 mx-auto" />
+        </div>
+        {[1, 2, 3].map(i => (
+           <div key={i} className="space-y-6">
+              <div className="flex gap-4">
+                   <Skeleton className="size-8 rounded-full" />
+                   <Skeleton className="h-8 w-3/4" />
+              </div>
+              <Skeleton className="w-full aspect-video rounded-xl" />
+           </div>
+        ))}
+      </div>
     </div>
   );
 }

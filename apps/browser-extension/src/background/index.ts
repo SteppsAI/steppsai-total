@@ -1,12 +1,12 @@
 /// <reference types="chrome" />
 
-const API_BASE_URL = 'http://localhost:8787';
+import { API_BASE_URL } from '../lib/constants';
 
 // Listen for messages from SidePanel or Content Script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'START_RECORDING') {
         handleStartRecording().then(sendResponse);
-        return true; // Keep channel open for async response
+        return true;
     } else if (message.type === 'STOP_RECORDING') {
         handleStopRecording().then(sendResponse);
         return true;
@@ -20,10 +20,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 async function handleStartRecording() {
     try {
-        // Clear previous recording data
         await chrome.storage.local.remove(['steps', 'recordingStartTime']);
-
-        // Set recording state
         await chrome.storage.local.set({
             isRecording: true,
             recordingStartTime: Date.now(),
@@ -50,7 +47,6 @@ async function handleStopRecording() {
             return { success: true, message: "No steps recorded" };
         }
 
-        // Construct Batch Payload
         const payload = {
             guide: {
                 title: `Recording ${new Date(recordingStartTime).toLocaleString()}`,
@@ -59,7 +55,6 @@ async function handleStopRecording() {
             steps: steps
         };
 
-        // Send Batch to Ingestion Endpoint
         const response = await fetch(`${API_BASE_URL}/guides/ingest`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -70,7 +65,6 @@ async function handleStopRecording() {
             throw new Error(`Ingestion failed: ${response.statusText}`);
         }
 
-        // Cleanup
         await chrome.storage.local.remove(['steps', 'recordingStartTime', 'isRecording']);
         await chrome.action.setBadgeText({ text: '' });
 
@@ -83,11 +77,8 @@ async function handleStopRecording() {
 
 async function handleDiscardRecording() {
     try {
-        // Simply clear all recording data without sending to server
         await chrome.storage.local.remove(['steps', 'recordingStartTime', 'isRecording']);
         await chrome.action.setBadgeText({ text: '' });
-
-        console.log('Recording discarded');
         return { success: true };
     } catch (error) {
         console.error('Failed to discard recording:', error);
@@ -100,25 +91,26 @@ async function handleStepAction(payload: any, tabId?: number) {
     if (!isRecording || !tabId) return;
 
     try {
-        // 1. Capture Screenshot
-        const dataUrl = await chrome.tabs.captureVisibleTab(chrome.windows.WINDOW_ID_CURRENT, { format: 'jpeg', quality: 80 });
+        // 1. Capture Screenshot as webp for better compression
+        const dataUrl = await chrome.tabs.captureVisibleTab(chrome.windows.WINDOW_ID_CURRENT, { 
+            format: 'png' // Chrome doesn't support webp capture, we'll convert server-side
+        });
 
         // 2. Generate ID and Key
         const stepId = crypto.randomUUID();
-        const imageKey = `${stepId}.jpg`;
+        const imageKey = `screenshots/${stepId}.webp`;
 
-        // 3. Upload to R2 (Fire & Forget)
-        // Convert Data URL to Blob
-        const res = await fetch(dataUrl);
-        const blob = await res.blob();
-
-        // Upload to Data Service Proxy
-        fetch(`${API_BASE_URL}/images/${imageKey}`, {
-            method: 'PUT',
-            body: blob
+        // 3. Upload base64 to data-service (which handles R2 storage)
+        fetch(`${API_BASE_URL}/images/upload`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                key: imageKey,
+                dataUrl: dataUrl
+            })
         }).catch(err => console.error('Failed to upload image:', err));
 
-        // 4. Store Metadata Locally (with imageKey)
+        // 4. Store Metadata Locally
         const { steps = [] } = await chrome.storage.local.get('steps');
 
         const newStep = {
@@ -126,7 +118,7 @@ async function handleStepAction(payload: any, tabId?: number) {
             orderIndex: steps.length,
             pageUrl: payload.url || 'unknown',
             domSelector: payload.selector,
-            imageKey: imageKey, // Store key, not URL (construct URL in UI)
+            imageKey: imageKey,
             timestamp: Date.now()
         };
 

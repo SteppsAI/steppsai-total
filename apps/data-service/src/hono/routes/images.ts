@@ -1,21 +1,36 @@
 import { Hono } from 'hono';
+import { uploadBase64ToR2 } from '../../helpers/base64toR2';
 
 export const imagesRouter = new Hono<{ Bindings: Env }>();
 
-// Upload Image (Fire & Forget from Extension)
+// Upload Image via base64 (from Extension)
+imagesRouter.post('/upload', async (c) => {
+    try {
+        const { key, dataUrl } = await c.req.json<{ key: string; dataUrl: string }>();
+
+        if (!key || !dataUrl) {
+            return c.json({ error: 'Missing key or dataUrl' }, 400);
+        }
+
+        await uploadBase64ToR2(c.env.BUCKET, key, dataUrl);
+        return c.json({ success: true, key });
+    } catch (error) {
+        console.error('Failed to upload image:', error);
+        return c.json({ error: 'Upload failed' }, 500);
+    }
+});
+
+// Legacy: Upload Image binary (keep for backwards compatibility)
 imagesRouter.put('/:key', async (c) => {
     const key = c.req.param('key');
     const body = await c.req.arrayBuffer();
-
-    // TODO: Add proper authentication (e.g. JWT or API Key from Extension)
-    // For now, we rely on the UUID key generation to be hard to guess
 
     await c.env.BUCKET.put(key, body);
     return c.json({ success: true });
 });
 
 // Retrieve Image (Proxy)
-imagesRouter.get('/:key', async (c) => {
+imagesRouter.get('/:key{.+}', async (c) => {
     const key = c.req.param('key');
 
     const object = await c.env.BUCKET.get(key);
@@ -26,9 +41,7 @@ imagesRouter.get('/:key', async (c) => {
     const headers = new Headers();
     object.writeHttpMetadata(headers);
     headers.set('etag', object.httpEtag);
-    headers.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+    headers.set('Cache-Control', 'public, max-age=31536000');
 
-    return new Response(object.body, {
-        headers,
-    });
+    return new Response(object.body, { headers });
 });

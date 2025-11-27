@@ -11,28 +11,14 @@
 		"nodejs_compat"
 	],
 	"observability": {
-		"enabled": true,
+		"enabled": true
 	},
 	"env": {
 		"stage": {
 			"r2_buckets": [
 				{
 					"binding": "BUCKET",
-					"bucket_name": "smart-links-eval-stage"
-				}
-			],
-			"d1_databases": [
-				{
-					"binding": "DB",
-					"database_id": "de4e53a3-c2b9-4b8c-a3e2-9fd68fe93f0e",
-					"experimental_remote": true
-				}
-			],
-			"kv_namespaces": [
-				{
-					"binding": "CACHE",
-					"id": "8046bcdc3ecb4a07873d509e292d50c0",
-					"experimental_remote": true
+					"bucket_name": "stepps-assets-stage"
 				}
 			],
 			"queues": {
@@ -55,13 +41,7 @@
 			"r2_buckets": [
 				{
 					"binding": "BUCKET",
-					"bucket_name": "smart-links-eval-production"
-				}
-			],
-			"kv_namespaces": [
-				{
-					"binding": "CACHE",
-					"id": "c366ed1d26ab4af495250f3534ccb71b"
+					"bucket_name": "stepps-assets-production"
 				}
 			],
 			"queues": {

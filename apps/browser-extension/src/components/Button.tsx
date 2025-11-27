@@ -1,9 +1,9 @@
 import { ButtonHTMLAttributes, ReactNode } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: 'primary' | 'secondary' | 'danger';
+    variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
     icon?: ReactNode;
-    children: ReactNode;
+    children?: ReactNode;
 }
 
 export function Button({ variant = 'primary', icon, children, className, ...props }: ButtonProps) {
@@ -12,7 +12,8 @@ export function Button({ variant = 'primary', icon, children, className, ...prop
     const variants = {
         primary: "bg-primary hover:bg-indigo-500 text-primary-foreground hover:shadow-indigo-500/25",
         secondary: "bg-secondary hover:bg-cyan-600 text-secondary-foreground",
-        danger: "bg-accent hover:bg-rose-600 text-accent-foreground"
+        danger: "bg-accent hover:bg-rose-600 text-accent-foreground",
+        ghost: "bg-transparent hover:bg-slate-100 text-slate-600 shadow-none"
     };
 
     return (

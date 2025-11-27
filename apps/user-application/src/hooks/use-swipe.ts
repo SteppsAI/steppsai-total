@@ -1,10 +1,6 @@
 import * as React from "react";
 
-interface SwipeState {
-  startX: number;
-  currentX: number;
-  isSwiping: boolean;
-}
+
 
 export function useSwipeToOpen(onOpen: () => void, threshold = 50) {
   React.useEffect(() => {

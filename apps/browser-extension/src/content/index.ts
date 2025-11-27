@@ -30,12 +30,20 @@ document.addEventListener('click', (event) => {
     const target = event.target as Element;
     const selector = getCssSelector(target);
 
+    // Check if extension context is still valid
+    if (!chrome.runtime?.id) {
+        return; // Extension was reloaded, ignore
+    }
+
     chrome.runtime.sendMessage({
         type: 'STEP_ACTION',
         payload: {
             selector,
             actionType: 'click',
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            url: window.location.href
         }
+    }).catch(() => {
+        // Extension context invalidated - silently ignore
     });
 }, true);

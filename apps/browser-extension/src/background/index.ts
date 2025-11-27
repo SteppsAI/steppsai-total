@@ -10,6 +10,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     } else if (message.type === 'STOP_RECORDING') {
         handleStopRecording().then(sendResponse);
         return true;
+    } else if (message.type === 'DISCARD_RECORDING') {
+        handleDiscardRecording().then(sendResponse);
+        return true;
     } else if (message.type === 'STEP_ACTION') {
         handleStepAction(message.payload, sender.tab?.id);
     }
@@ -47,7 +50,7 @@ async function handleStopRecording() {
             return { success: true, message: "No steps recorded" };
         }
 
-        // Construct Payload
+        // Construct Batch Payload
         const payload = {
             guide: {
                 title: `Recording ${new Date(recordingStartTime).toLocaleString()}`,
@@ -56,7 +59,7 @@ async function handleStopRecording() {
             steps: steps
         };
 
-        // Send to Ingestion Endpoint
+        // Send Batch to Ingestion Endpoint
         const response = await fetch(`${API_BASE_URL}/guides/ingest`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -78,6 +81,20 @@ async function handleStopRecording() {
     }
 }
 
+async function handleDiscardRecording() {
+    try {
+        // Simply clear all recording data without sending to server
+        await chrome.storage.local.remove(['steps', 'recordingStartTime', 'isRecording']);
+        await chrome.action.setBadgeText({ text: '' });
+
+        console.log('Recording discarded');
+        return { success: true };
+    } catch (error) {
+        console.error('Failed to discard recording:', error);
+        return { success: false, error: String(error) };
+    }
+}
+
 async function handleStepAction(payload: any, tabId?: number) {
     const { isRecording } = await chrome.storage.local.get('isRecording');
     if (!isRecording || !tabId) return;
@@ -88,28 +105,28 @@ async function handleStepAction(payload: any, tabId?: number) {
 
         // 2. Generate ID and Key
         const stepId = crypto.randomUUID();
-        const imageKey = `${stepId}.jpg`; // Simple key for now, can be prefixed later if needed
+        const imageKey = `${stepId}.jpg`;
 
         // 3. Upload to R2 (Fire & Forget)
         // Convert Data URL to Blob
         const res = await fetch(dataUrl);
         const blob = await res.blob();
 
-        // Upload
+        // Upload to Data Service Proxy
         fetch(`${API_BASE_URL}/images/${imageKey}`, {
             method: 'PUT',
             body: blob
         }).catch(err => console.error('Failed to upload image:', err));
 
-        // 4. Store Metadata Locally
+        // 4. Store Metadata Locally (with imageKey)
         const { steps = [] } = await chrome.storage.local.get('steps');
 
         const newStep = {
             stepId: stepId,
             orderIndex: steps.length,
-            pageUrl: payload.url || 'unknown', // Content script should send URL
+            pageUrl: payload.url || 'unknown',
             domSelector: payload.selector,
-            imageKey: imageKey,
+            imageKey: imageKey, // Store key, not URL (construct URL in UI)
             timestamp: Date.now()
         };
 

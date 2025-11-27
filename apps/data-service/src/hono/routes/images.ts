@@ -8,6 +8,7 @@ imagesRouter.put('/:key', async (c) => {
     const body = await c.req.arrayBuffer();
 
     // TODO: Add proper authentication (e.g. JWT or API Key from Extension)
+    // For now, we rely on the UUID key generation to be hard to guess
 
     await c.env.BUCKET.put(key, body);
     return c.json({ success: true });
@@ -17,8 +18,6 @@ imagesRouter.put('/:key', async (c) => {
 imagesRouter.get('/:key', async (c) => {
     const key = c.req.param('key');
 
-    // TODO: Add proper authentication (e.g. Session Cookie check)
-
     const object = await c.env.BUCKET.get(key);
     if (!object) {
         return c.text('Image not found', 404);
@@ -27,6 +26,7 @@ imagesRouter.get('/:key', async (c) => {
     const headers = new Headers();
     object.writeHttpMetadata(headers);
     headers.set('etag', object.httpEtag);
+    headers.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
 
     return new Response(object.body, {
         headers,

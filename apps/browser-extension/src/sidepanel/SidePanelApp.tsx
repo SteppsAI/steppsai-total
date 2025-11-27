@@ -1,138 +1,206 @@
-import { Play, Pause, Image as ImageIcon } from 'lucide-react';
-import { useState } from 'react';
+import { Play, Pause, ChevronDown, Trash2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import Logo from '../assets/logo.svg';
 import { Button } from '../components/Button';
-
-type RecordingState = 'idle' | 'recording' | 'paused';
+import { API_BASE_URL } from '../lib/constants';
+import { generateStepDescription } from '../lib/helpers';
+import type { RecordingState, Step } from '../types';
 
 function SidePanelApp() {
     const [recordingState, setRecordingState] = useState<RecordingState>('idle');
+    const [steps, setSteps] = useState<Step[]>([]);
+    const stepsEndRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        chrome.storage.local.get(['isRecording', 'steps'], (result) => {
+            if (result.isRecording) {
+                setRecordingState('recording');
+            }
+            if (result.steps) {
+                setSteps(result.steps);
+            }
+        });
+
+        const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange }) => {
+            if (changes.isRecording) {
+                setRecordingState(changes.isRecording.newValue ? 'recording' : 'idle');
+            }
+            if (changes.steps) {
+                setSteps(changes.steps.newValue || []);
+            }
+        };
+
+        chrome.storage.onChanged.addListener(handleStorageChange);
+        return () => chrome.storage.onChanged.removeListener(handleStorageChange);
+    }, []);
+
+    useEffect(() => {
+        stepsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [steps]);
 
     const handleStartRecording = async () => {
         const response = await chrome.runtime.sendMessage({ type: 'START_RECORDING' });
-        if (response && response.success) {
-            setRecordingState('recording');
-        }
+        if (response?.success) setRecordingState('recording');
     };
 
-    const handlePauseRecording = () => {
-        setRecordingState('paused');
-    };
-
-    const handleResumeRecording = () => {
-        setRecordingState('recording');
-    };
+    const handlePauseRecording = () => setRecordingState('paused');
+    const handleResumeRecording = () => setRecordingState('recording');
 
     const handleEndRecording = async () => {
         const response = await chrome.runtime.sendMessage({ type: 'STOP_RECORDING' });
-        if (response && response.success) {
+        if (response?.success) {
             setRecordingState('idle');
+            setSteps([]);
+        }
+    };
+
+    const handleDiscardRecording = async () => {
+        const response = await chrome.runtime.sendMessage({ type: 'DISCARD_RECORDING' });
+        if (response?.success) {
+            setRecordingState('idle');
+            setSteps([]);
         }
     };
 
     return (
-        <div className="w-full h-screen flex flex-col items-center py-8 px-6 relative overflow-hidden font-inter bg-background">
-            {/* Background Gradient - White -> Secondary (Cyan) -> Primary (Indigo) */}
+        <div className="w-full h-screen flex flex-col bg-background font-inter relative overflow-hidden">
+            {/* Background Gradient - Static */}
             <div
                 className="absolute inset-0 z-0 pointer-events-none"
                 style={{
                     background: 'radial-gradient(circle at 50% 30%, #ffffff 10%, #06B6D440 50%, #6366F140 90%)'
                 }}
             />
-
-            {/* Additional decorative blur blobs for more color depth */}
             <div className="absolute top-[-20%] left-[-20%] w-[70%] h-[70%] bg-[#06B6D4] opacity-20 blur-[120px] rounded-full pointer-events-none" />
             <div className="absolute bottom-[-20%] right-[-20%] w-[70%] h-[70%] bg-[#6366F1] opacity-20 blur-[120px] rounded-full pointer-events-none" />
 
-            {/* Content */}
-            <div className="z-10 flex flex-col items-center w-full h-full space-y-6">
-                {/* Logo */}
-                <div className={`${recordingState === 'idle' ? 'mt-24' : 'mt-8'} transition-all duration-300`}>
+            {/* Main Layout Container */}
+            <div className="z-10 flex flex-col w-full h-full px-6 py-8">
+                
+                {/* 1. HEADER - ALWAYS STATIC */}
+                <div className="flex flex-col items-center shrink-0">
                     <img src={Logo} alt="Stepps.ai Logo" className="w-16 h-16 object-contain shadow-lg rounded-lg" />
+                    
+                    {/* Status Badge Placeholder - RESERVED SPACE to prevent layout shift */}
+                    <div className="h-8 mt-4 flex items-center justify-center w-full">
+                        {recordingState !== 'idle' && (
+                            <div className="flex items-center gap-2 animate-in fade-in zoom-in duration-300">
+                                <div className={`w-2 h-2 rounded-full ${recordingState === 'recording' ? 'bg-rose-500 animate-pulse' : 'bg-amber-500'}`} />
+                                <span className="font-medium text-slate-900 capitalize">{recordingState}</span>
+                                <span className="text-slate-500">·</span>
+                                <span className="text-slate-600">{steps.length} steps</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                {recordingState === 'idle' ? (
-                    <div className="flex flex-col items-center text-center space-y-8 mt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <h1 className="text-[22px] font-normal text-slate-900 leading-tight">
-                            Capture any workflow <span className="text-[#6366F1]">in<br />seconds</span>.
-                        </h1>
-
-                        <Button
-                            variant="primary"
-                            className="w-full max-w-[240px] shadow-xl shadow-indigo-500/20 bg-[#6366F1] hover:bg-[#5558DD] text-white rounded-xl py-3 text-lg font-medium"
-                            onClick={handleStartRecording}
-                            icon={<Play className="w-5 h-5 fill-current" />}
-                        >
-                            Start Recording
-                        </Button>
-                    </div>
-                ) : (
-                    <>
-                        <div className="flex flex-col items-center space-y-1">
-                            <div className="flex items-center gap-2">
-                                <div className={`w-1.5 h-1.5 rounded-full ${recordingState === 'recording' ? 'bg-rose-500 animate-pulse' : 'bg-rose-500'}`} />
-                                <span className="font-normal text-lg text-slate-900">
-                                    {recordingState}
-                                </span>
-                            </div>
-                            <span className="text-slate-900 text-lg">
-                                (4 steps captured)
-                            </span>
-                        </div>
-
-                        <div className="w-full flex-1 flex flex-col items-center justify-center space-y-4 min-h-0">
-                            <p className="text-sm text-slate-900 text-center">
-                                Click on the “Gmail” link
-                            </p>
-                            {/* Placeholder Image */}
-                            <div className="w-full aspect-video bg-slate-50 rounded-xl border border-slate-200 shadow-sm overflow-hidden relative flex items-center justify-center group">
-                                <div className="absolute inset-0 bg-slate-100/50" />
-                                <div className="z-10 flex flex-col items-center gap-3 text-slate-300">
-                                    <ImageIcon className="w-12 h-12" />
-                                    <span className="text-sm font-medium">Preview Placeholder</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="w-full space-y-3 mt-auto pt-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                            <Button
-                                variant="primary"
-                                className="w-full bg-[#6366F1] hover:bg-[#5558DD] text-white shadow-lg shadow-indigo-500/20 rounded-xl py-3 font-medium text-lg"
-                                onClick={handleEndRecording}
-                            >
-                                End Recording
-                            </Button>
-
-                            {recordingState === 'recording' ? (
+                {/* 2. CONTENT - FLEXIBLE */}
+                <div className="flex-1 flex flex-col min-h-0 mt-6 relative">
+                    {recordingState === 'idle' ? (
+                        // IDLE STATE
+                        <div className="absolute inset-0 flex flex-col items-center w-full h-full">
+                            {/* Static top margin instead of centering to prevent jump */}
+                            <div className="mt-4 text-center w-full flex flex-col items-center">
+                                <h1 className="text-[22px] font-normal text-slate-900 leading-tight mb-8">
+                                    Capture any workflow <span className="text-[#6366F1]">in<br />seconds</span>.
+                                </h1>
                                 <Button
-                                    variant="danger"
-                                    className="w-full bg-[#F43F5E] hover:bg-[#E11D48] text-white shadow-lg shadow-rose-500/20 rounded-xl py-3 font-medium text-lg"
-                                    onClick={handlePauseRecording}
-                                    icon={<Pause className="w-5 h-5 fill-current" />}
-                                >
-                                    Pause Recording
-                                </Button>
-                            ) : (
-                                <Button
-                                    variant="secondary"
-                                    className="w-full bg-[#06B6D4] hover:bg-[#0891B2] text-white shadow-lg shadow-cyan-500/20 rounded-xl py-3 font-medium text-lg"
-                                    onClick={handleResumeRecording}
+                                    variant="primary"
+                                    className="w-full max-w-[240px] shadow-xl shadow-indigo-500/20 bg-[#6366F1] hover:bg-[#5558DD] text-white rounded-xl py-3 text-lg font-medium"
+                                    onClick={handleStartRecording}
                                     icon={<Play className="w-5 h-5 fill-current" />}
                                 >
-                                    Continue
+                                    Start Recording
                                 </Button>
-                            )}
+                            </div>
+                            
+                            {/* Footer Link - Bottom */}
+                            <div className="mt-auto pb-1 text-center shrink-0">
+                                <a href="#" className="text-sm text-slate-900 underline decoration-slate-900 underline-offset-4">
+                                    open dashboard
+                                </a>
+                            </div>
                         </div>
-                    </>
-                )}
+                    ) : (
+                        // RECORDING STATE
+                        <div className="flex flex-col h-full w-full">
+                            {/* Steps List - Scrollable */}
+                            <div className="flex-1 overflow-y-auto min-h-0 space-y-2 px-1 -mx-1">
+                                {steps.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center h-full text-slate-400 py-12">
+                                        <ChevronDown className="w-8 h-8 animate-bounce" />
+                                        <p className="text-sm mt-2">Click anywhere to capture</p>
+                                    </div>
+                                ) : (
+                                    steps.map((step, index) => (
+                                        <div
+                                            key={step.stepId || index}
+                                            className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 shadow-sm overflow-hidden"
+                                        >
+                                            <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100">
+                                                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[#6366F1] text-white text-xs font-bold">
+                                                    {index + 1}
+                                                </div>
+                                                <span className="text-sm font-medium text-slate-800 truncate flex-1">
+                                                    {generateStepDescription(step.domSelector)}
+                                                </span>
+                                            </div>
+                                            <div className="aspect-video bg-slate-100">
+                                                <img
+                                                    src={`${API_BASE_URL}/images/${step.imageKey}`}
+                                                    alt={`Step ${index + 1}`}
+                                                    className="w-full h-full object-cover"
+                                                    loading="lazy"
+                                                />
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                                <div ref={stepsEndRef} />
+                            </div>
 
-                {recordingState === 'idle' && (
-                    <div className="mt-auto pb-4">
-                        <a href="#" className="text-sm text-slate-900 underline decoration-slate-900 underline-offset-4 transition-colors">
-                            open dashboard
-                        </a>
-                    </div>
-                )}
+                            {/* Action Buttons - Fixed at bottom of content area */}
+                            <div className="space-y-2 pt-4 shrink-0 mt-auto">
+                                <Button
+                                    variant="primary"
+                                    className="w-full bg-[#6366F1] hover:bg-[#5558DD] text-white shadow-lg shadow-indigo-500/20 rounded-xl py-2.5 font-medium"
+                                    onClick={handleEndRecording}
+                                >
+                                    End Recording
+                                </Button>
+
+                                {recordingState === 'recording' ? (
+                                    <Button
+                                        variant="danger"
+                                        className="w-full bg-[#F43F5E] hover:bg-[#E11D48] text-white shadow-lg shadow-rose-500/20 rounded-xl py-2.5 font-medium"
+                                        onClick={handlePauseRecording}
+                                        icon={<Pause className="w-4 h-4 fill-current" />}
+                                    >
+                                        Pause
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        variant="secondary"
+                                        className="w-full bg-[#06B6D4] hover:bg-[#0891B2] text-white shadow-lg shadow-cyan-500/20 rounded-xl py-2.5 font-medium"
+                                        onClick={handleResumeRecording}
+                                        icon={<Play className="w-4 h-4 fill-current" />}
+                                    >
+                                        Continue
+                                    </Button>
+                                )}
+
+                                <Button
+                                    variant="ghost"
+                                    className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl py-2.5 font-medium"
+                                    onClick={handleDiscardRecording}
+                                    icon={<Trash2 className="w-4 h-4" />}
+                                >
+                                    Delete Recording
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

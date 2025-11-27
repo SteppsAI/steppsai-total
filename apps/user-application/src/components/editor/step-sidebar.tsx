@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Trash2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState, useRef, useEffect } from "react";
 
 interface Step {
     id: string;
@@ -23,8 +25,50 @@ export function StepSidebar({
     steps,
     activeStepId,
     onStepSelect,
+    onUpdateStep,
     onDeleteStep,
 }: StepSidebarProps) {
+    const [editingStepId, setEditingStepId] = useState<string | null>(null);
+    const [editValue, setEditValue] = useState("");
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    // Auto-focus and select text when entering edit mode
+    useEffect(() => {
+        if (editingStepId && inputRef.current) {
+            inputRef.current.focus();
+            inputRef.current.select();
+        }
+    }, [editingStepId]);
+
+    const handleStartEdit = (step: Step, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setEditingStepId(step.id);
+        setEditValue(step.title);
+    };
+
+    const handleSave = (stepId: string) => {
+        if (editValue.trim() !== "") {
+            onUpdateStep(stepId, editValue.trim());
+        }
+        setEditingStepId(null);
+        setEditValue("");
+    };
+
+    const handleCancel = () => {
+        setEditingStepId(null);
+        setEditValue("");
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent, stepId: string) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            handleSave(stepId);
+        } else if (e.key === "Escape") {
+            e.preventDefault();
+            handleCancel();
+        }
+    };
+
     return (
         <div className="w-[300px] bg-muted flex flex-col z-10 border-l border-border">
             <ScrollArea className="flex-1">
@@ -32,9 +76,29 @@ export function StepSidebar({
                     {steps.map((step, index) => (
                         <div key={step.id} className="group relative flex flex-col gap-2">
                             <div className="flex items-center justify-between px-1">
-                                <span className="text-sm font-medium text-foreground">
-                                    {index + 1}. {step.title}
-                                </span>
+                                {editingStepId === step.id ? (
+                                    <div className="flex items-center gap-1 flex-1">
+                                        <span className="text-sm font-medium text-foreground">
+                                            {index + 1}.
+                                        </span>
+                                        <Input
+                                            ref={inputRef}
+                                            value={editValue}
+                                            onChange={(e) => setEditValue(e.target.value)}
+                                            onBlur={() => handleSave(step.id)}
+                                            onKeyDown={(e) => handleKeyDown(e, step.id)}
+                                            className="h-6 px-2 py-0 text-sm font-medium bg-background border-primary"
+                                            onClick={(e) => e.stopPropagation()}
+                                        />
+                                    </div>
+                                ) : (
+                                    <span
+                                        className="text-sm font-medium text-foreground cursor-text hover:text-primary/80 transition-colors"
+                                        onClick={(e) => handleStartEdit(step, e)}
+                                    >
+                                        {index + 1}. {step.title}
+                                    </span>
+                                )}
                             </div>
 
                             <div

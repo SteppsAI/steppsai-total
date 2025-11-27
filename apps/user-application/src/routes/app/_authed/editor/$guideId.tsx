@@ -74,8 +74,16 @@ function EditorPage() {
   const [activeStepId, setActiveStepId] = useState<string>("");
   const [activeTool, setActiveTool] = useState<"pointer" | "arrow" | "highlight" | "hide">("pointer");
 
-  const handleUpdateStep = useCallback((id: string, caption: string) => {
-    console.log("Update step:", id, caption);
+  const handleUpdateStep = useCallback((id: string, title: string) => {
+    setGuide(prev => ({
+      ...prev,
+      steps: prev.steps.map(step =>
+        step.id === id
+          ? { ...step, title }
+          : step
+      )
+    }));
+
     setStatus("saving");
     // Simulate save
     setTimeout(() => setStatus("saved"), 1000);

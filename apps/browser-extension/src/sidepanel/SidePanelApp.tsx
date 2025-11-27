@@ -76,12 +76,12 @@ function SidePanelApp() {
             <div className="absolute top-[-20%] left-[-20%] w-[70%] h-[70%] bg-[#06B6D4] opacity-20 blur-[120px] rounded-full pointer-events-none" />
             <div className="absolute bottom-[-20%] right-[-20%] w-[70%] h-[70%] bg-[#6366F1] opacity-20 blur-[120px] rounded-full pointer-events-none" />
 
-            {/* Fixed Header */}
-            <div className="z-10 shrink-0 pt-8 px-6 flex flex-col items-center">
+            {/* Fixed Header - Always same height */}
+            <div className="z-10 shrink-0 h-[140px] px-6 flex flex-col items-center justify-center">
                 <img src={Logo} alt="Stepps.ai Logo" className="w-16 h-16 object-contain shadow-lg rounded-lg" />
                 
-                {/* Status - Always reserve space */}
-                <div className="h-14 flex flex-col items-center justify-center mt-2">
+                {/* Status - Fixed height container */}
+                <div className="h-[48px] flex flex-col items-center justify-center mt-2">
                     {isRecording ? (
                         <>
                             <div className="flex items-center gap-2">
@@ -91,8 +91,8 @@ function SidePanelApp() {
                             <span className="text-slate-600 text-sm">({steps.length} steps captured)</span>
                         </>
                     ) : (
-                        <h1 className="text-[22px] font-normal text-slate-900 leading-tight text-center">
-                            Capture any workflow <span className="text-[#6366F1]">in<br />seconds</span>.
+                        <h1 className="text-[18px] font-normal text-slate-900 leading-snug text-center">
+                            Capture any workflow <span className="text-[#6366F1]">in seconds</span>.
                         </h1>
                     )}
                 </div>

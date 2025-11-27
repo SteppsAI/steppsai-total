@@ -1,5 +1,6 @@
 /**
- * Generates a human-readable description from a DOM selector
+ * Generates a simple, readable description from a DOM selector
+ * Only uses basic element types - no random class names
  */
 export function generateStepDescription(domSelector: string): string {
     if (!domSelector) return "Click here";
@@ -7,13 +8,9 @@ export function generateStepDescription(domSelector: string): string {
     const parts = domSelector.split(" > ");
     const lastPart = parts[parts.length - 1] || domSelector;
 
+    // Only extract tag name - ignore classes and IDs (often auto-generated)
     const tagMatch = lastPart.match(/^([a-z0-9-]+)/i);
-    const idMatch = lastPart.match(/#([a-zA-Z0-9_-]+)/);
-    const classMatch = lastPart.match(/\.([a-zA-Z0-9_-]+)/);
-
     const tag = tagMatch?.[1]?.toLowerCase() || "element";
-    const id = idMatch?.[1];
-    const className = classMatch?.[1];
 
     const elementDescriptions: Record<string, string> = {
         button: "button",
@@ -26,26 +23,26 @@ export function generateStepDescription(domSelector: string): string {
         span: "text",
         nav: "navigation",
         li: "list item",
+        ul: "list",
+        ol: "list",
         label: "label",
         p: "paragraph",
         h1: "heading",
         h2: "heading",
         h3: "heading",
+        h4: "heading",
         svg: "icon",
+        path: "icon",
+        form: "form",
+        table: "table",
+        tr: "row",
+        td: "cell",
+        header: "header",
+        footer: "footer",
+        main: "main content",
+        article: "article",
+        section: "section",
     };
 
-    const elementType = elementDescriptions[tag] || tag;
-
-    if (id) {
-        const readableId = id.replace(/[-_]/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase();
-        return `Click on ${readableId} ${elementType}`;
-    }
-
-    if (className) {
-        const readableClass = className.replace(/[-_]/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase();
-        return `Click on ${readableClass} ${elementType}`;
-    }
-
-    return `Click on ${elementType}`;
+    return `Click on ${elementDescriptions[tag] || tag}`;
 }
-

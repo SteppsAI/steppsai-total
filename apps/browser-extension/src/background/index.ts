@@ -20,17 +20,34 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 async function handleStartRecording() {
     try {
-        await chrome.storage.local.remove(['steps', 'recordingStartTime']);
+        // 1. Create guide in database FIRST
+        const response = await fetch(`${API_BASE_URL}/guides/start`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.details || 'Failed to create guide');
+        }
+
+        const { guideId, userId } = await response.json();
+
+        // 2. Clear previous data and store new recording state
+        await chrome.storage.local.remove(['steps', 'recordingStartTime', 'guideId', 'userId']);
         await chrome.storage.local.set({
             isRecording: true,
             recordingStartTime: Date.now(),
+            guideId,
+            userId,
             steps: []
         });
 
         await chrome.action.setBadgeText({ text: 'REC' });
         await chrome.action.setBadgeBackgroundColor({ color: '#F43F5E' });
 
-        return { success: true };
+        console.log(`Started recording - Guide: ${guideId}`);
+        return { success: true, guideId };
     } catch (error) {
         console.error('Failed to start recording:', error);
         return { success: false, error: String(error) };
@@ -39,36 +56,37 @@ async function handleStartRecording() {
 
 async function handleStopRecording() {
     try {
-        const { steps, recordingStartTime } = await chrome.storage.local.get(['steps', 'recordingStartTime']);
+        const { steps, guideId, recordingStartTime } = await chrome.storage.local.get([
+            'steps', 'guideId', 'recordingStartTime'
+        ]);
 
-        if (!steps || steps.length === 0) {
+        if (!guideId) {
             await chrome.storage.local.set({ isRecording: false });
             await chrome.action.setBadgeText({ text: '' });
-            return { success: true, message: "No steps recorded" };
+            return { success: false, error: 'No active recording' };
         }
 
-        const payload = {
-            guide: {
-                title: `Recording ${new Date(recordingStartTime).toLocaleString()}`,
-                description: "Recorded via Chrome Extension"
-            },
-            steps: steps
-        };
-
-        const response = await fetch(`${API_BASE_URL}/guides/ingest`, {
+        // Send steps to complete the guide
+        const response = await fetch(`${API_BASE_URL}/guides/${guideId}/complete`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({
+                title: `Recording ${new Date(recordingStartTime).toLocaleString()}`,
+                steps: steps || []
+            })
         });
 
         if (!response.ok) {
-            throw new Error(`Ingestion failed: ${response.statusText}`);
+            const error = await response.json();
+            throw new Error(error.details || 'Failed to complete guide');
         }
 
-        await chrome.storage.local.remove(['steps', 'recordingStartTime', 'isRecording']);
+        // Clear local storage
+        await chrome.storage.local.remove(['steps', 'recordingStartTime', 'isRecording', 'guideId', 'userId']);
         await chrome.action.setBadgeText({ text: '' });
 
-        return { success: true };
+        console.log(`Completed recording - Guide: ${guideId}`);
+        return { success: true, guideId };
     } catch (error) {
         console.error('Failed to stop recording:', error);
         return { success: false, error: String(error) };
@@ -77,8 +95,25 @@ async function handleStopRecording() {
 
 async function handleDiscardRecording() {
     try {
-        await chrome.storage.local.remove(['steps', 'recordingStartTime', 'isRecording']);
+        const { guideId } = await chrome.storage.local.get('guideId');
+        
+        // Delete guide from DB and R2 if guideId exists
+        if (guideId) {
+            const response = await fetch(`${API_BASE_URL}/guides/${guideId}`, {
+                method: 'DELETE'
+            });
+            
+            if (!response.ok) {
+                console.error('Failed to delete guide from server:', await response.text());
+            } else {
+                console.log(`Deleted guide: ${guideId}`);
+            }
+        }
+
+        // Clear local storage
+        await chrome.storage.local.remove(['steps', 'recordingStartTime', 'isRecording', 'guideId', 'userId']);
         await chrome.action.setBadgeText({ text: '' });
+        
         return { success: true };
     } catch (error) {
         console.error('Failed to discard recording:', error);
@@ -87,38 +122,46 @@ async function handleDiscardRecording() {
 }
 
 async function handleStepAction(payload: any, tabId?: number) {
-    const { isRecording } = await chrome.storage.local.get('isRecording');
-    if (!isRecording || !tabId) return;
+    const { isRecording, guideId, userId } = await chrome.storage.local.get([
+        'isRecording', 'guideId', 'userId'
+    ]);
+    
+    if (!isRecording || !tabId || !guideId) return;
 
     try {
-        // 1. Capture Screenshot as webp for better compression
+        // Capture Screenshot
         const dataUrl = await chrome.tabs.captureVisibleTab(chrome.windows.WINDOW_ID_CURRENT, { 
-            format: 'png' // Chrome doesn't support webp capture, we'll convert server-side
+            format: 'png'
         });
 
-        // 2. Generate ID and Key
+        // Generate ID and Key with new path structure
         const stepId = crypto.randomUUID();
-        const imageKey = `screenshots/${stepId}.webp`;
+        const imageKey = `screenshots/${guideId}/${userId}/${stepId}.webp`;
 
-        // 3. Upload base64 to data-service (which handles R2 storage)
-        fetch(`${API_BASE_URL}/images/upload`, {
+        // Upload to data-service - WAIT for completion
+        const uploadResponse = await fetch(`${API_BASE_URL}/images/upload`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 key: imageKey,
                 dataUrl: dataUrl
             })
-        }).catch(err => console.error('Failed to upload image:', err));
+        });
 
-        // 4. Store Metadata Locally
+        if (!uploadResponse.ok) {
+            console.error('Upload failed:', await uploadResponse.text());
+            return;
+        }
+
+        // Store metadata locally AFTER upload confirmed
         const { steps = [] } = await chrome.storage.local.get('steps');
 
         const newStep = {
-            stepId: stepId,
+            stepId,
             orderIndex: steps.length,
-            pageUrl: payload.url || 'unknown',
-            domSelector: payload.selector,
-            imageKey: imageKey,
+            pageUrl: payload.url || '',
+            domSelector: payload.selector || '',
+            imageKey,
             timestamp: Date.now()
         };
 

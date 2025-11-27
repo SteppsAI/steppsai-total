@@ -1,34 +1,32 @@
-import { createGuide } from "@repo/data-ops/queries/guides";
 import { createStepsBatch } from "@repo/data-ops/queries/steps";
-import { RecordingIngestMessageType } from "@repo/data-ops/zod-schema/queue";
-import { nanoid } from "nanoid";
+import { updateGuide } from "@repo/data-ops/queries/guides";
+import { StepsInsertMessageType } from "@repo/data-ops/zod-schema/queue";
 
-export async function handleRecordingIngest(env: Env, event: RecordingIngestMessageType) {
-    const { userId, data } = event;
-    const { guide, steps } = data;
+export async function handleStepsInsert(env: Env, event: StepsInsertMessageType) {
+    const { guideId, steps } = event;
 
-    console.log(`Processing recording for user ${userId}`);
+    console.log(`Processing ${steps.length} steps for guide ${guideId}`);
 
-    // 1. Create Guide
-    const guideId = await createGuide({
-        userId: userId,
-        title: guide.title || "Untitled Recording",
-        description: guide.description,
-        slug: nanoid(10),
-        status: "recording",
-    });
+    try {
+        // Insert steps into DB
+        if (steps.length > 0) {
+            await createStepsBatch(steps.map((step, index) => ({
+                guideId: guideId,
+                orderIndex: index,
+                pageUrl: step.pageUrl || '',
+                domSelector: step.domSelector || '',
+                screenshotUrl: step.imageKey,
+                isExcluded: false,
+            })));
+        }
 
-    // 2. Create Steps
-    if (steps.length > 0) {
-        await createStepsBatch(steps.map(step => ({
-            guideId: guideId,
-            orderIndex: step.orderIndex,
-            pageUrl: step.pageUrl,
-            domSelector: step.domSelector,
-            screenshotUrl: step.imageKey,
-            isExcluded: false,
-        })));
+        // Update guide status to draft
+        await updateGuide(guideId, { status: 'draft' });
+
+        console.log(`Successfully inserted ${steps.length} steps for guide ${guideId}`);
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error(`Failed to insert steps for guide ${guideId}:`, errorMessage);
+        throw error;
     }
-
-    console.log(`Successfully ingested guide ${guideId} with ${steps.length} steps.`);
 }

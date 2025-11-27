@@ -28,8 +28,8 @@ export const stepsSchema = z.object({
 	id: z.string().uuid(),
 	guideId: z.string().uuid(),
 	orderIndex: z.number().int(),
-	screenshotUrl: z.string().url().optional(),
-	pageUrl: z.string().url().optional(),
+	screenshotUrl: z.string().optional(), // R2 key, not a full URL
+	pageUrl: z.string().optional(), // Can be any URL format
 	domSelector: z.string().optional(),
 	aiCaption: z.string().optional(),
 	finalCaption: z.string().optional(),

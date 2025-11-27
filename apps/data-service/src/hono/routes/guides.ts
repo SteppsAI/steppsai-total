@@ -1,29 +1,106 @@
 import { Hono } from 'hono';
-import { ingestGuideSchema } from '@repo/data-ops/zod-schema/guides';
-import { RecordingIngestMessageType } from '@repo/data-ops/zod-schema/queue';
+import { createGuide, deleteGuide, updateGuide } from '@repo/data-ops/queries/guides';
+import { deleteStepsByGuide } from '@repo/data-ops/queries/steps';
+import { nanoid } from 'nanoid';
 
 export const guidesRouter = new Hono<{ Bindings: Env }>();
 
-// Ingest Recording (Batch - Queue Producer)
-guidesRouter.post('/ingest', async (c) => {
-    const body = await c.req.json();
-    const result = ingestGuideSchema.safeParse(body);
+// HARDCODED: Replace with auth context user ID when auth is implemented
+const HARDCODED_USER_ID = 'f1d84914-ec7c-4b1a-9a89-eaeff6b2f366';
 
-    if (!result.success) {
-        return c.json({ error: result.error }, 400);
+// Start Recording - Creates a draft guide and returns guideId
+guidesRouter.post('/start', async (c) => {
+    try {
+        const guideId = await createGuide({
+            userId: HARDCODED_USER_ID,
+            title: 'Recording in progress...',
+            description: '',
+            slug: nanoid(10),
+            status: 'recording',
+            visibility: 'private',
+        });
+
+        console.log(`Created draft guide: ${guideId}`);
+        
+        return c.json({ 
+            success: true, 
+            guideId,
+            userId: HARDCODED_USER_ID 
+        });
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Failed to create guide:', errorMessage);
+        return c.json({ 
+            error: 'Failed to create guide', 
+            details: errorMessage 
+        }, 500);
     }
+});
 
-    // HARDCODED: Replace with auth context user ID when auth is implemented
-    const HARDCODED_USER_ID = 'f1d84914-ec7c-4b1a-9a89-eaeff6b2f366';
+// Complete Recording - Updates guide title and sends steps to queue
+guidesRouter.post('/:guideId/complete', async (c) => {
+    const guideId = c.req.param('guideId');
     
-    const message: RecordingIngestMessageType = {
-        type: 'RECORDING_INGEST',
-        userId: HARDCODED_USER_ID,
-        data: result.data
-    };
+    try {
+        const { title, steps } = await c.req.json();
 
-    // Send to Cloudflare Queue
-    await c.env.QUEUE.send(message);
+        // 1. Update guide title and status
+        await updateGuide(guideId, {
+            title: title || 'Untitled Recording',
+            status: 'processing'
+        });
 
-    return c.json({ success: true, message: 'Recording queued for processing' });
+        // 2. Send steps to queue for processing
+        await c.env.QUEUE.send({
+            type: 'STEPS_INSERT',
+            guideId,
+            steps: steps || []
+        });
+
+        console.log(`Guide ${guideId} sent to queue with ${steps?.length || 0} steps`);
+        
+        return c.json({ success: true, guideId });
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Failed to complete guide:', errorMessage);
+        return c.json({ 
+            error: 'Failed to complete guide', 
+            details: errorMessage 
+        }, 500);
+    }
+});
+
+// Delete Recording - Deletes guide from DB and images from R2
+guidesRouter.delete('/:guideId', async (c) => {
+    const guideId = c.req.param('guideId');
+    
+    try {
+        // 1. Delete steps first
+        await deleteStepsByGuide(guideId);
+        
+        // 2. Delete guide from DB
+        await deleteGuide(guideId);
+        
+        // 3. Delete all images for this guide from R2
+        const prefix = `screenshots/${guideId}/`;
+        const listed = await c.env.BUCKET.list({ prefix });
+        
+        if (listed.objects.length > 0) {
+            await Promise.all(
+                listed.objects.map(obj => c.env.BUCKET.delete(obj.key))
+            );
+            console.log(`Deleted ${listed.objects.length} images from R2 for guide ${guideId}`);
+        }
+        
+        console.log(`Deleted guide: ${guideId}`);
+        
+        return c.json({ success: true });
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Failed to delete guide:', errorMessage);
+        return c.json({ 
+            error: 'Failed to delete guide', 
+            details: errorMessage 
+        }, 500);
+    }
 });

@@ -121,3 +121,8 @@ export async function reorderSteps(_guideId: string, stepIdsInOrder: string[]): 
 
 	await Promise.all(updates);
 }
+
+export async function deleteStepsByGuide(guideId: string): Promise<void> {
+	const db = getDb();
+	await db.delete(steps).where(eq(steps.guideId, guideId));
+}

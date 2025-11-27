@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const stepSchema = z.object({
 	stepId: z.string().uuid(),
 	orderIndex: z.number().int().min(0),
-	pageUrl: z.string().url(),
+	pageUrl: z.string(), // Not .url() - can be any string
 	domSelector: z.string(),
 	imageKey: z.string(),
 	timestamp: z.number(),

@@ -2,7 +2,7 @@ import { WorkerEntrypoint } from 'cloudflare:workers';
 import { App } from './hono/app'
 import { initDatabase } from '@repo/data-ops/database';
 import { queueMessageSchema } from "@repo/data-ops/zod-schema/queue";
-import { handleRecordingIngest } from './queue-handlers/recording-ingest';
+import { handleStepsInsert } from './queue-handlers/recording-ingest';
 
 export default class DataService extends WorkerEntrypoint<Env> {
 	constructor(ctx: ExecutionContext, env: Env) {
@@ -35,17 +35,27 @@ export default class DataService extends WorkerEntrypoint<Env> {
 		initDatabase(this.env.DATABASE_URL);
 		
 		for (const message of batch.messages) {
-			const parsedEvent = queueMessageSchema.safeParse(message.body);
-			if (parsedEvent.success) {
-				const event = parsedEvent.data;
-				if (event.type === "RECORDING_INGEST") {
-					await handleRecordingIngest(this.env, event);
+			try {
+				const parsedEvent = queueMessageSchema.safeParse(message.body);
+				
+				if (!parsedEvent.success) {
+					console.error("Invalid Queue Message:", parsedEvent.error.message);
+					message.ack();
+					continue;
 				}
-			} else {
-				console.error("Invalid Queue Message:", parsedEvent.error);
+
+				const event = parsedEvent.data;
+				
+				if (event.type === "STEPS_INSERT") {
+					await handleStepsInsert(this.env, event);
+				}
+				
+				message.ack();
+			} catch (error) {
+				const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+				console.error(`Queue processing failed: ${errorMessage}`);
+				// Don't ack - will retry
 			}
-			message.ack();
 		}
 	}
 }
-

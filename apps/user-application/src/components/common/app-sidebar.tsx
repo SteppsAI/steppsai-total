@@ -37,10 +37,17 @@ import { useState } from "react";
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation();
   const pathname = location.pathname;
-  const { state, isMobile } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
 
   const isActive = (path: string) => pathname === path;
+
+  // Close sidebar on mobile when clicking a link
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -64,7 +71,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   isActive={isActive("/app")}
                   tooltip="Home"
                 >
-                  <Link to="/app">
+                  <Link to="/app" onClick={handleLinkClick}>
                     <Home />
                     <span>Home</span>
                   </Link>
@@ -77,7 +84,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   isActive={pathname.startsWith("/app/editor")}
                   tooltip="Editor (Demo)"
                 >
-                  <Link to="/app/editor/$guideId" params={{ guideId: "test-guide-1" }}>
+                  <Link to="/app/editor/$guideId" params={{ guideId: "test-guide-1" }} onClick={handleLinkClick}>
                     <Edit />
                     <span>Editor (Demo)</span>
                   </Link>
@@ -90,7 +97,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   isActive={isActive("/app/library")}
                   tooltip="My Stepps"
                 >
-                  <Link to="/app/folders" search={{ search: "" }}>
+                  <Link to="/app/folders" search={{ search: "" }} onClick={handleLinkClick}>
                     <Library />
                     <span>My Stepps</span>
                   </Link>

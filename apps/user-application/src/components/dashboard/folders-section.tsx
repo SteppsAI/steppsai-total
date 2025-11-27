@@ -14,6 +14,10 @@ interface FoldersSectionProps {
   folders?: FolderWithCount[];
 }
 
+// TODO: Future integration with tRPC
+// import { trpc } from "@/lib/trpc";
+// const { data: folders, isLoading } = trpc.folder.getAll.useQuery();
+
 export function FoldersSection({ isLoading, folders = [] }: FoldersSectionProps) {
   // Mock data commented out
   /*
@@ -30,8 +34,8 @@ export function FoldersSection({ isLoading, folders = [] }: FoldersSectionProps)
           <Skeleton className="h-4 w-16" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-24 w-full rounded-xl" />
+          {[1, 2, 3, 4].map((i, index) => (
+            <Skeleton key={i} className={`h-24 w-full rounded-xl ${index >= 2 ? "hidden lg:block" : ""}`} />
           ))}
         </div>
       </section>
@@ -56,15 +60,16 @@ export function FoldersSection({ isLoading, folders = [] }: FoldersSectionProps)
 
       {hasFolders ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {folders?.slice(0, 4).map((folder) => (
-            <FolderCard
-              key={folder.id}
-              folder={{
-                id: folder.id,
-                name: folder.name,
-                guideCount: folder.guide_count || 0,
-              }}
-            />
+          {folders?.slice(0, 4).map((folder, index) => (
+            <div key={folder.id} className={index >= 2 ? "hidden lg:block" : ""}>
+              <FolderCard
+                folder={{
+                  id: folder.id,
+                  name: folder.name,
+                  guideCount: folder.guide_count || 0,
+                }}
+              />
+            </div>
           ))}
         </div>
       ) : (

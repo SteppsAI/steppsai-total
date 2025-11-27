@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { RecentStepps } from "@/components/dashboard/recent-stepps";
 import { TutorialsSection } from "@/components/dashboard/tutorials-section";
+import { MobileTutorialsSection } from "@/components/dashboard/mobile-tutorials-section";
 import { FoldersSection } from "@/components/dashboard/folders-section";
 import { useState, useEffect } from "react";
 import { Guide, Folder } from "@/types/db";
@@ -14,6 +15,11 @@ function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [recentStepps, setRecentStepps] = useState<Guide[]>([]);
   const [folders, setFolders] = useState<(Folder & { guide_count?: number })[]>([]);
+
+  // TODO: Future integration with tRPC and TanStack Query
+  // const { data: recentStepps, isLoading: isLoadingStepps } = trpc.guide.getRecent.useQuery({ limit: 4 });
+  // const { data: folders, isLoading: isLoadingFolders } = trpc.folder.getAll.useQuery();
+  // const isLoading = isLoadingStepps || isLoadingFolders;
 
   useEffect(() => {
     // Simulate data fetching
@@ -38,6 +44,7 @@ function Dashboard() {
 
       {/* Tutorials Section - Full Width */}
       <TutorialsSection />
+      <MobileTutorialsSection />
     </div>
   );
 }

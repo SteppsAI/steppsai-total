@@ -39,6 +39,8 @@ import { FolderCard } from "@/components/folder-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TEST_FOLDERS, TEST_GUIDES, FolderWithCount, GuideWithFolder } from "@/types/test-data";
 import { triggerExtensionSidePanel } from "@/lib/extension";
+import { MobileCreationDialog } from "@/components/mobile-creation-dialog";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export const Route = createFileRoute("/app/_authed/folders")({
     component: FoldersPage,
@@ -54,6 +56,8 @@ function FoldersPage() {
     const [searchQuery, setSearchQuery] = useState(search || "");
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
     const [newFolderName, setNewFolderName] = useState("");
+    const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
+    const { isMobile } = useSidebar();
 
     // Data state
     const [isLoading, setIsLoading] = useState(true);
@@ -155,11 +159,18 @@ function FoldersPage() {
 
                     <Button
                         className="gap-2 cursor-pointer"
-                        onClick={() => triggerExtensionSidePanel().catch((e) => alert(e.message))}
+                        onClick={() => {
+                            if (isMobile) {
+                                setIsMobileDialogOpen(true);
+                            } else {
+                                triggerExtensionSidePanel().catch((e) => alert(e.message));
+                            }
+                        }}
                     >
                         <Plus className="size-4" />
                         New Stepp
                     </Button>
+                    <MobileCreationDialog open={isMobileDialogOpen} onOpenChange={setIsMobileDialogOpen} />
                 </div>
             </div>
 

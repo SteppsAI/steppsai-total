@@ -23,7 +23,7 @@ export function TutorialsSection() {
   ];
 
   return (
-    <section className="w-full">
+    <section className="w-full hidden md:block">
       <h3 className="text-xl font-semibold text-foreground mb-4">Quick Start Guide</h3>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">

@@ -31,11 +31,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { triggerExtensionSidePanel } from "@/lib/extension";
+import { MobileCreationDialog } from "@/components/mobile-creation-dialog";
+import { useState } from "react";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation();
   const pathname = location.pathname;
   const { state, isMobile } = useSidebar();
+  const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
 
   const isActive = (path: string) => pathname === path;
 
@@ -105,7 +108,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className={`w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-md flex items-center justify-center transition-all duration-200 overflow-hidden cursor-pointer ${state === "collapsed" ? "px-0" : "px-4 gap-2"
                 }`}
               aria-label={state === "collapsed" ? "Create Stepps" : undefined}
-              onClick={() => triggerExtensionSidePanel().catch((e) => alert(e.message))}
+              onClick={() => {
+                if (isMobile) {
+                  setIsMobileDialogOpen(true);
+                } else {
+                  triggerExtensionSidePanel().catch((e) => alert(e.message));
+                }
+              }}
             >
               <Plus className="size-4 flex-shrink-0" />
               <span className={`whitespace-nowrap transition-all duration-200 ${state === "collapsed" ? "w-0 opacity-0" : "w-auto opacity-100"}`}>
@@ -163,6 +172,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarFooter>
+      <MobileCreationDialog open={isMobileDialogOpen} onOpenChange={setIsMobileDialogOpen} />
     </Sidebar>
   );
 }

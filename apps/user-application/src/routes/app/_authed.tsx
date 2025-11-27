@@ -4,8 +4,8 @@ import { Outlet, createFileRoute, useLocation } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 // import { authClient } from "@/components/auth/client";
 // import { redirect } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+
+
 
 
 export const Route = createFileRoute("/app/_authed")({
@@ -74,16 +74,7 @@ function RouteComponent() {
           )}
 
           {/* Mobile CTA (Visible only on mobile) */}
-          <div className="md:hidden ml-auto">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 size-10 min-h-[44px] rounded-lg touch-manipulation transition-colors"
-              aria-label="Create new Stepps"
-            >
-              <Plus className="h-5 w-5" />
-            </Button>
-          </div>
+
         </header>
 
         {/* Scrollable Content Area */}

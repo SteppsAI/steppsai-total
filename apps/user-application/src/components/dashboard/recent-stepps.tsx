@@ -5,13 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Guide } from "@/types/db";
 import { triggerExtensionSidePanel } from "@/lib/extension";
+import { MobileCreationDialog } from "@/components/mobile-creation-dialog";
+import { useState } from "react";
+import { useSidebar } from "@/components/ui/sidebar";
 
 interface RecentSteppsProps {
   isLoading?: boolean;
   stepps?: Guide[];
 }
 
+// TODO: Future integration with tRPC
+// import { trpc } from "@/lib/trpc";
+// const { data: recentStepps, isLoading } = trpc.guide.getRecent.useQuery({ limit: 4 });
+
 export function RecentStepps({ isLoading, stepps = [] }: RecentSteppsProps) {
+  const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
+  const { isMobile } = useSidebar();
   // Mock data commented out for real data integration
   /*
   const recentStepps = [
@@ -35,8 +44,8 @@ export function RecentStepps({ isLoading, stepps = [] }: RecentSteppsProps) {
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex flex-col gap-2">
+          {[1, 2, 3, 4].map((i, index) => (
+            <div key={i} className={`flex flex-col gap-2 ${index >= 2 ? "hidden lg:block" : ""}`}>
               <Skeleton className="aspect-video w-full rounded-xl" />
               <div className="space-y-1">
                 <Skeleton className="h-4 w-3/4" />
@@ -50,6 +59,11 @@ export function RecentStepps({ isLoading, stepps = [] }: RecentSteppsProps) {
   }
 
   const handleCreateStepp = async () => {
+    if (isMobile) {
+      setIsMobileDialogOpen(true);
+      return;
+    }
+
     try {
       await triggerExtensionSidePanel();
     } catch (error) {
@@ -82,15 +96,16 @@ export function RecentStepps({ isLoading, stepps = [] }: RecentSteppsProps) {
 
       {stepps.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {stepps.map((stepp) => (
-            <DashboardCard
-              key={stepp.id}
-              title={stepp.title || "Untitled Stepp"}
-              image={"https://placehold.co/600x400/png"} // Fallback image since Guide doesn't have screenshot_url yet
-              onEdit={() => console.log("Edit", stepp.id)}
-              onShare={() => console.log("Share", stepp.id)}
-              onDelete={() => console.log("Delete", stepp.id)}
-            />
+          {stepps.slice(0, 4).map((stepp, index) => (
+            <div key={stepp.id} className={index >= 2 ? "hidden lg:block" : ""}>
+              <DashboardCard
+                title={stepp.title || "Untitled Stepp"}
+                image={"https://placehold.co/600x400/png"} // Fallback image since Guide doesn't have screenshot_url yet
+                onEdit={() => console.log("Edit", stepp.id)}
+                onShare={() => console.log("Share", stepp.id)}
+                onDelete={() => console.log("Delete", stepp.id)}
+              />
+            </div>
           ))}
         </div>
       ) : (
@@ -101,6 +116,7 @@ export function RecentStepps({ isLoading, stepps = [] }: RecentSteppsProps) {
           </Button>
         </div>
       )}
+      <MobileCreationDialog open={isMobileDialogOpen} onOpenChange={setIsMobileDialogOpen} />
     </section>
   );
 }

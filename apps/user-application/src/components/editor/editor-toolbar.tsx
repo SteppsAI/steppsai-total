@@ -43,7 +43,7 @@ export function EditorToolbar({ activeTool, onToolChange }: EditorToolbarProps) 
                                 <tool.icon className="w-5 h-5" />
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent side="right" className="bg-foreground text-background border-none px-3 py-1.5">
+                        <TooltipContent side="right" align="center">
                             <p className="font-medium text-xs">{tool.label}</p>
                         </TooltipContent>
                     </Tooltip>

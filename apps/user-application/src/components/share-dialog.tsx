@@ -4,21 +4,11 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Copy, Check, Globe, Lock, UserPlus, Mail } from "lucide-react";
+import { Copy, Check, Link as LinkIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -32,8 +22,8 @@ interface ShareDialogProps {
 export function ShareDialog({ open, onOpenChange, guideTitle, guideId }: ShareDialogProps) {
     const [copied, setCopied] = useState(false);
     const [email, setEmail] = useState("");
-    const [accessLevel, setAccessLevel] = useState("view");
 
+    // In a real app, this would be the actual public URL
     const shareUrl = `${window.location.origin}/share/${guideId}`;
 
     const handleCopy = () => {
@@ -46,7 +36,8 @@ export function ShareDialog({ open, onOpenChange, guideTitle, guideId }: ShareDi
     const handleInvite = (e: React.FormEvent) => {
         e.preventDefault();
         if (!email) return;
-        // TODO: Implement invite logic
+
+        // TODO: Implement actual invite logic with backend
         toast.success(`Invited ${email} to view ${guideTitle}`);
         setEmail("");
     };
@@ -61,113 +52,57 @@ export function ShareDialog({ open, onOpenChange, guideTitle, guideId }: ShareDi
                     </DialogDescription>
                 </DialogHeader>
 
-                <Tabs defaultValue="invite" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="invite">Invite People</TabsTrigger>
-                        <TabsTrigger value="link">Get Link</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="invite" className="space-y-4 py-4">
-                        <form onSubmit={handleInvite} className="flex gap-2">
-                            <Input
-                                placeholder="Email address"
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                            <Select value={accessLevel} onValueChange={setAccessLevel}>
-                                <SelectTrigger className="w-[110px]">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="view">Can view</SelectItem>
-                                    <SelectItem value="edit">Can edit</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <Button type="submit">Invite</Button>
-                        </form>
-
-                        <div className="space-y-4 pt-2">
-                            <h4 className="text-sm font-medium text-muted-foreground">People with access</h4>
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <Avatar className="size-8">
-                                            <AvatarImage src="/avatars/01.png" />
-                                            <AvatarFallback>VB</AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <p className="text-sm font-medium">Vilém Barnet (You)</p>
-                                            <p className="text-xs text-muted-foreground">vilem@example.com</p>
-                                        </div>
-                                    </div>
-                                    <span className="text-sm text-muted-foreground">Owner</span>
-                                </div>
-                                
-                                {/* Mock Invited User */}
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <Avatar className="size-8">
-                                            <AvatarFallback>JD</AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <p className="text-sm font-medium">John Doe</p>
-                                            <p className="text-xs text-muted-foreground">john@example.com</p>
-                                        </div>
-                                    </div>
-                                    <Select defaultValue="view">
-                                        <SelectTrigger className="w-[100px] h-8 text-xs">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="view">Can view</SelectItem>
-                                            <SelectItem value="edit">Can edit</SelectItem>
-                                            <SelectItem value="remove" className="text-destructive">Remove</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                <div className="flex flex-col gap-6 py-4">
+                    {/* Copy Link Section */}
+                    <div className="space-y-2">
+                        <Label className="text-sm font-medium">Guide Link</Label>
+                        <div className="flex items-center space-x-2">
+                            <div className="relative flex-1">
+                                <LinkIcon className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+                                <Input
+                                    value={shareUrl}
+                                    readOnly
+                                    className="pl-9 bg-muted/50"
+                                />
                             </div>
-                        </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="link" className="space-y-4 py-4">
-                        <div className="flex flex-col space-y-2">
-                             <Label>General Access</Label>
-                             <Select defaultValue="restricted">
-                                <SelectTrigger>
-                                    <div className="flex items-center gap-2">
-                                        <Lock className="size-4 text-muted-foreground" />
-                                        <span>Restricted</span>
-                                    </div>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="restricted">
-                                        <div className="flex items-center gap-2">
-                                            <Lock className="size-4 text-muted-foreground" />
-                                            <span>Restricted - Only added people can open</span>
-                                        </div>
-                                    </SelectItem>
-                                    <SelectItem value="public">
-                                        <div className="flex items-center gap-2">
-                                            <Globe className="size-4 text-muted-foreground" />
-                                            <span>Public - Anyone with the link can view</span>
-                                        </div>
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2 pt-2">
-                            <div className="grid flex-1 gap-2">
-                                <Label htmlFor="link" className="sr-only">Link</Label>
-                                <Input id="link" value={shareUrl} readOnly className="h-9" />
-                            </div>
-                            <Button size="sm" onClick={handleCopy} className="px-3">
+                            <Button
+                                size="icon"
+                                variant="outline"
+                                onClick={handleCopy}
+                                className="shrink-0"
+                            >
                                 {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
                             </Button>
                         </div>
-                    </TabsContent>
-                </Tabs>
+                    </div>
+
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-background px-2 text-muted-foreground">
+                                Or invite via email
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Invite Section */}
+                    <form onSubmit={handleInvite} className="space-y-2">
+                        <Label htmlFor="email" className="text-sm font-medium">Email address</Label>
+                        <div className="flex gap-2">
+                            <Input
+                                id="email"
+                                placeholder="colleague@company.com"
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="flex-1"
+                            />
+                            <Button type="submit">Invite</Button>
+                        </div>
+                    </form>
+                </div>
             </DialogContent>
         </Dialog>
     );

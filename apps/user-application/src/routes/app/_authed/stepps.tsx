@@ -3,8 +3,6 @@ import {
     Folder as FolderIcon,
     Plus,
     Search,
-    LayoutGrid,
-    List
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useCreateFolder } from "@/hooks/use-folders";
@@ -22,7 +20,6 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { FolderCard } from "@/components/folder-card";
-import { SteppCard } from "@/components/stepp-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TEST_FOLDERS, TEST_GUIDES, FolderWithCount, GuideWithFolder } from "@/types/test-data";
 import { triggerExtensionSidePanel } from "@/lib/extension";
@@ -36,6 +33,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical, FileText } from "lucide-react";
+import { ShareDialog } from "@/components/share-dialog";
 
 export const Route = createFileRoute("/app/_authed/stepps")({
     component: SteppsPage,
@@ -47,7 +45,10 @@ function SteppsPage() {
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
     const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
     const { isMobile } = useSidebar();
-    const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+
+    // Share Dialog State
+    const [shareDialogOpen, setShareDialogOpen] = useState(false);
+    const [selectedGuide, setSelectedGuide] = useState<{ id: string; title: string } | null>(null);
 
     // Backend integration hooks
     const createFolderMutation = useCreateFolder();
@@ -83,6 +84,11 @@ function SteppsPage() {
         }
     };
 
+    const handleShare = (guide: GuideWithFolder) => {
+        setSelectedGuide({ id: guide.id, title: guide.title || "Untitled" });
+        setShareDialogOpen(true);
+    };
+
     // Helper function to format date
     const formatDate = (dateString: string | null) => {
         if (!dateString) return "N/A";
@@ -101,7 +107,7 @@ function SteppsPage() {
     };
 
     // Filter guides based on search query
-    const filteredGuides = guides.filter(guide => 
+    const filteredGuides = guides.filter(guide =>
         guide.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (guide.folderName && guide.folderName.toLowerCase().includes(searchQuery.toLowerCase()))
     );
@@ -222,176 +228,146 @@ function SteppsPage() {
             <section className="space-y-4">
                 <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-foreground">All Stepps</h2>
-                    <div className="flex items-center gap-2">
-                         <Button
-                            variant={viewMode === "grid" ? "secondary" : "ghost"}
-                            size="sm"
-                            onClick={() => setViewMode("grid")}
-                        >
-                            <LayoutGrid className="size-4" />
-                        </Button>
-                        <Button
-                            variant={viewMode === "list" ? "secondary" : "ghost"}
-                            size="sm"
-                            onClick={() => setViewMode("list")}
-                        >
-                            <List className="size-4" />
-                        </Button>
-                    </div>
                 </div>
-                
-                {viewMode === "list" ? (
-                    <div className="border rounded-lg">
-                        <Table>
-                            <TableHeader>
-                                <TableRow className="hover:bg-transparent">
-                                    <TableHead className="w-[40%]">Title</TableHead>
-                                    <TableHead className="w-[20%]">Folder</TableHead>
-                                    <TableHead className="w-[15%]">Status</TableHead>
-                                    <TableHead className="w-[15%]">Visibility</TableHead>
-                                    <TableHead className="w-[15%]">Last Modified</TableHead>
-                                    <TableHead className="w-[5%]"></TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {isLoading ? (
-                                    [1, 2, 3, 4, 5].map((i) => (
-                                        <TableRow key={i}>
-                                            <TableCell><Skeleton className="h-5 w-48" /></TableCell>
-                                            <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                                            <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
-                                            <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
-                                            <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                                            <TableCell><Skeleton className="h-8 w-8 rounded-md" /></TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : filteredGuides.length > 0 ? (
-                                    filteredGuides.map((guide) => (
-                                        <TableRow 
-                                            key={guide.id} 
-                                            className="cursor-pointer hover:bg-muted/50 transition-colors"
-                                            onClick={() => navigate({ to: "/app/stepps/$guideId", params: { guideId: guide.id } })}
-                                        >
-                                            <TableCell className="font-medium">
-                                                <div className="flex items-center gap-2">
-                                                    <FileText className="size-4 text-muted-foreground" />
-                                                    <Link 
-                                                        to="/app/stepps/$guideId" 
-                                                        params={{ guideId: guide.id }}
-                                                        className="hover:underline hover:text-primary"
+
+                <div className="border rounded-lg">
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="hover:bg-transparent">
+                                <TableHead className="w-[40%]">Title</TableHead>
+                                <TableHead className="w-[20%]">Folder</TableHead>
+                                <TableHead className="w-[15%]">Status</TableHead>
+                                <TableHead className="w-[15%]">Visibility</TableHead>
+                                <TableHead className="w-[15%]">Last Modified</TableHead>
+                                <TableHead className="w-[5%]"></TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {isLoading ? (
+                                [1, 2, 3, 4, 5].map((i) => (
+                                    <TableRow key={i}>
+                                        <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                        <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                                        <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                        <TableCell><Skeleton className="h-8 w-8 rounded-md" /></TableCell>
+                                    </TableRow>
+                                ))
+                            ) : filteredGuides.length > 0 ? (
+                                filteredGuides.map((guide) => (
+                                    <TableRow
+                                        key={guide.id}
+                                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                                        onClick={() => navigate({ to: "/app/stepps/$guideId", params: { guideId: guide.id } })}
+                                    >
+                                        <TableCell className="font-medium">
+                                            <div className="flex items-center gap-2">
+                                                <FileText className="size-4 text-muted-foreground" />
+                                                <Link
+                                                    to="/app/stepps/$guideId"
+                                                    params={{ guideId: guide.id }}
+                                                    className="hover:underline hover:text-primary"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    {guide.title || "Untitled"}
+                                                </Link>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            {guide.folderName ? (
+                                                <div className="flex items-center gap-1.5 text-muted-foreground">
+                                                    <FolderIcon className="size-3.5" />
+                                                    <span className="text-sm">{guide.folderName}</span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-muted-foreground text-sm">—</span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge
+                                                variant={guide.status === "published" ? "default" : "secondary"}
+                                                className="capitalize"
+                                            >
+                                                {guide.status || "draft"}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge
+                                                variant={guide.visibility === "public" ? "outline" : "secondary"}
+                                                className="capitalize"
+                                            >
+                                                {guide.visibility || "private"}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground text-sm">
+                                            {formatDate(guide.updated_at)}
+                                        </TableCell>
+                                        <TableCell>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="size-8 p-0"
                                                         onClick={(e) => e.stopPropagation()}
                                                     >
-                                                        {guide.title || "Untitled"}
-                                                    </Link>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                {guide.folderName ? (
-                                                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                                                        <FolderIcon className="size-3.5" />
-                                                        <span className="text-sm">{guide.folderName}</span>
-                                                    </div>
-                                                ) : (
-                                                    <span className="text-muted-foreground text-sm">—</span>
-                                                )}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge
-                                                    variant={guide.status === "published" ? "default" : "secondary"}
-                                                    className="capitalize"
-                                                >
-                                                    {guide.status || "draft"}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge
-                                                    variant={guide.visibility === "public" ? "outline" : "secondary"}
-                                                    className="capitalize"
-                                                >
-                                                    {guide.visibility || "private"}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell className="text-muted-foreground text-sm">
-                                                {formatDate(guide.updated_at)}
-                                            </TableCell>
-                                            <TableCell>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button
-                                                            variant="ghost"
-                                                            className="size-8 p-0"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            <span className="sr-only">Open menu</span>
-                                                            <MoreVertical className="size-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem onClick={(e) => {
+                                                        <span className="sr-only">Open menu</span>
+                                                        <MoreVertical className="size-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        navigate({ to: "/app/editor/$guideId", params: { guideId: guide.id } });
+                                                    }}>
+                                                        Edit
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleShare(guide);
+                                                    }}>
+                                                        Share
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        console.log("Move", guide.id);
+                                                    }}>
+                                                        Move to folder
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        className="text-destructive"
+                                                        onClick={(e) => {
                                                             e.stopPropagation();
-                                                            navigate({ to: "/app/editor/$guideId", params: { guideId: guide.id } });
-                                                        }}>
-                                                            Edit
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            console.log("Share", guide.id);
-                                                        }}>
-                                                            Share
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            console.log("Move", guide.id);
-                                                        }}>
-                                                            Move to folder
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem
-                                                            className="text-destructive"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                console.log("Delete", guide.id);
-                                                            }}
-                                                        >
-                                                            Delete
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="h-24 text-center">
-                                            No stepps found.
+                                                            console.log("Delete", guide.id);
+                                                        }}
+                                                    >
+                                                        Delete
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </TableCell>
                                     </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                         {isLoading ? (
-                             [1, 2, 3, 4].map(i => <Skeleton key={i} className="h-60 rounded-lg" />)
-                         ) : filteredGuides.length > 0 ? (
-                             filteredGuides.map(guide => (
-                                 <SteppCard key={guide.id} guide={{
-                                    id: guide.id,
-                                    title: guide.title || "",
-                                    status: guide.status || "",
-                                    visibility: guide.visibility || "",
-                                    updated_at: guide.updated_at || "",
-                                    folderName: guide.folderName || ""
-                                 }} />
-                             ))
-                         ) : (
-                             <div className="col-span-full flex flex-col items-center justify-center py-8 text-center border border-dashed rounded-xl bg-muted/30">
-                                 <p className="text-muted-foreground text-sm">No stepps yet.</p>
-                             </div>
-                         )}
-                    </div>
-                )}
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="h-24 text-center">
+                                        No stepps found.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
             </section>
+
+            {selectedGuide && (
+                <ShareDialog
+                    open={shareDialogOpen}
+                    onOpenChange={setShareDialogOpen}
+                    guideTitle={selectedGuide.title}
+                    guideId={selectedGuide.id}
+                />
+            )}
         </div >
     );
 }

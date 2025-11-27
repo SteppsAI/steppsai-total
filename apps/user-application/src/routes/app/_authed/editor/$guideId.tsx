@@ -3,86 +3,46 @@ import { EditorHeader } from "@/components/editor/editor-header";
 import { EditorToolbar } from "@/components/editor/editor-toolbar";
 import { Canvas } from "@/components/editor/canvas";
 import { StepSidebar } from "@/components/editor/step-sidebar";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Annotation } from "@/components/editor/annotation-types";
-// import { useQuery } from "@tanstack/react-query";
-// import { trpc } from "@/router";
+import { useStepp } from "@/hooks/use-stepps";
+import { Guide, Step } from "@/types/db"; // Or reuse internal types if db types don't match exactly
 
 export const Route = createFileRoute("/app/_authed/editor/$guideId")({
   component: EditorPage,
 });
 
-// Mock data for development
-interface Step {
-  id: string;
-  title: string;
-  orderIndex: number;
-  screenshotUrl: string;
-  finalCaption: string;
-  overlays: Annotation[];
-}
-
-interface Guide {
-  id: string;
-  title: string;
-  updatedAt: string;
-  steps: Step[];
-}
-
-const MOCK_GUIDE: Guide = {
-  id: "test-guide-1",
-  title: "How to Create a New Project",
-  updatedAt: new Date().toISOString(),
-  steps: [
-    {
-      id: "step-1",
-      title: "Click on 'Create New'",
-      orderIndex: 0,
-      screenshotUrl: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1974&auto=format&fit=crop",
-      finalCaption: "Start by clicking the 'Create New' button in the top right corner.",
-      overlays: []
-    },
-    {
-      id: "step-2",
-      title: "Select Project Type",
-      orderIndex: 1,
-      screenshotUrl: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?q=80&w=1974&auto=format&fit=crop",
-      finalCaption: "Choose 'Web Application' from the dropdown menu.",
-      overlays: []
-    },
-    {
-      id: "step-3",
-      title: "Configure Settings",
-      orderIndex: 2,
-      screenshotUrl: "https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?q=80&w=1974&auto=format&fit=crop",
-      finalCaption: "Fill in the project details and click 'Next'.",
-      overlays: []
-    }
-  ]
-};
-
 function EditorPage() {
-  // const { guideId } = Route.useParams();
-  // const { data: guide, isLoading } = useQuery(trpc.guides.getById.queryOptions({ id: guideId }));
-
-  // Use mock data instead of real data for now
-  const [guide, setGuide] = useState(MOCK_GUIDE);
-  const isLoading = false;
-
-  const [title, setTitle] = useState(guide.title || "Untitled Stepps");
+  const { guideId } = Route.useParams();
+  const { data: fetchedGuide, isLoading, error } = useStepp(guideId);
+  
+  // Local state for editor (synced with fetched data initially)
+  const [guide, setGuide] = useState<any | null>(null); // Using any for now to avoid strict type mismatch with mock data structure vs DB
+  const [title, setTitle] = useState("Untitled Stepps");
   const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const [activeStepId, setActiveStepId] = useState<string>("");
   const [activeTool, setActiveTool] = useState<"pointer" | "arrow" | "highlight" | "hide">("pointer");
 
+  // Sync fetched guide to local state
+  useEffect(() => {
+    if (fetchedGuide) {
+      setGuide(fetchedGuide);
+      setTitle(fetchedGuide.title || "Untitled Stepps");
+    }
+  }, [fetchedGuide]);
+
   const handleUpdateStep = useCallback((id: string, title: string) => {
-    setGuide(prev => ({
-      ...prev,
-      steps: prev.steps.map(step =>
-        step.id === id
-          ? { ...step, title }
-          : step
-      )
-    }));
+    setGuide((prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        steps: prev.steps.map((step: any) =>
+          step.id === id
+            ? { ...step, title }
+            : step
+        )
+      };
+    });
 
     setStatus("saving");
     // Simulate save
@@ -92,14 +52,17 @@ function EditorPage() {
   const handleAnnotationsChange = useCallback((annotations: Annotation[]) => {
     if (!activeStepId) return;
 
-    setGuide(prev => ({
-      ...prev,
-      steps: prev.steps.map(step =>
-        step.id === activeStepId
-          ? { ...step, overlays: annotations }
-          : step
-      )
-    }));
+    setGuide((prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        steps: prev.steps.map((step: any) =>
+          step.id === activeStepId
+            ? { ...step, overlays: annotations }
+            : step
+        )
+      };
+    });
 
     setStatus("saving");
     setTimeout(() => setStatus("saved"), 1000);
@@ -121,7 +84,7 @@ function EditorPage() {
     );
   }
 
-  if (!guide) {
+  if (error || !guide) {
     return (
       <div className="h-screen flex items-center justify-center bg-background">
         <div className="text-muted-foreground">Guide not found</div>
@@ -139,11 +102,6 @@ function EditorPage() {
 
   // Get the current active step
   const currentStep = sortedSteps.find((step: any) => step.id === activeStepId) || sortedSteps[0];
-
-  // Update title from guide if not already set
-  if (guide.title && title === "Untitled Stepps") {
-    setTitle(guide.title);
-  }
 
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden bg-background">

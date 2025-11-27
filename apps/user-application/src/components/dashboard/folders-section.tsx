@@ -49,7 +49,7 @@ export function FoldersSection({ isLoading, folders = [] }: FoldersSectionProps)
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl font-semibold text-foreground">Your folders</h2>
         <Link
-          to="/app/folders"
+          to="/app/stepps"
           search={{ search: "" }}
           className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80"
         >

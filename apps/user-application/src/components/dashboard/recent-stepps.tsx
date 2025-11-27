@@ -77,7 +77,7 @@ export function RecentStepps({ isLoading, stepps = [] }: RecentSteppsProps) {
         <h2 className="text-xl font-semibold text-foreground">Recent Stepps</h2>
         <div className="flex items-center gap-3">
           <Link
-            to="/app/folders"
+            to="/app/stepps"
             search={{ search: "" }}
             className="text-xs font-medium uppercase tracking-wide text-muted-foreground hover:text-foreground"
           >

@@ -84,7 +84,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   isActive={pathname.startsWith("/app/editor")}
                   tooltip="Editor (Demo)"
                 >
-                  <Link to="/app/editor/$guideId" params={{ guideId: "test-guide-1" }} onClick={handleLinkClick}>
+                  <Link to="/app/editor/$guideId" params={{ guideId: "gd_searching_101" }} onClick={handleLinkClick}>
                     <Edit />
                     <span>Editor (Demo)</span>
                   </Link>
@@ -97,7 +97,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   isActive={isActive("/app/library")}
                   tooltip="My Stepps"
                 >
-                  <Link to="/app/folders" search={{ search: "" }} onClick={handleLinkClick}>
+                  <Link to="/app/stepps" search={{ search: "" }} onClick={handleLinkClick}>
                     <Library />
                     <span>My Stepps</span>
                   </Link>

@@ -66,7 +66,7 @@ function RouteComponent() {
                 className="w-full pl-9 pr-4 py-2 bg-muted/50 border-none rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && e.currentTarget.value) {
-                    window.location.href = `/app/folders?search=${encodeURIComponent(e.currentTarget.value)}`;
+                    window.location.href = `/app/stepps?search=${encodeURIComponent(e.currentTarget.value)}`;
                   }
                 }}
               />

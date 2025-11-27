@@ -2,6 +2,7 @@ import { DashboardCard } from "./dashboard-card";
 import { Plus } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Guide } from "@/types/db";
 import { triggerExtensionSidePanel } from "@/lib/extension";
@@ -67,7 +68,7 @@ export function RecentStepps({ isLoading, stepps = [] }: RecentSteppsProps) {
     try {
       await triggerExtensionSidePanel();
     } catch (error) {
-      alert((error as Error).message);
+      toast.error((error as Error).message);
     }
   };
 

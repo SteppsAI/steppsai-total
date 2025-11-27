@@ -28,10 +28,12 @@ function RouteComponent() {
   // Fullscreen layout for editor (no sidebar, no dashboard chrome)
   if (isEditorRoute) {
     return (
-      <div className="h-screen w-full overflow-hidden bg-background">
-        <Outlet />
-        <Toaster />
-      </div>
+      <SidebarProvider>
+        <div className="h-screen w-full overflow-hidden bg-background">
+          <Outlet />
+          <Toaster />
+        </div>
+      </SidebarProvider>
     );
   }
 

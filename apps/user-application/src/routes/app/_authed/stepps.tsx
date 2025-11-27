@@ -150,7 +150,7 @@ function SteppsPage() {
                             if (isMobile) {
                                 setIsMobileDialogOpen(true);
                             } else {
-                                triggerExtensionSidePanel().catch((e) => alert(e.message));
+                                triggerExtensionSidePanel().catch((e) => toast.error(e.message));
                             }
                         }}
                     >

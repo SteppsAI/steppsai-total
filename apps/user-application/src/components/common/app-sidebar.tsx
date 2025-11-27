@@ -9,6 +9,7 @@ import {
   Plus,
   MessageSquare,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Link, useLocation } from "@tanstack/react-router";
 
 import {
@@ -84,9 +85,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   isActive={pathname.startsWith("/app/editor")}
                   tooltip="Editor (Demo)"
                 >
-                  <Link to="/app/editor/$guideId" params={{ guideId: "gd_searching_101" }} onClick={handleLinkClick}>
+                  <Link to="/app/editor" onClick={handleLinkClick}>
                     <Edit />
-                    <span>Editor (Demo)</span>
+                    <span>Editor</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -119,7 +120,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 if (isMobile) {
                   setIsMobileDialogOpen(true);
                 } else {
-                  triggerExtensionSidePanel().catch((e) => alert(e.message));
+                  triggerExtensionSidePanel().catch((e) => toast.error(e.message));
                 }
               }}
             >

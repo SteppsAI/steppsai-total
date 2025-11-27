@@ -95,11 +95,10 @@ function SidePanelApp() {
                 </div>
 
                 {/* 2. CONTENT - FLEXIBLE */}
-                <div className="flex-1 flex flex-col min-h-0 mt-6 relative">
+                <div className="flex-1 flex flex-col min-h-0 mt-6">
                     {recordingState === 'idle' ? (
                         // IDLE STATE
-                        <div className="absolute inset-0 flex flex-col items-center w-full h-full">
-                            {/* Static top margin instead of centering to prevent jump */}
+                        <div className="flex flex-col items-center w-full h-full">
                             <div className="mt-4 text-center w-full flex flex-col items-center">
                                 <h1 className="text-[22px] font-normal text-slate-900 leading-tight mb-8">
                                     Capture any workflow <span className="text-[#6366F1]">in<br />seconds</span>.
@@ -190,8 +189,8 @@ function SidePanelApp() {
                                 )}
 
                                 <Button
-                                    variant="ghost"
-                                    className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl py-2.5 font-medium"
+                                    variant="danger"
+                                    className="w-full bg-slate-600 hover:bg-slate-700 text-white shadow-lg shadow-slate-500/20 rounded-xl py-2.5 font-medium"
                                     onClick={handleDiscardRecording}
                                     icon={<Trash2 className="w-4 h-4" />}
                                 >

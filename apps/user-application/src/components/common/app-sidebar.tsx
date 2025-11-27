@@ -159,7 +159,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />
-              <span>Workspace settings</span>
+              <span>Settings</span>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <a

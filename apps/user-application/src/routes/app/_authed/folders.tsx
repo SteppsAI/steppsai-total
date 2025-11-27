@@ -7,19 +7,11 @@ import {
     FileText,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useCreateFolder } from "@/hooks/use-folders";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -40,6 +32,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TEST_FOLDERS, TEST_GUIDES, FolderWithCount, GuideWithFolder } from "@/types/test-data";
 import { triggerExtensionSidePanel } from "@/lib/extension";
 import { MobileCreationDialog } from "@/components/mobile-creation-dialog";
+import { CreateFolderDialog } from "@/components/create-folder-dialog";
 import { useSidebar } from "@/components/ui/sidebar";
 
 export const Route = createFileRoute("/app/_authed/folders")({
@@ -55,9 +48,11 @@ function FoldersPage() {
     const { search } = Route.useSearch();
     const [searchQuery, setSearchQuery] = useState(search || "");
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
-    const [newFolderName, setNewFolderName] = useState("");
     const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
     const { isMobile } = useSidebar();
+
+    // Backend integration hooks
+    const createFolderMutation = useCreateFolder();
 
     // Data state
     const [isLoading, setIsLoading] = useState(true);
@@ -66,6 +61,7 @@ function FoldersPage() {
 
     useEffect(() => {
         // Simulate data fetching
+        // TODO: Replace with actual data fetching using useFolders() hook when backend is ready
         const timer = setTimeout(() => {
             setIsLoading(false);
             // Use test data
@@ -76,10 +72,17 @@ function FoldersPage() {
         return () => clearTimeout(timer);
     }, []);
 
-    const handleCreateFolder = () => {
-        console.log("Creating folder:", newFolderName);
-        setIsCreateFolderOpen(false);
-        setNewFolderName("");
+    const handleCreateFolder = async (name: string) => {
+        try {
+            const newFolder = await createFolderMutation.mutateAsync(name);
+            // Update local state optimistically
+            setFolders((prev) => [...prev, newFolder]);
+            setIsCreateFolderOpen(false);
+            toast.success("Folder created successfully!");
+        } catch (error) {
+            console.error("Error creating folder:", error);
+            toast.error("Failed to create folder");
+        }
     };
 
     // Helper function to format date
@@ -100,7 +103,7 @@ function FoldersPage() {
     };
 
     return (
-        <div className="flex flex-col gap-8 w-full max-w-[1400px] mx-auto pb-8">
+        <div className="flex flex-col gap-8 w-full max-w-[1400px] mx-auto pb-8 px-4 sm:px-6">
             {/* Header Section */}
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
@@ -120,42 +123,16 @@ function FoldersPage() {
                         />
                     </div>
 
-                    <Dialog open={isCreateFolderOpen} onOpenChange={setIsCreateFolderOpen}>
-                        <DialogTrigger asChild>
-                            <Button variant="outline" className="gap-2">
-                                <FolderIcon className="size-4" />
-                                New Folder
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Create New Folder</DialogTitle>
-                                <DialogDescription>
-                                    Organize your Stepps by creating a new folder.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="name">Folder Name</Label>
-                                    <Input
-                                        id="name"
-                                        placeholder="e.g., Onboarding, Marketing..."
-                                        value={newFolderName}
-                                        onChange={(e) => setNewFolderName(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setIsCreateFolderOpen(false)}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button onClick={handleCreateFolder}>Create Folder</Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
+                    <Button variant="outline" className="gap-2" onClick={() => setIsCreateFolderOpen(true)}>
+                        <FolderIcon className="size-4" />
+                        New Folder
+                    </Button>
+                    <CreateFolderDialog
+                        open={isCreateFolderOpen}
+                        onOpenChange={setIsCreateFolderOpen}
+                        onCreate={handleCreateFolder}
+                        isLoading={createFolderMutation.isPending}
+                    />
 
                     <Button
                         className="gap-2 cursor-pointer"
@@ -178,29 +155,62 @@ function FoldersPage() {
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold text-foreground">Folders</h2>
                 {isLoading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                        {[1, 2, 3, 4].map((i) => (
-                            <Skeleton key={i} className="h-24 w-full rounded-xl" />
-                        ))}
-                    </div>
+                    <>
+                        {/* Mobile Loading State - Filter chips */}
+                        <div className="flex flex-wrap gap-2 md:hidden">
+                            {[1, 2, 3, 4].map((i) => (
+                                <Skeleton key={i} className="h-9 w-28 rounded-full" />
+                            ))}
+                        </div>
+                        {/* Desktop Loading State - Cards */}
+                        <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            {[1, 2, 3, 4].map((i) => (
+                                <Skeleton key={i} className="h-24 w-full rounded-xl" />
+                            ))}
+                        </div>
+                    </>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                        {folders.map((folder) => (
-                            <FolderCard
-                                key={folder.id}
-                                folder={{
-                                    id: folder.id,
-                                    name: folder.name,
-                                    guideCount: folder.guide_count || 0
-                                }}
-                            />
-                        ))}
-                        {folders.length === 0 && (
-                            <div className="col-span-full flex flex-col items-center justify-center py-8 text-center border border-dashed rounded-xl bg-muted/30">
-                                <p className="text-muted-foreground text-sm">No folders yet.</p>
-                            </div>
-                        )}
-                    </div>
+                    <>
+                        {/* Mobile View - Filter chips */}
+                        <div className="flex flex-wrap gap-2 md:hidden">
+                            {folders.map((folder) => (
+                                <button
+                                    key={folder.id}
+                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted hover:bg-muted/80 transition-colors text-sm font-medium cursor-pointer border border-border hover:border-primary/50"
+                                >
+                                    <FolderIcon className="size-3.5 text-muted-foreground" />
+                                    <span>{folder.name}</span>
+                                    <span className="text-xs text-muted-foreground">
+                                        ({folder.guide_count || 0})
+                                    </span>
+                                </button>
+                            ))}
+                            {folders.length === 0 && (
+                                <div className="w-full flex flex-col items-center justify-center py-6 text-center border border-dashed rounded-xl bg-muted/30">
+                                    <p className="text-muted-foreground text-sm">No folders yet.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Desktop View - Cards */}
+                        <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            {folders.map((folder) => (
+                                <FolderCard
+                                    key={folder.id}
+                                    folder={{
+                                        id: folder.id,
+                                        name: folder.name,
+                                        guideCount: folder.guide_count || 0
+                                    }}
+                                />
+                            ))}
+                            {folders.length === 0 && (
+                                <div className="col-span-full flex flex-col items-center justify-center py-8 text-center border border-dashed rounded-xl bg-muted/30">
+                                    <p className="text-muted-foreground text-sm">No folders yet.</p>
+                                </div>
+                            )}
+                        </div>
+                    </>
                 )}
             </section>
 
@@ -312,6 +322,6 @@ function FoldersPage() {
                     </Table>
                 </div>
             </section>
-        </div>
+        </div >
     );
 }

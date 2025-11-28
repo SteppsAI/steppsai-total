@@ -1,7 +1,10 @@
 import { AppSidebar } from "@/components/common/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Outlet, createFileRoute, useLocation } from "@tanstack/react-router";
+import { Outlet, createFileRoute, useLocation, useNavigate } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+import { useState } from "react";
 // import { authClient } from "@/components/auth/client";
 // import { redirect } from "@tanstack/react-router";
 
@@ -18,14 +21,32 @@ export const Route = createFileRoute("/app/_authed")({
   //}
 });
 function RouteComponent() {
-
+  const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Check if we're on an editor route or guide view route
   const isEditorRoute = pathname.startsWith('/app/editor');
   const isGuideViewRoute = /^\/app\/stepps\/[^/]+$/.test(pathname);
   const isFullscreenRoute = isEditorRoute || isGuideViewRoute;
+
+  // Handle search submission
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && searchQuery.trim()) {
+      // Navigate to stepps page
+      // TODO: When backend is ready, implement search with query params
+      // For now, we'll navigate to the stepps page and let it handle local filtering
+      navigate({
+        to: "/app/stepps",
+        // In future, pass search as a search param: search: { q: searchQuery }
+      });
+
+      // Store search query in sessionStorage for the stepps page to pick up
+      // TODO: Replace with proper URL search params when implementing backend search
+      sessionStorage.setItem('searchQuery', searchQuery);
+    }
+  };
 
   // Fullscreen layout for editor/guide view (no sidebar, no dashboard chrome)
   if (isFullscreenRoute) {
@@ -59,21 +80,14 @@ function RouteComponent() {
           {/* Search Bar - Only show on Dashboard */}
           {pathname === '/app' && (
             <div className="relative w-full max-w-md hidden md:block">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="size-4 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="m21 21-4.3-4.3" />
-                </svg>
-              </div>
-              <input
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <Input
                 type="text"
-                placeholder="Search..."
-                className="w-full pl-9 pr-4 py-2 bg-muted/50 border-none rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && e.currentTarget.value) {
-                    window.location.href = `/app/stepps?search=${encodeURIComponent(e.currentTarget.value)}`;
-                  }
-                }}
+                placeholder="Search stepps..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearch}
+                className="pl-9 bg-muted/50 border-none"
               />
             </div>
           )}

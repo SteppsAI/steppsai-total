@@ -52,7 +52,6 @@ export function FoldersSection({ isLoading, folders = [], onRename, onDelete }: 
         <h2 className="text-xl font-semibold text-foreground">Your folders</h2>
         <Link
           to="/app/stepps"
-          search={{ search: "" }}
           className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80"
         >
           View all

@@ -84,6 +84,18 @@ function SteppsPage() {
         return () => clearTimeout(timer);
     }, []);
 
+    // Handle search query from dashboard
+    useEffect(() => {
+        // Check if there's a search query from the dashboard
+        const savedSearchQuery = sessionStorage.getItem('searchQuery');
+        if (savedSearchQuery) {
+            setSearchQuery(savedSearchQuery);
+            // Clear it after reading so it doesn't persist
+            sessionStorage.removeItem('searchQuery');
+        }
+    }, []);
+
+
     const handleCreateFolder = async (name: string) => {
         try {
             const newFolder = await createFolderMutation.mutateAsync(name);

@@ -96,7 +96,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   isActive={isActive("/app/library")}
                   tooltip="My Stepps"
                 >
-                  <Link to="/app/stepps" search={{ search: "" }} onClick={handleLinkClick}>
+                  <Link to="/app/stepps" onClick={handleLinkClick}>
                     <Library />
                     <span>My Stepps</span>
                   </Link>

@@ -73,7 +73,6 @@ export function RecentStepps({ isLoading, stepps = [], onDelete, onMove }: Recen
         <div className="flex items-center gap-3">
           <Link
             to="/app/stepps"
-            search={{ search: "" }}
             className="text-xs font-medium uppercase tracking-wide text-muted-foreground hover:text-foreground"
           >
             View all

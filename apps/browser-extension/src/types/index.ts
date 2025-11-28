@@ -6,4 +6,5 @@ export interface Step {
     imageKey: string;
     pageUrl: string;
     domSelector: string;
+    previewUrl?: string; // Data URL for immediate display
 }

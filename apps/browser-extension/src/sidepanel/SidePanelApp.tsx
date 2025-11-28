@@ -9,7 +9,7 @@ import type { RecordingState, Step } from '../types';
 function SidePanelApp() {
     const [recordingState, setRecordingState] = useState<RecordingState>('idle');
     const [steps, setSteps] = useState<Step[]>([]);
-    const stepsEndRef = useRef<HTMLDivElement>(null);
+    const stepsContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         chrome.storage.local.get(['isRecording', 'steps'], (result) => {
@@ -35,7 +35,9 @@ function SidePanelApp() {
     }, []);
 
     useEffect(() => {
-        stepsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        if (stepsContainerRef.current) {
+            stepsContainerRef.current.scrollTop = stepsContainerRef.current.scrollHeight;
+        }
     }, [steps]);
 
     const handleStartRecording = async () => {
@@ -76,71 +78,66 @@ function SidePanelApp() {
             <div className="absolute top-[-20%] left-[-20%] w-[70%] h-[70%] bg-[#06B6D4] opacity-20 blur-[120px] rounded-full pointer-events-none" />
             <div className="absolute bottom-[-20%] right-[-20%] w-[70%] h-[70%] bg-[#6366F1] opacity-20 blur-[120px] rounded-full pointer-events-none" />
 
-            {/* Fixed Header - Always same height */}
-            <div className="z-10 shrink-0 h-[140px] px-6 flex flex-col items-center justify-center">
-                <img src={Logo} alt="Stepps.ai Logo" className="w-16 h-16 object-contain shadow-lg rounded-lg" />
-                
-                {/* Status - Fixed height container */}
-                <div className="h-[48px] flex flex-col items-center justify-center mt-2">
-                    {isRecording ? (
-                        <>
-                            <div className="flex items-center gap-2">
-                                <div className={`w-1.5 h-1.5 rounded-full ${recordingState === 'recording' ? 'bg-rose-500 animate-pulse' : 'bg-amber-500'}`} />
-                                <span className="font-normal text-lg text-slate-900 capitalize">{recordingState}</span>
-                            </div>
-                            <span className="text-slate-600 text-sm">({steps.length} steps captured)</span>
-                        </>
-                    ) : (
-                        <h1 className="text-[18px] font-normal text-slate-900 leading-snug text-center">
-                            Capture any workflow <span className="text-[#6366F1]">in seconds</span>.
-                        </h1>
-                    )}
+            {/* Header - Only visible when recording */}
+            {isRecording && (
+                <div className="z-10 shrink-0 px-6 pt-8 pb-4 flex flex-col items-center justify-center">
+                    <img src={Logo} alt="Stepps.ai Logo" className="w-16 h-16 object-contain shadow-lg rounded-lg mb-4" />
+
+                    {/* Status */}
+                    <div className="min-h-[48px] flex flex-col items-center justify-center">
+                        <div className="flex items-center gap-2 mb-1">
+                            <div className={`w-2 h-2 rounded-full ${recordingState === 'recording' ? 'bg-rose-500 animate-pulse' : 'bg-amber-500'}`} />
+                            <span className="font-medium text-lg text-slate-900 capitalize">{recordingState}</span>
+                        </div>
+                        <span className="text-slate-500 text-sm font-medium">({steps.length} steps captured)</span>
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Scrollable Content Area */}
             <div className="z-10 flex-1 min-h-0 px-6 py-4 overflow-hidden flex flex-col">
                 {isRecording ? (
                     <>
                         {/* Steps List */}
-                        <div className="flex-1 overflow-y-auto min-h-0 space-y-2">
+                        <div ref={stepsContainerRef} className="flex-1 overflow-y-auto min-h-0 space-y-2 scrollbar-hide">
                             {steps.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center h-full text-slate-400">
                                     <ChevronDown className="w-8 h-8 animate-bounce" />
                                     <p className="text-sm mt-2">Click anywhere to capture</p>
                                 </div>
                             ) : (
-                                <>
-                                    {steps.map((step, index) => (
-                                        <div
-                                            key={step.id || index}
-                                            className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 shadow-sm overflow-hidden"
-                                        >
-                                            <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100">
-                                                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[#6366F1] text-white text-xs font-bold">
-                                                    {index + 1}
-                                                </div>
-                                                <span className="text-sm font-medium text-slate-800 truncate flex-1">
-                                                    {generateStepDescription(step.domSelector)}
-                                                </span>
+                                steps.map((step, index) => (
+                                    <div
+                                        key={step.id || index}
+                                        className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 shadow-sm overflow-hidden"
+                                    >
+                                        <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100">
+                                            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[#6366F1] text-white text-xs font-bold">
+                                                {index + 1}
                                             </div>
-                                            <div className="aspect-video bg-slate-100">
-                                                <img
-                                                    src={`${API_BASE_URL}/images/${step.imageKey}`}
-                                                    alt={`Step ${index + 1}`}
-                                                    className="w-full h-full object-cover"
-                                                    loading="lazy"
-                                                />
-                                            </div>
+                                            <span className="text-sm font-medium text-slate-800 truncate flex-1">
+                                                {generateStepDescription(step.domSelector)}
+                                            </span>
                                         </div>
-                                    ))}
-                                    <div ref={stepsEndRef} />
-                                </>
+                                        <div className="aspect-video bg-slate-100">
+                                            <img
+                                                src={step.previewUrl || `${API_BASE_URL}/images/${step.imageKey}`}
+                                                alt={`Step ${index + 1}`}
+                                                className="w-full h-full object-cover"
+                                                loading="lazy"
+                                            />
+                                        </div>
+                                    </div>
+                                ))
                             )}
                         </div>
                     </>
                 ) : (
-                    <div className="flex-1 flex items-start justify-center pt-4">
+                    <div className="flex-1 flex flex-col items-center justify-center">
+                        <img src={Logo} alt="Stepps.ai Logo" className="w-20 h-20 object-contain shadow-lg rounded-xl mb-6" />
+                        <h1 className="text-[24px] font-bold text-slate-900 leading-tight text-center max-w-[280px] mb-8">
+                            Capture any workflow <span className="text-[#6366F1]">in seconds</span>.
+                        </h1>
                         <Button
                             variant="primary"
                             className="w-full max-w-[240px] shadow-xl shadow-indigo-500/20 bg-[#6366F1] hover:bg-[#5558DD] text-white rounded-xl py-3 text-lg font-medium"

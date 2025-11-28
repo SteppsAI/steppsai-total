@@ -127,7 +127,28 @@ async function handleStepAction(payload: any, tabId?: number) {
         const stepId = crypto.randomUUID();
         const imageKey = `screenshots/${guideId}/${userId}/${stepId}.webp`;
 
-        // Upload via tRPC
+        // Create step object with previewUrl for immediate display
+        const { steps: currentSteps = [] } = await chrome.storage.local.get('steps');
+
+        const newStep = {
+            id: stepId,
+            orderIndex: currentSteps.length,
+            imageKey,
+            pageUrl: payload.url || '',
+            domSelector: payload.selector || '',
+            previewUrl: webpDataUrl
+        };
+
+        // 1. Save immediately to local storage
+        try {
+            await chrome.storage.local.set({ steps: [...currentSteps, newStep] });
+            console.log('Recorded Step (Local):', newStep);
+        } catch (storageError) {
+            console.warn('Failed to save local step (likely quota exceeded), proceeding with upload only:', storageError);
+            // If local save fails, we still proceed to upload, but UI won't update immediately
+        }
+
+        // 2. Upload via tRPC
         const uploadResult = await trpc.images.upload.mutate({
             key: imageKey,
             dataUrl: webpDataUrl
@@ -138,22 +159,15 @@ async function handleStepAction(payload: any, tabId?: number) {
             return;
         }
 
-        // Store metadata locally AFTER upload confirmed
-        const { steps = [] } = await chrome.storage.local.get('steps');
+        // 3. Update metadata locally AFTER upload confirmed (remove previewUrl to save space)
+        const { steps: updatedSteps } = await chrome.storage.local.get('steps');
+        const stepIndex = updatedSteps.findIndex((s: any) => s.id === stepId);
 
-        // Step format with domSelector for AI processing
-        const newStep = {
-            id: stepId,
-            orderIndex: steps.length,
-            imageKey,
-            pageUrl: payload.url || '',
-            domSelector: payload.selector || '',
-        };
-
-        const updatedSteps = [...steps, newStep];
-        await chrome.storage.local.set({ steps: updatedSteps });
-
-        console.log('Recorded Step:', newStep);
+        if (stepIndex !== -1) {
+            delete updatedSteps[stepIndex].previewUrl;
+            await chrome.storage.local.set({ steps: updatedSteps });
+            console.log('Step synced to server:', stepId);
+        }
 
     } catch (error) {
         console.error('Failed to capture step:', error);

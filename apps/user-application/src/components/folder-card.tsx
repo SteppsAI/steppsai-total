@@ -13,9 +13,11 @@ interface FolderCardProps {
         name: string;
         guideCount: number;
     };
+    onRename?: (folderId: string, currentName: string) => void;
+    onDelete?: (folderId: string, folderName: string) => void;
 }
 
-export function FolderCard({ folder }: FolderCardProps) {
+export function FolderCard({ folder, onRename, onDelete }: FolderCardProps) {
     return (
         <div className="group relative flex flex-col justify-between p-4 h-28 rounded-lg border border-border bg-card hover:border-primary/50 hover:shadow-sm transition-all cursor-pointer">
             <div className="flex justify-between items-start">
@@ -33,8 +35,22 @@ export function FolderCard({ folder }: FolderCardProps) {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Rename</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
+                        <DropdownMenuItem
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onRename?.(folder.id, folder.name);
+                            }}
+                            className="cursor-pointer"
+                        >
+                            Rename
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            className="text-destructive cursor-pointer"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete?.(folder.id, folder.name);
+                            }}
+                        >
                             Delete
                         </DropdownMenuItem>
                     </DropdownMenuContent>

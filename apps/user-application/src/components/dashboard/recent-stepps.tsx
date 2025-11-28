@@ -14,13 +14,15 @@ import { useSidebar } from "@/components/ui/sidebar";
 interface RecentSteppsProps {
   isLoading?: boolean;
   stepps?: Guide[];
+  onDelete?: (guide: Guide) => void;
+  onMove?: (guide: Guide) => void;
 }
 
 // TODO: Future integration with tRPC
 // import { trpc } from "@/lib/trpc";
 // const { data: recentStepps, isLoading } = trpc.guide.getRecent.useQuery({ limit: 4 });
 
-export function RecentStepps({ isLoading, stepps = [] }: RecentSteppsProps) {
+export function RecentStepps({ isLoading, stepps = [], onDelete, onMove }: RecentSteppsProps) {
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
   const [shareGuide, setShareGuide] = useState<Guide | null>(null);
   const { isMobile } = useSidebar();
@@ -97,7 +99,8 @@ export function RecentStepps({ isLoading, stepps = [] }: RecentSteppsProps) {
                 viewUrl={`/app/stepps/${stepp.id}`}
                 onEdit={() => navigate({ to: `/app/editor/${stepp.id}` })}
                 onShare={() => setShareGuide(stepp)}
-                onDelete={() => toast.info("Delete functionality coming soon")}
+                onDelete={onDelete ? () => onDelete(stepp) : undefined}
+                onMove={onMove ? () => onMove(stepp) : undefined}
                 onExport={() => toast.info("Export functionality coming soon")}
               />
             </div>
@@ -112,13 +115,13 @@ export function RecentStepps({ isLoading, stepps = [] }: RecentSteppsProps) {
         </div>
       )}
       <MobileCreationDialog open={isMobileDialogOpen} onOpenChange={setIsMobileDialogOpen} />
-      
+
       {shareGuide && (
-        <ShareDialog 
-            open={!!shareGuide} 
-            onOpenChange={(open) => !open && setShareGuide(null)}
-            guideTitle={shareGuide.title || "Untitled Stepp"}
-            guideId={shareGuide.id}
+        <ShareDialog
+          open={!!shareGuide}
+          onOpenChange={(open) => !open && setShareGuide(null)}
+          guideTitle={shareGuide.title || "Untitled Stepp"}
+          guideId={shareGuide.id}
         />
       )}
     </section>

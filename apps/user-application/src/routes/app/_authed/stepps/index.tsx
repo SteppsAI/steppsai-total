@@ -34,6 +34,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical, FileText, Share2, Pencil, Trash, FolderInput } from "lucide-react";
 import { ShareDialog } from "@/components/share-dialog";
+import { DeleteFolderDialog } from "@/components/delete-folder-dialog";
+import { RenameFolderDialog } from "@/components/rename-folder-dialog";
+import { DeleteSteppDialog } from "@/components/delete-stepp-dialog";
+import { MoveSteppDialog } from "@/components/move-stepp-dialog";
 
 export const Route = createFileRoute("/app/_authed/stepps/")({
     component: SteppsPage,
@@ -49,6 +53,15 @@ function SteppsPage() {
     // Share Dialog State
     const [shareDialogOpen, setShareDialogOpen] = useState(false);
     const [selectedGuide, setSelectedGuide] = useState<{ id: string; title: string } | null>(null);
+
+    // Dialog States
+    const [deleteFolderOpen, setDeleteFolderOpen] = useState(false);
+    const [renameFolderOpen, setRenameFolderOpen] = useState(false);
+    const [deleteSteppOpen, setDeleteSteppOpen] = useState(false);
+    const [moveSteppOpen, setMoveSteppOpen] = useState(false);
+
+    const [selectedFolder, setSelectedFolder] = useState<{ id: string; name: string } | null>(null);
+    const [selectedSteppForAction, setSelectedSteppForAction] = useState<GuideWithFolder | null>(null);
 
     // Backend integration hooks
     const createFolderMutation = useCreateFolder();
@@ -81,6 +94,75 @@ function SteppsPage() {
         } catch (error) {
             console.error("Error creating folder:", error);
             toast.error("Failed to create folder");
+        }
+    };
+
+    const handleDeleteFolder = (folderId: string, folderName: string) => {
+        setSelectedFolder({ id: folderId, name: folderName });
+        setDeleteFolderOpen(true);
+    };
+
+    const confirmDeleteFolder = () => {
+        if (selectedFolder) {
+            // Optimistic update
+            setFolders((prev) => prev.filter((f) => f.id !== selectedFolder.id));
+            setDeleteFolderOpen(false);
+            toast.success(`Folder "${selectedFolder.name}" deleted`);
+            setSelectedFolder(null);
+        }
+    };
+
+    const handleRenameFolder = (folderId: string, currentName: string) => {
+        setSelectedFolder({ id: folderId, name: currentName });
+        setRenameFolderOpen(true);
+    };
+
+    const confirmRenameFolder = (newName: string) => {
+        if (selectedFolder) {
+            // Optimistic update
+            setFolders((prev) =>
+                prev.map((f) => (f.id === selectedFolder.id ? { ...f, name: newName } : f))
+            );
+            setRenameFolderOpen(false);
+            toast.success(`Folder renamed to "${newName}"`);
+            setSelectedFolder(null);
+        }
+    };
+
+    const handleDeleteStepp = (guide: GuideWithFolder) => {
+        setSelectedSteppForAction(guide);
+        setDeleteSteppOpen(true);
+    };
+
+    const confirmDeleteStepp = () => {
+        if (selectedSteppForAction) {
+            // Optimistic update
+            setGuides((prev) => prev.filter((g) => g.id !== selectedSteppForAction.id));
+            setDeleteSteppOpen(false);
+            toast.success(`Stepp "${selectedSteppForAction.title}" deleted`);
+            setSelectedSteppForAction(null);
+        }
+    };
+
+    const handleMoveStepp = (guide: GuideWithFolder) => {
+        setSelectedSteppForAction(guide);
+        setMoveSteppOpen(true);
+    };
+
+    const confirmMoveStepp = (folderId: string | null) => {
+        if (selectedSteppForAction) {
+            // Optimistic update
+            const folderName = folderId ? folders.find(f => f.id === folderId)?.name : undefined;
+            setGuides((prev) =>
+                prev.map((g) =>
+                    g.id === selectedSteppForAction.id
+                        ? { ...g, folder_id: folderId, folderName: folderName }
+                        : g
+                )
+            );
+            setMoveSteppOpen(false);
+            toast.success(`Stepp moved to ${folderName || "Root"}`);
+            setSelectedSteppForAction(null);
         }
     };
 
@@ -212,6 +294,8 @@ function SteppsPage() {
                                         name: folder.name,
                                         guideCount: folder.guide_count || 0
                                     }}
+                                    onRename={handleRenameFolder}
+                                    onDelete={handleDeleteFolder}
                                 />
                             ))}
                             {folders.length === 0 && (
@@ -316,32 +400,41 @@ function SteppsPage() {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        navigate({ to: "/app/editor/$guideId", params: { guideId: guide.id } });
-                                                    }}>
+                                                    <DropdownMenuItem
+                                                        className="cursor-pointer"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            navigate({ to: "/app/editor/$guideId", params: { guideId: guide.id } });
+                                                        }}
+                                                    >
                                                         <Pencil className="mr-2 size-4" />
                                                         Edit
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleShare(guide);
-                                                    }}>
+                                                    <DropdownMenuItem
+                                                        className="cursor-pointer"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleShare(guide);
+                                                        }}
+                                                    >
                                                         <Share2 className="mr-2 size-4" />
                                                         Share
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        console.log("Move", guide.id);
-                                                    }}>
+                                                    <DropdownMenuItem
+                                                        className="cursor-pointer"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleMoveStepp(guide);
+                                                        }}
+                                                    >
                                                         <FolderInput className="mr-2 size-4" />
                                                         Move to folder
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
-                                                        className="text-destructive"
+                                                        className="text-destructive cursor-pointer"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            console.log("Delete", guide.id);
+                                                            handleDeleteStepp(guide);
                                                         }}
                                                     >
                                                         <Trash className="mr-2 size-4" />
@@ -371,6 +464,41 @@ function SteppsPage() {
                     guideTitle={selectedGuide.title}
                     guideId={selectedGuide.id}
                 />
+            )}
+
+            {selectedFolder && (
+                <>
+                    <DeleteFolderDialog
+                        open={deleteFolderOpen}
+                        onOpenChange={setDeleteFolderOpen}
+                        onConfirm={confirmDeleteFolder}
+                        folderName={selectedFolder.name}
+                    />
+                    <RenameFolderDialog
+                        open={renameFolderOpen}
+                        onOpenChange={setRenameFolderOpen}
+                        onConfirm={confirmRenameFolder}
+                        currentName={selectedFolder.name}
+                    />
+                </>
+            )}
+
+            {selectedSteppForAction && (
+                <>
+                    <DeleteSteppDialog
+                        open={deleteSteppOpen}
+                        onOpenChange={setDeleteSteppOpen}
+                        onConfirm={confirmDeleteStepp}
+                        steppTitle={selectedSteppForAction.title || "Untitled"}
+                    />
+                    <MoveSteppDialog
+                        open={moveSteppOpen}
+                        onOpenChange={setMoveSteppOpen}
+                        onConfirm={confirmMoveStepp}
+                        folders={folders}
+                        currentFolderId={selectedSteppForAction.folder_id}
+                    />
+                </>
             )}
         </div >
     );

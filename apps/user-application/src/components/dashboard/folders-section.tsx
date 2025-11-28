@@ -12,13 +12,15 @@ interface FolderWithCount extends Folder {
 interface FoldersSectionProps {
   isLoading?: boolean;
   folders?: FolderWithCount[];
+  onRename?: (folderId: string, currentName: string) => void;
+  onDelete?: (folderId: string, folderName: string) => void;
 }
 
 // TODO: Future integration with tRPC
 // import { trpc } from "@/lib/trpc";
 // const { data: folders, isLoading } = trpc.folder.getAll.useQuery();
 
-export function FoldersSection({ isLoading, folders = [] }: FoldersSectionProps) {
+export function FoldersSection({ isLoading, folders = [], onRename, onDelete }: FoldersSectionProps) {
   // Mock data commented out
   /*
   const MOCK_FOLDERS: FolderRecord[] = [
@@ -68,6 +70,8 @@ export function FoldersSection({ isLoading, folders = [] }: FoldersSectionProps)
                   name: folder.name,
                   guideCount: folder.guide_count || 0,
                 }}
+                onRename={onRename}
+                onDelete={onDelete}
               />
             </div>
           ))}

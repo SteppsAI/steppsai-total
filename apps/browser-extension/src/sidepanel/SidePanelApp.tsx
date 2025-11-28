@@ -113,7 +113,7 @@ function SidePanelApp() {
                                 <>
                                     {steps.map((step, index) => (
                                         <div
-                                            key={step.stepId || index}
+                                            key={step.id || index}
                                             className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 shadow-sm overflow-hidden"
                                         >
                                             <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100">

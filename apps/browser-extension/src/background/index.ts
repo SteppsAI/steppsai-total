@@ -141,13 +141,13 @@ async function handleStepAction(payload: any, tabId?: number) {
         // Store metadata locally AFTER upload confirmed
         const { steps = [] } = await chrome.storage.local.get('steps');
 
+        // Step format with domSelector for AI processing
         const newStep = {
-            stepId,
+            id: stepId,
             orderIndex: steps.length,
+            imageKey,
             pageUrl: payload.url || '',
             domSelector: payload.selector || '',
-            imageKey,
-            timestamp: Date.now()
         };
 
         const updatedSteps = [...steps, newStep];

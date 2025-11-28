@@ -1,7 +1,8 @@
 import { getDb } from "@/db/database";
-import { guides, steps } from "@/drizzle-out/schema";
+import { guides } from "@/drizzle-out/schema";
 import { and, desc, eq, sql } from "drizzle-orm";
-import { CreateGuideSchemaType, GuidesSchemaType } from "@/zod/guides";
+import { CreateGuideSchemaType, Guide } from "@/zod/guides";
+import { Step } from "@/zod/steps";
 import { v4 as uuidv4 } from "uuid";
 
 export async function createGuide(data: CreateGuideSchemaType): Promise<string> {
@@ -22,7 +23,7 @@ export async function createGuide(data: CreateGuideSchemaType): Promise<string> 
 	return id;
 }
 
-export async function getGuide(guideId: string): Promise<GuidesSchemaType | null> {
+export async function getGuide(guideId: string): Promise<Guide | null> {
 	const db = getDb();
 	
 	const result = await db
@@ -32,10 +33,15 @@ export async function getGuide(guideId: string): Promise<GuidesSchemaType | null
 		.limit(1);
 	
 	if (!result.length) return null;
-	return result[0] as GuidesSchemaType;
+	
+	const guide = result[0];
+	return {
+		...guide,
+		steps: parseSteps(guide.steps),
+	} as Guide;
 }
 
-export async function getUserGuides(userId: string, folderId?: string): Promise<GuidesSchemaType[]> {
+export async function getUserGuides(userId: string, folderId?: string): Promise<Guide[]> {
 	const db = getDb();
 	
 	const conditions = [eq(guides.userId, userId)];
@@ -49,16 +55,37 @@ export async function getUserGuides(userId: string, folderId?: string): Promise<
 		.where(and(...conditions))
 		.orderBy(desc(guides.updatedAt));
 	
-	return result as GuidesSchemaType[];
+	return result.map(guide => ({
+		...guide,
+		steps: parseSteps(guide.steps),
+	})) as Guide[];
 }
 
-export async function updateGuide(guideId: string, data: Partial<GuidesSchemaType>): Promise<void> {
+export async function updateGuide(guideId: string, data: Partial<Guide>): Promise<void> {
+	const db = getDb();
+	
+	// If steps are included, stringify them
+	const updateData: any = { ...data };
+	if (data.steps) {
+		updateData.steps = JSON.stringify(data.steps);
+	}
+	
+	await db
+		.update(guides)
+		.set({
+			...updateData,
+			updatedAt: sql`now()`,
+		})
+		.where(eq(guides.id, guideId));
+}
+
+export async function updateGuideSteps(guideId: string, steps: Step[]): Promise<void> {
 	const db = getDb();
 	
 	await db
 		.update(guides)
 		.set({
-			...data,
+			steps: JSON.stringify(steps),
 			updatedAt: sql`now()`,
 		})
 		.where(eq(guides.id, guideId));
@@ -70,18 +97,21 @@ export async function deleteGuide(guideId: string): Promise<void> {
 	await db.delete(guides).where(eq(guides.id, guideId));
 }
 
-export async function getGuideWithSteps(guideId: string) {
-	const db = getDb();
-	
-	const result = await db
-		.select({
-			guide: guides,
-			step: steps,
-		})
-		.from(guides)
-		.leftJoin(steps, eq(steps.guideId, guides.id))
-		.where(eq(guides.id, guideId))
-		.orderBy(steps.orderIndex);
-	
-	return result;
+// Alias for backwards compatibility
+export async function getGuideWithSteps(guideId: string): Promise<Guide | null> {
+	return getGuide(guideId);
+}
+
+// Helper to parse steps JSONB
+function parseSteps(steps: unknown): Step[] {
+	if (!steps) return [];
+	if (typeof steps === 'string') {
+		try {
+			return JSON.parse(steps);
+		} catch {
+			return [];
+		}
+	}
+	if (Array.isArray(steps)) return steps;
+	return [];
 }

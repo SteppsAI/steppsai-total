@@ -43,8 +43,6 @@ document.addEventListener('mousedown', (event) => {
         type: 'STEP_ACTION',
         payload: {
             selector,
-            actionType: 'click',
-            timestamp: Date.now(),
             url: window.location.href
         }
     }).catch(() => {

@@ -1,15 +1,6 @@
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc-instance";
-
-// Step schema for complete mutation
-const stepSchema = z.object({
-    stepId: z.string(),
-    orderIndex: z.number(),
-    pageUrl: z.string(),
-    domSelector: z.string(),
-    imageKey: z.string(),
-    timestamp: z.number(),
-});
+import { stepFromExtensionSchema } from "@repo/data-ops/zod-schema";
 
 export const recordingRouter = router({
     /**
@@ -44,7 +35,7 @@ export const recordingRouter = router({
             z.object({
                 guideId: z.string(),
                 title: z.string(),
-                steps: z.array(stepSchema),
+                steps: z.array(stepFromExtensionSchema),
             })
         )
         .mutation(async ({ ctx, input }) => {

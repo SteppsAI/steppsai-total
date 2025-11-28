@@ -1,49 +1,36 @@
-import { createStepsBatch } from "@repo/data-ops/queries/steps";
-import { updateGuide, deleteGuide } from "@repo/data-ops/queries/guides";
-import { deleteStepsByGuide } from "@repo/data-ops/queries/steps";
-import { StepsInsertMessageType } from "@repo/data-ops/zod-schema/queue";
+import { updateGuide, updateGuideSteps, deleteGuide } from "@repo/data-ops/queries";
+import type { StepsInsertMessage, Step } from "@repo/data-ops/zod-schema";
+import { generateStepDescription } from "../helpers/generateStepDescription";
 
-export async function handleStepsInsert(env: Env, event: StepsInsertMessageType) {
-    const { guideId, steps } = event;
+export async function handleStepsInsert(env: Env, event: StepsInsertMessage) {
+    const { guideId, steps: rawSteps } = event;
 
-    console.log(`Processing ${steps.length} steps for guide ${guideId}`);
-    console.log(`Steps data:`, JSON.stringify(steps, null, 2));
+    console.log(`Processing ${rawSteps.length} steps for guide ${guideId}`);
 
     try {
-        // Insert steps into DB
-        if (steps.length > 0) {
-            const stepsToInsert = steps.map((step, index) => ({
-                guideId: guideId,
-                orderIndex: index,
-                pageUrl: step.pageUrl || '',
-                domSelector: step.domSelector || '',
-                screenshotUrl: step.imageKey,
-                isExcluded: false,
-            }));
-            
-            console.log(`Inserting steps:`, JSON.stringify(stepsToInsert, null, 2));
-            
-            await createStepsBatch(stepsToInsert);
-        }
+        // Transform extension steps to full steps with readable captions
+        const steps: Step[] = rawSteps.map((step) => ({
+            id: step.id,
+            orderIndex: step.orderIndex,
+            imageKey: step.imageKey,
+            pageUrl: step.pageUrl,
+            domSelector: step.domSelector,
+            caption: generateStepDescription(step.domSelector),
+            isExcluded: false,
+        }));
+
+        // Update guide with steps JSONB
+        await updateGuideSteps(guideId, steps);
 
         // Update guide status to draft
         await updateGuide(guideId, { status: 'draft' });
 
         console.log(`Successfully inserted ${steps.length} steps for guide ${guideId}`);
     } catch (error) {
-        // BETTER ERROR LOGGING
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        const errorStack = error instanceof Error ? error.stack : '';
-        const errorName = error instanceof Error ? error.name : 'Unknown';
+        console.error(`Steps insert failed for guide ${guideId}: ${errorMessage}`);
         
-        console.error(`=== STEPS INSERT FAILED ===`);
-        console.error(`Guide ID: ${guideId}`);
-        console.error(`Error Name: ${errorName}`);
-        console.error(`Error Message: ${errorMessage}`);
-        console.error(`Error Stack: ${errorStack}`);
-        console.error(`Full Error:`, error);
-        
-        // FALLBACK: Clean up zombie data
+        // Cleanup on failure
         await cleanupFailedGuide(env, guideId);
         
         throw error;
@@ -54,9 +41,10 @@ async function cleanupFailedGuide(env: Env, guideId: string) {
     console.log(`Cleaning up failed guide: ${guideId}`);
     
     try {
-        await deleteStepsByGuide(guideId);
+        // Delete guide (steps are embedded, so no separate cleanup needed)
         await deleteGuide(guideId);
         
+        // Delete images from R2
         const prefix = `screenshots/${guideId}/`;
         const listed = await env.BUCKET.list({ prefix });
         

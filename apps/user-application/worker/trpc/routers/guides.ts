@@ -3,30 +3,24 @@ import { router, publicProcedure } from "../trpc-instance";
 import {
     createGuide,
     deleteGuide,
-    getGuideWithSteps,
+    getGuide,
     getUserGuides,
     updateGuide,
 } from "@repo/data-ops/queries";
-import {
-    createGuideSchema,
-    // UpdateGuideSchema,
-} from "@repo/data-ops/zod-schema";
+import { createGuideSchema } from "@repo/data-ops/zod-schema";
 
 export const guidesRouter = router({
     getAll: publicProcedure.query(async () => {
         // TODO: Get userId from context (auth)
-        const userId = "user_123"; // Mock user ID for now
+        const userId = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366"; // Hardcoded for now
         return await getUserGuides(userId);
     }),
 
     getById: publicProcedure
         .input(z.object({ id: z.string() }))
         .query(async ({ input }) => {
-            const rows = await getGuideWithSteps(input.id);
-            if (!rows.length) return null;
-            const guide = rows[0].guide;
-            const steps = rows.map((r: any) => r.step).filter((s: any) => s !== null);
-            return { ...guide, steps };
+            // Guide now includes steps as JSONB
+            return await getGuide(input.id);
         }),
 
     create: publicProcedure

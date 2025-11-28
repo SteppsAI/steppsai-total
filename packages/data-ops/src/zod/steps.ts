@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+// Overlay schemas for step annotations
 export const overlaySchema = z.discriminatedUnion("type", [
 	z.object({
 		type: z.literal("arrow"),
@@ -22,23 +23,40 @@ export const overlaySchema = z.discriminatedUnion("type", [
 	}),
 ]);
 
-export type OverlaySchemaType = z.infer<typeof overlaySchema>;
+export type Overlay = z.infer<typeof overlaySchema>;
 
-export const stepsSchema = z.object({
+/**
+ * Step - embedded in guide.steps JSONB
+ */
+export const stepSchema = z.object({
 	id: z.string().uuid(),
-	guideId: z.string().uuid(),
 	orderIndex: z.number().int(),
-	screenshotUrl: z.string().optional(), // R2 key, not a full URL
-	pageUrl: z.string().optional(), // Can be any URL format
-	domSelector: z.string().optional(),
-	aiCaption: z.string().optional(),
-	finalCaption: z.string().optional(),
+	imageKey: z.string(),                    // R2 path: screenshots/{guideId}/{userId}/{stepId}.webp
+	pageUrl: z.string(),
+	domSelector: z.string(),                 // CSS selector for AI processing
+	caption: z.string(),                     // "Step 1", user can edit
+	aiCaption: z.string().optional(),        // Future: AI-generated description
 	overlays: z.array(overlaySchema).optional(),
-	isExcluded: z.boolean().default(false),
+	isExcluded: z.boolean().optional(),
 });
 
-export const createStepSchema = stepsSchema.omit({ id: true });
-export const updateStepSchema = stepsSchema.partial();
+export type Step = z.infer<typeof stepSchema>;
 
-export type StepsSchemaType = z.infer<typeof stepsSchema>;
-export type CreateStepSchemaType = z.infer<typeof createStepSchema>;
+/**
+ * Step data coming from extension
+ */
+export const stepFromExtensionSchema = z.object({
+	id: z.string().uuid(),
+	orderIndex: z.number().int(),
+	imageKey: z.string(),
+	pageUrl: z.string(),
+	domSelector: z.string(),
+});
+
+export type StepFromExtension = z.infer<typeof stepFromExtensionSchema>;
+
+/**
+ * For updating a step
+ */
+export const updateStepSchema = stepSchema.partial().omit({ id: true });
+export type UpdateStep = z.infer<typeof updateStepSchema>;

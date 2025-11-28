@@ -1,11 +1,9 @@
 export type RecordingState = 'idle' | 'recording' | 'paused';
 
 export interface Step {
-    stepId: string;
+    id: string;
     orderIndex: number;
+    imageKey: string;
     pageUrl: string;
     domSelector: string;
-    imageKey: string;
-    timestamp: number;
 }
-

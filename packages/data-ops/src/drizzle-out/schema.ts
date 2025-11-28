@@ -53,21 +53,9 @@ export const guides = pgTable("guides", {
 	slug: text("slug").notNull().unique(),
 	status: text("status").default('draft'), // 'draft' | 'recording' | 'processing' | 'published'
 	visibility: text("visibility"),
+	steps: jsonb("steps").default([]), // Step[] - embedded steps as JSONB
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
-});
-
-export const steps = pgTable("steps", {
-	id: uuid("id").defaultRandom().primaryKey().notNull(),
-	guideId: uuid("guide_id").notNull(),
-	orderIndex: integer("order_index").notNull(),
-	screenshotUrl: text("screenshot_url"),
-	pageUrl: text("page_url"),
-	domSelector: text("dom_selector"),
-	aiCaption: text("ai_caption"),
-	finalCaption: text("final_caption"),
-	overlays: jsonb("overlays"),
-	isExcluded: boolean("is_excluded").default(false),
 });
 
 export const exports = pgTable("exports", {

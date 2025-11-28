@@ -1,26 +1,7 @@
 import { z } from 'zod';
+import { stepSchema, stepFromExtensionSchema, type Step } from './steps';
 
-export const stepSchema = z.object({
-	stepId: z.string().uuid(),
-	orderIndex: z.number().int().min(0),
-	pageUrl: z.string(), // Not .url() - can be any string
-	domSelector: z.string(),
-	imageKey: z.string(),
-	timestamp: z.number(),
-});
-
-export const ingestGuideSchema = z.object({
-	guide: z.object({
-		title: z.string(),
-		description: z.string().optional(),
-	}),
-	steps: z.array(stepSchema),
-});
-
-export type Step = z.infer<typeof stepSchema>;
-export type IngestGuide = z.infer<typeof ingestGuideSchema>;
-
-// Types expected by queries/guides.ts
+// Guide schema
 export const guidesSchema = z.object({
 	id: z.string().uuid(),
 	userId: z.string().uuid(),
@@ -30,6 +11,7 @@ export const guidesSchema = z.object({
 	slug: z.string(),
 	status: z.string().nullable().optional(),
 	visibility: z.string().nullable().optional(),
+	steps: z.array(stepSchema).optional(),
 	createdAt: z.string().nullable().optional(),
 	updatedAt: z.string().nullable().optional(),
 });
@@ -44,5 +26,16 @@ export const createGuideSchema = z.object({
 	visibility: z.string().optional(),
 });
 
-export type GuidesSchemaType = z.infer<typeof guidesSchema>;
-export type CreateGuideSchemaType = z.infer<typeof createGuideSchema>;
+// For completing a recording (extension sends steps)
+export const completeRecordingSchema = z.object({
+	title: z.string(),
+	steps: z.array(stepFromExtensionSchema),
+});
+
+export type Guide = z.infer<typeof guidesSchema>;
+export type CreateGuide = z.infer<typeof createGuideSchema>;
+export type CompleteRecording = z.infer<typeof completeRecordingSchema>;
+
+// Re-export for backwards compatibility
+export type GuidesSchemaType = Guide;
+export type CreateGuideSchemaType = CreateGuide;

@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { users, subscriptions, teamMembers, folders, guides, steps, exports } from "./schema";
+import { users, subscriptions, teamMembers, folders, guides, exports } from "./schema";
 
 export const usersRelations = relations(users, ({ many }) => ({
 	subscriptions: many(subscriptions),
@@ -46,15 +46,7 @@ export const guidesRelations = relations(guides, ({ one, many }) => ({
 		fields: [guides.folderId],
 		references: [folders.id],
 	}),
-	steps: many(steps),
 	exports: many(exports),
-}));
-
-export const stepsRelations = relations(steps, ({ one }) => ({
-	guide: one(guides, {
-		fields: [steps.guideId],
-		references: [guides.id],
-	}),
 }));
 
 export const exportsRelations = relations(exports, ({ one }) => ({

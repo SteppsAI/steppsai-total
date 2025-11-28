@@ -1,25 +1,19 @@
 /**
  * Generates a human-readable description from a DOM selector
- * @param domSelector - CSS selector string (e.g., "button#submit", "input.search-box")
- * @returns Human-readable action text (e.g., "Click on Submit button")
+ * Only uses element type - ignores IDs and classes (often auto-generated garbage)
+ * @param domSelector - CSS selector string
+ * @returns Human-readable action text (e.g., "Click on text area")
  */
 export function generateStepDescription(domSelector: string): string {
     if (!domSelector) return "Click here";
 
-    // Extract meaningful parts from selector
     const parts = domSelector.split(" > ");
     const lastPart = parts[parts.length - 1] || domSelector;
 
-    // Parse the last element
+    // Only extract tag name - ignore IDs and classes
     const tagMatch = lastPart.match(/^([a-z0-9-]+)/i);
-    const idMatch = lastPart.match(/#([a-zA-Z0-9_-]+)/);
-    const classMatch = lastPart.match(/\.([a-zA-Z0-9_-]+)/);
-
     const tag = tagMatch?.[1]?.toLowerCase() || "element";
-    const id = idMatch?.[1];
-    const className = classMatch?.[1];
 
-    // Generate description based on element type
     const elementDescriptions: Record<string, string> = {
         button: "button",
         input: "input field",
@@ -52,26 +46,12 @@ export function generateStepDescription(domSelector: string): string {
         audio: "audio",
         canvas: "canvas",
         svg: "icon",
+        path: "icon",
+        main: "main content",
+        article: "article",
+        section: "section",
+        aside: "sidebar",
     };
 
-    const elementType = elementDescriptions[tag] || tag;
-
-    // Build description
-    if (id) {
-        const readableId = id
-            .replace(/[-_]/g, " ")
-            .replace(/([a-z])([A-Z])/g, "$1 $2")
-            .toLowerCase();
-        return `Click on ${readableId} ${elementType}`;
-    }
-
-    if (className) {
-        const readableClass = className
-            .replace(/[-_]/g, " ")
-            .replace(/([a-z])([A-Z])/g, "$1 $2")
-            .toLowerCase();
-        return `Click on ${readableClass} ${elementType}`;
-    }
-
-    return `Click on ${elementType}`;
+    return `Click on ${elementDescriptions[tag] || tag}`;
 }

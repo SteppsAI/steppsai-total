@@ -1,6 +1,5 @@
 import { Hono } from 'hono';
-import { createGuide, deleteGuide, updateGuide } from '@repo/data-ops/queries/guides';
-import { deleteStepsByGuide } from '@repo/data-ops/queries/steps';
+import { createGuide, deleteGuide, updateGuide } from '@repo/data-ops/queries';
 import { nanoid } from 'nanoid';
 
 export const guidesRouter = new Hono<{ Bindings: Env }>();
@@ -75,13 +74,10 @@ guidesRouter.delete('/:guideId', async (c) => {
     const guideId = c.req.param('guideId');
     
     try {
-        // 1. Delete steps first
-        await deleteStepsByGuide(guideId);
-        
-        // 2. Delete guide from DB
+        // 1. Delete guide from DB (steps are embedded as JSONB)
         await deleteGuide(guideId);
         
-        // 3. Delete all images for this guide from R2
+        // 2. Delete all images for this guide from R2
         const prefix = `screenshots/${guideId}/`;
         const listed = await c.env.BUCKET.list({ prefix });
         

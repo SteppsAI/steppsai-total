@@ -37,7 +37,7 @@ export async function convertToWebP(dataUrl: string, quality = 0.8): Promise<str
 
 /**
  * Generates a simple, readable description from a DOM selector
- * Only uses basic element types - no random class names
+ * Used for preview in sidepanel + future AI processing
  */
 export function generateStepDescription(domSelector: string): string {
     if (!domSelector) return "Click here";

@@ -47,6 +47,7 @@ function SidePanelApp() {
         if (recordingState === 'finished' && guideId) {
             const timer = setTimeout(() => {
                 chrome.tabs.create({ url: `${WEB_APP_URL}/app/editor/${guideId}` });
+                window.close();
                 setRecordingState('idle');
                 setSteps([]);
                 setGuideId(null);
@@ -131,6 +132,7 @@ function SidePanelApp() {
                             onClick={() => {
                                 if (guideId) {
                                     chrome.tabs.create({ url: `${WEB_APP_URL}/app/editor/${guideId}` });
+                                    window.close();
                                     setRecordingState('idle');
                                     setSteps([]);
                                     setGuideId(null);

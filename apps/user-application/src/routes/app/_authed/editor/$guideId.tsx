@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { EditorHeader } from "@/components/editor/editor-header";
 import { EditorToolbar } from "@/components/editor/editor-toolbar";
 import { Canvas } from "@/components/editor/canvas";
@@ -6,8 +6,9 @@ import { StepSidebar } from "@/components/editor/step-sidebar";
 import { useState, useCallback, useEffect } from "react";
 import { Annotation } from "@/components/editor/annotation-types";
 import { useStepp } from "@/hooks/use-stepps";
-import { Guide, Step } from "@/types/db"; // Or reuse internal types if db types don't match exactly
 import { ShareDialog } from "@/components/share-dialog";
+import { useSidebar } from "@/components/ui/sidebar";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/_authed/editor/$guideId")({
   component: EditorPage,
@@ -16,7 +17,16 @@ export const Route = createFileRoute("/app/_authed/editor/$guideId")({
 function EditorPage() {
   const { guideId } = Route.useParams();
   const { data: fetchedGuide, isLoading, error } = useStepp(guideId);
-  
+  const { isMobile } = useSidebar();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isMobile) {
+      toast.error("Editing is only available on desktop devices.");
+      navigate({ to: "/app" });
+    }
+  }, [isMobile, navigate]);
+
   // Local state for editor (synced with fetched data initially)
   const [guide, setGuide] = useState<any | null>(null); // Using any for now to avoid strict type mismatch with mock data structure vs DB
   const [title, setTitle] = useState("Untitled Stepps");
@@ -141,8 +151,8 @@ function EditorPage() {
         />
       </div>
 
-      <ShareDialog 
-        open={isShareOpen} 
+      <ShareDialog
+        open={isShareOpen}
         onOpenChange={setIsShareOpen}
         guideTitle={title}
         guideId={guideId}

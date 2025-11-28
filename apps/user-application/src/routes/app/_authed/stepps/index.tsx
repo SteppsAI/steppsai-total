@@ -32,7 +32,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, FileText, Share2, Pencil, Trash, FolderInput } from "lucide-react";
+import { MoreVertical, FileText, Share2, Pencil, Trash, FolderInput, Eye, Lock } from "lucide-react";
 import { ShareDialog } from "@/components/share-dialog";
 import { DeleteFolderDialog } from "@/components/delete-folder-dialog";
 import { RenameFolderDialog } from "@/components/rename-folder-dialog";
@@ -176,6 +176,21 @@ function SteppsPage() {
             toast.success(`Stepp moved to ${folderName || "Root"}`);
             setSelectedSteppForAction(null);
         }
+    };
+
+    const handleVisibilityChange = (guide: GuideWithFolder, visibility: 'public' | 'private') => {
+        // TODO: Backend integration for visibility
+        // await updateGuideMutation.mutateAsync({ id: guide.id, visibility });
+
+        // Optimistic update
+        setGuides((prev) =>
+            prev.map((g) =>
+                g.id === guide.id
+                    ? { ...g, visibility }
+                    : g
+            )
+        );
+        toast.success(`Stepp is now ${visibility}`);
     };
 
     const handleShare = (guide: GuideWithFolder) => {
@@ -404,7 +419,7 @@ function SteppsPage() {
                                                 <DropdownMenuTrigger asChild>
                                                     <Button
                                                         variant="ghost"
-                                                        className="size-8 p-0"
+                                                        className="size-8 p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                                                         onClick={(e) => e.stopPropagation()}
                                                     >
                                                         <span className="sr-only">Open menu</span>
@@ -421,6 +436,26 @@ function SteppsPage() {
                                                     >
                                                         <Pencil className="mr-2 size-4" />
                                                         Edit
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        className="cursor-pointer"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            const newVisibility = guide.visibility === 'public' ? 'private' : 'public';
+                                                            handleVisibilityChange(guide, newVisibility);
+                                                        }}
+                                                    >
+                                                        {guide.visibility === 'public' ? (
+                                                            <>
+                                                                <Lock className="mr-2 size-4" />
+                                                                Make Private
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Eye className="mr-2 size-4" />
+                                                                Make Public
+                                                            </>
+                                                        )}
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
                                                         className="cursor-pointer"

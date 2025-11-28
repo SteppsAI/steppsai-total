@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppAuthedRouteImport } from './routes/app/_authed'
 import { Route as AppAuthedIndexRouteImport } from './routes/app/_authed/index'
 import { Route as AppAuthedSteppsRouteImport } from './routes/app/_authed/stepps'
+import { Route as AppAuthedSettingsRouteImport } from './routes/app/_authed/settings'
 import { Route as AppAuthedSteppsIndexRouteImport } from './routes/app/_authed/stepps/index'
 import { Route as AppAuthedEditorIndexRouteImport } from './routes/app/_authed/editor/index'
 import { Route as AppAuthedSteppsGuideIdRouteImport } from './routes/app/_authed/stepps/$guideId'
@@ -46,6 +47,11 @@ const AppAuthedSteppsRoute = AppAuthedSteppsRouteImport.update({
   path: '/stepps',
   getParentRoute: () => AppAuthedRoute,
 } as any)
+const AppAuthedSettingsRoute = AppAuthedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppAuthedRoute,
+} as any)
 const AppAuthedSteppsIndexRoute = AppAuthedSteppsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -70,6 +76,7 @@ const AppAuthedEditorGuideIdRoute = AppAuthedEditorGuideIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppAuthedRouteWithChildren
+  '/app/settings': typeof AppAuthedSettingsRoute
   '/app/stepps': typeof AppAuthedSteppsRouteWithChildren
   '/app/': typeof AppAuthedIndexRoute
   '/app/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppAuthedIndexRoute
+  '/app/settings': typeof AppAuthedSettingsRoute
   '/app/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
   '/app/stepps/$guideId': typeof AppAuthedSteppsGuideIdRoute
   '/app/editor': typeof AppAuthedEditorIndexRoute
@@ -90,6 +98,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/app/_authed': typeof AppAuthedRouteWithChildren
+  '/app/_authed/settings': typeof AppAuthedSettingsRoute
   '/app/_authed/stepps': typeof AppAuthedSteppsRouteWithChildren
   '/app/_authed/': typeof AppAuthedIndexRoute
   '/app/_authed/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
@@ -102,6 +111,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/app/settings'
     | '/app/stepps'
     | '/app/'
     | '/app/editor/$guideId'
@@ -112,6 +122,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/app'
+    | '/app/settings'
     | '/app/editor/$guideId'
     | '/app/stepps/$guideId'
     | '/app/editor'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/app/_authed'
+    | '/app/_authed/settings'
     | '/app/_authed/stepps'
     | '/app/_authed/'
     | '/app/_authed/editor/$guideId'
@@ -171,6 +183,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthedSteppsRouteImport
       parentRoute: typeof AppAuthedRoute
     }
+    '/app/_authed/settings': {
+      id: '/app/_authed/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppAuthedSettingsRouteImport
+      parentRoute: typeof AppAuthedRoute
+    }
     '/app/_authed/stepps/': {
       id: '/app/_authed/stepps/'
       path: '/'
@@ -217,6 +236,7 @@ const AppAuthedSteppsRouteWithChildren = AppAuthedSteppsRoute._addFileChildren(
 )
 
 interface AppAuthedRouteChildren {
+  AppAuthedSettingsRoute: typeof AppAuthedSettingsRoute
   AppAuthedSteppsRoute: typeof AppAuthedSteppsRouteWithChildren
   AppAuthedIndexRoute: typeof AppAuthedIndexRoute
   AppAuthedEditorGuideIdRoute: typeof AppAuthedEditorGuideIdRoute
@@ -224,6 +244,7 @@ interface AppAuthedRouteChildren {
 }
 
 const AppAuthedRouteChildren: AppAuthedRouteChildren = {
+  AppAuthedSettingsRoute: AppAuthedSettingsRoute,
   AppAuthedSteppsRoute: AppAuthedSteppsRouteWithChildren,
   AppAuthedIndexRoute: AppAuthedIndexRoute,
   AppAuthedEditorGuideIdRoute: AppAuthedEditorGuideIdRoute,

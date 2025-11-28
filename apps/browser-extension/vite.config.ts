@@ -5,6 +5,12 @@ import { resolve } from 'path';
 
 export default defineConfig({
     plugins: [react(), tailwindcss()],
+    resolve: {
+        alias: {
+            '@': resolve(__dirname, 'src'),
+            '@user-app': resolve(__dirname, '../user-application'),
+        },
+    },
     build: {
         outDir: 'dist',
         rollupOptions: {

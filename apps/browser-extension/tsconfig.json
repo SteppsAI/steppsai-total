@@ -29,6 +29,9 @@
         "paths": {
             "@/*": [
                 "./src/*"
+            ],
+            "@user-app/*": [
+                "../user-application/*"
             ]
         }
     }

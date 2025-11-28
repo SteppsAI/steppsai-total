@@ -1,6 +1,6 @@
 /// <reference types="chrome" />
 
-import { API_BASE_URL } from '../lib/constants';
+import { trpc } from '../lib/trpc';
 import { convertToWebP } from '../lib/helpers';
 
 // Listen for messages from SidePanel or Content Script
@@ -21,18 +21,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 async function handleStartRecording() {
     try {
-        // 1. Create guide in database FIRST
-        const response = await fetch(`${API_BASE_URL}/guides/start`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        });
+        // 1. Create guide via tRPC
+        const result = await trpc.recording.start.mutate();
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.details || 'Failed to create guide');
+        if (!result.success) {
+            throw new Error('Failed to create guide');
         }
 
-        const { guideId, userId } = await response.json();
+        const { guideId, userId } = result;
 
         // 2. Clear previous data and store new recording state
         await chrome.storage.local.remove(['steps', 'recordingStartTime', 'guideId', 'userId']);
@@ -67,20 +63,12 @@ async function handleStopRecording() {
             return { success: false, error: 'No active recording' };
         }
 
-        // Send steps to complete the guide
-        const response = await fetch(`${API_BASE_URL}/guides/${guideId}/complete`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                title: `Recording ${new Date(recordingStartTime).toLocaleString()}`,
-                steps: steps || []
-            })
+        // Complete guide via tRPC
+        await trpc.recording.complete.mutate({
+            guideId,
+            title: `Recording ${new Date(recordingStartTime).toLocaleString()}`,
+            steps: steps || []
         });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.details || 'Failed to complete guide');
-        }
 
         // Clear local storage
         await chrome.storage.local.remove(['steps', 'recordingStartTime', 'isRecording', 'guideId', 'userId']);
@@ -98,16 +86,13 @@ async function handleDiscardRecording() {
     try {
         const { guideId } = await chrome.storage.local.get('guideId');
         
-        // Delete guide from DB and R2 if guideId exists
+        // Delete guide via tRPC if guideId exists
         if (guideId) {
-            const response = await fetch(`${API_BASE_URL}/guides/${guideId}`, {
-                method: 'DELETE'
-            });
-            
-            if (!response.ok) {
-                console.error('Failed to delete guide from server:', await response.text());
-            } else {
+            try {
+                await trpc.recording.discard.mutate({ guideId });
                 console.log(`Deleted guide: ${guideId}`);
+            } catch (error) {
+                console.error('Failed to delete guide from server:', error);
             }
         }
 
@@ -142,18 +127,14 @@ async function handleStepAction(payload: any, tabId?: number) {
         const stepId = crypto.randomUUID();
         const imageKey = `screenshots/${guideId}/${userId}/${stepId}.webp`;
 
-        // Upload to data-service - WAIT for completion
-        const uploadResponse = await fetch(`${API_BASE_URL}/images/upload`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                key: imageKey,
-                dataUrl: webpDataUrl
-            })
+        // Upload via tRPC
+        const uploadResult = await trpc.images.upload.mutate({
+            key: imageKey,
+            dataUrl: webpDataUrl
         });
 
-        if (!uploadResponse.ok) {
-            console.error('Upload failed:', await uploadResponse.text());
+        if (!uploadResult.success) {
+            console.error('Upload failed');
             return;
         }
 

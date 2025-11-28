@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Guide } from "@/types/db";
 import { TEST_GUIDES } from "@/types/test-data";
-import { Annotation } from "@/components/editor/annotation-types";
 
 // Mock steps for detailed view
 const MOCK_STEPS = [
@@ -73,7 +72,7 @@ const updateStepp = async ({ id, ...data }: { id: string } & Partial<Guide>): Pr
   } as Guide;
 };
 
-const deleteStepp = async (id: string): Promise<void> => {
+const deleteStepp = async (_id: string): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
   // void
 };

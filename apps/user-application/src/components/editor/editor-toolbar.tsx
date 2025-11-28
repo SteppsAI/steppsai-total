@@ -2,13 +2,13 @@ import { Button } from "@/components/ui/button";
 import {
     ArrowRight,
     Circle,
-    Droplets,
+    EyeOff,
     MousePointer2
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-export type EditorTool = "pointer" | "arrow" | "highlight" | "blur";
+export type EditorTool = "pointer" | "arrow" | "highlight" | "hide";
 
 interface EditorToolbarProps {
     activeTool: EditorTool;
@@ -17,10 +17,10 @@ interface EditorToolbarProps {
 
 export function EditorToolbar({ activeTool, onToolChange }: EditorToolbarProps) {
     const tools = [
-        { icon: MousePointer2, label: "Pointer", id: "pointer" },
-        { icon: ArrowRight, label: "Arrow", id: "arrow" },
-        { icon: Circle, label: "Highlight", id: "highlight" },
-        { icon: Droplets, label: "Blur", id: "blur" },
+        { icon: MousePointer2, label: "Pointer", id: "pointer", shortcut: "V" },
+        { icon: ArrowRight, label: "Arrow", id: "arrow", shortcut: "A" },
+        { icon: Circle, label: "Highlight", id: "highlight", shortcut: "H" },
+        { icon: EyeOff, label: "Hide", id: "hide", shortcut: "B" },
     ];
 
     return (
@@ -37,14 +37,14 @@ export function EditorToolbar({ activeTool, onToolChange }: EditorToolbarProps) 
                                     "rounded-full w-10 h-10",
                                     activeTool === tool.id
                                         ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                                        : "text-muted-foreground hover:text-primary hover:bg-primary/10"
+                                        : "text-slate-600 hover:text-primary hover:bg-primary/15"
                                 )}
                             >
                                 <tool.icon className="w-5 h-5" />
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent side="right">
-                            <p>{tool.label}</p>
+                        <TooltipContent side="right" align="center">
+                            <p className="font-medium text-xs">{tool.label}</p>
                         </TooltipContent>
                     </Tooltip>
                 ))}

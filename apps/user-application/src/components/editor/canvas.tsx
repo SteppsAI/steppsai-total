@@ -1,223 +1,560 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { Stage, Layer, Image as KonvaImage, Arrow, Circle, Group, Transformer, Rect } from "react-konva";
+import useImage from "use-image";
+import Konva from "konva";
+import { Undo2, Redo2, Trash2 } from "lucide-react";
 import { EditorTool } from "./editor-toolbar";
-
-interface Overlay {
-  type: "arrow" | "circle" | "blur";
-  from?: [number, number];
-  to?: [number, number];
-  center?: [number, number];
-  radius?: number;
-  rect?: { x: number; y: number; width: number; height: number };
-}
+import {
+  Annotation,
+  ArrowAnnotation,
+  CircleAnnotation,
+  HideAnnotation,
+  ANNOTATION_DEFAULTS
+} from "./annotation-types";
+import { useAnnotationHistory } from "@/hooks/use-annotation-history";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 interface CanvasProps {
   screenshotUrl?: string;
-  overlays?: Array<Overlay>;
+  overlays?: Array<any>; // Legacy overlays prop for backward compatibility
   activeTool: EditorTool;
-  onAddOverlay: (overlay: Overlay) => void;
+  onAddOverlay?: (overlay: any) => void;
+  onAnnotationsChange?: (annotations: Annotation[]) => void;
 }
 
-export function Canvas({ screenshotUrl, overlays = [], activeTool, onAddOverlay }: CanvasProps) {
+// Generate unique IDs for annotations
+const generateId = () => `annotation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+const COLORS = [
+  '#ef4444', // Red
+  '#f97316', // Orange
+  '#f59e0b', // Amber
+  '#22c55e', // Green
+  '#3b82f6', // Blue
+  '#6366f1', // Indigo
+  '#a855f7', // Purple
+  '#ec4899', // Pink
+];
+
+export function Canvas({
+  screenshotUrl,
+  overlays,
+  activeTool,
+  onAnnotationsChange
+}: CanvasProps) {
+  const [image] = useImage(screenshotUrl || "", "anonymous");
+  const stageRef = useRef<Konva.Stage>(null);
+  const layerRef = useRef<Konva.Layer>(null);
+  const transformerRef = useRef<Konva.Transformer>(null);
+
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [startPoint, setStartPoint] = useState<[number, number] | null>(null);
-  const [currentPoint, setCurrentPoint] = useState<[number, number] | null>(null);
+  const [tempAnnotation, setTempAnnotation] = useState<Annotation | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string>(COLORS[5]); // Default to Indigo
+
+  // Ref to track if we are currently syncing from props to avoid triggering updates back to parent
+  const isSyncingRef = useRef(false);
+
+  // Initialize with overlays from props
+  const { annotations, set: setAnnotations, undo, redo, canUndo, canRedo } = useAnnotationHistory(overlays || []);
+
+  // Sync internal history with external props when they change (e.g. switching steps)
+  useEffect(() => {
+    if (overlays) {
+      isSyncingRef.current = true;
+      setAnnotations(overlays);
+      // Reset the flag after a short delay to ensure the state update has processed
+      // and the subsequent effect has run (or been skipped)
+      setTimeout(() => {
+        isSyncingRef.current = false;
+      }, 0);
+    }
+  }, [screenshotUrl]); // Only sync when the step (screenshot) changes
+
+  // Container dimensions
+  const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const getCoordinates = (e: React.MouseEvent<HTMLDivElement>): [number, number] => {
-    if (!containerRef.current) return [0, 0];
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    return [Math.max(0, Math.min(100, x)), Math.max(0, Math.min(100, y))];
+  // Update dimensions on mount and resize
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const { width, height } = containerRef.current.getBoundingClientRect();
+        setDimensions({ width, height });
+      }
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
+
+  // Notify parent of annotation changes
+  useEffect(() => {
+    if (!isSyncingRef.current) {
+      onAnnotationsChange?.(annotations);
+    }
+  }, [annotations, onAnnotationsChange]);
+
+  // Sync selectedColor with selected annotation
+  useEffect(() => {
+    if (selectedId) {
+      const annotation = annotations.find(a => a.id === selectedId);
+      if (annotation) {
+        setSelectedColor(annotation.color);
+      }
+    }
+  }, [selectedId, annotations]);
+
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Delete selected annotation
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId) {
+        e.preventDefault();
+        setAnnotations(annotations.filter(a => a.id !== selectedId));
+        setSelectedId(null);
+      }
+
+      // Undo
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey && canUndo) {
+        e.preventDefault();
+        undo();
+        setSelectedId(null);
+      }
+
+      // Redo
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'z' && canRedo) {
+        e.preventDefault();
+        redo();
+        setSelectedId(null);
+      }
+
+      // Escape to deselect
+      if (e.key === 'Escape') {
+        setSelectedId(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedId, annotations, setAnnotations, undo, redo, canUndo, canRedo]);
+
+  // Update transformer when selection changes
+  useEffect(() => {
+    if (!transformerRef.current) return;
+
+    const selectedNode = layerRef.current?.findOne(`#${selectedId}`);
+    if (selectedNode && selectedId) {
+      transformerRef.current.nodes([selectedNode]);
+      transformerRef.current.getLayer()?.batchDraw();
+    } else {
+      transformerRef.current.nodes([]);
+    }
+  }, [selectedId, annotations]);
+
+  const handleColorChange = (color: string) => {
+    setSelectedColor(color);
+    if (selectedId) {
+      handleAnnotationChange(selectedId, { color });
+    }
   };
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (activeTool === "pointer") return;
+  const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    // Deselect when clicking on empty area
+    const clickedOnEmpty = e.target === e.target.getStage() || e.target.getType() === 'Layer';
+    if (clickedOnEmpty) {
+      setSelectedId(null);
+      if (activeTool === 'pointer') return;
+    }
 
-    const coords = getCoordinates(e);
+    // Don't start drawing if clicking on an existing annotation
+    if (!clickedOnEmpty && activeTool === 'pointer') {
+      return;
+    }
+
+    if (activeTool === 'pointer') return;
+
+    const stage = e.target.getStage();
+    if (!stage) return;
+
+    const pos = stage.getPointerPosition();
+    if (!pos) return;
+
     setIsDrawing(true);
-    setStartPoint(coords);
-    setCurrentPoint(coords);
+
+    // Create temporary annotation based on tool
+    if (activeTool === 'arrow') {
+      const newArrow: ArrowAnnotation = {
+        id: generateId(),
+        type: 'arrow',
+        points: [pos.x, pos.y, pos.x, pos.y],
+        color: selectedColor,
+        strokeWidth: ANNOTATION_DEFAULTS.arrow.strokeWidth,
+      };
+      setTempAnnotation(newArrow);
+    } else if (activeTool === 'highlight') {
+      const newCircle: CircleAnnotation = {
+        id: generateId(),
+        type: 'circle',
+        x: pos.x,
+        y: pos.y,
+        radius: 0,
+        color: selectedColor,
+        strokeWidth: ANNOTATION_DEFAULTS.circle.strokeWidth,
+      };
+      setTempAnnotation(newCircle);
+    } else if (activeTool === 'hide') {
+      const newHide: HideAnnotation = {
+        id: generateId(),
+        type: 'hide',
+        x: pos.x,
+        y: pos.y,
+        width: 0,
+        height: 0,
+        color: ANNOTATION_DEFAULTS.hide.color,
+      };
+      setTempAnnotation(newHide);
+    }
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDrawing) return;
-    setCurrentPoint(getCoordinates(e));
+  const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    if (!isDrawing || !tempAnnotation) return;
+
+    const stage = e.target.getStage();
+    if (!stage) return;
+
+    const pos = stage.getPointerPosition();
+    if (!pos) return;
+
+    // Update temporary annotation based on type
+    if (tempAnnotation.type === 'arrow') {
+      const arrow = tempAnnotation as ArrowAnnotation;
+      setTempAnnotation({
+        ...arrow,
+        points: [arrow.points[0], arrow.points[1], pos.x, pos.y],
+      });
+    } else if (tempAnnotation.type === 'circle') {
+      const circle = tempAnnotation as CircleAnnotation;
+      const dx = pos.x - circle.x;
+      const dy = pos.y - circle.y;
+      const radius = Math.sqrt(dx * dx + dy * dy);
+      setTempAnnotation({
+        ...circle,
+        radius,
+      });
+    } else if (tempAnnotation.type === 'hide') {
+      const hide = tempAnnotation as HideAnnotation;
+      const width = pos.x - hide.x;
+      const height = pos.y - hide.y;
+      setTempAnnotation({
+        ...hide,
+        width,
+        height,
+      });
+    }
   };
 
   const handleMouseUp = () => {
-    if (!isDrawing || !startPoint || !currentPoint) return;
+    if (!isDrawing || !tempAnnotation) {
+      setIsDrawing(false);
+      return;
+    }
 
-    // Create the overlay based on the active tool
-    if (activeTool === "arrow") {
-      onAddOverlay({
-        type: "arrow",
-        from: startPoint,
-        to: currentPoint
-      });
-    } else if (activeTool === "highlight") {
-      // Calculate radius based on distance
-      const dx = currentPoint[0] - startPoint[0];
-      const dy = currentPoint[1] - startPoint[1];
-      const radius = Math.sqrt(dx * dx + dy * dy) / 2;
-      const centerX = (startPoint[0] + currentPoint[0]) / 2;
-      const centerY = (startPoint[1] + currentPoint[1]) / 2;
+    // Only add if annotation has meaningful size
+    let shouldAdd = false;
+    if (tempAnnotation.type === 'arrow') {
+      const arrow = tempAnnotation as ArrowAnnotation;
+      const dx = arrow.points[2] - arrow.points[0];
+      const dy = arrow.points[3] - arrow.points[1];
+      shouldAdd = Math.sqrt(dx * dx + dy * dy) > 10;
+    } else if (tempAnnotation.type === 'circle') {
+      const circle = tempAnnotation as CircleAnnotation;
+      shouldAdd = circle.radius > 10;
+    } else if (tempAnnotation.type === 'hide') {
+      const hide = tempAnnotation as HideAnnotation;
+      shouldAdd = Math.abs(hide.width) > 10 && Math.abs(hide.height) > 10;
+    }
 
-      onAddOverlay({
-        type: "circle",
-        center: [centerX, centerY],
-        radius: radius
-      });
-    } else if (activeTool === "blur") {
-      const x = Math.min(startPoint[0], currentPoint[0]);
-      const y = Math.min(startPoint[1], currentPoint[1]);
-      const width = Math.abs(currentPoint[0] - startPoint[0]);
-      const height = Math.abs(currentPoint[1] - startPoint[1]);
-
-      onAddOverlay({
-        type: "blur",
-        rect: { x, y, width, height }
-      });
+    if (shouldAdd) {
+      setAnnotations([...annotations, tempAnnotation]);
     }
 
     setIsDrawing(false);
-    setStartPoint(null);
-    setCurrentPoint(null);
+    setTempAnnotation(null);
+  };
+
+  const handleAnnotationChange = (id: string, newAttrs: Partial<Annotation>) => {
+    const newAnnotations = annotations.map(ann => {
+      if (ann.id === id) {
+        return { ...ann, ...newAttrs } as Annotation;
+      }
+      return ann;
+    });
+    setAnnotations(newAnnotations);
+  };
+
+  // Render hide annotation with filled rectangle
+  const renderHideAnnotation = (annotation: HideAnnotation) => {
+    // Normalize width/height to handle negative values
+    const x = annotation.width < 0 ? annotation.x + annotation.width : annotation.x;
+    const y = annotation.height < 0 ? annotation.y + annotation.height : annotation.y;
+    const width = Math.abs(annotation.width);
+    const height = Math.abs(annotation.height);
+
+    return (
+      <Group
+        key={annotation.id}
+        id={annotation.id}
+        x={x}
+        y={y}
+        draggable={activeTool === 'pointer'}
+        onClick={() => activeTool === 'pointer' && setSelectedId(annotation.id)}
+        onTap={() => activeTool === 'pointer' && setSelectedId(annotation.id)}
+        onDragEnd={(e) => {
+          handleAnnotationChange(annotation.id, {
+            x: e.target.x(),
+            y: e.target.y(),
+          });
+        }}
+        onTransformEnd={(e) => {
+          const node = e.target;
+          const scaleX = node.scaleX();
+          const scaleY = node.scaleY();
+
+          handleAnnotationChange(annotation.id, {
+            x: node.x(),
+            y: node.y(),
+            width: width * scaleX,
+            height: height * scaleY,
+          });
+          node.scaleX(1);
+          node.scaleY(1);
+        }}
+      >
+        {/* Solid filled rectangle for hiding content */}
+        <Rect
+          width={width}
+          height={height}
+          fill={annotation.color}
+          cornerRadius={4}
+        />
+      </Group>
+    );
+  };
+
+  // Render annotation components
+  const renderAnnotations = (annotationsToRender: Annotation[]) => {
+    return annotationsToRender.map((annotation) => {
+      const isSelected = annotation.id === selectedId;
+
+      if (annotation.type === 'arrow') {
+        return (
+          <Arrow
+            key={annotation.id}
+            id={annotation.id}
+            points={annotation.points}
+            stroke={annotation.color}
+            strokeWidth={annotation.strokeWidth}
+            fill={annotation.color}
+            pointerLength={12}
+            pointerWidth={12}
+            draggable={activeTool === 'pointer'}
+            onClick={() => activeTool === 'pointer' && setSelectedId(annotation.id)}
+            onTap={() => activeTool === 'pointer' && setSelectedId(annotation.id)}
+            onDragEnd={(e) => {
+              const node = e.target;
+              handleAnnotationChange(annotation.id, {
+                points: [
+                  annotation.points[0] + node.x(),
+                  annotation.points[1] + node.y(),
+                  annotation.points[2] + node.x(),
+                  annotation.points[3] + node.y(),
+                ],
+              });
+              node.position({ x: 0, y: 0 });
+            }}
+            shadowColor={isSelected ? '#000' : undefined}
+            shadowBlur={isSelected ? 10 : undefined}
+            shadowOpacity={isSelected ? 0.3 : undefined}
+          />
+        );
+      }
+
+      if (annotation.type === 'circle') {
+        return (
+          <Circle
+            key={annotation.id}
+            id={annotation.id}
+            x={annotation.x}
+            y={annotation.y}
+            radius={annotation.radius}
+            stroke={annotation.color}
+            strokeWidth={annotation.strokeWidth}
+            draggable={activeTool === 'pointer'}
+            onClick={() => activeTool === 'pointer' && setSelectedId(annotation.id)}
+            onTap={() => activeTool === 'pointer' && setSelectedId(annotation.id)}
+            onDragEnd={(e) => {
+              handleAnnotationChange(annotation.id, {
+                x: e.target.x(),
+                y: e.target.y(),
+              });
+            }}
+            onTransformEnd={(e) => {
+              const node = e.target;
+              const scaleX = node.scaleX();
+              handleAnnotationChange(annotation.id, {
+                radius: annotation.radius * scaleX,
+              });
+              node.scaleX(1);
+              node.scaleY(1);
+            }}
+            shadowColor={isSelected ? '#000' : undefined}
+            shadowBlur={isSelected ? 10 : undefined}
+            shadowOpacity={isSelected ? 0.3 : undefined}
+          />
+        );
+      }
+
+      if (annotation.type === 'hide') {
+        return renderHideAnnotation(annotation as HideAnnotation);
+      }
+
+      return null;
+    });
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center bg-muted p-8 relative overflow-hidden">
+    <div className="flex-1 flex flex-col items-center justify-center bg-slate-100 p-8 pb-16 relative overflow-hidden">
       <div className="max-w-5xl w-full space-y-4 z-10">
-        <div className="bg-background rounded-xl shadow-2xl overflow-hidden border border-border/50">
-          <div
-            ref={containerRef}
-            className={`relative aspect-video bg-muted select-none ${activeTool !== "pointer" ? "cursor-crosshair" : "cursor-default"}`}
+        {/* Toolbar for undo/redo/delete with icons */}
+
+        {/* Canvas */}
+        <div
+          ref={containerRef}
+          className="bg-background rounded-xl shadow-2xl overflow-hidden border border-border"
+        >
+          <Stage
+            ref={stageRef}
+            width={dimensions.width}
+            height={dimensions.height}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
+            onTouchStart={handleMouseDown as any}
+            onTouchMove={handleMouseMove as any}
+            onTouchEnd={handleMouseUp}
+            style={{ cursor: activeTool === 'pointer' ? 'default' : 'crosshair' }}
           >
-            {screenshotUrl ? (
-              <img src={screenshotUrl} alt="Screenshot" className="w-full h-full object-contain" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                No screenshot available
-              </div>
-            )}
+            <Layer ref={layerRef}>
+              {/* Background Image */}
+              {image && (
+                <KonvaImage
+                  image={image}
+                  width={dimensions.width}
+                  height={dimensions.height}
+                  listening={false}
+                />
+              )}
 
-            {/* Render existing overlays */}
-            {overlays.map((overlay, index) => {
-              if (overlay.type === "arrow" && overlay.from && overlay.to) {
-                return (
-                  <svg
-                    key={index}
-                    className="absolute inset-0 w-full h-full pointer-events-none"
-                    viewBox="0 0 100 100"
-                    preserveAspectRatio="none"
-                  >
-                    <defs>
-                      <marker id={`arrowhead-${index}`} markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                        <polygon points="0 0, 10 3.5, 0 7" fill="#6366F1" />
-                      </marker>
-                    </defs>
-                    <line
-                      x1={overlay.from[0]}
-                      y1={overlay.from[1]}
-                      x2={overlay.to[0]}
-                      y2={overlay.to[1]}
-                      stroke="#6366F1"
-                      strokeWidth="2"
-                      markerEnd={`url(#arrowhead-${index})`}
-                    />
-                  </svg>
-                );
-              }
-              if (overlay.type === "circle" && overlay.center && overlay.radius) {
-                return (
-                  <div
-                    key={index}
-                    className="absolute border-4 border-yellow-400 rounded-full pointer-events-none shadow-sm"
-                    style={{
-                      left: `${overlay.center[0] - overlay.radius}%`,
-                      top: `${overlay.center[1] - overlay.radius}%`,
-                      width: `${overlay.radius * 2}%`,
-                      height: `${overlay.radius * 2}%`,
-                    }}
-                  />
-                );
-              }
-              if (overlay.type === "blur" && overlay.rect) {
-                return (
-                  <div
-                    key={index}
-                    className="absolute backdrop-blur-md bg-background/30 pointer-events-none border border-white/20"
-                    style={{
-                      left: `${overlay.rect.x}%`,
-                      top: `${overlay.rect.y}%`,
-                      width: `${overlay.rect.width}%`,
-                      height: `${overlay.rect.height}%`,
-                    }}
-                  />
-                );
-              }
-              return null;
-            })}
+              {/* Render saved annotations */}
+              {renderAnnotations(annotations)}
 
-            {/* Render active drawing */}
-            {isDrawing && startPoint && currentPoint && (
-              <>
-                {activeTool === "arrow" && (
-                  <svg
-                    className="absolute inset-0 w-full h-full pointer-events-none"
-                    viewBox="0 0 100 100"
-                    preserveAspectRatio="none"
-                  >
-                    <defs>
-                      <marker id="arrowhead-drawing" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                        <polygon points="0 0, 10 3.5, 0 7" fill="#6366F1" />
-                      </marker>
-                    </defs>
-                    <line
-                      x1={startPoint[0]}
-                      y1={startPoint[1]}
-                      x2={currentPoint[0]}
-                      y2={currentPoint[1]}
-                      stroke="#6366F1"
-                      strokeWidth="2"
-                      markerEnd="url(#arrowhead-drawing)"
-                    />
-                  </svg>
-                )}
-                {activeTool === "highlight" && (
-                  <div
-                    className="absolute border-4 border-yellow-400 rounded-full pointer-events-none shadow-sm"
-                    style={{
-                      left: `${Math.min(startPoint[0], currentPoint[0])}%`,
-                      top: `${Math.min(startPoint[1], currentPoint[1])}%`,
-                      width: `${Math.abs(currentPoint[0] - startPoint[0])}%`,
-                      height: `${Math.abs(currentPoint[1] - startPoint[1])}%`,
-                    }}
-                  />
-                )}
-                {activeTool === "blur" && (
-                  <div
-                    className="absolute backdrop-blur-md bg-background/30 pointer-events-none border border-white/20"
-                    style={{
-                      left: `${Math.min(startPoint[0], currentPoint[0])}%`,
-                      top: `${Math.min(startPoint[1], currentPoint[1])}%`,
-                      width: `${Math.abs(currentPoint[0] - startPoint[0])}%`,
-                      height: `${Math.abs(currentPoint[1] - startPoint[1])}%`,
-                    }}
-                  />
-                )}
-              </>
-            )}
-          </div>
+              {/* Render temporary annotation while drawing */}
+              {tempAnnotation && renderAnnotations([tempAnnotation])}
+
+              {/* Transformer for selected annotation */}
+              <Transformer
+                ref={transformerRef}
+                enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
+                boundBoxFunc={(oldBox, newBox) => {
+                  // Limit resize
+                  if (newBox.width < 10 || newBox.height < 10) {
+                    return oldBox;
+                  }
+                  return newBox;
+                }}
+              />
+            </Layer>
+          </Stage>
         </div>
 
-        <div className="flex justify-center gap-2">
-          <div className="text-xs font-medium text-muted-foreground bg-white/50 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm border border-white/20">
-            {activeTool === "pointer" ? "Select a tool to draw" : `Click and drag to draw ${activeTool}`}
+        {/* Action buttons at bottom */}
+        <div className="flex justify-center items-center gap-3">
+          <div className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-full shadow-xl border border-border">
+            <Button
+              onClick={undo}
+              disabled={!canUndo}
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-full hover:bg-primary/10"
+              title="Undo"
+            >
+              <Undo2 className="w-4 h-4" />
+            </Button>
+            <Button
+              onClick={redo}
+              disabled={!canRedo}
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-full hover:bg-primary/10"
+              title="Redo"
+            >
+              <Redo2 className="w-4 h-4" />
+            </Button>
+
+            <div className="h-6 w-px bg-border/50" />
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 rounded-full hover:bg-primary/10 p-1.5"
+                  title="Color"
+                >
+                  <div
+                    className="w-full h-full rounded-md border border-black/10 shadow-sm"
+                    style={{ backgroundColor: selectedColor }}
+                  />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-3" side="top" onOpenAutoFocus={(e) => e.preventDefault()}>
+                <div className="grid grid-cols-4 gap-2">
+                  {COLORS.map((color) => (
+                    <button
+                      key={color}
+                      className={cn(
+                        "w-8 h-8 rounded-full border border-black/10 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary",
+                        selectedColor === color && "ring-2 ring-offset-2 ring-primary scale-110"
+                      )}
+                      style={{ backgroundColor: color }}
+                      onClick={() => handleColorChange(color)}
+                    />
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            <div className="h-6 w-px bg-border/50" />
+
+            <Button
+              onClick={() => {
+                if (selectedId) {
+                  setAnnotations(annotations.filter(a => a.id !== selectedId));
+                  setSelectedId(null);
+                }
+              }}
+              disabled={!selectedId}
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-full hover:bg-red-50 text-red-600 disabled:opacity-40 disabled:cursor-not-allowed"
+              title="Delete"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </div>

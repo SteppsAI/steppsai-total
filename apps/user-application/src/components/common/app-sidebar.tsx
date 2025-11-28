@@ -4,12 +4,11 @@ import {
   Library,
   Settings,
   User,
-  Folder,
-  BookOpen,
-  MessageSquare,
-  Plus,
   Edit,
+  Plus,
+  MessageSquare,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Link, useLocation } from "@tanstack/react-router";
 
 import {
@@ -22,53 +21,58 @@ import {
   SidebarMenuItem,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarSeparator,
+  useSidebar,
 } from "@/components/ui/sidebar";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useSwipeToClose } from "@/hooks/use-swipe";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { triggerExtensionSidePanel } from "@/lib/extension";
+import { MobileCreationDialog } from "@/components/mobile-creation-dialog";
+import { useState } from "react";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation();
   const pathname = location.pathname;
-  const isMobile = useIsMobile();
+  const { state, isMobile, setOpenMobile } = useSidebar();
+  const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
 
   const isActive = (path: string) => pathname === path;
 
-  // Add swipe gesture to close sidebar on mobile
-  const handleCloseSidebar = () => {
+  // Close sidebar on mobile when clicking a link
+  const handleLinkClick = () => {
     if (isMobile) {
-      const sidebar = document.querySelector('[data-sidebar="sidebar"]')?.closest('.sheet');
-      if (sidebar) {
-        const closeButton = sidebar.querySelector('[data-state="open"] button') as HTMLButtonElement;
-        closeButton?.click();
-      }
+      setOpenMobile(false);
     }
   };
 
-  useSwipeToClose(handleCloseSidebar, 60);
-
   return (
-    <Sidebar collapsible="offcanvas" className="bg-sidebar border-r border-sidebar-border shadow-sm border-r-0 md:border-r" {...props}>
-      <SidebarHeader className="h-16 flex items-center justify-center px-4 border-b border-sidebar-border bg-sidebar">
-        <div className="flex items-center justify-center">
-          <img src="/brand/logo-light.svg" alt="Stepps.ai" className="h-7 w-auto" />
+    <Sidebar collapsible="icon" {...props}>
+      <SidebarHeader>
+        <div className="flex items-center justify-center py-2">
+          {state === "collapsed" ? (
+            <img src="/brand/logo-symbol.svg" alt="Stepps.ai" className="size-7" />
+          ) : (
+            <img src="/brand/logo-light.svg" alt="Stepps.ai" className="h-7 w-auto" />
+          )}
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-3 py-4 gap-2">
+      <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className="gap-2">
+            <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
                   isActive={isActive("/app")}
                   tooltip="Home"
-                  className={`h-12 px-4 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground font-medium transition-all duration-200 rounded-lg ${isMobile ? 'min-h-[44px]' : ''}`}
                 >
-                  <Link to="/app" className="flex items-center gap-3">
-                    <Home className="size-5" />
-                    <span className="text-sm">Home</span>
+                  <Link to="/app" onClick={handleLinkClick}>
+                    <Home />
+                    <span>Home</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -78,11 +82,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   asChild
                   isActive={pathname.startsWith("/app/editor")}
                   tooltip="Editor (Demo)"
-                  className={`h-12 px-4 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground font-medium transition-all duration-200 rounded-lg ${isMobile ? 'min-h-[44px]' : ''}`}
                 >
-                  <Link to="/app/editor/$guideId" params={{ guideId: "test-guide-1" }} className="flex items-center gap-3">
-                    <Edit className="size-5" />
-                    <span className="text-sm">Editor (Demo)</span>
+                  <Link to="/app/editor" onClick={handleLinkClick}>
+                    <Edit />
+                    <span>Editor</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -92,97 +95,83 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   asChild
                   isActive={isActive("/app/library")}
                   tooltip="My Stepps"
-                  className={`h-12 px-4 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground font-medium transition-all duration-200 rounded-lg ${isMobile ? 'min-h-[44px]' : ''}`}
                 >
-                  <Link to="/app" className="flex items-center gap-3">
-                    <Library className="size-5" />
-                    <span className="text-sm">My Stepps</span>
-                  </Link>
-                </SidebarMenuButton>
-
-                {/* Sub-items for showcase - improved for mobile */}
-                <div className={`pl-12 flex flex-col gap-1 mt-2 ${isMobile ? 'gap-2' : 'gap-1'}`}>
-                  {["Marketing", "Support", "Product"].map((item) => (
-                    <SidebarMenuButton
-                      key={item}
-                      asChild
-                      className={`h-10 px-3 text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground font-normal transition-colors rounded-md ${isMobile ? 'min-h-[40px]' : ''}`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Folder className="size-4" />
-                        <span className="text-xs">{item}</span>
-                      </div>
-                    </SidebarMenuButton>
-                  ))}
-                </div>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarSeparator className="bg-sidebar-border w-full mx-0 my-3 h-px" />
-
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu className="gap-2">
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  tooltip="Tutorials"
-                  className={`h-12 px-4 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground font-medium transition-all duration-200 rounded-lg ${isMobile ? 'min-h-[44px]' : ''}`}
-                >
-                  <Link to="/app" className="flex items-center gap-3">
-                    <BookOpen className="size-5" />
-                    <span className="text-sm">Tutorials</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  tooltip="Feedback"
-                  className={`h-12 px-4 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground font-medium transition-all duration-200 rounded-lg ${isMobile ? 'min-h-[44px]' : ''}`}
-                >
-                  <Link to="/app" className="flex items-center gap-3">
-                    <MessageSquare className="size-5" />
-                    <span className="text-sm">Feedback</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  tooltip="Settings"
-                  className={`h-12 px-4 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground font-medium transition-all duration-200 rounded-lg ${isMobile ? 'min-h-[44px]' : ''}`}
-                >
-                  <Link to="/app" className="flex items-center gap-3">
-                    <Settings className="size-5" />
-                    <span className="text-sm">Settings</span>
+                  <Link to="/app/stepps" onClick={handleLinkClick}>
+                    <Library />
+                    <span>My Stepps</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-sidebar-border gap-4">
-        <button className={`w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg active:scale-[0.98] ${isMobile ? 'min-h-[44px] text-sm' : 'py-2.5'}`}>
-          <Plus className="size-5" />
-          <span>Create Stepps</span>
-        </button>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <button
+              className={`mb-2 w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-md flex items-center justify-center transition-all duration-200 overflow-hidden cursor-pointer ${state === "collapsed" ? "px-0" : "px-4 gap-2"
+                }`}
+              aria-label={state === "collapsed" ? "Create Stepps" : undefined}
+              onClick={() => {
+                if (isMobile) {
+                  setIsMobileDialogOpen(true);
+                } else {
+                  triggerExtensionSidePanel().catch((e) => toast.error(e.message));
+                }
+              }}
+            >
+              <Plus className="size-4 flex-shrink-0" />
+              <span className={`whitespace-nowrap transition-all duration-200 ${state === "collapsed" ? "w-0 opacity-0" : "w-auto opacity-100"}`}>
+                Create Stepps
+              </span>
+            </button>
+          </SidebarMenuItem>
+        </SidebarMenu>
 
-        <div className={`flex items-center gap-3 p-3 rounded-xl hover:bg-sidebar-accent transition-colors cursor-pointer group ${isMobile ? 'min-h-[44px]' : ''}`}>
-          <div className="size-10 rounded-full bg-sidebar-accent flex items-center justify-center text-sidebar-primary group-hover:bg-sidebar-accent/80 transition-colors">
-            <User className="size-5" />
-          </div>
-          <div className="flex flex-col overflow-hidden">
-            <span className="text-sm font-medium text-sidebar-foreground truncate">Vilém Barnet</span>
-            <span className="text-xs text-sidebar-foreground/60 truncate">Pro Plan</span>
-          </div>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton
+              size="lg"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            >
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <User className="size-4" />
+              </div>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-semibold">Vilém Barnet</span>
+                <span className="truncate text-xs">Pro Plan</span>
+              </div>
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            side={isMobile ? "bottom" : "right"}
+            align="end"
+            sideOffset={6}
+            className="w-56"
+          >
+            <DropdownMenuItem asChild>
+              <Link to="/app/settings" className="flex w-full items-center">
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a
+                href="https://feedback.stepps.ai"
+                target="_blank"
+                rel="noreferrer"
+                className="flex w-full items-center"
+              >
+                <MessageSquare className="mr-2 h-4 w-4" />
+                <span>Send feedback</span>
+              </a>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </SidebarFooter>
+      <MobileCreationDialog open={isMobileDialogOpen} onOpenChange={setIsMobileDialogOpen} />
     </Sidebar>
   );
 }

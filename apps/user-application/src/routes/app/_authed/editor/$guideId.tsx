@@ -1,82 +1,86 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { EditorHeader } from "@/components/editor/editor-header";
 import { EditorToolbar } from "@/components/editor/editor-toolbar";
 import { Canvas } from "@/components/editor/canvas";
 import { StepSidebar } from "@/components/editor/step-sidebar";
-import { useState } from "react";
-// import { useQuery } from "@tanstack/react-query";
-// import { trpc } from "@/router";
+import { useState, useCallback, useEffect } from "react";
+import { Annotation } from "@/components/editor/annotation-types";
+import { useStepp } from "@/hooks/use-stepps";
+import { ShareDialog } from "@/components/share-dialog";
+import { ExportDialog } from "@/components/export-dialog";
+import { useSidebar } from "@/components/ui/sidebar";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/_authed/editor/$guideId")({
   component: EditorPage,
 });
 
-// Mock data for development
-const MOCK_GUIDE = {
-  id: "test-guide-1",
-  title: "How to Create a New Project",
-  updatedAt: new Date().toISOString(),
-  steps: [
-    {
-      id: "step-1",
-      title: "Click on 'Create New'",
-      orderIndex: 0,
-      screenshotUrl: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1974&auto=format&fit=crop",
-      finalCaption: "Start by clicking the 'Create New' button in the top right corner.",
-      overlays: [
-        {
-          type: "arrow",
-          from: [20, 20],
-          to: [40, 40]
-        }
-      ]
-    },
-    {
-      id: "step-2",
-      title: "Select Project Type",
-      orderIndex: 1,
-      screenshotUrl: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?q=80&w=1974&auto=format&fit=crop",
-      finalCaption: "Choose 'Web Application' from the dropdown menu.",
-      overlays: []
-    },
-    {
-      id: "step-3",
-      title: "Configure Settings",
-      orderIndex: 2,
-      screenshotUrl: "https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?q=80&w=1974&auto=format&fit=crop",
-      finalCaption: "Fill in the project details and click 'Next'.",
-      overlays: []
-    }
-  ]
-};
-
 function EditorPage() {
-  // const { guideId } = Route.useParams();
-  // const { data: guide, isLoading } = useQuery(trpc.guides.getById.queryOptions({ id: guideId }));
+  const { guideId } = Route.useParams();
+  const { data: fetchedGuide, isLoading, error } = useStepp(guideId);
+  const { isMobile } = useSidebar();
+  const navigate = useNavigate();
 
-  // Use mock data instead of real data for now
-  const guide = MOCK_GUIDE;
-  const isLoading = false;
+  useEffect(() => {
+    if (isMobile) {
+      toast.error("Editing is only available on desktop devices.");
+      navigate({ to: "/app" });
+    }
+  }, [isMobile, navigate]);
 
-  const [title, setTitle] = useState(guide.title || "Untitled Stepps");
+  // Local state for editor (synced with fetched data initially)
+  const [guide, setGuide] = useState<any | null>(null); // Using any for now to avoid strict type mismatch with mock data structure vs DB
+  const [title, setTitle] = useState("Untitled Stepps");
   const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const [activeStepId, setActiveStepId] = useState<string>("");
-  const [activeTool, setActiveTool] = useState<"pointer" | "arrow" | "highlight" | "blur">("pointer");
+  const [activeTool, setActiveTool] = useState<"pointer" | "arrow" | "highlight" | "hide">("pointer");
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
-  const handleUpdateStep = (id: string, caption: string) => {
-    console.log("Update step:", id, caption);
+  // Sync fetched guide to local state
+  useEffect(() => {
+    if (fetchedGuide) {
+      setGuide(fetchedGuide);
+      setTitle(fetchedGuide.title || "Untitled Stepps");
+    }
+  }, [fetchedGuide]);
+
+  const handleUpdateStep = useCallback((id: string, title: string) => {
+    setGuide((prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        steps: prev.steps.map((step: any) =>
+          step.id === id
+            ? { ...step, title }
+            : step
+        )
+      };
+    });
+
     setStatus("saving");
     // Simulate save
     setTimeout(() => setStatus("saved"), 1000);
-  };
+  }, []);
 
-  const handleAddOverlay = (overlay: any) => {
-    console.log("Add overlay:", overlay);
-    // In a real app, we would update the step's overlays here
-    // For now, we'll just log it
+  const handleAnnotationsChange = useCallback((annotations: Annotation[]) => {
+    if (!activeStepId) return;
+
+    setGuide((prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        steps: prev.steps.map((step: any) =>
+          step.id === activeStepId
+            ? { ...step, overlays: annotations }
+            : step
+        )
+      };
+    });
+
     setStatus("saving");
     setTimeout(() => setStatus("saved"), 1000);
-  };
+  }, [activeStepId]);
 
   const handleDeleteStep = (id: string) => {
     console.log("Delete step:", id);
@@ -84,6 +88,37 @@ function EditorPage() {
 
   const handleReorderSteps = (steps: any[]) => {
     console.log("Reorder steps:", steps);
+  };
+
+  const handleAddStep = (stepData: { title: string; file: File; previewUrl: string }) => {
+    // Create new step with temporary ID and local preview URL
+    const newStep = {
+      id: crypto.randomUUID(),
+      title: stepData.title,
+      screenshotUrl: stepData.previewUrl,
+      orderIndex: (guide?.steps?.length || 0),
+      overlays: [],
+      // Initialize other fields as needed by DB schema
+      pageUrl: "",
+      domSelector: "",
+      aiCaption: "",
+      finalCaption: "",
+      isExcluded: false
+    };
+
+    setGuide((prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        steps: [...(prev.steps || []), newStep]
+      };
+    });
+
+    // Set as active step
+    setActiveStepId(newStep.id);
+
+    setStatus("saving");
+    setTimeout(() => setStatus("saved"), 1000);
   };
 
   if (isLoading) {
@@ -94,7 +129,7 @@ function EditorPage() {
     );
   }
 
-  if (!guide) {
+  if (error || !guide) {
     return (
       <div className="h-screen flex items-center justify-center bg-background">
         <div className="text-muted-foreground">Guide not found</div>
@@ -113,11 +148,6 @@ function EditorPage() {
   // Get the current active step
   const currentStep = sortedSteps.find((step: any) => step.id === activeStepId) || sortedSteps[0];
 
-  // Update title from guide if not already set
-  if (guide.title && title === "Untitled Stepps") {
-    setTitle(guide.title);
-  }
-
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden bg-background">
       <EditorHeader
@@ -128,6 +158,8 @@ function EditorPage() {
           setStatus("saving");
           setTimeout(() => setStatus("saved"), 1000);
         }}
+        onShare={() => setIsShareOpen(true)}
+        onExport={() => setIsExportOpen(true)}
       />
 
       <div className="flex-1 flex overflow-hidden relative">
@@ -138,9 +170,9 @@ function EditorPage() {
 
         <Canvas
           screenshotUrl={currentStep?.screenshotUrl || undefined}
-          overlays={currentStep?.overlays as any || []}
+          overlays={currentStep?.overlays as Annotation[] || []}
           activeTool={activeTool}
-          onAddOverlay={handleAddOverlay}
+          onAnnotationsChange={handleAnnotationsChange}
         />
 
         <StepSidebar
@@ -150,8 +182,23 @@ function EditorPage() {
           onUpdateStep={handleUpdateStep}
           onDeleteStep={handleDeleteStep}
           onReorderSteps={handleReorderSteps}
+          onAddStep={handleAddStep}
         />
       </div>
+
+      <ShareDialog
+        open={isShareOpen}
+        onOpenChange={setIsShareOpen}
+        guideTitle={title}
+        guideId={guideId}
+      />
+
+      <ExportDialog
+        open={isExportOpen}
+        onOpenChange={setIsExportOpen}
+        guideTitle={title}
+        guideId={guideId}
+      />
     </div>
   );
 }

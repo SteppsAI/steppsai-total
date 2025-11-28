@@ -13,17 +13,23 @@
   --primary: #6366F1;
   --primary-foreground: #FFFFFF;
 
-  --secondary: #f;
+  --secondary: #06B6D4;
   --secondary-foreground: #FFFFFF;
 
   --accent: #F43F5E;
   --accent-foreground: #FFFFFF;
 
-  --muted: #F1F5F9;
-  --muted-foreground: #64748B;
+  --muted: #E2E8F0;
+  /* slate-200 - better contrast */
+  --muted-foreground: #475569;
+  /* slate-600 - meets WCAG AA */
 
   --border: #E2E8F0;
   --input: #E2E8F0;
+  --ring: #6366F1;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #0B0F19;
 
   --radius: 0.5rem;
 
@@ -37,6 +43,11 @@
   --sidebar-accent-foreground: #111827;
   --sidebar-border: #E5E7EB;
   --sidebar-ring: #6366F1;
+
+  /* Destructive colors with proper contrast */
+  --destructive: #EF4444;
+  /* red-500 */
+  --destructive-foreground: #FFFFFF;
 }
 
 @theme inline {
@@ -59,6 +70,8 @@
   --color-muted-foreground: var(--muted-foreground);
 
   --color-border: var(--border);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-brand-dark: var(--brand-dark);
 
   --radius-sm: calc(var(--radius) - 4px);
@@ -72,6 +85,8 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
 }
 
 @layer base {
@@ -104,6 +119,13 @@
   --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
   --sidebar-border: hsl(240 3.7% 15.9%);
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
+
+  --popover: hsl(240 5.9% 10%);
+  --popover-foreground: hsl(240 4.8% 95.9%);
+
+  --destructive: hsl(0 84.2% 60.2%);
+  /* red-500 in HSL */
+  --destructive-foreground: hsl(0 0% 100%);
 }
 
 /* Mobile sidebar enhancements */
@@ -132,5 +154,15 @@
   .sheet-overlay {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
   }
 }

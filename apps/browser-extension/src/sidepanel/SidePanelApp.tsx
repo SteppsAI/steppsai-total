@@ -81,7 +81,7 @@ function SidePanelApp() {
             {/* Header - Only visible when recording */}
             {isRecording && (
                 <div className="z-10 shrink-0 px-6 pt-8 pb-4 flex flex-col items-center justify-center">
-                    <img src={Logo} alt="Stepps.ai Logo" className="w-16 h-16 object-contain shadow-lg rounded-lg mb-4" />
+                    <img src={Logo} alt="Stepps.ai Logo" className="w-12 h-12 object-contain shadow-lg mb-4" />
 
                     {/* Status */}
                     <div className="min-h-[48px] flex flex-col items-center justify-center">
@@ -134,8 +134,8 @@ function SidePanelApp() {
                     </>
                 ) : (
                     <div className="flex-1 flex flex-col items-center justify-center">
-                        <img src={Logo} alt="Stepps.ai Logo" className="w-20 h-20 object-contain shadow-lg rounded-xl mb-6" />
-                        <h1 className="text-[24px] font-bold text-slate-900 leading-tight text-center max-w-[280px] mb-8">
+                        <img src={Logo} alt="Stepps.ai Logo" className="w-16 h-16 object-contain shadow-lg mb-6" />
+                        <h1 className="text-[24px] font-medium text-slate-900 leading-tight text-center max-w-[280px] mb-8">
                             Capture any workflow <span className="text-[#6366F1]">in seconds</span>.
                         </h1>
                         <Button

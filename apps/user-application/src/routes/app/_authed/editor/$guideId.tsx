@@ -88,6 +88,37 @@ function EditorPage() {
     console.log("Reorder steps:", steps);
   };
 
+  const handleAddStep = (stepData: { title: string; file: File; previewUrl: string }) => {
+    // Create new step with temporary ID and local preview URL
+    const newStep = {
+      id: crypto.randomUUID(),
+      title: stepData.title,
+      screenshotUrl: stepData.previewUrl,
+      orderIndex: (guide?.steps?.length || 0),
+      overlays: [],
+      // Initialize other fields as needed by DB schema
+      pageUrl: "",
+      domSelector: "",
+      aiCaption: "",
+      finalCaption: "",
+      isExcluded: false
+    };
+
+    setGuide((prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        steps: [...(prev.steps || []), newStep]
+      };
+    });
+
+    // Set as active step
+    setActiveStepId(newStep.id);
+
+    setStatus("saving");
+    setTimeout(() => setStatus("saved"), 1000);
+  };
+
   if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-background">
@@ -148,6 +179,7 @@ function EditorPage() {
           onUpdateStep={handleUpdateStep}
           onDeleteStep={handleDeleteStep}
           onReorderSteps={handleReorderSteps}
+          onAddStep={handleAddStep}
         />
       </div>
 

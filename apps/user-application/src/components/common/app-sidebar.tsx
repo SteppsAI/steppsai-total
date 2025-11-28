@@ -55,9 +55,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <div className="flex items-center justify-center py-2">
           {state === "collapsed" ? (
-            <img src="/brand/logo-symbol.svg" alt="Stepps.ai" className="size-8" />
+            <img src="/brand/logo-symbol.svg" alt="Stepps.ai" className="size-7" />
           ) : (
-            <img src="/brand/logo-light.svg" alt="Stepps.ai" className="h-8 w-auto" />
+            <img src="/brand/logo-light.svg" alt="Stepps.ai" className="h-7 w-auto" />
           )}
         </div>
       </SidebarHeader>
@@ -113,7 +113,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <button
-              className={`w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-md flex items-center justify-center transition-all duration-200 overflow-hidden cursor-pointer ${state === "collapsed" ? "px-0" : "px-4 gap-2"
+              className={`mb-2 w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-md flex items-center justify-center transition-all duration-200 overflow-hidden cursor-pointer ${state === "collapsed" ? "px-0" : "px-4 gap-2"
                 }`}
               aria-label={state === "collapsed" ? "Create Stepps" : undefined}
               onClick={() => {

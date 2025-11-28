@@ -8,6 +8,7 @@ import { Guide } from "@/types/db";
 import { triggerExtensionSidePanel } from "@/lib/extension";
 import { MobileCreationDialog } from "@/components/mobile-creation-dialog";
 import { ShareDialog } from "@/components/share-dialog";
+import { ExportDialog } from "@/components/export-dialog";
 import { useState } from "react";
 import { useSidebar } from "@/components/ui/sidebar";
 
@@ -25,6 +26,7 @@ interface RecentSteppsProps {
 export function RecentStepps({ isLoading, stepps = [], onDelete, onMove }: RecentSteppsProps) {
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
   const [shareGuide, setShareGuide] = useState<Guide | null>(null);
+  const [exportGuide, setExportGuide] = useState<Guide | null>(null);
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
 
@@ -100,7 +102,7 @@ export function RecentStepps({ isLoading, stepps = [], onDelete, onMove }: Recen
                 onShare={() => setShareGuide(stepp)}
                 onDelete={onDelete ? () => onDelete(stepp) : undefined}
                 onMove={onMove ? () => onMove(stepp) : undefined}
-                onExport={() => toast.info("Export functionality coming soon")}
+                onExport={() => setExportGuide(stepp)}
               />
             </div>
           ))}
@@ -121,6 +123,15 @@ export function RecentStepps({ isLoading, stepps = [], onDelete, onMove }: Recen
           onOpenChange={(open) => !open && setShareGuide(null)}
           guideTitle={shareGuide.title || "Untitled Stepp"}
           guideId={shareGuide.id}
+        />
+      )}
+
+      {exportGuide && (
+        <ExportDialog
+            open={!!exportGuide}
+            onOpenChange={(open) => !open && setExportGuide(null)}
+            guideTitle={exportGuide.title || "Untitled Stepp"}
+            guideId={exportGuide.id}
         />
       )}
     </section>

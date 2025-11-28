@@ -7,6 +7,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Annotation } from "@/components/editor/annotation-types";
 import { useStepp } from "@/hooks/use-stepps";
 import { ShareDialog } from "@/components/share-dialog";
+import { ExportDialog } from "@/components/export-dialog";
 import { useSidebar } from "@/components/ui/sidebar";
 import { toast } from "sonner";
 
@@ -34,6 +35,7 @@ function EditorPage() {
   const [activeStepId, setActiveStepId] = useState<string>("");
   const [activeTool, setActiveTool] = useState<"pointer" | "arrow" | "highlight" | "hide">("pointer");
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   // Sync fetched guide to local state
   useEffect(() => {
@@ -157,6 +159,7 @@ function EditorPage() {
           setTimeout(() => setStatus("saved"), 1000);
         }}
         onShare={() => setIsShareOpen(true)}
+        onExport={() => setIsExportOpen(true)}
       />
 
       <div className="flex-1 flex overflow-hidden relative">
@@ -186,6 +189,13 @@ function EditorPage() {
       <ShareDialog
         open={isShareOpen}
         onOpenChange={setIsShareOpen}
+        guideTitle={title}
+        guideId={guideId}
+      />
+
+      <ExportDialog
+        open={isExportOpen}
+        onOpenChange={setIsExportOpen}
         guideTitle={title}
         guideId={guideId}
       />

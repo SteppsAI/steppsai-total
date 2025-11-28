@@ -32,8 +32,9 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, FileText, Share2, Pencil, Trash, FolderInput, Eye, Lock } from "lucide-react";
+import { MoreVertical, FileText, Share2, Pencil, Trash, FolderInput, Eye, Lock, Download } from "lucide-react";
 import { ShareDialog } from "@/components/share-dialog";
+import { ExportDialog } from "@/components/export-dialog";
 import { DeleteFolderDialog } from "@/components/delete-folder-dialog";
 import { RenameFolderDialog } from "@/components/rename-folder-dialog";
 import { DeleteSteppDialog } from "@/components/delete-stepp-dialog";
@@ -50,8 +51,9 @@ function SteppsPage() {
     const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
     const { isMobile } = useSidebar();
 
-    // Share Dialog State
+    // Share/Export Dialog State
     const [shareDialogOpen, setShareDialogOpen] = useState(false);
+    const [exportDialogOpen, setExportDialogOpen] = useState(false);
     const [selectedGuide, setSelectedGuide] = useState<{ id: string; title: string } | null>(null);
 
     // Dialog States
@@ -196,6 +198,11 @@ function SteppsPage() {
     const handleShare = (guide: GuideWithFolder) => {
         setSelectedGuide({ id: guide.id, title: guide.title || "Untitled" });
         setShareDialogOpen(true);
+    };
+
+    const handleExport = (guide: GuideWithFolder) => {
+        setSelectedGuide({ id: guide.id, title: guide.title || "Untitled" });
+        setExportDialogOpen(true);
     };
 
     // Helper function to format date
@@ -471,6 +478,16 @@ function SteppsPage() {
                                                         className="cursor-pointer"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
+                                                            handleExport(guide);
+                                                        }}
+                                                    >
+                                                        <Download className="mr-2 size-4" />
+                                                        Export
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        className="cursor-pointer"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
                                                             handleMoveStepp(guide);
                                                         }}
                                                     >
@@ -505,12 +522,20 @@ function SteppsPage() {
             </section>
 
             {selectedGuide && (
-                <ShareDialog
-                    open={shareDialogOpen}
-                    onOpenChange={setShareDialogOpen}
-                    guideTitle={selectedGuide.title}
-                    guideId={selectedGuide.id}
-                />
+                <>
+                    <ShareDialog
+                        open={shareDialogOpen}
+                        onOpenChange={setShareDialogOpen}
+                        guideTitle={selectedGuide.title}
+                        guideId={selectedGuide.id}
+                    />
+                    <ExportDialog
+                        open={exportDialogOpen}
+                        onOpenChange={setExportDialogOpen}
+                        guideTitle={selectedGuide.title}
+                        guideId={selectedGuide.id}
+                    />
+                </>
             )}
 
             {selectedFolder && (

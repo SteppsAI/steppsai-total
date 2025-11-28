@@ -67,7 +67,6 @@ export const steps = pgTable("steps", {
 	aiCaption: text("ai_caption"),
 	finalCaption: text("final_caption"),
 	overlays: jsonb("overlays"),
-	metadata: jsonb("metadata"),
 	isExcluded: boolean("is_excluded").default(false),
 });
 

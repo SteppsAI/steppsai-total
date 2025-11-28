@@ -35,26 +35,26 @@ export default class DataService extends WorkerEntrypoint<Env> {
 		initDatabase(this.env.DATABASE_URL);
 		
 		for (const message of batch.messages) {
-			try {
-				const parsedEvent = queueMessageSchema.safeParse(message.body);
-				
-				if (!parsedEvent.success) {
-					console.error("Invalid Queue Message:", parsedEvent.error.message);
-					message.ack();
-					continue;
-				}
+			const parsedEvent = queueMessageSchema.safeParse(message.body);
+			
+			if (!parsedEvent.success) {
+				console.error("Invalid Queue Message:", parsedEvent.error.message);
+				message.ack(); // Ack invalid messages to prevent infinite loop
+				continue;
+			}
 
-				const event = parsedEvent.data;
-				
+			const event = parsedEvent.data;
+			
+			try {
 				if (event.type === "STEPS_INSERT") {
 					await handleStepsInsert(this.env, event);
 				}
-				
 				message.ack();
 			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-				console.error(`Queue processing failed: ${errorMessage}`);
-				// Don't ack - will retry
+				// Handler already cleaned up zombie data
+				// Ack the message so we don't retry (data is already deleted)
+				console.error(`Queue handler failed, data cleaned up. Acknowledging message.`);
+				message.ack();
 			}
 		}
 	}

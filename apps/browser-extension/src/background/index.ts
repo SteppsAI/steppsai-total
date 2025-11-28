@@ -1,6 +1,7 @@
 /// <reference types="chrome" />
 
 import { API_BASE_URL } from '../lib/constants';
+import { convertToWebP } from '../lib/helpers';
 
 // Listen for messages from SidePanel or Content Script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -129,10 +130,13 @@ async function handleStepAction(payload: any, tabId?: number) {
     if (!isRecording || !tabId || !guideId) return;
 
     try {
-        // Capture Screenshot
-        const dataUrl = await chrome.tabs.captureVisibleTab(chrome.windows.WINDOW_ID_CURRENT, { 
+        // Capture Screenshot as PNG first
+        const pngDataUrl = await chrome.tabs.captureVisibleTab(chrome.windows.WINDOW_ID_CURRENT, { 
             format: 'png'
         });
+
+        // Convert to WebP with 85% quality (good for text-heavy screenshots)
+        const webpDataUrl = await convertToWebP(pngDataUrl, 0.85);
 
         // Generate ID and Key with new path structure
         const stepId = crypto.randomUUID();
@@ -144,7 +148,7 @@ async function handleStepAction(payload: any, tabId?: number) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 key: imageKey,
-                dataUrl: dataUrl
+                dataUrl: webpDataUrl
             })
         });
 

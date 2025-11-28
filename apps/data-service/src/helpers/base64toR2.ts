@@ -26,10 +26,10 @@ export async function uploadBase64ToR2(
         bytes[i] = binaryString.charCodeAt(i);
     }
 
-    // Store in R2 with proper content type
+    // Store in R2 with actual mime type from dataUrl
     await bucket.put(key, bytes.buffer, {
         httpMetadata: {
-            contentType: key.endsWith('.webp') ? 'image/webp' : mimeType
+            contentType: mimeType
         }
     });
 

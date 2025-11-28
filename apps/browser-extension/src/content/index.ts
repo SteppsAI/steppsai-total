@@ -1,5 +1,5 @@
-
 // Content script to capture user interactions
+// Uses mousedown instead of click to capture screenshot BEFORE the action happens
 
 function getCssSelector(el: Element): string {
     if (!(el instanceof Element)) return '';
@@ -26,13 +26,17 @@ function getCssSelector(el: Element): string {
     return path.join(" > ");
 }
 
-document.addEventListener('click', (event) => {
+// Use mousedown to capture BEFORE the click action happens
+document.addEventListener('mousedown', (event) => {
+    // Only capture left mouse button
+    if (event.button !== 0) return;
+    
     const target = event.target as Element;
     const selector = getCssSelector(target);
 
     // Check if extension context is still valid
     if (!chrome.runtime?.id) {
-        return; // Extension was reloaded, ignore
+        return;
     }
 
     chrome.runtime.sendMessage({

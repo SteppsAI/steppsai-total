@@ -28,20 +28,37 @@ export async function createStepsBatch(stepData: CreateStepSchemaType[]): Promis
 	const db = getDb();
 	const ids = stepData.map(() => uuidv4());
 
-	const values = stepData.map((data, index) => ({
-		id: ids[index],
-		guideId: data.guideId,
-		orderIndex: data.orderIndex,
-		screenshotUrl: data.screenshotUrl,
-		pageUrl: data.pageUrl,
-		domSelector: data.domSelector,
-		aiCaption: data.aiCaption,
-		finalCaption: data.finalCaption,
-		overlays: data.overlays ? JSON.stringify(data.overlays) : null,
-		isExcluded: data.isExcluded || false,
-	}));
+	// Only include fields that are actually provided
+	const values = stepData.map((data, index) => {
+		const value: any = {
+			id: ids[index],
+			guideId: data.guideId,
+			orderIndex: data.orderIndex,
+			isExcluded: data.isExcluded ?? false,
+		};
+		
+		// Only add optional fields if they have values
+		if (data.screenshotUrl) value.screenshotUrl = data.screenshotUrl;
+		if (data.pageUrl) value.pageUrl = data.pageUrl;
+		if (data.domSelector) value.domSelector = data.domSelector;
+		if (data.aiCaption) value.aiCaption = data.aiCaption;
+		if (data.finalCaption) value.finalCaption = data.finalCaption;
+		if (data.overlays && data.overlays.length > 0) {
+			value.overlays = JSON.stringify(data.overlays);
+		}
+		
+		return value;
+	});
 
-	await db.insert(steps).values(values);
+	console.log('Inserting batch values:', JSON.stringify(values, null, 2));
+	
+	try {
+		await db.insert(steps).values(values);
+	} catch (error) {
+		console.error('DB Insert Error:', error);
+		throw error;
+	}
+	
 	return ids;
 }
 

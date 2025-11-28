@@ -85,7 +85,7 @@ async function handleStopRecording() {
 async function handleDiscardRecording() {
     try {
         const { guideId } = await chrome.storage.local.get('guideId');
-        
+
         // Delete guide via tRPC if guideId exists
         if (guideId) {
             try {
@@ -99,7 +99,7 @@ async function handleDiscardRecording() {
         // Clear local storage
         await chrome.storage.local.remove(['steps', 'recordingStartTime', 'isRecording', 'guideId', 'userId']);
         await chrome.action.setBadgeText({ text: '' });
-        
+
         return { success: true };
     } catch (error) {
         console.error('Failed to discard recording:', error);
@@ -111,12 +111,12 @@ async function handleStepAction(payload: any, tabId?: number) {
     const { isRecording, guideId, userId } = await chrome.storage.local.get([
         'isRecording', 'guideId', 'userId'
     ]);
-    
+
     if (!isRecording || !tabId || !guideId) return;
 
     try {
         // Capture Screenshot as PNG first
-        const pngDataUrl = await chrome.tabs.captureVisibleTab(chrome.windows.WINDOW_ID_CURRENT, { 
+        const pngDataUrl = await chrome.tabs.captureVisibleTab(chrome.windows.WINDOW_ID_CURRENT, {
             format: 'png'
         });
 
@@ -163,5 +163,18 @@ async function handleStepAction(payload: any, tabId?: number) {
 chrome.action.onClicked.addListener((tab) => {
     if (tab.windowId) {
         chrome.sidePanel.open({ windowId: tab.windowId });
+    }
+});
+
+chrome.runtime.onMessageExternal.addListener((message, _sender, sendResponse) => {
+    if (message.type === 'OPEN_SIDE_PANEL') {
+        chrome.tabs.create({ url: 'https://google.com' }, (tab) => {
+            if (tab.windowId) {
+                // Open side panel in the new window
+                chrome.sidePanel.open({ windowId: tab.windowId })
+                    .catch((error) => console.error('Failed to open side panel:', error));
+            }
+        });
+        sendResponse({ success: true });
     }
 });

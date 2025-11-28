@@ -13,6 +13,8 @@ import {
 } from "./annotation-types";
 import { useAnnotationHistory } from "@/hooks/use-annotation-history";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 interface CanvasProps {
   screenshotUrl?: string;
@@ -24,6 +26,17 @@ interface CanvasProps {
 
 // Generate unique IDs for annotations
 const generateId = () => `annotation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+const COLORS = [
+  '#ef4444', // Red
+  '#f97316', // Orange
+  '#f59e0b', // Amber
+  '#22c55e', // Green
+  '#3b82f6', // Blue
+  '#6366f1', // Indigo
+  '#a855f7', // Purple
+  '#ec4899', // Pink
+];
 
 export function Canvas({
   screenshotUrl,
@@ -39,6 +52,7 @@ export function Canvas({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [tempAnnotation, setTempAnnotation] = useState<Annotation | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string>(COLORS[5]); // Default to Indigo
 
   // Ref to track if we are currently syncing from props to avoid triggering updates back to parent
   const isSyncingRef = useRef(false);
@@ -83,6 +97,16 @@ export function Canvas({
       onAnnotationsChange?.(annotations);
     }
   }, [annotations, onAnnotationsChange]);
+
+  // Sync selectedColor with selected annotation
+  useEffect(() => {
+    if (selectedId) {
+      const annotation = annotations.find(a => a.id === selectedId);
+      if (annotation) {
+        setSelectedColor(annotation.color);
+      }
+    }
+  }, [selectedId, annotations]);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -131,6 +155,13 @@ export function Canvas({
     }
   }, [selectedId, annotations]);
 
+  const handleColorChange = (color: string) => {
+    setSelectedColor(color);
+    if (selectedId) {
+      handleAnnotationChange(selectedId, { color });
+    }
+  };
+
   const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
     // Deselect when clicking on empty area
     const clickedOnEmpty = e.target === e.target.getStage() || e.target.getType() === 'Layer';
@@ -160,7 +191,7 @@ export function Canvas({
         id: generateId(),
         type: 'arrow',
         points: [pos.x, pos.y, pos.x, pos.y],
-        color: ANNOTATION_DEFAULTS.arrow.color,
+        color: selectedColor,
         strokeWidth: ANNOTATION_DEFAULTS.arrow.strokeWidth,
       };
       setTempAnnotation(newArrow);
@@ -171,7 +202,7 @@ export function Canvas({
         x: pos.x,
         y: pos.y,
         radius: 0,
-        color: ANNOTATION_DEFAULTS.circle.color,
+        color: selectedColor,
         strokeWidth: ANNOTATION_DEFAULTS.circle.strokeWidth,
       };
       setTempAnnotation(newCircle);
@@ -473,6 +504,39 @@ export function Canvas({
             >
               <Redo2 className="w-4 h-4" />
             </Button>
+
+            <div className="h-6 w-px bg-border/50" />
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 rounded-full hover:bg-primary/10 p-1.5"
+                  title="Color"
+                >
+                  <div
+                    className="w-full h-full rounded-md border border-black/10 shadow-sm"
+                    style={{ backgroundColor: selectedColor }}
+                  />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-3" side="top" onOpenAutoFocus={(e) => e.preventDefault()}>
+                <div className="grid grid-cols-4 gap-2">
+                  {COLORS.map((color) => (
+                    <button
+                      key={color}
+                      className={cn(
+                        "w-8 h-8 rounded-full border border-black/10 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary",
+                        selectedColor === color && "ring-2 ring-offset-2 ring-primary scale-110"
+                      )}
+                      style={{ backgroundColor: color }}
+                      onClick={() => handleColorChange(color)}
+                    />
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
 
             <div className="h-6 w-px bg-border/50" />
 

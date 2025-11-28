@@ -1,4 +1,4 @@
-export type RecordingState = 'idle' | 'recording' | 'paused';
+export type RecordingState = 'idle' | 'recording' | 'paused' | 'finished';
 
 export interface Step {
     id: string;

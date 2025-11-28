@@ -1,7 +1,8 @@
-import { Play, Pause, ChevronDown, Trash2 } from 'lucide-react';
+import { Play, Pause, ChevronDown, Trash2, Loader2 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import Logo from '../assets/logo.svg';
 import { Button } from '../components/Button';
+import { WEB_APP_URL } from '../lib/config';
 import { API_BASE_URL } from '../lib/constants';
 import { generateStepDescription } from '../lib/helpers';
 import type { RecordingState, Step } from '../types';
@@ -9,6 +10,8 @@ import type { RecordingState, Step } from '../types';
 function SidePanelApp() {
     const [recordingState, setRecordingState] = useState<RecordingState>('idle');
     const [steps, setSteps] = useState<Step[]>([]);
+    const [guideId, setGuideId] = useState<string | null>(null);
+
     const stepsContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -40,6 +43,19 @@ function SidePanelApp() {
         }
     }, [steps]);
 
+    useEffect(() => {
+        if (recordingState === 'finished' && guideId) {
+            const timer = setTimeout(() => {
+                chrome.tabs.create({ url: `${WEB_APP_URL}/app/editor/${guideId}` });
+                setRecordingState('idle');
+                setSteps([]);
+                setGuideId(null);
+            }, 3000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [recordingState, guideId]);
+
     const handleStartRecording = async () => {
         const response = await chrome.runtime.sendMessage({ type: 'START_RECORDING' });
         if (response?.success) setRecordingState('recording');
@@ -49,10 +65,12 @@ function SidePanelApp() {
     const handleResumeRecording = () => setRecordingState('recording');
 
     const handleEndRecording = async () => {
+
         const response = await chrome.runtime.sendMessage({ type: 'STOP_RECORDING' });
         if (response?.success) {
-            setRecordingState('idle');
-            setSteps([]);
+            setRecordingState('finished');
+            setGuideId(response.guideId);
+            // setSteps([]); // Keep steps to show count or preview if needed, or clear them
         }
     };
 
@@ -78,8 +96,8 @@ function SidePanelApp() {
             <div className="absolute top-[-20%] left-[-20%] w-[70%] h-[70%] bg-[#06B6D4] opacity-20 blur-[120px] rounded-full pointer-events-none" />
             <div className="absolute bottom-[-20%] right-[-20%] w-[70%] h-[70%] bg-[#6366F1] opacity-20 blur-[120px] rounded-full pointer-events-none" />
 
-            {/* Header - Only visible when recording */}
-            {isRecording && (
+            {/* Header - Only visible when recording and not finished */}
+            {isRecording && recordingState !== 'finished' && (
                 <div className="z-10 shrink-0 px-6 pt-8 pb-4 flex flex-col items-center justify-center">
                     <img src={Logo} alt="Stepps.ai Logo" className="w-12 h-12 object-contain shadow-lg mb-4" />
 
@@ -96,7 +114,34 @@ function SidePanelApp() {
 
             {/* Scrollable Content Area */}
             <div className="z-10 flex-1 min-h-0 px-6 py-4 overflow-hidden flex flex-col">
-                {isRecording ? (
+                {recordingState === 'finished' ? (
+                    <div className="flex-1 flex flex-col items-center justify-center text-center px-4">
+                        <div className="mb-6">
+                            <Loader2 className="w-12 h-12 text-[#6366F1] animate-spin" />
+                        </div>
+                        <h1 className="text-[24px] font-medium text-slate-900 leading-tight mb-2">
+                            Recording Finished!
+                        </h1>
+                        <p className="text-slate-500 mb-8">
+                            You will now be redirected to the editor...
+                        </p>
+                        <Button
+                            variant="primary"
+                            className="w-full max-w-[240px] shadow-xl shadow-indigo-500/20 bg-[#6366F1] hover:bg-[#5558DD] text-white rounded-xl py-3 text-lg font-medium"
+                            onClick={() => {
+                                if (guideId) {
+                                    chrome.tabs.create({ url: `${WEB_APP_URL}/app/editor/${guideId}` });
+                                    setRecordingState('idle');
+                                    setSteps([]);
+                                    setGuideId(null);
+                                }
+                            }}
+                            icon={<Play className="w-5 h-5 fill-current" />}
+                        >
+                            Open Editor Now
+                        </Button>
+                    </div>
+                ) : isRecording ? (
                     <>
                         {/* Steps List */}
                         <div ref={stepsContainerRef} className="flex-1 overflow-y-auto min-h-0 space-y-2 scrollbar-hide">
@@ -152,7 +197,7 @@ function SidePanelApp() {
 
             {/* Fixed Footer */}
             <div className="z-10 shrink-0 px-6 pb-6">
-                {isRecording ? (
+                {recordingState === 'finished' ? null : isRecording ? (
                     <div className="space-y-2">
                         <Button
                             variant="primary"

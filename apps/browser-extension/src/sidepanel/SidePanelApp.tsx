@@ -1,4 +1,4 @@
-import { Play, Pause, ChevronDown, Trash2, Loader2 } from 'lucide-react';
+import { Play, Pause, Trash2, Loader2 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import Logo from '../assets/logo.svg';
 import { Button } from '../components/Button';
@@ -148,9 +148,8 @@ function SidePanelApp() {
                         {/* Steps List */}
                         <div ref={stepsContainerRef} className="flex-1 overflow-y-auto min-h-0 space-y-2 scrollbar-hide">
                             {steps.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                                    <ChevronDown className="w-8 h-8 animate-bounce" />
-                                    <p className="text-sm mt-2">Click anywhere to capture</p>
+                                <div className="flex flex-col items-center justify-center h-full">
+                                    <p className="text-sm font-medium text-slate-400">Click anywhere to capture</p>
                                 </div>
                             ) : (
                                 steps.map((step, index) => (

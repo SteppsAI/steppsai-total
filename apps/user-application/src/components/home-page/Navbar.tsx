@@ -31,7 +31,7 @@ export function Navbar() {
         {/* Spacer to balance the logo on the left, or just the buttons */}
         <div className="flex items-center gap-2">
           <a
-            href="/dashboard"
+            href="/app"
             className="relative z-20 text-sm font-medium font-sans leading-6 text-zinc-600 hover:text-black dark:text-neutral-300 dark:hover:text-white transition-colors whitespace-nowrap px-4 py-2"
           >
             Log in
@@ -65,7 +65,7 @@ export function Navbar() {
           ))}
           <div className="my-2 h-px bg-gray-200 w-full dark:bg-zinc-800" />
           <a
-            href="/dashboard"
+            href="/app"
             className="block w-full rounded-md px-3 py-2 text-base font-medium text-zinc-700 hover:bg-gray-50 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >
             Log in

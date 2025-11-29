@@ -100,6 +100,7 @@
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
@@ -474,8 +475,8 @@
 
   body {
     @apply bg-background text-foreground font-inter antialiased relative;
-    background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
-    background-size: 24px 24px;
+    background: linear-gradient(to bottom right, #ffffff, #f8fafc, #f1f5f9);
+    min-height: 100vh;
   }
 
   h1,
@@ -576,5 +577,15 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .bg-hero-clouds {
+    background-color: var(--background);
+    background-image: 
+      radial-gradient(circle at 50% -10%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 0% 40%, rgba(6, 182, 212, 0.10) 0%, transparent 50%),
+      radial-gradient(circle at 100% 40%, rgba(244, 63, 94, 0.08) 0%, transparent 50%);
   }
 }

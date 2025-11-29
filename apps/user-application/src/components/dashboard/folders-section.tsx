@@ -2,12 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { FolderCard } from "@/components/folder-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Folder } from "@/types/db";
-
-// Extended type for UI display if needed, or just use Folder and assume count is separate or missing for now
-interface FolderWithCount extends Folder {
-  guide_count?: number;
-}
+import { FolderWithCount } from "@/types/db";
 
 interface FoldersSectionProps {
   isLoading?: boolean;
@@ -67,7 +62,7 @@ export function FoldersSection({ isLoading, folders = [], onRename, onDelete }: 
                 folder={{
                   id: folder.id,
                   name: folder.name,
-                  guideCount: folder.guide_count || 0,
+                  guideCount: folder.guideCount || 0,
                 }}
                 onRename={onRename}
                 onDelete={onDelete}

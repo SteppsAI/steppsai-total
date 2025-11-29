@@ -1,41 +1,39 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Share2, Pencil, ChevronLeft } from "lucide-react";
 import { ShareDialog } from "@/components/share-dialog";
-import { useStepp } from "@/hooks/use-stepps";
-import { Guide, Step } from "@/types/db";
+import { trpc } from "@/router";
+import { Step } from "@/types/db";
 
 export const Route = createFileRoute("/app/_authed/stepps/$guideId")({
   component: GuideViewPage,
+  loader: async ({ context, params }) => {
+    await context.queryClient.prefetchQuery(
+      context.trpc.guides.getById.queryOptions({ id: params.guideId })
+    );
+  },
 });
-
-// Extend Guide to include steps for this view (handling mock data vs DB schema)
-interface GuideWithSteps extends Guide {
-  steps: (Step & { title?: string })[];
-}
 
 function GuideViewPage() {
   const { guideId } = Route.useParams();
-  const { data: fetchedGuide, isLoading, error } = useStepp(guideId);
   const [isShareOpen, setIsShareOpen] = useState(false);
 
-  const guide = fetchedGuide as unknown as GuideWithSteps;
-  const steps = guide?.steps || [];
+  const { data: guide } = useSuspenseQuery(
+    trpc.guides.getById.queryOptions({ id: guideId })
+  );
 
-  if (isLoading) {
-    return <GuideLoadingSkeleton />;
-  }
-
-  if (error || !guide) {
+  if (!guide) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="text-muted-foreground">Guide not found</div>
       </div>
     );
   }
+
+  const steps = (guide.steps ?? []) as Step[];
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -87,7 +85,7 @@ function GuideViewPage() {
           <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>{steps.length} steps</span>
             <span>•</span>
-            <span>Last updated {new Date(guide.updated_at || new Date()).toLocaleDateString()}</span>
+            <span>Last updated {new Date(guide.updatedAt || new Date()).toLocaleDateString()}</span>
           </div>
         </div>
 
@@ -103,8 +101,7 @@ function GuideViewPage() {
                     </div>
                     <div className="space-y-2 pt-1">
                       <h2 className="text-xl md:text-2xl font-medium text-foreground leading-snug">
-                        {/* Prefer final_caption/ai_caption as the main instruction */}
-                        {step.final_caption || step.ai_caption || step.title || `Step ${index + 1}`}
+                        {step.caption || step.aiCaption || `Step ${index + 1}`}
                       </h2>
                     </div>
                   </div>
@@ -112,9 +109,9 @@ function GuideViewPage() {
                 
                 {/* Screenshot */}
                 <div className="rounded-xl border overflow-hidden shadow-sm bg-muted/10 ring-1 ring-black/5">
-                   {step.screenshot_url ? (
+                   {step.imageKey ? (
                        <img
-                           src={step.screenshot_url}
+                           src={step.imageKey}
                            alt={`Step ${index + 1}`}
                            className="w-full h-auto object-contain bg-white"
                            loading="lazy"
@@ -147,35 +144,6 @@ function GuideViewPage() {
           guideTitle={guide.title || ""}
           guideId={guide.id}
       />
-    </div>
-  );
-}
-
-function GuideLoadingSkeleton() {
-  return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <div className="h-14 border-b flex items-center justify-between px-4 bg-background">
-        <Skeleton className="h-8 w-8 rounded-full" />
-        <Skeleton className="h-4 w-32" />
-        <div className="flex gap-2">
-          <Skeleton className="h-8 w-20" />
-        </div>
-      </div>
-      <div className="flex-1 w-full max-w-3xl mx-auto p-6 py-12 space-y-12">
-        <div className="space-y-4 text-center pb-8">
-          <Skeleton className="h-12 w-3/4 mx-auto" />
-          <Skeleton className="h-6 w-1/2 mx-auto" />
-        </div>
-        {[1, 2, 3].map(i => (
-           <div key={i} className="space-y-6">
-              <div className="flex gap-4">
-                   <Skeleton className="size-8 rounded-full" />
-                   <Skeleton className="h-8 w-3/4" />
-              </div>
-              <Skeleton className="w-full aspect-video rounded-xl" />
-           </div>
-        ))}
-      </div>
     </div>
   );
 }

@@ -1,25 +1,49 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { EditorHeader } from "@/components/editor/editor-header";
 import { EditorToolbar } from "@/components/editor/editor-toolbar";
 import { Canvas } from "@/components/editor/canvas";
 import { StepSidebar } from "@/components/editor/step-sidebar";
 import { useState, useCallback, useEffect } from "react";
-import { Annotation } from "@/components/editor/annotation-types";
-import { useStepp } from "@/hooks/use-stepps";
 import { ShareDialog } from "@/components/share-dialog";
 import { ExportDialog } from "@/components/export-dialog";
 import { useSidebar } from "@/components/ui/sidebar";
 import { toast } from "sonner";
+import { trpc } from "@/router";
+import { Step, Overlay, Guide } from "@/types/db";
 
 export const Route = createFileRoute("/app/_authed/editor/$guideId")({
   component: EditorPage,
+  loader: async ({ context, params }) => {
+    await context.queryClient.prefetchQuery(
+      context.trpc.guides.getById.queryOptions({ id: params.guideId })
+    );
+  },
 });
+
+// Type for local guide state that uses our Overlay types
+interface LocalGuide extends Omit<Guide, 'steps'> {
+  steps?: Step[];
+}
 
 function EditorPage() {
   const { guideId } = Route.useParams();
-  const { data: fetchedGuide, isLoading, error } = useStepp(guideId);
+  const queryClient = useQueryClient();
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
+
+  // Fetch guide data
+  const { data: fetchedGuide } = useSuspenseQuery(
+    trpc.guides.getById.queryOptions({ id: guideId })
+  );
+
+  // Update mutation
+  const updateGuideMutation = useMutation({
+    ...trpc.guides.update.mutationOptions(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["guides"] });
+    },
+  });
 
   useEffect(() => {
     if (isMobile) {
@@ -29,7 +53,7 @@ function EditorPage() {
   }, [isMobile, navigate]);
 
   // Local state for editor (synced with fetched data initially)
-  const [guide, setGuide] = useState<any | null>(null); // Using any for now to avoid strict type mismatch with mock data structure vs DB
+  const [guide, setGuide] = useState<LocalGuide | null>(null);
   const [title, setTitle] = useState("Untitled Stepps");
   const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const [activeStepId, setActiveStepId] = useState<string>("");
@@ -37,99 +61,113 @@ function EditorPage() {
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
 
-  // Sync fetched guide to local state
+  // Sync fetched guide to local state and set initial active step
   useEffect(() => {
     if (fetchedGuide) {
-      setGuide(fetchedGuide);
+      // Cast to LocalGuide - overlays might have different format from backend
+      const localGuide = fetchedGuide as unknown as LocalGuide;
+      setGuide(localGuide);
       setTitle(fetchedGuide.title || "Untitled Stepps");
+      
+      // Set initial active step if not set
+      if (!activeStepId && localGuide.steps && localGuide.steps.length > 0) {
+        const sorted = [...localGuide.steps].sort((a, b) => 
+          (a.orderIndex ?? 0) - (b.orderIndex ?? 0)
+        );
+        setActiveStepId(sorted[0].id);
+      }
     }
-  }, [fetchedGuide]);
+  }, [fetchedGuide, activeStepId]);
 
-  const handleUpdateStep = useCallback((id: string, title: string) => {
-    setGuide((prev: any) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        steps: prev.steps.map((step: any) =>
-          step.id === id
-            ? { ...step, title }
-            : step
-        )
-      };
-    });
-
+  const saveGuide = useCallback(async (updates: { title?: string; steps?: Step[] }) => {
+    if (!guide) return;
+    
     setStatus("saving");
-    // Simulate save
-    setTimeout(() => setStatus("saved"), 1000);
-  }, []);
+    try {
+      await updateGuideMutation.mutateAsync({
+        id: guideId,
+        data: updates as any, // Backend accepts the Step[] format
+      });
+      setStatus("saved");
+    } catch (error) {
+      setStatus("unsaved");
+      toast.error("Failed to save changes");
+    }
+  }, [guide, guideId, updateGuideMutation]);
 
-  const handleAnnotationsChange = useCallback((annotations: Annotation[]) => {
+  const handleTitleChange = useCallback((newTitle: string) => {
+    setTitle(newTitle);
+    saveGuide({ title: newTitle });
+  }, [saveGuide]);
+
+  const handleUpdateStep = useCallback((id: string, stepTitle: string) => {
+    setGuide((prev) => {
+      if (!prev || !prev.steps) return prev;
+      const updatedSteps = prev.steps.map((step) =>
+        step.id === id ? { ...step, caption: stepTitle } : step
+      );
+      saveGuide({ steps: updatedSteps });
+      return { ...prev, steps: updatedSteps };
+    });
+  }, [saveGuide]);
+
+  const handleAnnotationsChange = useCallback((annotations: Overlay[]) => {
     if (!activeStepId) return;
 
-    setGuide((prev: any) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        steps: prev.steps.map((step: any) =>
-          step.id === activeStepId
-            ? { ...step, overlays: annotations }
-            : step
-        )
-      };
+    setGuide((prev) => {
+      if (!prev || !prev.steps) return prev;
+      const updatedSteps = prev.steps.map((step) =>
+        step.id === activeStepId ? { ...step, overlays: annotations } : step
+      );
+      saveGuide({ steps: updatedSteps });
+      return { ...prev, steps: updatedSteps };
     });
+  }, [activeStepId, saveGuide]);
 
-    setStatus("saving");
-    setTimeout(() => setStatus("saved"), 1000);
-  }, [activeStepId]);
+  const handleDeleteStep = useCallback((id: string) => {
+    setGuide((prev) => {
+      if (!prev || !prev.steps) return prev;
+      const updatedSteps = prev.steps.filter((step) => step.id !== id);
+      const reindexed = updatedSteps.map((step, idx) => ({
+        ...step,
+        orderIndex: idx,
+      }));
+      saveGuide({ steps: reindexed });
+      return { ...prev, steps: reindexed };
+    });
+  }, [saveGuide]);
 
-  const handleDeleteStep = (id: string) => {
-    console.log("Delete step:", id);
-  };
+  const handleReorderSteps = useCallback((steps: Step[]) => {
+    const reindexed = steps.map((step, idx) => ({
+      ...step,
+      orderIndex: idx,
+    }));
+    setGuide((prev) => prev ? { ...prev, steps: reindexed } : prev);
+    saveGuide({ steps: reindexed });
+  }, [saveGuide]);
 
-  const handleReorderSteps = (steps: any[]) => {
-    console.log("Reorder steps:", steps);
-  };
-
-  const handleAddStep = (stepData: { title: string; file: File; previewUrl: string }) => {
-    // Create new step with temporary ID and local preview URL
-    const newStep = {
+  const handleAddStep = useCallback((stepData: { title: string; file: File; previewUrl: string }) => {
+    const newStep: Step = {
       id: crypto.randomUUID(),
-      title: stepData.title,
-      screenshotUrl: stepData.previewUrl,
+      caption: stepData.title,
+      imageKey: stepData.previewUrl,
       orderIndex: (guide?.steps?.length || 0),
       overlays: [],
-      // Initialize other fields as needed by DB schema
       pageUrl: "",
       domSelector: "",
-      aiCaption: "",
-      finalCaption: "",
-      isExcluded: false
     };
 
-    setGuide((prev: any) => {
+    setGuide((prev) => {
       if (!prev) return prev;
-      return {
-        ...prev,
-        steps: [...(prev.steps || []), newStep]
-      };
+      const updatedSteps = [...(prev.steps || []), newStep];
+      saveGuide({ steps: updatedSteps });
+      return { ...prev, steps: updatedSteps };
     });
 
-    // Set as active step
     setActiveStepId(newStep.id);
+  }, [guide?.steps?.length, saveGuide]);
 
-    setStatus("saving");
-    setTimeout(() => setStatus("saved"), 1000);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-background">
-        <div className="text-muted-foreground">Loading...</div>
-      </div>
-    );
-  }
-
-  if (error || !guide) {
+  if (!guide) {
     return (
       <div className="h-screen flex items-center justify-center bg-background">
         <div className="text-muted-foreground">Guide not found</div>
@@ -138,26 +176,19 @@ function EditorPage() {
   }
 
   // Sort steps by orderIndex
-  const sortedSteps = guide.steps?.sort((a: any, b: any) => a.orderIndex - b.orderIndex) || [];
-
-  // Set initial active step if not set
-  if (!activeStepId && sortedSteps.length > 0) {
-    setActiveStepId(sortedSteps[0].id);
-  }
+  const sortedSteps = [...(guide.steps || [])].sort((a, b) => 
+    (a.orderIndex ?? 0) - (b.orderIndex ?? 0)
+  );
 
   // Get the current active step
-  const currentStep = sortedSteps.find((step: any) => step.id === activeStepId) || sortedSteps[0];
+  const currentStep = sortedSteps.find((step) => step.id === activeStepId) || sortedSteps[0];
 
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden bg-background">
       <EditorHeader
         title={title}
         status={status}
-        onTitleChange={(newTitle: string) => {
-          setTitle(newTitle);
-          setStatus("saving");
-          setTimeout(() => setStatus("saved"), 1000);
-        }}
+        onTitleChange={handleTitleChange}
         onShare={() => setIsShareOpen(true)}
         onExport={() => setIsExportOpen(true)}
       />
@@ -169,8 +200,8 @@ function EditorPage() {
         />
 
         <Canvas
-          screenshotUrl={currentStep?.screenshotUrl || undefined}
-          overlays={currentStep?.overlays as Annotation[] || []}
+          screenshotUrl={currentStep?.imageKey || undefined}
+          overlays={(currentStep?.overlays as Overlay[]) || []}
           activeTool={activeTool}
           onAnnotationsChange={handleAnnotationsChange}
         />

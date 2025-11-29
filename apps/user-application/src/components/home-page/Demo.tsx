@@ -27,11 +27,8 @@ export function Demo() {
                         <div className="relative w-full h-full bg-slate-50 dark:bg-slate-950 group cursor-pointer">
                              {/* Placeholder for now */}
                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 duration-300 backdrop-blur-sm border border-primary/20">
-                                    <Play className="w-8 h-8 text-primary fill-primary ml-1" />
-                                </div>
+                                <p className="text-muted-foreground">Demo video here</p>
                              </div>
-                             
                              {/* Prepared video tag for future implementation
                              <video 
                                 className="w-full h-full object-cover"

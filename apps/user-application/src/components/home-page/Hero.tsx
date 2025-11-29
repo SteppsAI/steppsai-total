@@ -1,31 +1,50 @@
+"use client"
+
 import { ArrowRight, Play } from 'lucide-react'
 import { Demo } from './Demo'
-import { motion } from 'framer-motion'
+import { useRef } from 'react'
+import gsap from 'gsap'
+import { useGSAP } from '@gsap/react'
 
 export function Hero() {
+    const containerRef = useRef<HTMLDivElement>(null)
+    const contentRef = useRef<HTMLDivElement>(null)
+
+    useGSAP(() => {
+        const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
+        
+        tl.fromTo(contentRef.current, 
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 0.8 }
+        )
+        .fromTo(".hero-text-stagger", 
+            { opacity: 0, y: 20 }, 
+            { opacity: 1, y: 0, duration: 0.6, stagger: 0.15 }, 
+            "-=0.6"
+        )
+    }, { scope: containerRef })
+
     return (
-        <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
+        <section className="relative pt-56 pb-20 md:pt-56 md:pb-32 overflow-hidden" ref={containerRef}>
             <div className="absolute inset-0 bg-hero-clouds pointer-events-none" />
             <div className="container mx-auto px-4 relative z-10">
                 <div className="mx-auto grid max-w-8xl border border-border/50 rounded-3xl shadow-2xl overflow-hidden bg-background/40 backdrop-blur-sm">
 
                     {/* Top Left: Hero Content */}
                     <div className="p-6 sm:p-16 flex flex-col justify-center items-center text-center bg-background w-full">
-                        <motion.div 
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
-                            className="space-y-8 flex flex-col items-center"
+                        <div 
+                            ref={contentRef}
+                            className="space-y-8 flex flex-col items-center opacity-0" // Start invisible to prevent flash
                         >
-                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.1] max-w-4xl">
+                            <h1 className="hero-text-stagger text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.1] max-w-4xl">
                                 Stop writing docs <span className="text-primary">manually</span>.
                             </h1>
                             
-                            <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
+                            <p className="hero-text-stagger text-lg text-muted-foreground leading-relaxed max-w-2xl">
                                 stepps.ai automatically records your workflow and generates beautiful, step-by-step guides in seconds.
                             </p>
                             
-                            <div className="flex flex-wrap gap-4 pt-2 justify-center">
+                            <div className="hero-text-stagger flex flex-wrap gap-4 pt-2 justify-center">
                                 <a
                                     href="/dashboard"
                                     className="inline-flex h-12 items-center justify-center rounded-full bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
@@ -41,7 +60,7 @@ export function Hero() {
                                     View Demo
                                 </a>
                             </div>
-                        </motion.div>
+                        </div>
                     </div>
 
                     {/* Middle Bar: Stats/Trust */}

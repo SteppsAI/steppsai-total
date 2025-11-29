@@ -1,12 +1,47 @@
 "use client"
 
+import { useRef } from 'react'
+import gsap from 'gsap'
+import { useGSAP } from '@gsap/react'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
+
 export function Demo() {
+    const containerRef = useRef<HTMLDivElement>(null)
+    const browserRef = useRef<HTMLDivElement>(null)
+
+    useGSAP(() => {
+        gsap.fromTo(browserRef.current,
+            { 
+                opacity: 0, 
+                y: 100, 
+                rotateX: -20,
+                scale: 0.95
+            },
+            { 
+                opacity: 1, 
+                y: 0, 
+                rotateX: 0,
+                scale: 1,
+                duration: 1.5, 
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: containerRef.current,
+                    start: "top 75%",
+                    end: "bottom 20%",
+                    toggleActions: "play none none reverse"
+                }
+            }
+        )
+    }, { scope: containerRef })
+
     return (
-        <div id="demo" className="relative w-full overflow-hidden">
+        <div id="demo" ref={containerRef} className="relative w-full overflow-hidden">
             <div className="w-full py-8 md:py-12 px-2 md:px-0">
-                <div className="relative max-w-5xl mx-auto perspective-1000">
+                <div className="relative max-w-5xl mx-auto perspective-1000" style={{ perspective: '1000px' }}>
                     {/* Browser Window */}
-                    <div className="relative bg-background rounded-xl border border-border shadow-2xl overflow-hidden aspect-video origin-center">
+                    <div ref={browserRef} className="relative bg-background rounded-xl border border-border shadow-2xl overflow-hidden aspect-video origin-center will-change-transform">
                         {/* Browser Header */}
                         <div className="h-10 bg-muted border-b border-border flex items-center px-4 gap-2">
                             <div className="flex gap-1.5">

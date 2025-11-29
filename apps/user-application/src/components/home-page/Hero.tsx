@@ -4,7 +4,8 @@ import { motion } from 'framer-motion'
 
 export function Hero() {
     return (
-        <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden bg-hero-clouds">
+        <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
+            <div className="absolute inset-0 bg-hero-clouds pointer-events-none" />
             <div className="container mx-auto px-4 relative z-10">
                 <div className="mx-auto grid max-w-8xl border border-border/50 rounded-3xl shadow-2xl overflow-hidden bg-background/40 backdrop-blur-sm">
 

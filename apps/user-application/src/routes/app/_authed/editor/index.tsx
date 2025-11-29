@@ -8,6 +8,13 @@ import { useState } from "react";
 
 export const Route = createFileRoute("/app/_authed/editor/")({
     component: EditorIndexPage,
+    loader: async ({ context }) => {
+        // Prefetch data needed by SteppSelectionModal
+        await Promise.all([
+            context.queryClient.prefetchQuery(context.trpc.guides.getAll.queryOptions()),
+            context.queryClient.prefetchQuery(context.trpc.folders.getAll.queryOptions()),
+        ]);
+    },
 });
 
 function EditorIndexPage() {

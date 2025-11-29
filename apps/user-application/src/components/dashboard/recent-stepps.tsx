@@ -99,7 +99,7 @@ export function RecentStepps({ isLoading, stepps = [], onDelete, onMove }: Recen
               <div key={stepp.id} className={index >= 2 ? "hidden lg:block" : ""}>
                 <DashboardCard
                   title={stepp.title || "Untitled Stepp"}
-                  image={firstStepImage || "https://placehold.co/600x400/png"}
+                  image={firstStepImage || "/og-image.svg"}
                   viewUrl={`/app/stepps/${stepp.id}`}
                   onEdit={() => navigate({ to: `/app/editor/${stepp.id}` })}
                   onShare={() => setShareGuide(stepp)}

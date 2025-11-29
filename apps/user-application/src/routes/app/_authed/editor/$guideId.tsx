@@ -61,14 +61,23 @@ function EditorPage() {
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
 
-  // Sync fetched guide to local state
+  // Sync fetched guide to local state and set initial active step
   useEffect(() => {
     if (fetchedGuide) {
       // Cast to LocalGuide - overlays might have different format from backend
-      setGuide(fetchedGuide as unknown as LocalGuide);
+      const localGuide = fetchedGuide as unknown as LocalGuide;
+      setGuide(localGuide);
       setTitle(fetchedGuide.title || "Untitled Stepps");
+      
+      // Set initial active step if not set
+      if (!activeStepId && localGuide.steps && localGuide.steps.length > 0) {
+        const sorted = [...localGuide.steps].sort((a, b) => 
+          (a.orderIndex ?? 0) - (b.orderIndex ?? 0)
+        );
+        setActiveStepId(sorted[0].id);
+      }
     }
-  }, [fetchedGuide]);
+  }, [fetchedGuide, activeStepId]);
 
   const saveGuide = useCallback(async (updates: { title?: string; steps?: Step[] }) => {
     if (!guide) return;
@@ -170,11 +179,6 @@ function EditorPage() {
   const sortedSteps = [...(guide.steps || [])].sort((a, b) => 
     (a.orderIndex ?? 0) - (b.orderIndex ?? 0)
   );
-
-  // Set initial active step if not set
-  if (!activeStepId && sortedSteps.length > 0) {
-    setActiveStepId(sortedSteps[0].id);
-  }
 
   // Get the current active step
   const currentStep = sortedSteps.find((step) => step.id === activeStepId) || sortedSteps[0];

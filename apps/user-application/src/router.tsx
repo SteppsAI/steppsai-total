@@ -5,6 +5,7 @@ import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { routeTree } from "./routeTree.gen";
 import type { AppRouter } from "@/worker/trpc/router";
 import Pending from "@/components/common/pending";
+import { ErrorComponent } from "@/components/common/error-boundary";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 
 export const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ export function createRouter() {
       queryClient,
     },
     defaultPendingComponent: () => <Pending />,
+    defaultErrorComponent: ({ error }) => <ErrorComponent error={error} />,
     Wrap: function WrapComponent({ children }) {
       return (
         <QueryClientProvider client={queryClient}>

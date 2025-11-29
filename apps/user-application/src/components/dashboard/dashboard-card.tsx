@@ -1,5 +1,5 @@
 import { Pencil, Share2, Trash, Download, FolderInput } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 
 interface DashboardCardProps {
   title: string;
@@ -13,24 +13,26 @@ interface DashboardCardProps {
 }
 
 export function DashboardCard({ title, image, viewUrl, onEdit, onShare, onMove, onDelete, onExport }: DashboardCardProps) {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    if (viewUrl) {
+      navigate({ to: viewUrl });
+    }
+  };
+
   return (
     <div className="flex flex-col gap-2 group">
-      {/* Card Wrapper with Link */}
+      {/* Card Wrapper */}
       <div className="relative">
-        {viewUrl ? (
-          <Link to={viewUrl} className="block">
-            <div className="aspect-video w-full rounded-xl border border-border overflow-hidden bg-card relative transition-all duration-200 cursor-pointer group-hover:shadow-sm">
-              <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-              {/* Overlay on hover */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-200" />
-            </div>
-          </Link>
-        ) : (
-          <div className="aspect-video w-full rounded-xl border border-border overflow-hidden bg-card relative transition-all duration-200 cursor-pointer group-hover:shadow-sm">
-            <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-200" />
-          </div>
-        )}
+        <div 
+          onClick={handleCardClick}
+          className={`aspect-video w-full rounded-xl border border-border overflow-hidden bg-card relative transition-all duration-200 ${viewUrl ? 'cursor-pointer' : ''} group-hover:shadow-sm`}
+        >
+          <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+          {/* Overlay on hover */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-200" />
+        </div>
       </div>
 
       {/* Card Footer - Flex container for Title and Actions */}

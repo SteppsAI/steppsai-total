@@ -3,13 +3,13 @@ import {
   Home,
   Library,
   Settings,
-  User,
   Edit,
   Plus,
   MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useLocation } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 
 import {
   Sidebar,
@@ -29,9 +29,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { triggerExtensionSidePanel } from "@/lib/extension";
 import { MobileCreationDialog } from "@/components/mobile-creation-dialog";
 import { useState } from "react";
+import { trpc } from "@/router";
+import { User as UserType } from "@/types/db";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation();
@@ -39,7 +42,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { state, isMobile, setOpenMobile } = useSidebar();
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
 
+  // Fetch user data (non-blocking, uses regular useQuery)
+  const { data: userData } = useQuery(trpc.users.getMe.queryOptions());
+  const user = userData as UserType | null | undefined;
+
   const isActive = (path: string) => pathname === path;
+
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   // Close sidebar on mobile when clicking a link
   const handleLinkClick = () => {
@@ -136,11 +153,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <User className="size-4" />
-              </div>
+              <Avatar className="size-8">
+                <AvatarImage src={user?.avatarUrl || undefined} alt="Profile" />
+                <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-xs">
+                  {getInitials(user?.name)}
+                </AvatarFallback>
+              </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">Vilém Barnet</span>
+                <span className="truncate font-semibold">{user?.name || "User"}</span>
                 <span className="truncate text-xs">Pro Plan</span>
               </div>
             </SidebarMenuButton>

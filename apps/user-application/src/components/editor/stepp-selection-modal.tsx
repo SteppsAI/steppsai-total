@@ -187,70 +187,70 @@ export function SteppSelectionModal({ open, onOpenChange }: SteppSelectionModalP
                                         </div>
                                     )}
 
-                                    {/* Folders Section (Expandable) */}
-                                    {folders.length > 0 && (
-                                        <div className="mb-2">
-                                            <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                                Folders
-                                            </div>
-                                            <div className="flex flex-col gap-1">
-                                                {folders.map((folder) => {
-                                                    const isExpanded = expandedFolders.has(folder.id);
-                                                    const folderGuides = guidesByFolder[folder.id] || [];
-                                                    return (
-                                                        <div key={folder.id}>
-                                                            <button
-                                                                className="flex items-center justify-between w-full p-3 rounded-lg hover:bg-muted/50 transition-colors text-left group"
-                                                                onClick={() => toggleFolder(folder.id)}
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="flex-shrink-0 size-10 rounded-lg bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                                                                        <Folder className="size-5" />
+                                    {/* Folders Section (Expandable) - Only show folders with guides */}
+                                    {(() => {
+                                        const foldersWithGuides = folders.filter(
+                                            (folder) => (guidesByFolder[folder.id] || []).length > 0
+                                        );
+                                        return foldersWithGuides.length > 0 && (
+                                            <div className="mb-2">
+                                                <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                                    Folders
+                                                </div>
+                                                <div className="flex flex-col gap-1">
+                                                    {foldersWithGuides.map((folder) => {
+                                                        const isExpanded = expandedFolders.has(folder.id);
+                                                        const folderGuides = guidesByFolder[folder.id] || [];
+                                                        return (
+                                                            <div key={folder.id}>
+                                                                <button
+                                                                    className="flex items-center justify-between w-full p-3 rounded-lg hover:bg-muted/50 transition-colors text-left group"
+                                                                    onClick={() => toggleFolder(folder.id)}
+                                                                >
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="flex-shrink-0 size-10 rounded-lg bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                                                            <Folder className="size-5" />
+                                                                        </div>
+                                                                        <div className="flex flex-col">
+                                                                            <span className="font-medium">{folder.name}</span>
+                                                                            <span className="text-xs text-muted-foreground">
+                                                                                {folderGuides.length} stepp{folderGuides.length !== 1 ? "s" : ""}
+                                                                            </span>
+                                                                        </div>
                                                                     </div>
-                                                                    <div className="flex flex-col">
-                                                                        <span className="font-medium">{folder.name}</span>
-                                                                        <span className="text-xs text-muted-foreground">
-                                                                            {folderGuides.length} stepp{folderGuides.length !== 1 ? "s" : ""}
-                                                                        </span>
+                                                                    {isExpanded ? (
+                                                                        <ChevronDown className="size-4 text-muted-foreground" />
+                                                                    ) : (
+                                                                        <ChevronRight className="size-4 text-muted-foreground" />
+                                                                    )}
+                                                                </button>
+                                                                {/* Expanded folder content */}
+                                                                {isExpanded && (
+                                                                    <div className="ml-6 pl-4 border-l border-border">
+                                                                        {folderGuides.map((guide) => (
+                                                                            <GuideItem
+                                                                                key={guide.id}
+                                                                                guide={guide}
+                                                                                onClick={() => handleSelect(guide.id)}
+                                                                                compact
+                                                                            />
+                                                                        ))}
                                                                     </div>
-                                                                </div>
-                                                                {isExpanded ? (
-                                                                    <ChevronDown className="size-4 text-muted-foreground" />
-                                                                ) : (
-                                                                    <ChevronRight className="size-4 text-muted-foreground" />
                                                                 )}
-                                                            </button>
-                                                            {/* Expanded folder content */}
-                                                            {isExpanded && folderGuides.length > 0 && (
-                                                                <div className="ml-6 pl-4 border-l border-border">
-                                                                    {folderGuides.map((guide) => (
-                                                                        <GuideItem
-                                                                            key={guide.id}
-                                                                            guide={guide}
-                                                                            onClick={() => handleSelect(guide.id)}
-                                                                            compact
-                                                                        />
-                                                                    ))}
-                                                                </div>
-                                                            )}
-                                                            {isExpanded && folderGuides.length === 0 && (
-                                                                <div className="ml-6 pl-4 border-l border-border py-2">
-                                                                    <span className="text-sm text-muted-foreground">No stepps in this folder</span>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    );
-                                                })}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                                {looseGuides.length > 0 && <Separator className="my-2" />}
                                             </div>
-                                            {looseGuides.length > 0 && <Separator className="my-2" />}
-                                        </div>
-                                    )}
+                                        );
+                                    })()}
 
-                                    {/* Loose Stepps (not in any folder) */}
+                                    {/* All Stepps (not in any folder) */}
                                     {looseGuides.length > 0 && (
                                         <div>
                                             <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                                Uncategorized
+                                                All Stepps
                                             </div>
                                             <div className="flex flex-col gap-1">
                                                 {looseGuides.map((guide) => (

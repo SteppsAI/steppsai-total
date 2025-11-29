@@ -3,6 +3,7 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
+		"build": "tsc --noEmit",
 		"stage:deploy": "wrangler deploy --env stage",
 		"production:deploy": "wrangler deploy --env production",
 		"dev": "wrangler dev --env stage",

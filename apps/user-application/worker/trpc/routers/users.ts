@@ -41,7 +41,7 @@ export const usersRouter = router({
     // Upload avatar (via data-service)
     uploadAvatar: publicProcedure
         .input(z.object({ dataUrl: z.string() }))
-        .mutation(async ({ input }) => {
+        .mutation(async ({ input: _input }) => {
             // TODO: Get userId from context (auth)
             const userId = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366"; // Hardcoded for now
             

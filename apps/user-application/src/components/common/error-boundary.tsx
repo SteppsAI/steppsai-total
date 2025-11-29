@@ -9,7 +9,7 @@ interface ErrorComponentProps {
 
 const REDIRECT_DELAY = 3; // seconds
 
-export function ErrorComponent({ error }: ErrorComponentProps) {
+export function ErrorComponent({ error: _error }: ErrorComponentProps) {
   const router = useRouter();
   const [countdown, setCountdown] = useState(REDIRECT_DELAY);
 

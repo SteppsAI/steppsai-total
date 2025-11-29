@@ -34,13 +34,13 @@ export function Features() {
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-2xl text-center mb-16">
                     <div className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-600 mb-4">
-                        How it works
+                        Save 10+ hours per week
                     </div>
                     <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl font-heading">
-                        Transform your workflow
+                        Stop wasting time on documentation
                     </h2>
                     <p className="mt-4 text-lg leading-8 text-gray-600 font-sans">
-                        From recording to sharing, our intelligent platform makes documentation effortless and collaborative.
+                        stepps.ai automates the boring parts of your job so you can focus on what matters.
                     </p>
                 </div>
 

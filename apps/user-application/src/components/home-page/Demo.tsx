@@ -1,7 +1,5 @@
 "use client"
 
-import { Play } from "lucide-react"
-
 export function Demo() {
     return (
         <div id="demo" className="relative w-full overflow-hidden">

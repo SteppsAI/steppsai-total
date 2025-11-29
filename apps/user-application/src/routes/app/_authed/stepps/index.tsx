@@ -1,12 +1,13 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     Folder as FolderIcon,
     Plus,
     Search,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useCreateFolder } from "@/hooks/use-folders";
 import { toast } from "sonner";
+import { trpc } from "@/router";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,8 +21,19 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { FolderCard } from "@/components/folder-card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { TEST_FOLDERS, TEST_GUIDES, FolderWithCount, GuideWithFolder } from "@/types/test-data";
+
+// Local type for guides with folder name - avoids tRPC type conflicts
+interface LocalGuideWithFolder {
+    id: string;
+    userId: string;
+    folderId?: string | null;
+    title?: string | null;
+    status?: string | null;
+    visibility?: string | null;
+    steps?: { id: string }[];
+    updatedAt?: string | null;
+    folderName?: string | null;
+}
 import { triggerExtensionSidePanel } from "@/lib/extension";
 import { MobileCreationDialog } from "@/components/mobile-creation-dialog";
 import { CreateFolderDialog } from "@/components/create-folder-dialog";
@@ -42,14 +54,77 @@ import { MoveSteppDialog } from "@/components/move-stepp-dialog";
 
 export const Route = createFileRoute("/app/_authed/stepps/")({
     component: SteppsPage,
+    loader: async ({ context }) => {
+        // Prefetch data in parallel
+        await Promise.all([
+            context.queryClient.prefetchQuery(
+                context.trpc.guides.getAll.queryOptions()
+            ),
+            context.queryClient.prefetchQuery(
+                context.trpc.folders.getAll.queryOptions()
+            ),
+        ]);
+    },
 });
 
 function SteppsPage() {
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const [searchQuery, setSearchQuery] = useState("");
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
     const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
     const { isMobile } = useSidebar();
+
+    // Fetch data with useSuspenseQuery
+    const { data: guides } = useSuspenseQuery(
+        trpc.guides.getAll.queryOptions()
+    );
+    const { data: folders } = useSuspenseQuery(
+        trpc.folders.getAll.queryOptions()
+    );
+
+    // Enrich guides with folder names
+    const guidesWithFolders: LocalGuideWithFolder[] = (guides ?? []).map(guide => ({
+        ...guide,
+        folderName: guide.folderId ? folders?.find(f => f.id === guide.folderId)?.name : null,
+    }));
+
+    // Mutations
+    const createFolderMutation = useMutation({
+        ...trpc.folders.create.mutationOptions(),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["folders"] });
+        },
+    });
+
+    const deleteFolderMutation = useMutation({
+        ...trpc.folders.delete.mutationOptions(),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["folders"] });
+            queryClient.invalidateQueries({ queryKey: ["guides"] });
+        },
+    });
+
+    const updateFolderMutation = useMutation({
+        ...trpc.folders.update.mutationOptions(),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["folders"] });
+        },
+    });
+
+    const deleteGuideMutation = useMutation({
+        ...trpc.guides.delete.mutationOptions(),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["guides"] });
+        },
+    });
+
+    const updateGuideMutation = useMutation({
+        ...trpc.guides.update.mutationOptions(),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["guides"] });
+        },
+    });
 
     // Share/Export Dialog State
     const [shareDialogOpen, setShareDialogOpen] = useState(false);
@@ -63,46 +138,20 @@ function SteppsPage() {
     const [moveSteppOpen, setMoveSteppOpen] = useState(false);
 
     const [selectedFolder, setSelectedFolder] = useState<{ id: string; name: string } | null>(null);
-    const [selectedSteppForAction, setSelectedSteppForAction] = useState<GuideWithFolder | null>(null);
-
-    // Backend integration hooks
-    const createFolderMutation = useCreateFolder();
-
-    // Data state
-    const [isLoading, setIsLoading] = useState(true);
-    const [folders, setFolders] = useState<FolderWithCount[]>([]);
-    const [guides, setGuides] = useState<GuideWithFolder[]>([]);
-
-    useEffect(() => {
-        // Simulate data fetching
-        // TODO: Replace with actual data fetching using useStepps() hook when backend is ready
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-            // Use test data
-            setFolders(TEST_FOLDERS);
-            setGuides(TEST_GUIDES);
-        }, 1500);
-
-        return () => clearTimeout(timer);
-    }, []);
+    const [selectedSteppForAction, setSelectedSteppForAction] = useState<LocalGuideWithFolder | null>(null);
 
     // Handle search query from dashboard
     useEffect(() => {
-        // Check if there's a search query from the dashboard
         const savedSearchQuery = sessionStorage.getItem('searchQuery');
         if (savedSearchQuery) {
             setSearchQuery(savedSearchQuery);
-            // Clear it after reading so it doesn't persist
             sessionStorage.removeItem('searchQuery');
         }
     }, []);
 
-
     const handleCreateFolder = async (name: string) => {
         try {
-            const newFolder = await createFolderMutation.mutateAsync(name);
-            // Update local state optimistically
-            setFolders((prev) => [...prev, newFolder]);
+            await createFolderMutation.mutateAsync({ name });
             setIsCreateFolderOpen(false);
             toast.success("Folder created successfully!");
         } catch (error) {
@@ -116,13 +165,16 @@ function SteppsPage() {
         setDeleteFolderOpen(true);
     };
 
-    const confirmDeleteFolder = () => {
+    const confirmDeleteFolder = async () => {
         if (selectedFolder) {
-            // Optimistic update
-            setFolders((prev) => prev.filter((f) => f.id !== selectedFolder.id));
-            setDeleteFolderOpen(false);
-            toast.success(`Folder "${selectedFolder.name}" deleted`);
-            setSelectedFolder(null);
+            try {
+                await deleteFolderMutation.mutateAsync({ id: selectedFolder.id });
+                setDeleteFolderOpen(false);
+                toast.success(`Folder "${selectedFolder.name}" deleted`);
+                setSelectedFolder(null);
+            } catch (error) {
+                toast.error("Failed to delete folder");
+            }
         }
     };
 
@@ -131,82 +183,83 @@ function SteppsPage() {
         setRenameFolderOpen(true);
     };
 
-    const confirmRenameFolder = (newName: string) => {
+    const confirmRenameFolder = async (newName: string) => {
         if (selectedFolder) {
-            // Optimistic update
-            setFolders((prev) =>
-                prev.map((f) => (f.id === selectedFolder.id ? { ...f, name: newName } : f))
-            );
-            setRenameFolderOpen(false);
-            toast.success(`Folder renamed to "${newName}"`);
-            setSelectedFolder(null);
+            try {
+                await updateFolderMutation.mutateAsync({ id: selectedFolder.id, name: newName });
+                setRenameFolderOpen(false);
+                toast.success(`Folder renamed to "${newName}"`);
+                setSelectedFolder(null);
+            } catch (error) {
+                toast.error("Failed to rename folder");
+            }
         }
     };
 
-    const handleDeleteStepp = (guide: GuideWithFolder) => {
+    const handleDeleteStepp = (guide: LocalGuideWithFolder) => {
         setSelectedSteppForAction(guide);
         setDeleteSteppOpen(true);
     };
 
-    const confirmDeleteStepp = () => {
+    const confirmDeleteStepp = async () => {
         if (selectedSteppForAction) {
-            // Optimistic update
-            setGuides((prev) => prev.filter((g) => g.id !== selectedSteppForAction.id));
-            setDeleteSteppOpen(false);
-            toast.success(`Stepp "${selectedSteppForAction.title}" deleted`);
-            setSelectedSteppForAction(null);
+            try {
+                await deleteGuideMutation.mutateAsync({ id: selectedSteppForAction.id });
+                setDeleteSteppOpen(false);
+                toast.success(`Stepp "${selectedSteppForAction.title}" deleted`);
+                setSelectedSteppForAction(null);
+            } catch (error) {
+                toast.error("Failed to delete stepp");
+            }
         }
     };
 
-    const handleMoveStepp = (guide: GuideWithFolder) => {
+    const handleMoveStepp = (guide: LocalGuideWithFolder) => {
         setSelectedSteppForAction(guide);
         setMoveSteppOpen(true);
     };
 
-    const confirmMoveStepp = (folderId: string | null) => {
+    const confirmMoveStepp = async (folderId: string | null) => {
         if (selectedSteppForAction) {
-            // Optimistic update
-            const folderName = folderId ? folders.find(f => f.id === folderId)?.name : undefined;
-            setGuides((prev) =>
-                prev.map((g) =>
-                    g.id === selectedSteppForAction.id
-                        ? { ...g, folder_id: folderId, folderName: folderName }
-                        : g
-                )
-            );
-            setMoveSteppOpen(false);
-            toast.success(`Stepp moved to ${folderName || "Root"}`);
-            setSelectedSteppForAction(null);
+            try {
+                await updateGuideMutation.mutateAsync({
+                    id: selectedSteppForAction.id,
+                    data: { folderId: folderId ?? undefined },
+                });
+                const folderName = folderId ? folders?.find(f => f.id === folderId)?.name : undefined;
+                setMoveSteppOpen(false);
+                toast.success(`Stepp moved to ${folderName || "Root"}`);
+                setSelectedSteppForAction(null);
+            } catch (error) {
+                toast.error("Failed to move stepp");
+            }
         }
     };
 
-    const handleVisibilityChange = (guide: GuideWithFolder, visibility: 'public' | 'private') => {
-        // TODO: Backend integration for visibility
-        // await updateGuideMutation.mutateAsync({ id: guide.id, visibility });
-
-        // Optimistic update
-        setGuides((prev) =>
-            prev.map((g) =>
-                g.id === guide.id
-                    ? { ...g, visibility }
-                    : g
-            )
-        );
-        toast.success(`Stepp is now ${visibility}`);
+    const handleVisibilityChange = async (guide: LocalGuideWithFolder, visibility: 'public' | 'private') => {
+        try {
+            await updateGuideMutation.mutateAsync({
+                id: guide.id,
+                data: { visibility },
+            });
+            toast.success(`Stepp is now ${visibility}`);
+        } catch (error) {
+            toast.error("Failed to update visibility");
+        }
     };
 
-    const handleShare = (guide: GuideWithFolder) => {
+    const handleShare = (guide: LocalGuideWithFolder) => {
         setSelectedGuide({ id: guide.id, title: guide.title || "Untitled" });
         setShareDialogOpen(true);
     };
 
-    const handleExport = (guide: GuideWithFolder) => {
+    const handleExport = (guide: LocalGuideWithFolder) => {
         setSelectedGuide({ id: guide.id, title: guide.title || "Untitled" });
         setExportDialogOpen(true);
     };
 
     // Helper function to format date
-    const formatDate = (dateString: string | null) => {
+    const formatDate = (dateString?: string | null) => {
         if (!dateString) return "N/A";
         const date = new Date(dateString);
         const now = new Date();
@@ -223,7 +276,7 @@ function SteppsPage() {
     };
 
     // Filter guides based on search query
-    const filteredGuides = guides.filter(guide =>
+    const filteredGuides = guidesWithFolders.filter(guide =>
         guide.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (guide.folderName && guide.folderName.toLowerCase().includes(searchQuery.toLowerCase()))
     );
@@ -280,66 +333,49 @@ function SteppsPage() {
             {/* Folders Section */}
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold text-foreground">Folders</h2>
-                {isLoading ? (
-                    <>
-                        {/* Mobile Loading State - Filter chips */}
-                        <div className="flex flex-wrap gap-2 md:hidden">
-                            {[1, 2, 3, 4].map((i) => (
-                                <Skeleton key={i} className="h-9 w-28 rounded-full" />
-                            ))}
-                        </div>
-                        {/* Desktop Loading State - Cards */}
-                        <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            {[1, 2, 3, 4].map((i) => (
-                                <Skeleton key={i} className="h-24 w-full rounded-xl" />
-                            ))}
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        {/* Mobile View - Filter chips */}
-                        <div className="flex flex-wrap gap-2 md:hidden">
-                            {folders.map((folder) => (
-                                <button
-                                    key={folder.id}
-                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted hover:bg-muted/80 transition-colors text-sm font-medium cursor-pointer border border-border hover:border-primary/50"
-                                >
-                                    <FolderIcon className="size-3.5 text-muted-foreground" />
-                                    <span>{folder.name}</span>
-                                    <span className="text-xs text-muted-foreground">
-                                        ({folder.guide_count || 0})
-                                    </span>
-                                </button>
-                            ))}
-                            {folders.length === 0 && (
-                                <div className="w-full flex flex-col items-center justify-center py-6 text-center border border-dashed rounded-xl bg-muted/30">
-                                    <p className="text-muted-foreground text-sm">No folders yet.</p>
-                                </div>
-                            )}
-                        </div>
+                <>
+                    {/* Mobile View - Filter chips */}
+                    <div className="flex flex-wrap gap-2 md:hidden">
+                        {(folders ?? []).map((folder) => (
+                            <button
+                                key={folder.id}
+                                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted hover:bg-muted/80 transition-colors text-sm font-medium cursor-pointer border border-border hover:border-primary/50"
+                            >
+                                <FolderIcon className="size-3.5 text-muted-foreground" />
+                                <span>{folder.name}</span>
+                                <span className="text-xs text-muted-foreground">
+                                    ({folder.guideCount || 0})
+                                </span>
+                            </button>
+                        ))}
+                        {(folders ?? []).length === 0 && (
+                            <div className="w-full flex flex-col items-center justify-center py-6 text-center border border-dashed rounded-xl bg-muted/30">
+                                <p className="text-muted-foreground text-sm">No folders yet.</p>
+                            </div>
+                        )}
+                    </div>
 
-                        {/* Desktop View - Cards */}
-                        <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            {folders.map((folder) => (
-                                <FolderCard
-                                    key={folder.id}
-                                    folder={{
-                                        id: folder.id,
-                                        name: folder.name,
-                                        guideCount: folder.guide_count || 0
-                                    }}
-                                    onRename={handleRenameFolder}
-                                    onDelete={handleDeleteFolder}
-                                />
-                            ))}
-                            {folders.length === 0 && (
-                                <div className="col-span-full flex flex-col items-center justify-center py-8 text-center border border-dashed rounded-xl bg-muted/30">
-                                    <p className="text-muted-foreground text-sm">No folders yet.</p>
-                                </div>
-                            )}
-                        </div>
-                    </>
-                )}
+                    {/* Desktop View - Cards */}
+                    <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        {(folders ?? []).map((folder) => (
+                            <FolderCard
+                                key={folder.id}
+                                folder={{
+                                    id: folder.id,
+                                    name: folder.name,
+                                    guideCount: folder.guideCount || 0
+                                }}
+                                onRename={handleRenameFolder}
+                                onDelete={handleDeleteFolder}
+                            />
+                        ))}
+                        {(folders ?? []).length === 0 && (
+                            <div className="col-span-full flex flex-col items-center justify-center py-8 text-center border border-dashed rounded-xl bg-muted/30">
+                                <p className="text-muted-foreground text-sm">No folders yet.</p>
+                            </div>
+                        )}
+                    </div>
+                </>
             </section>
 
             {/* All Stepps Section */}
@@ -352,27 +388,17 @@ function SteppsPage() {
                     <Table>
                         <TableHeader>
                             <TableRow className="hover:bg-transparent">
-                                <TableHead className="w-[40%]">Title</TableHead>
-                                <TableHead className="w-[20%]">Folder</TableHead>
-                                <TableHead className="w-[15%]">Status</TableHead>
-                                <TableHead className="w-[15%]">Visibility</TableHead>
-                                <TableHead className="w-[15%]">Last Modified</TableHead>
-                                <TableHead className="w-[5%]"></TableHead>
+                                <TableHead className="w-[35%]">Title</TableHead>
+                                <TableHead className="w-[8%]">Steps</TableHead>
+                                <TableHead className="w-[17%]">Folder</TableHead>
+                                <TableHead className="w-[12%]">Status</TableHead>
+                                <TableHead className="w-[12%]">Visibility</TableHead>
+                                <TableHead className="w-[12%]">Last Modified</TableHead>
+                                <TableHead className="w-[4%]"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {isLoading ? (
-                                [1, 2, 3, 4, 5].map((i) => (
-                                    <TableRow key={i}>
-                                        <TableCell><Skeleton className="h-5 w-48" /></TableCell>
-                                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                                        <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
-                                        <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
-                                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                                        <TableCell><Skeleton className="h-8 w-8 rounded-md" /></TableCell>
-                                    </TableRow>
-                                ))
-                            ) : filteredGuides.length > 0 ? (
+                            {filteredGuides.length > 0 ? (
                                 filteredGuides.map((guide) => (
                                     <TableRow
                                         key={guide.id}
@@ -391,6 +417,9 @@ function SteppsPage() {
                                                     {guide.title || "Untitled"}
                                                 </Link>
                                             </div>
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground text-sm">
+                                            {guide.steps?.length || 0}
                                         </TableCell>
                                         <TableCell>
                                             {guide.folderName ? (
@@ -419,7 +448,7 @@ function SteppsPage() {
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-muted-foreground text-sm">
-                                            {formatDate(guide.updated_at)}
+                                            {formatDate(guide.updatedAt)}
                                         </TableCell>
                                         <TableCell>
                                             <DropdownMenu>
@@ -511,7 +540,7 @@ function SteppsPage() {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="h-24 text-center">
+                                    <TableCell colSpan={7} className="h-24 text-center">
                                         No stepps found.
                                     </TableCell>
                                 </TableRow>
@@ -545,12 +574,14 @@ function SteppsPage() {
                         onOpenChange={setDeleteFolderOpen}
                         onConfirm={confirmDeleteFolder}
                         folderName={selectedFolder.name}
+                        isLoading={deleteFolderMutation.isPending}
                     />
                     <RenameFolderDialog
                         open={renameFolderOpen}
                         onOpenChange={setRenameFolderOpen}
                         onConfirm={confirmRenameFolder}
                         currentName={selectedFolder.name}
+                        isLoading={updateFolderMutation.isPending}
                     />
                 </>
             )}
@@ -562,16 +593,18 @@ function SteppsPage() {
                         onOpenChange={setDeleteSteppOpen}
                         onConfirm={confirmDeleteStepp}
                         steppTitle={selectedSteppForAction.title || "Untitled"}
+                        isLoading={deleteGuideMutation.isPending}
                     />
                     <MoveSteppDialog
                         open={moveSteppOpen}
                         onOpenChange={setMoveSteppOpen}
                         onConfirm={confirmMoveStepp}
-                        folders={folders}
-                        currentFolderId={selectedSteppForAction.folder_id}
+                        folders={folders ?? []}
+                        currentFolderId={selectedSteppForAction.folderId}
+                        isLoading={updateGuideMutation.isPending}
                     />
                 </>
             )}
-        </div >
+        </div>
     );
 }

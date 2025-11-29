@@ -92,20 +92,24 @@ export function RecentStepps({ isLoading, stepps = [], onDelete, onMove }: Recen
 
       {stepps.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {stepps.slice(0, 4).map((stepp, index) => (
-            <div key={stepp.id} className={index >= 2 ? "hidden lg:block" : ""}>
-              <DashboardCard
-                title={stepp.title || "Untitled Stepp"}
-                image={"https://placehold.co/600x400/png"} // Fallback image since Guide doesn't have screenshot_url yet
-                viewUrl={`/app/stepps/${stepp.id}`}
-                onEdit={() => navigate({ to: `/app/editor/${stepp.id}` })}
-                onShare={() => setShareGuide(stepp)}
-                onDelete={onDelete ? () => onDelete(stepp) : undefined}
-                onMove={onMove ? () => onMove(stepp) : undefined}
-                onExport={() => setExportGuide(stepp)}
-              />
-            </div>
-          ))}
+          {stepps.slice(0, 4).map((stepp, index) => {
+            // Get first step's imageKey for thumbnail
+            const firstStepImage = stepp.steps?.[0]?.imageKey;
+            return (
+              <div key={stepp.id} className={index >= 2 ? "hidden lg:block" : ""}>
+                <DashboardCard
+                  title={stepp.title || "Untitled Stepp"}
+                  image={firstStepImage || "https://placehold.co/600x400/png"}
+                  viewUrl={`/app/stepps/${stepp.id}`}
+                  onEdit={() => navigate({ to: `/app/editor/${stepp.id}` })}
+                  onShare={() => setShareGuide(stepp)}
+                  onDelete={onDelete ? () => onDelete(stepp) : undefined}
+                  onMove={onMove ? () => onMove(stepp) : undefined}
+                  onExport={() => setExportGuide(stepp)}
+                />
+              </div>
+            );
+          })}
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed rounded-xl bg-muted/30">

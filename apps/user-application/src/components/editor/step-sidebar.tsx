@@ -4,13 +4,7 @@ import { cn } from "@/lib/utils";
 import { Trash2, Plus, X, Check } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useRef, useEffect } from "react";
-
-interface Step {
-    id: string;
-    title: string;
-    screenshotUrl?: string;
-    orderIndex: number;
-}
+import { Step } from "@/types/db";
 
 interface StepSidebarProps {
     steps: Step[];
@@ -58,7 +52,7 @@ export function StepSidebar({
     const handleStartEdit = (step: Step, e: React.MouseEvent) => {
         e.stopPropagation();
         setEditingStepId(step.id);
-        setEditValue(step.title);
+        setEditValue(step.caption || "");
     };
 
     const handleSave = (stepId: string) => {
@@ -165,7 +159,7 @@ export function StepSidebar({
                                         className="text-sm font-medium text-foreground cursor-text hover:text-primary/80 transition-colors"
                                         onClick={(e) => handleStartEdit(step, e)}
                                     >
-                                        {index + 1}. {step.title}
+                                        {index + 1}. {step.caption || `Step ${index + 1}`}
                                     </span>
                                 )}
                             </div>
@@ -177,9 +171,9 @@ export function StepSidebar({
                                     activeStepId === step.id ? "ring-3 ring-primary ring-offset-2 ring-offset-background" : "border border-border/50"
                                 )}
                             >
-                                {step.screenshotUrl ? (
+                                {step.imageKey ? (
                                     <img
-                                        src={step.screenshotUrl}
+                                        src={step.imageKey}
                                         alt={`Step ${index + 1}`}
                                         className="w-full h-full object-cover"
                                     />

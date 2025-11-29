@@ -1,64 +1,99 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { RecentStepps } from "@/components/dashboard/recent-stepps";
 import { TutorialsSection } from "@/components/dashboard/tutorials-section";
 import { MobileTutorialsSection } from "@/components/dashboard/mobile-tutorials-section";
 import { FoldersSection } from "@/components/dashboard/folders-section";
-import { useState, useEffect } from "react";
-import { Guide, Folder } from "@/types/db";
-import { TEST_RECENT_GUIDES, TEST_FOLDERS } from "@/types/test-data";
+import { useState } from "react";
+import { Guide } from "@/types/db";
 import { toast } from "sonner";
 import { DeleteFolderDialog } from "@/components/delete-folder-dialog";
 import { RenameFolderDialog } from "@/components/rename-folder-dialog";
 import { DeleteSteppDialog } from "@/components/delete-stepp-dialog";
 import { MoveSteppDialog } from "@/components/move-stepp-dialog";
+import { trpc } from "@/router";
 
 export const Route = createFileRoute("/app/_authed/")({
   component: Dashboard,
+  loader: async ({ context }) => {
+    // Prefetch data in parallel for SSR/hydration
+    await Promise.all([
+      context.queryClient.prefetchQuery(
+        context.trpc.guides.getAll.queryOptions()
+      ),
+      context.queryClient.prefetchQuery(
+        context.trpc.folders.getAll.queryOptions()
+      ),
+    ]);
+  },
 });
 
 function Dashboard() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [recentStepps, setRecentStepps] = useState<Guide[]>([]);
-  const [folders, setFolders] = useState<(Folder & { guide_count?: number })[]>([]);
+  const queryClient = useQueryClient();
+
+  // Fetch data with useSuspenseQuery - data is always available (no loading state needed)
+  const { data: guides } = useSuspenseQuery(
+    trpc.guides.getAll.queryOptions()
+  );
+  const { data: folders } = useSuspenseQuery(
+    trpc.folders.getAll.queryOptions()
+  );
+
+  // Get recent stepps (last 4) - cast to Guide[] for type compatibility
+  const recentStepps = (guides ?? []).slice(0, 4) as Guide[];
+
+  // Mutations
+  const deleteFolderMutation = useMutation({
+    ...trpc.folders.delete.mutationOptions(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["folders"] });
+    },
+  });
+
+  const updateFolderMutation = useMutation({
+    ...trpc.folders.update.mutationOptions(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["folders"] });
+    },
+  });
+
+  const deleteGuideMutation = useMutation({
+    ...trpc.guides.delete.mutationOptions(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["guides"] });
+    },
+  });
+
+  const updateGuideMutation = useMutation({
+    ...trpc.guides.update.mutationOptions(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["guides"] });
+    },
+  });
 
   // Dialog States
   const [deleteFolderOpen, setDeleteFolderOpen] = useState(false);
   const [renameFolderOpen, setRenameFolderOpen] = useState(false);
   const [deleteSteppOpen, setDeleteSteppOpen] = useState(false);
   const [moveSteppOpen, setMoveSteppOpen] = useState(false);
-
   const [selectedFolder, setSelectedFolder] = useState<{ id: string; name: string } | null>(null);
   const [selectedSteppForAction, setSelectedSteppForAction] = useState<Guide | null>(null);
-
-  // TODO: Future integration with tRPC and TanStack Query
-  // const { data: recentStepps, isLoading: isLoadingStepps } = trpc.guide.getRecent.useQuery({ limit: 4 });
-  // const { data: folders, isLoading: isLoadingFolders } = trpc.folder.getAll.useQuery();
-  // const isLoading = isLoadingStepps || isLoadingFolders;
-
-  useEffect(() => {
-    // Simulate data fetching
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      // Use test data
-      setRecentStepps(TEST_RECENT_GUIDES);
-      setFolders(TEST_FOLDERS);
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   const handleDeleteFolder = (folderId: string, folderName: string) => {
     setSelectedFolder({ id: folderId, name: folderName });
     setDeleteFolderOpen(true);
   };
 
-  const confirmDeleteFolder = () => {
+  const confirmDeleteFolder = async () => {
     if (selectedFolder) {
-      // Optimistic update
-      setFolders((prev) => prev.filter((f) => f.id !== selectedFolder.id));
-      setDeleteFolderOpen(false);
-      toast.success(`Folder "${selectedFolder.name}" deleted`);
-      setSelectedFolder(null);
+      try {
+        await deleteFolderMutation.mutateAsync({ id: selectedFolder.id });
+        setDeleteFolderOpen(false);
+        toast.success(`Folder "${selectedFolder.name}" deleted`);
+        setSelectedFolder(null);
+      } catch (error) {
+        toast.error("Failed to delete folder");
+      }
     }
   };
 
@@ -67,15 +102,16 @@ function Dashboard() {
     setRenameFolderOpen(true);
   };
 
-  const confirmRenameFolder = (newName: string) => {
+  const confirmRenameFolder = async (newName: string) => {
     if (selectedFolder) {
-      // Optimistic update
-      setFolders((prev) =>
-        prev.map((f) => (f.id === selectedFolder.id ? { ...f, name: newName } : f))
-      );
-      setRenameFolderOpen(false);
-      toast.success(`Folder renamed to "${newName}"`);
-      setSelectedFolder(null);
+      try {
+        await updateFolderMutation.mutateAsync({ id: selectedFolder.id, name: newName });
+        setRenameFolderOpen(false);
+        toast.success(`Folder renamed to "${newName}"`);
+        setSelectedFolder(null);
+      } catch (error) {
+        toast.error("Failed to rename folder");
+      }
     }
   };
 
@@ -84,13 +120,16 @@ function Dashboard() {
     setDeleteSteppOpen(true);
   };
 
-  const confirmDeleteStepp = () => {
+  const confirmDeleteStepp = async () => {
     if (selectedSteppForAction) {
-      // Optimistic update
-      setRecentStepps((prev) => prev.filter((g) => g.id !== selectedSteppForAction.id));
-      setDeleteSteppOpen(false);
-      toast.success(`Stepp "${selectedSteppForAction.title}" deleted`);
-      setSelectedSteppForAction(null);
+      try {
+        await deleteGuideMutation.mutateAsync({ id: selectedSteppForAction.id });
+        setDeleteSteppOpen(false);
+        toast.success(`Stepp "${selectedSteppForAction.title}" deleted`);
+        setSelectedSteppForAction(null);
+      } catch (error) {
+        toast.error("Failed to delete stepp");
+      }
     }
   };
 
@@ -99,13 +138,20 @@ function Dashboard() {
     setMoveSteppOpen(true);
   };
 
-  const confirmMoveStepp = (folderId: string | null) => {
+  const confirmMoveStepp = async (folderId: string | null) => {
     if (selectedSteppForAction) {
-      // Optimistic update - for recent stepps, moving might not remove it from the list, but we can show success
-      const folderName = folderId ? folders.find(f => f.id === folderId)?.name : undefined;
-      setMoveSteppOpen(false);
-      toast.success(`Stepp moved to ${folderName || "Root"}`);
-      setSelectedSteppForAction(null);
+      try {
+        await updateGuideMutation.mutateAsync({
+          id: selectedSteppForAction.id,
+          data: { folderId: folderId ?? undefined },
+        });
+        const folderName = folderId ? folders?.find(f => f.id === folderId)?.name : undefined;
+        setMoveSteppOpen(false);
+        toast.success(`Stepp moved to ${folderName || "Root"}`);
+        setSelectedSteppForAction(null);
+      } catch (error) {
+        toast.error("Failed to move stepp");
+      }
     }
   };
 
@@ -114,7 +160,6 @@ function Dashboard() {
 
       {/* Recents Section */}
       <RecentStepps
-        isLoading={isLoading}
         stepps={recentStepps}
         onDelete={handleDeleteStepp}
         onMove={handleMoveStepp}
@@ -122,8 +167,7 @@ function Dashboard() {
 
       {/* Folders Section */}
       <FoldersSection
-        isLoading={isLoading}
-        folders={folders}
+        folders={folders ?? []}
         onRename={handleRenameFolder}
         onDelete={handleDeleteFolder}
       />
@@ -139,12 +183,14 @@ function Dashboard() {
             onOpenChange={setDeleteFolderOpen}
             onConfirm={confirmDeleteFolder}
             folderName={selectedFolder.name}
+            isLoading={deleteFolderMutation.isPending}
           />
           <RenameFolderDialog
             open={renameFolderOpen}
             onOpenChange={setRenameFolderOpen}
             onConfirm={confirmRenameFolder}
             currentName={selectedFolder.name}
+            isLoading={updateFolderMutation.isPending}
           />
         </>
       )}
@@ -156,13 +202,15 @@ function Dashboard() {
             onOpenChange={setDeleteSteppOpen}
             onConfirm={confirmDeleteStepp}
             steppTitle={selectedSteppForAction.title || "Untitled"}
+            isLoading={deleteGuideMutation.isPending}
           />
           <MoveSteppDialog
             open={moveSteppOpen}
             onOpenChange={setMoveSteppOpen}
             onConfirm={confirmMoveStepp}
-            folders={folders}
-            currentFolderId={selectedSteppForAction.folder_id}
+            folders={folders ?? []}
+            currentFolderId={selectedSteppForAction.folderId}
+            isLoading={updateGuideMutation.isPending}
           />
         </>
       )}

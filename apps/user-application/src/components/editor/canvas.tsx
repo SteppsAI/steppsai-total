@@ -5,12 +5,12 @@ import Konva from "konva";
 import { Undo2, Redo2, Trash2 } from "lucide-react";
 import { EditorTool } from "./editor-toolbar";
 import {
-  Annotation,
+  Overlay as Annotation,
   ArrowAnnotation,
   CircleAnnotation,
   HideAnnotation,
-  ANNOTATION_DEFAULTS
-} from "./annotation-types";
+} from "@/types/db";
+import { ANNOTATION_DEFAULTS } from "./annotation-types";
 import { useAnnotationHistory } from "@/hooks/use-annotation-history";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";

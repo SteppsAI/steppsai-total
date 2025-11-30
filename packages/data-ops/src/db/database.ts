@@ -6,8 +6,8 @@ import * as authSchema from "../drizzle-out/auth-schema";
 let db: ReturnType<typeof drizzle<typeof schema & typeof authSchema>>;
 
 export function initDatabase(connectionString: string) {
-  const client = postgres(connectionString);
-  db = drizzle(client, { schema: { ...schema, ...authSchema } });
+  const client = postgres(connectionString, { prepare: false });
+  db = drizzle(client, { schema: { ...schema, ...authSchema }, logger: true });
 }
 
 export function getDb() {

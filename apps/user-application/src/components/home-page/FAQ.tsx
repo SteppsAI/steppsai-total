@@ -63,10 +63,6 @@ const faqs = [
     {
         question: "Do you offer refunds?",
         answer: "Yes, we offer a 30-day money-back guarantee. If you're not completely satisfied with stepps.ai, contact our support team within 30 days of purchase for a full refund."
-    },
-    {
-        question: "What happens to my guides over time?",
-        answer: "With the lifetime deal, your guides and all features remain accessible forever. No subscriptions to cancel. Plus, as we add new features like team collaboration and marketing exports, you'll automatically get access to them at no additional cost."
     }
 ]
 

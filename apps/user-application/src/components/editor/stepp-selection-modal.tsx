@@ -20,7 +20,6 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { MobileCreationDialog } from "@/components/mobile-creation-dialog";
 import { trpc } from "@/router";
 
-// Use a simple interface for guides in this modal - we don't need full type compatibility
 interface ModalGuide {
     id: string;
     title?: string | null;
@@ -28,6 +27,11 @@ interface ModalGuide {
     status?: string | null;
     updatedAt?: string | null;
     steps?: { id: string }[];
+}
+
+interface ModalFolder {
+    id: string;
+    name: string;
 }
 
 interface SteppSelectionModalProps {
@@ -42,18 +46,12 @@ export function SteppSelectionModal({ open, onOpenChange }: SteppSelectionModalP
     const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
     const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
-    // Fetch guides and folders via tRPC
-    const { data: guidesData = [] } = useSuspenseQuery(
-        trpc.guides.getAll.queryOptions()
-    );
-    const { data: folders = [] } = useSuspenseQuery(
-        trpc.folders.getAll.queryOptions()
-    );
+    const { data: guidesData = [] } = useSuspenseQuery(trpc.guides.getAll.queryOptions());
+    const { data: foldersData = [] } = useSuspenseQuery(trpc.folders.getAll.queryOptions());
 
-    // Cast to our simple modal type
     const guides = guidesData as ModalGuide[];
+    const folders = foldersData as ModalFolder[];
 
-    // Recent guides (sorted by updatedAt, limit 4)
     const recentGuides = [...guides]
         .sort((a, b) => {
             const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
@@ -62,16 +60,13 @@ export function SteppSelectionModal({ open, onOpenChange }: SteppSelectionModalP
         })
         .slice(0, 4);
 
-    // Guides NOT in any folder (for "loose" guides section)
     const looseGuides = guides.filter((g) => !g.folderId);
 
-    // Guides grouped by folder
     const guidesByFolder = folders.reduce((acc, folder) => {
         acc[folder.id] = guides.filter((g) => g.folderId === folder.id);
         return acc;
     }, {} as Record<string, ModalGuide[]>);
 
-    // Filter based on search
     const filteredGuides = searchQuery
         ? guides.filter(
               (guide) =>
@@ -140,7 +135,6 @@ export function SteppSelectionModal({ open, onOpenChange }: SteppSelectionModalP
 
                     <ScrollArea className="h-[400px]">
                         <div className="p-2">
-                            {/* Search Results */}
                             {searchQuery ? (
                                 <>
                                     <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -165,7 +159,6 @@ export function SteppSelectionModal({ open, onOpenChange }: SteppSelectionModalP
                                 </>
                             ) : (
                                 <>
-                                    {/* Recent Section */}
                                     {recentGuides.length > 0 && (
                                         <div className="mb-2">
                                             <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
@@ -187,7 +180,6 @@ export function SteppSelectionModal({ open, onOpenChange }: SteppSelectionModalP
                                         </div>
                                     )}
 
-                                    {/* Folders Section (Expandable) - Only show folders with guides */}
                                     {(() => {
                                         const foldersWithGuides = folders.filter(
                                             (folder) => (guidesByFolder[folder.id] || []).length > 0
@@ -224,7 +216,6 @@ export function SteppSelectionModal({ open, onOpenChange }: SteppSelectionModalP
                                                                         <ChevronRight className="size-4 text-muted-foreground" />
                                                                     )}
                                                                 </button>
-                                                                {/* Expanded folder content */}
                                                                 {isExpanded && (
                                                                     <div className="ml-6 pl-4 border-l border-border">
                                                                         {folderGuides.map((guide) => (
@@ -246,7 +237,6 @@ export function SteppSelectionModal({ open, onOpenChange }: SteppSelectionModalP
                                         );
                                     })()}
 
-                                    {/* All Stepps (not in any folder) */}
                                     {looseGuides.length > 0 && (
                                         <div>
                                             <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -264,7 +254,6 @@ export function SteppSelectionModal({ open, onOpenChange }: SteppSelectionModalP
                                         </div>
                                     )}
 
-                                    {/* Empty state */}
                                     {guides.length === 0 && (
                                         <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
                                             <p>No stepps found.</p>
@@ -293,7 +282,6 @@ export function SteppSelectionModal({ open, onOpenChange }: SteppSelectionModalP
     );
 }
 
-// Helper component for guide items
 interface GuideItemProps {
     guide: ModalGuide;
     folderName?: string | null;

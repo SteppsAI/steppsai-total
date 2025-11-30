@@ -16,14 +16,9 @@ import { trpc } from "@/router";
 export const Route = createFileRoute("/app/_authed/")({
   component: Dashboard,
   loader: async ({ context }) => {
-    // Prefetch data in parallel for SSR/hydration
     await Promise.all([
-      context.queryClient.prefetchQuery(
-        context.trpc.guides.getAll.queryOptions()
-      ),
-      context.queryClient.prefetchQuery(
-        context.trpc.folders.getAll.queryOptions()
-      ),
+      context.queryClient.prefetchQuery(context.trpc.guides.getAll.queryOptions()),
+      context.queryClient.prefetchQuery(context.trpc.folders.getAll.queryOptions()),
     ]);
   },
 });
@@ -31,43 +26,38 @@ export const Route = createFileRoute("/app/_authed/")({
 function Dashboard() {
   const queryClient = useQueryClient();
 
-  // Fetch data with useSuspenseQuery - data is always available (no loading state needed)
-  const { data: guides } = useSuspenseQuery(
-    trpc.guides.getAll.queryOptions()
-  );
-  const { data: folders } = useSuspenseQuery(
-    trpc.folders.getAll.queryOptions()
-  );
+  const { data: guides } = useSuspenseQuery(trpc.guides.getAll.queryOptions());
+  const { data: folders } = useSuspenseQuery(trpc.folders.getAll.queryOptions());
 
-  // Get recent stepps (last 4) - cast to Guide[] for type compatibility
   const recentStepps = (guides ?? []).slice(0, 4) as Guide[];
 
-  // Mutations
+  // Mutations - invalidate using the same query options
   const deleteFolderMutation = useMutation({
     ...trpc.folders.delete.mutationOptions(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["folders"] });
+      queryClient.invalidateQueries({ queryKey: trpc.folders.getAll.queryOptions().queryKey });
+      queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
     },
   });
 
   const updateFolderMutation = useMutation({
     ...trpc.folders.update.mutationOptions(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["folders"] });
+      queryClient.invalidateQueries({ queryKey: trpc.folders.getAll.queryOptions().queryKey });
     },
   });
 
   const deleteGuideMutation = useMutation({
     ...trpc.guides.delete.mutationOptions(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["guides"] });
+      queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
     },
   });
 
   const updateGuideMutation = useMutation({
     ...trpc.guides.update.mutationOptions(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["guides"] });
+      queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
     },
   });
 
@@ -157,22 +147,18 @@ function Dashboard() {
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-[1400px] mx-auto pb-8">
-
-      {/* Recents Section */}
       <RecentStepps
         stepps={recentStepps}
         onDelete={handleDeleteStepp}
         onMove={handleMoveStepp}
       />
 
-      {/* Folders Section */}
       <FoldersSection
         folders={folders ?? []}
         onRename={handleRenameFolder}
         onDelete={handleDeleteFolder}
       />
 
-      {/* Tutorials Section - Full Width */}
       <TutorialsSection />
       <MobileTutorialsSection />
 

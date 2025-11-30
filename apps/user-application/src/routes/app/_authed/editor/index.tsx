@@ -9,7 +9,6 @@ import { useState } from "react";
 export const Route = createFileRoute("/app/_authed/editor/")({
     component: EditorIndexPage,
     loader: async ({ context }) => {
-        // Prefetch data needed by SteppSelectionModal
         await Promise.all([
             context.queryClient.prefetchQuery(context.trpc.guides.getAll.queryOptions()),
             context.queryClient.prefetchQuery(context.trpc.folders.getAll.queryOptions()),
@@ -21,20 +20,17 @@ function EditorIndexPage() {
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(true);
 
-    // Dummy handlers for the background UI
     const noop = () => { };
 
     const handleModalOpenChange = (open: boolean) => {
         setIsModalOpen(open);
         if (!open) {
-            // If modal is closed without selection, redirect back to stepps
             navigate({ to: "/app/stepps" });
         }
     };
 
     return (
         <div className="h-screen w-full flex flex-col overflow-hidden bg-background relative">
-            {/* Background Editor UI (Blurred or just present) */}
             <div className="absolute inset-0 flex flex-col pointer-events-none opacity-50 filter blur-[2px]">
                 <EditorHeader
                     title="Select a Stepp..."
@@ -66,7 +62,6 @@ function EditorIndexPage() {
                 </div>
             </div>
 
-            {/* Selection Modal */}
             <SteppSelectionModal
                 open={isModalOpen}
                 onOpenChange={handleModalOpenChange}

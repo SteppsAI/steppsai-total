@@ -15,9 +15,7 @@ import { User } from "@/types/db";
 export const Route = createFileRoute("/app/_authed/settings")({
     component: SettingsPage,
     loader: async ({ context }) => {
-        await context.queryClient.prefetchQuery(
-            context.trpc.users.getMe.queryOptions()
-        );
+        await context.queryClient.prefetchQuery(context.trpc.users.getMe.queryOptions());
     },
 });
 
@@ -25,23 +23,18 @@ function SettingsPage() {
     const queryClient = useQueryClient();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Fetch user data
-    const { data: userData } = useSuspenseQuery(
-        trpc.users.getMe.queryOptions()
-    );
+    const { data: userData } = useSuspenseQuery(trpc.users.getMe.queryOptions());
     const user = userData as User | null;
 
-    // Local state for form
     const [displayName, setDisplayName] = useState(user?.name || "");
     const [newsletter, setNewsletter] = useState(
         user?.notificationPreferences?.newsletter ?? true
     );
 
-    // Mutations
     const updateProfileMutation = useMutation({
         ...trpc.users.updateProfile.mutationOptions(),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["users"] });
+            queryClient.invalidateQueries({ queryKey: trpc.users.getMe.queryOptions().queryKey });
             toast.success("Profile updated successfully!");
         },
         onError: () => {
@@ -52,7 +45,7 @@ function SettingsPage() {
     const updateNotificationsMutation = useMutation({
         ...trpc.users.updateNotifications.mutationOptions(),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["users"] });
+            queryClient.invalidateQueries({ queryKey: trpc.users.getMe.queryOptions().queryKey });
             toast.success("Notification preferences updated!");
         },
         onError: () => {
@@ -63,7 +56,7 @@ function SettingsPage() {
     const uploadAvatarMutation = useMutation({
         ...trpc.users.uploadAvatar.mutationOptions(),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["users"] });
+            queryClient.invalidateQueries({ queryKey: trpc.users.getMe.queryOptions().queryKey });
             toast.success("Avatar updated!");
         },
         onError: () => {

@@ -8,7 +8,20 @@ import Pending from "@/components/common/pending";
 import { ErrorComponent } from "@/components/common/error-boundary";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 
-export const queryClient = new QueryClient();
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes - data considered fresh
+      gcTime: 1000 * 60 * 30, // 30 minutes - keep in cache
+      retry: 2, // Retry failed requests twice
+      refetchOnWindowFocus: false, // Don't refetch on tab focus
+      refetchOnReconnect: true, // Refetch when internet reconnects
+    },
+    mutations: {
+      retry: 1, // Retry failed mutations once
+    },
+  },
+});
 
 export const trpc = createTRPCOptionsProxy<AppRouter>({
   client: createTRPCClient({

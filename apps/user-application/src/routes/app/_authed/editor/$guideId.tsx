@@ -21,7 +21,6 @@ export const Route = createFileRoute("/app/_authed/editor/$guideId")({
   },
 });
 
-// Type for local guide state that uses our Overlay types
 interface LocalGuide extends Omit<Guide, 'steps'> {
   steps?: Step[];
 }
@@ -32,16 +31,13 @@ function EditorPage() {
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
 
-  // Fetch guide data
-  const { data: fetchedGuide } = useSuspenseQuery(
-    trpc.guides.getById.queryOptions({ id: guideId })
-  );
+  const { data: fetchedGuide } = useSuspenseQuery(trpc.guides.getById.queryOptions({ id: guideId }));
 
-  // Update mutation
   const updateGuideMutation = useMutation({
     ...trpc.guides.update.mutationOptions(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["guides"] });
+      queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
+      queryClient.invalidateQueries({ queryKey: trpc.guides.getById.queryOptions({ id: guideId }).queryKey });
     },
   });
 

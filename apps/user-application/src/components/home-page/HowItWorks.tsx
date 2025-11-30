@@ -1,75 +1,64 @@
-import {
-    Download,
-    ScreenShare,
-    FileText,
-    Share
-} from "lucide-react";
-
-const steps = [
-    {
-        step: '01',
-        name: 'Install Extension',
-        description: 'Add our browser extension in 30 seconds and start creating guides instantly.',
-        icon: Download,
-    },
-    {
-        step: '02',
-        name: 'Record Your Workflow',
-        description: 'Click record and go through your process. We capture every step automatically.',
-        icon: ScreenShare,
-    },
-    {
-        step: '03',
-        name: 'Generate Perfect Guide',
-        description: 'Watch as we turn your recording into a beautiful step-by-step guide instantly.',
-        icon: FileText,
-    },
-    {
-        step: '04',
-        name: 'Edit & Share',
-        description: 'Tweak if needed, then share with your team. Export to PDF or share via link.',
-        icon: Share,
-    },
-];
+import React from "react";
+import { cn } from "@/lib/utils";
 
 export function HowItWorks() {
+    const features = [
+        {
+            title: "Install Extension",
+            description:
+                "Add our browser extension in 30 seconds and start creating guides instantly.",
+            skeleton: <PlaceholderImage />,
+            className:
+                "col-span-1 md:col-span-4 lg:col-span-4 border-b md:border-r dark:border-neutral-800",
+            containerClassName: "aspect-video"
+        },
+        {
+            title: "Record Your Workflow",
+            description:
+                "Click record and go through your process. We capture every step automatically.",
+            skeleton: <PlaceholderImage />,
+            className: "col-span-1 md:col-span-2 lg:col-span-2 border-b dark:border-neutral-800",
+            containerClassName: "h-full flex-1 min-h-[200px]"
+        },
+        {
+            title: "Generate Perfect Guide",
+            description:
+                "Watch as we turn your recording into a beautiful step-by-step guide instantly.",
+            skeleton: <PlaceholderImage />,
+            className:
+                "col-span-1 md:col-span-3 lg:col-span-3 border-b md:border-r dark:border-neutral-800",
+            containerClassName: "aspect-video"
+        },
+        {
+            title: "Edit & Share",
+            description:
+                "Tweak if needed, then share with your team. Export to PDF or share via link.",
+            skeleton: <PlaceholderImage />,
+            className: "col-span-1 md:col-span-3 lg:col-span-3 border-b md:border-none",
+            containerClassName: "aspect-video"
+        },
+    ];
     return (
-        <section className="py-24 bg-white">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="mx-auto max-w-2xl text-center mb-16">
-                    <div className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-4">
-                        How It Works
-                    </div>
-                    <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl font-heading">
+        <section id="how-it-works" className="py-24 bg-white dark:bg-neutral-950">
+            <div className="relative z-20 py-10 lg:py-40 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="px-8">
+                    <h4 className="text-3xl lg:text-5xl lg:leading-tight max-w-5xl mx-auto text-center tracking-tight font-medium text-black dark:text-white">
                         From recording to sharing in 4 simple steps
-                    </h2>
-                    <p className="mt-4 text-lg leading-8 text-gray-600 font-sans">
+                    </h4>
+
+                    <p className="text-sm lg:text-base max-w-2xl my-4 mx-auto text-neutral-500 text-center font-normal dark:text-neutral-300">
                         Create beautiful guides in minutes, not hours. Your team will thank you.
                     </p>
                 </div>
 
-                <div className="mx-auto max-w-7xl">
-                    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                        {steps.map((step, index) => (
-                            <div key={step.step} className="relative p-8 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors border border-gray-100">
-                                <div className="mb-4">
-                                    <div className="text-sm font-medium text-gray-500 mb-2">
-                                        Step {step.step}
-                                    </div>
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-gray-900/5">
-                                        <step.icon className="h-6 w-6 text-indigo-600" aria-hidden="true" />
-                                    </div>
-                                </div>
-                                <h3 className="text-lg font-semibold leading-8 text-gray-900 font-heading">
-                                    {step.name}
-                                </h3>
-                                <p className="mt-2 text-base leading-7 text-gray-600 font-sans">
-                                    {step.description}
-                                </p>
-                                {index < steps.length - 1 && (
-                                    <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gray-300" />
-                                )}
-                            </div>
+                <div className="relative">
+                    <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-6 mt-12 xl:border rounded-md dark:border-neutral-800">
+                        {features.map((feature) => (
+                            <FeatureCard key={feature.title} className={feature.className}>
+                                <FeatureTitle>{feature.title}</FeatureTitle>
+                                <FeatureDescription>{feature.description}</FeatureDescription>
+                                <div className={cn("w-full mt-8", feature.containerClassName)}>{feature.skeleton}</div>
+                            </FeatureCard>
                         ))}
                     </div>
                 </div>
@@ -77,3 +66,51 @@ export function HowItWorks() {
         </section>
     );
 }
+
+const FeatureCard = ({
+    children,
+    className,
+}: {
+    children?: React.ReactNode;
+    className?: string;
+}) => {
+    return (
+        <div className={cn(`p-4 sm:p-8 relative overflow-hidden flex flex-col`, className)}>
+            {children}
+        </div>
+    );
+};
+
+const FeatureTitle = ({ children }: { children?: React.ReactNode }) => {
+    return (
+        <p className="max-w-5xl text-left tracking-tight text-black dark:text-white text-xl md:text-2xl md:leading-snug">
+            {children}
+        </p>
+    );
+};
+
+const FeatureDescription = ({ children }: { children?: React.ReactNode }) => {
+    return (
+        <p
+            className={cn(
+                "text-sm md:text-base max-w-4xl text-left mx-auto",
+                "text-neutral-500 text-center font-normal dark:text-neutral-300",
+                "text-left max-w-sm mx-0 md:text-sm my-2"
+            )}
+        >
+            {children}
+        </p>
+    );
+};
+
+export const PlaceholderImage = () => {
+    return (
+        <div className="w-full h-full bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center rounded-lg border border-neutral-200 dark:border-neutral-800">
+            <img 
+                src="/brand/logo-symbol.svg" 
+                alt="Placeholder" 
+                className="w-12 h-12 opacity-20 grayscale" 
+            />
+        </div>
+    );
+};

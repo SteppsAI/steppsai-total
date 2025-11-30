@@ -13,10 +13,9 @@ import {
 } from "@/components/ui/resizable-navbar";
 
 const navigation = [
-  { name: "Demo", link: "#demo" },
-  { name: "Why Stepps", link: "#why-stepps" },
+  { name: "Why Stepps", link: "#save-time" },
   { name: "Who is it for", link: "#who-is-it-for" },
-  { name: "Features", link: "#features" },
+  { name: "How it works", link: "#how-it-works" },
   { name: "FAQ", link: "#faq" },
 ];
 

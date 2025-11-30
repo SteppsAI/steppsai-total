@@ -85,7 +85,7 @@ export function WhoIsItFor() {
     }, { scope: containerRef });
 
     return (
-        <section ref={triggerRef} className="relative bg-background text-foreground">
+        <section id="who-is-it-for" ref={triggerRef} className="relative bg-background text-foreground">
             <div ref={containerRef} className="h-screen flex flex-col items-center justify-center overflow-hidden">
                 <div className="absolute top-8 left-0 w-full text-center z-10 px-4">
                     <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-[0.2em] mb-2">

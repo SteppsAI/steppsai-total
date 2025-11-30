@@ -1,9 +1,9 @@
 'use client'
-import { ScreenShare, FolderOpen, Users, Clock, Zap, Share2 } from 'lucide-react'
+import { ScreenShare, FolderOpen, Zap, } from 'lucide-react'
 
 export function SocialProof() {
     return (
-        <section className="px-4 py-16 md:py-32">
+        <section id="save-time" className="px-4 py-16 md:py-32">
             <div className="mx-auto grid max-w-5xl border md:grid-cols-2">
                 <div>
                     <div className="p-6 sm:p-12">

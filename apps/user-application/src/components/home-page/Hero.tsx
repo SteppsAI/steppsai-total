@@ -28,10 +28,10 @@ export function Hero() {
         <section className="relative pt-56 pb-20 md:pt-56 md:pb-32 overflow-hidden" ref={containerRef}>
             <div className="absolute inset-0 bg-hero-clouds pointer-events-none" />
             <div className="container mx-auto px-4 relative z-10">
-                <div className="mx-auto grid max-w-8xl border border-border/50 rounded-3xl shadow-2xl overflow-hidden bg-background/40 backdrop-blur-sm">
+                <div className="mx-auto grid max-w-8xl border border-border/50 rounded-3xl shadow-2xl overflow-hidden bg-hero-trust">
 
                     {/* Top Left: Hero Content */}
-                    <div className="p-6 sm:p-16 flex flex-col justify-center items-center text-center bg-background w-full">
+                    <div className="p-6 sm:p-16 flex flex-col justify-center items-center text-center w-full">
                         <div 
                             ref={contentRef}
                             className="space-y-8 flex flex-col items-center opacity-0" // Start invisible to prevent flash
@@ -54,7 +54,7 @@ export function Hero() {
                                 </a>
                                 <a
                                     href="#demo"
-                                    className="inline-flex h-12 items-center justify-center rounded-full border border-input bg-background px-8 text-sm font-medium shadow-sm transition-all hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                                    className="inline-flex h-12 items-center justify-center rounded-full border border-input bg-background/50 px-8 text-sm font-medium shadow-sm transition-all hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                                 >
                                     <Play className="mr-2 size-4 fill-current" />
                                     View Demo
@@ -64,14 +64,14 @@ export function Hero() {
                     </div>
 
                     {/* Middle Bar: Stats/Trust */}
-                    <div className="col-span-full border-t border-border/50 bg-background p-8 md:p-12 text-center">
+                    <div className="col-span-full border-t border-border/50 p-8 md:p-12 text-center">
                         <p className="text-2xl md:text-3xl font-semibold tracking-tight">
                             Works on <span className="text-muted-foreground">any website</span>, captures <span className="text-muted-foreground">every detail</span>.
                         </p>
                     </div>
 
                     {/* Bottom Full Width: Demo */}
-                    <div className="col-span-full border-t border-border/50 bg-zinc-50/30 dark:bg-zinc-900/10 relative">
+                    <div className="col-span-full border-t border-border/50 relative">
                         <div className="pt-0 md:pt-8">
                              <Demo />
                         </div>

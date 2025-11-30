@@ -39,7 +39,7 @@ export function WhoIsItFor() {
             scrollTrigger: {
                 trigger: triggerRef.current,
                 start: "top top",
-                end: `+=${items.length * 50}%`,
+                end: `+=${items.length * 25}%`,
                 scrub: 0.5,
                 pin: true,
                 anticipatePin: 1,

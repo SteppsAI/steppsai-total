@@ -60,7 +60,7 @@ export function BlackFridayDeal() {
     }, { scope: containerRef });
 
     return (
-        <section id="black-friday" ref={containerRef} className="py-24 animate-brand-cycle relative overflow-hidden font-sans">
+        <section id="black-friday" ref={containerRef} className="py-16 md:py-24 animate-brand-cycle relative overflow-hidden font-sans">
             {/* Subtle background pattern */}
             <div className="absolute inset-0 opacity-5 pointer-events-none">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
@@ -70,7 +70,7 @@ export function BlackFridayDeal() {
                 <div className="max-w-5xl mx-auto">
 
                     {/* Header */}
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12 gap-6">
                         <div>
                             <div className="bf-badge inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
                                 <span className="relative flex h-2 w-2">
@@ -79,7 +79,7 @@ export function BlackFridayDeal() {
                                 </span>
                                 Limited Time Offer
                             </div>
-                            <h2 className="bf-title text-5xl md:text-7xl font-bold tracking-tighter text-foreground">
+                            <h2 className="bf-title text-4xl md:text-7xl font-bold tracking-tighter text-foreground">
                                 BLACK <br className="hidden md:block" />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-violet-500">
                                     FRIDAY
@@ -87,31 +87,31 @@ export function BlackFridayDeal() {
                             </h2>
                         </div>
                         <div className="md:text-right max-w-md">
-                            <p className="bf-desc text-xl text-muted-foreground">
+                            <p className="bf-desc text-lg md:text-xl text-muted-foreground">
                                 Stop paying monthly fees. Get lifetime access to the intuitive documentation tool that grows with your team.
                             </p>
                         </div>
                     </div>
 
                     {/* Minimal Card (Cell Layout) */}
-                    <div className="bf-card mx-auto grid max-w-5xl border shadow-sm overflow-hidden">
-                        <div className="grid md:grid-cols-5 min-h-[500px]">
+                    <div className="bf-card mx-auto grid max-w-5xl border shadow-sm overflow-hidden rounded-xl">
+                        <div className="grid md:grid-cols-5 min-h-auto md:min-h-[500px]">
 
                             {/* Left: Pricing & Action */}
-                            <div className="md:col-span-3 p-8 md:p-12 flex flex-col justify-between border-b md:border-b-0 md:border-r bg-gradient-to-b from-background to-muted/20">
+                            <div className="md:col-span-3 p-6 md:p-12 flex flex-col justify-between border-b md:border-b-0 md:border-r bg-gradient-to-b from-background to-muted/20">
                                 <div className="bf-price-content">
                                     <div className="inline-block bg-foreground text-background px-3 py-1 text-sm font-bold rounded-md mb-4">
                                         LIFETIME DEAL
                                     </div>
                                     <div className="flex items-baseline gap-3 mb-2">
-                                        <span className="text-7xl md:text-8xl font-bold tracking-tighter text-foreground">
+                                        <span className="text-6xl md:text-8xl font-bold tracking-tighter text-foreground">
                                             $199
                                         </span>
                                         <div className="flex flex-col items-start">
                                             <span className="text-sm font-medium text-primary uppercase tracking-wide">One-time payment</span>
                                         </div>
                                     </div>
-                                    <p className="text-muted-foreground mt-4 max-w-sm">
+                                    <p className="text-muted-foreground mt-4 max-w-sm text-sm md:text-base">
                                         Pay once, own it forever. Includes all future Pro plan updates.
                                     </p>
                                 </div>
@@ -131,21 +131,21 @@ export function BlackFridayDeal() {
                                         </p>
                                     </div>
 
-                                    <Button size="lg" className="w-full h-16 text-xl font-bold rounded-xl shadow-lg hover:shadow-primary/20 transition-all">
+                                    <Button size="lg" className="w-full h-14 md:h-16 text-lg md:text-xl font-bold rounded-xl shadow-lg hover:shadow-primary/20 transition-all">
                                         Get Lifetime Access
                                     </Button>
-                                    <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+                                    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs md:text-sm text-muted-foreground">
                                         <span>30-day money-back guarantee</span>
-                                        <span>•</span>
+                                        <span className="hidden md:inline">•</span>
                                         <span>Instant access</span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Right: Features */}
-                            <div className="md:col-span-2 p-8 md:p-12 bg-muted/10 flex flex-col justify-center">
-                                <h3 className="bf-feature-item text-xl font-bold mb-8 text-foreground">What's included:</h3>
-                                <ul className="space-y-5">
+                            <div className="md:col-span-2 p-6 md:p-12 bg-muted/10 flex flex-col justify-center">
+                                <h3 className="bf-feature-item text-lg md:text-xl font-bold mb-6 md:mb-8 text-foreground">What's included:</h3>
+                                <ul className="space-y-4 md:space-y-5">
                                     {[
                                         "Unlimited Guides & Stepps",
                                         "Smart AI Screenshot Capture",
@@ -160,7 +160,7 @@ export function BlackFridayDeal() {
                                             <div className="mt-0.5 p-0.5 rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                                                 <Check className="w-4 h-4" strokeWidth={3} />
                                             </div>
-                                            <span className="text-muted-foreground font-medium group-hover:text-foreground transition-colors">
+                                            <span className="text-sm md:text-base text-muted-foreground font-medium group-hover:text-foreground transition-colors">
                                                 {feature}
                                             </span>
                                         </li>

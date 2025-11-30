@@ -18,7 +18,7 @@ const faqs = [
     },
     {
         question: "What can I do with the current MVP?",
-        answer: "Right now you can record any workflow, capture smart screenshots, add titles, edit guides in our interactive editor (with annotations, arrows, highlights, and sensitive info blurring), organize guides in folders, and share via public links. PDF export is coming very soon!"
+        answer: "Right now you can record any workflow, capture smart screenshots, add titles, edit guides in our interactive editor (with annotations, arrows, highlights, and sensitive info blurring), organize guides in folders, share via public links and export to PDF."
     },
     {
         question: "What browsers and websites does stepps.ai work with?",
@@ -30,7 +30,7 @@ const faqs = [
     },
     {
         question: "What editing features are available now?",
-        answer: "Our interactive editor lets you add arrows, highlights, boxes, and text annotations to screenshots. You can crop images, blur sensitive information, edit step descriptions, and rearrange the guide flow. Perfect for creating professional, polished documentation."
+        answer: "Our interactive editor lets you add arrows, highlights, or hide sensitive information. You can edit step descriptions, and rearrange the guide flow. Perfect for creating professional, polished documentation."
     },
     {
         question: "Can I pause and resume recordings?",
@@ -50,11 +50,11 @@ const faqs = [
     },
     {
         question: "How are screenshots handled and optimized?",
-        answer: "Screenshots are automatically captured at each interaction point, intelligently cropped to focus on relevant areas, and optimized for web viewing. You can enhance them with annotations, blur sensitive data, or replace them entirely in the editor."
+        answer: "Screenshots are automatically captured at each interaction point, and optimized for web viewing. You can enhance them with annotations, blur sensitive data, or replace them entirely in the editor."
     },
     {
         question: "What's included in the lifetime deal?",
-        answer: "The one-time payment includes all current features (unlimited guides, advanced editor, sharing, organization) plus ALL upcoming features (team collaboration, templates, embedding, marketing exports, custom branding and more). No monthly fees or surprise charges - you get everything we build, forever."
+        answer: "The one-time payment includes all current features (unlimited guides, SOP editor, sharing, organization) plus ALL upcoming features (team collaboration, templates, embedding, marketing exports, custom branding and more). No monthly fees or surprise charges - you get everything we build, forever."
     },
     {
         question: "How secure is my data and guides?",

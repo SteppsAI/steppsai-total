@@ -2,7 +2,7 @@ import { Navbar } from "./Navbar";
 import { Hero } from "./Hero";
 import { SocialProof } from "./SocialProof";
 import { WhoIsItFor } from "./WhoIsItFor";
-import { Features } from "./Features";
+import {HowItWorks} from "./HowItWorks";
 import { BlackFridayDeal } from "./BlackFridayDeal";
 import { FAQ } from "./FAQ";
 import { Footer } from "./footer";
@@ -16,7 +16,7 @@ export function LandingPage() {
                 <Hero />
                 <SocialProof />
                 <WhoIsItFor />
-                <Features />
+                <HowItWorks />
                 <BlackFridayDeal />
                 <FAQ />
             </main>

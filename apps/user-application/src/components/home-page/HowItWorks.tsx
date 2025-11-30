@@ -1,123 +1,79 @@
-import { useRef } from 'react'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { useGSAP } from '@gsap/react'
-import { Badge } from "@/components/ui/badge"
-import RuixenBentoCards from "@/components/ui/ruixen-bento-cards"
+import {
+    Download,
+    ScreenShare,
+    FileText,
+    Share
+} from "lucide-react";
 
-gsap.registerPlugin(ScrollTrigger)
+const steps = [
+    {
+        step: '01',
+        name: 'Install Extension',
+        description: 'Add our browser extension in 30 seconds and start creating guides instantly.',
+        icon: Download,
+    },
+    {
+        step: '02',
+        name: 'Record Your Workflow',
+        description: 'Click record and go through your process. We capture every step automatically.',
+        icon: ScreenShare,
+    },
+    {
+        step: '03',
+        name: 'Generate Perfect Guide',
+        description: 'Watch as we turn your recording into a beautiful step-by-step guide instantly.',
+        icon: FileText,
+    },
+    {
+        step: '04',
+        name: 'Edit & Share',
+        description: 'Tweak if needed, then share with your team. Export to PDF or share via link.',
+        icon: Share,
+    },
+];
 
-export default function HowItWorks() {
-    const sectionRef = useRef<HTMLDivElement>(null)
-    const headerRef = useRef<HTMLDivElement>(null)
-    const badgeRef = useRef<HTMLDivElement>(null)
-    const titleRef = useRef<HTMLHeadingElement>(null)
-    const descriptionRef = useRef<HTMLParagraphElement>(null)
-    const gridRef = useRef<HTMLDivElement>(null)
-
-    useGSAP(() => {
-        // Set initial hidden state for grid elements
-        gsap.set(".plus-card", { opacity: 0, y: 30 })
-
-        // Animate the header section
-        const headerTl = gsap.timeline({
-            scrollTrigger: {
-                trigger: headerRef.current,
-                start: "top 80%",
-                end: "bottom 20%",
-                toggleActions: "play none none none"
-            }
-        })
-
-        // Badge animation with scale
-        headerTl.from(badgeRef.current, {
-            opacity: 0,
-            y: 20,
-            scale: 0.9,
-            duration: 0.6,
-            ease: "power2.out"
-        })
-
-        // Title animation
-        headerTl.from(titleRef.current, {
-            opacity: 0,
-            y: 40,
-            duration: 0.8,
-            ease: "power3.out"
-        }, "-=0.3")
-
-        // Description animation
-        headerTl.from(descriptionRef.current, {
-            opacity: 0,
-            y: 30,
-            duration: 0.7,
-            ease: "power2.out"
-        }, "-=0.4")
-
-        // Animate grid elements line by line
-        const gridTl = gsap.timeline({
-            scrollTrigger: {
-                trigger: gridRef.current,
-                start: "top 75%",
-                end: "bottom 25%",
-                toggleActions: "play none none none"
-            }
-        })
-
-        // Line 1: First row (2 cards)
-        gridTl.to(".plus-card:nth-child(1), .plus-card:nth-child(2)", {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            stagger: 0.1,
-            ease: "power2.out"
-        })
-
-        // Line 2: Second row (1 card)
-        gridTl.to(".plus-card:nth-child(3)", {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: "power2.out"
-        }, "-=0.3")
-
-        // Line 3: Third row (2 cards)
-        gridTl.to(".plus-card:nth-child(4), .plus-card:nth-child(5)", {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            stagger: 0.1,
-            ease: "power2.out"
-        }, "-=0.3")
-
-    }, { scope: sectionRef })
-
+export function HowItWorks() {
     return (
-        <section ref={sectionRef} id="how-it-works" className="relative w-full py-12 sm:py-16 lg:py-20 xl:py-24 px-4 sm:px-6 lg:px-8">
-            {/* Background Elements */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.05),transparent_50%)]" />
-
-            <div className="max-w-6xl lg:max-w-7xl xl:max-w-7xl mx-auto">
-                {/* Section Header - Higher z-index to stay above cards */}
-                <div ref={headerRef} className="text-center mb-8 sm:mb-12 lg:mb-16 relative z-20">
-                    <div ref={badgeRef}>
-                        <Badge className="mb-3 sm:mb-4 lg:mb-6 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
-                            How it works
-                        </Badge>
+        <section className="py-24 bg-white">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-2xl text-center mb-16">
+                    <div className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-4">
+                        How It Works
                     </div>
-                    <h2 ref={titleRef} className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 sm:mb-3 lg:mb-4 leading-tight text-foreground">
-                        Transform your workflow
+                    <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl font-heading">
+                        From recording to sharing in 4 simple steps
                     </h2>
-                    <p ref={descriptionRef} className="text-sm sm:text-base lg:text-lg text-muted-foreground max-w-xs sm:max-w-2xl lg:max-w-3xl mx-auto leading-relaxed">
-                        From recording to sharing, our intelligent platform makes documentation effortless and collaborative
+                    <p className="mt-4 text-lg leading-8 text-gray-600 font-sans">
+                        Create beautiful guides in minutes, not hours. Your team will thank you.
                     </p>
                 </div>
 
-                {/* Ruixen Bento Cards - Lower z-index */}
-                <div ref={gridRef} className="relative z-10">
-                    <RuixenBentoCards />
+                <div className="mx-auto max-w-7xl">
+                    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                        {steps.map((step, index) => (
+                            <div key={step.step} className="relative p-8 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors border border-gray-100">
+                                <div className="mb-4">
+                                    <div className="text-sm font-medium text-gray-500 mb-2">
+                                        Step {step.step}
+                                    </div>
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-gray-900/5">
+                                        <step.icon className="h-6 w-6 text-indigo-600" aria-hidden="true" />
+                                    </div>
+                                </div>
+                                <h3 className="text-lg font-semibold leading-8 text-gray-900 font-heading">
+                                    {step.name}
+                                </h3>
+                                <p className="mt-2 text-base leading-7 text-gray-600 font-sans">
+                                    {step.description}
+                                </p>
+                                {index < steps.length - 1 && (
+                                    <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gray-300" />
+                                )}
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>
-    )
+    );
 }

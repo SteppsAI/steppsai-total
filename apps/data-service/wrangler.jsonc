@@ -15,6 +15,9 @@
 	},
 	"env": {
 		"stage": {
+			"vars": {
+				"ASSETS_URL": "https://stepps-assets-stage.stepps.ai"
+			},
 			"r2_buckets": [
 				{
 					"binding": "BUCKET",
@@ -38,6 +41,9 @@
 			}
 		},
 		"production": {
+			"vars": {
+				"ASSETS_URL": "https://assets.stepps.ai"
+			},
 			"r2_buckets": [
 				{
 					"binding": "BUCKET",

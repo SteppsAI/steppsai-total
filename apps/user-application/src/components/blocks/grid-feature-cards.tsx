@@ -40,33 +40,33 @@ export function FeatureCard({ feature, className, index = 0, ...props }: Feature
 export function GridFeatureCards() {
     const features = [
         {
-            title: "Operations",
-            description: "Standardize processes with automated workflows and version control",
+            title: "Process Guides",
+            description: "Record any workflow once and generate step-by-step guides automatically",
             icon: Settings,
         },
         {
-            title: "Product Teams",
-            description: "Accelerate alignment with clear documentation and training materials",
+            title: "Team Training",
+            description: "Create training materials that teams can actually follow. No more guesswork.",
             icon: Zap,
         },
         {
             title: "Customer Support",
-            description: "Resolve issues faster with visual guides and knowledge bases",
+            description: "Build help guides that reduce tickets and keep customers happy",
             icon: MessageSquare,
         },
         {
-            title: "Engineering",
-            description: "Streamline development with API docs and technical specifications",
+            title: "Technical Docs",
+            description: "Document technical processes visually. Perfect for engineering teams.",
             icon: Code,
         },
         {
-            title: "HR & Onboarding",
-            description: "Simplify employee onboarding with policy documents and compliance",
+            title: "Employee Onboarding",
+            description: "Get new hires productive faster with clear, visual instructions",
             icon: Users,
         },
         {
-            title: "Sales & Marketing",
-            description: "Enable teams with brand guidelines and competitive analysis",
+            title: "Quality Control",
+            description: "Ensure consistency with standardized procedures and version tracking",
             icon: TrendingUp,
         },
     ];

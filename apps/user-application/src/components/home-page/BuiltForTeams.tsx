@@ -74,14 +74,14 @@ export default function BuiltForTeams() {
                 <div ref={headerRef} className="text-center mb-8 sm:mb-12 lg:mb-16">
                     <div ref={badgeRef}>
                         <Badge className="mb-3 sm:mb-4 lg:mb-6 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
-                            Built for Teams
+                            Process Documentation
                         </Badge>
                     </div>
                     <h2 ref={titleRef} className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 sm:mb-3 lg:mb-4 leading-tight text-foreground">
-                        Made for every team
+                        Document any process in minutes
                     </h2>
                     <p ref={descriptionRef} className="text-sm sm:text-base lg:text-lg text-muted-foreground max-w-xs sm:max-w-xl lg:max-w-2xl mx-auto leading-relaxed">
-                        From engineering to customer support, documentation that scales with your organization
+                        Record your workflow once and generate step-by-step guides automatically
                     </p>
                 </div>
 

@@ -1,5 +1,5 @@
 'use client'
-import { Activity, FileText, Users } from 'lucide-react'
+import { ScreenShare, FolderOpen, Users, Clock, Zap, Share2 } from 'lucide-react'
 
 export function SocialProof() {
     return (
@@ -8,12 +8,12 @@ export function SocialProof() {
                 <div>
                     <div className="p-6 sm:p-12">
                         <span className="text-muted-foreground flex items-center gap-2">
-                            <FileText className="size-4" />
-                            Automated Documentation
+                            <ScreenShare className="size-4" />
+                            Record Once
                         </span>
 
                         <p className="mt-8 text-2xl font-semibold">
-                            Record once, generate forever. Create beautiful step-by-step guides automatically.
+                            Capture any workflow and generate perfect guides automatically
                         </p>
                     </div>
 
@@ -42,12 +42,12 @@ export function SocialProof() {
                 <div className="overflow-hidden border-t bg-zinc-50 p-6 sm:p-12 md:border-0 md:border-l dark:bg-transparent">
                     <div className="relative z-10">
                         <span className="text-muted-foreground flex items-center gap-2">
-                            <Users className="size-4" />
-                            Built for teams
+                            <FolderOpen className="size-4" />
+                            Share Everywhere
                         </span>
 
                         <p className="my-8 text-2xl font-semibold">
-                            Collaborate seamlessly with your team to create and share knowledge.
+                            Organize guides into folders and share with your team. Export to PDF, Markdown, or share via link.
                         </p>
                     </div>
                     <div aria-hidden className="flex flex-col gap-6 mt-8">
@@ -88,14 +88,14 @@ export function SocialProof() {
                 <div className="relative col-span-full p-6 sm:p-12">
                     <div className="max-w-lg">
                         <span className="text-muted-foreground flex items-center gap-2">
-                            <Activity className="size-4" />
-                            Always up-to-date
+                            <Zap className="size-4" />
+                            Save Hours Weekly
                         </span>
 
                         <p className="my-8 text-2xl font-semibold">
-                            Keep your documentation current with every workflow change.{' '}
+                            Stop writing documentation manually.{' '}
                             <span className="text-muted-foreground">
-                                Never let your guides become outdated.
+                                Your team will thank you for the time saved.
                             </span>
                         </p>
                     </div>

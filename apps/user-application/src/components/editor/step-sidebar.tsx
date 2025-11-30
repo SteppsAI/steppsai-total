@@ -56,7 +56,7 @@ export function StepSidebar({
     const handleStartEdit = (step: Step, e: React.MouseEvent) => {
         e.stopPropagation();
         setEditingStepId(step.id);
-        setEditValue(step.caption || "");
+        setEditValue(step.caption || (step as any).aiCaption || "");
     };
 
     const handleSave = (stepId: string) => {
@@ -206,7 +206,7 @@ export function StepSidebar({
                                         className="text-sm font-medium text-foreground cursor-text hover:text-primary/80 transition-colors"
                                         onClick={(e) => handleStartEdit(step, e)}
                                     >
-                                        {index + 1}. {step.caption || `Step ${index + 1}`}
+                                        {index + 1}. {step.caption || (step as any).aiCaption || `Step ${index + 1}`}
                                     </span>
                                 )}
                             </div>

@@ -22,6 +22,8 @@ interface CanvasProps {
   activeTool: EditorTool;
   onAddOverlay?: (overlay: any) => void;
   onAnnotationsChange?: (annotations: Annotation[]) => void;
+  onDeleteStep?: () => void;
+  currentStepId?: string;
 }
 
 // Generate unique IDs for annotations
@@ -42,7 +44,9 @@ export function Canvas({
   screenshotUrl,
   overlays,
   activeTool,
-  onAnnotationsChange
+  onAnnotationsChange,
+  onDeleteStep,
+  currentStepId,
 }: CanvasProps) {
   const [image] = useImage(screenshotUrl || "");
   const stageRef = useRef<Konva.Stage>(null);
@@ -546,15 +550,18 @@ export function Canvas({
             <Button
               onClick={() => {
                 if (selectedId) {
+                  // Delete selected annotation
                   setAnnotations(annotations.filter(a => a.id !== selectedId));
                   setSelectedId(null);
+                } else if (onDeleteStep && currentStepId) {
+                  // Delete entire step if no annotation selected
+                  onDeleteStep();
                 }
               }}
-              disabled={!selectedId}
               variant="ghost"
               size="icon"
-              className="h-9 w-9 rounded-full hover:bg-red-50 text-red-600 disabled:opacity-40 disabled:cursor-not-allowed"
-              title="Delete"
+              className="h-9 w-9 rounded-full hover:bg-red-50 text-red-600"
+              title={selectedId ? "Delete annotation" : "Delete step"}
             >
               <Trash2 className="w-4 h-4" />
             </Button>

@@ -201,6 +201,8 @@ function EditorPage() {
           overlays={(currentStep?.overlays as Overlay[]) || []}
           activeTool={activeTool}
           onAnnotationsChange={handleAnnotationsChange}
+          onDeleteStep={() => currentStep && handleDeleteStep(currentStep.id)}
+          currentStepId={currentStep?.id}
         />
 
         <StepSidebar

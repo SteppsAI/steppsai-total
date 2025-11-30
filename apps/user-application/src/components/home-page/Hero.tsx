@@ -5,6 +5,9 @@ import { Demo } from './Demo'
 import { useRef } from 'react'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
 
 export function Hero() {
     const containerRef = useRef<HTMLDivElement>(null)
@@ -13,6 +16,7 @@ export function Hero() {
     useGSAP(() => {
         const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
         
+        // Initial Hero Content Animation (On Load)
         tl.fromTo(contentRef.current, 
             { opacity: 0, y: 20 },
             { opacity: 1, y: 0, duration: 0.8 }
@@ -22,6 +26,34 @@ export function Hero() {
             { opacity: 1, y: 0, duration: 0.6, stagger: 0.15 }, 
             "-=0.6"
         )
+
+        // ScrollTrigger for "Works on..." bar
+        gsap.from(".hero-trust-bar", {
+            scrollTrigger: {
+                trigger: ".hero-trust-bar",
+                start: "top 95%",
+                toggleActions: "play none none reverse"
+            },
+            scale: 0.95,
+            y: 20,
+            opacity: 0,
+            duration: 0.8,
+            ease: "back.out(1.7)"
+        });
+
+        // ScrollTrigger for Demo
+        gsap.from(".hero-demo", {
+            scrollTrigger: {
+                trigger: ".hero-demo",
+                start: "top 90%",
+                toggleActions: "play none none reverse"
+            },
+            y: 40,
+            opacity: 0,
+            duration: 1,
+            ease: "power3.out"
+        });
+
     }, { scope: containerRef })
 
     return (
@@ -64,14 +96,14 @@ export function Hero() {
                     </div>
 
                     {/* Middle Bar: Stats/Trust */}
-                    <div className="col-span-full border-t border-border/50 p-8 md:p-12 text-center">
+                    <div className="hero-trust-bar col-span-full border-t border-border/50 p-8 md:p-12 text-center">
                         <p className="text-2xl md:text-3xl font-semibold tracking-tight">
                             Works on <span className="text-muted-foreground">any website</span>, captures <span className="text-muted-foreground">every detail</span>.
                         </p>
                     </div>
 
                     {/* Bottom Full Width: Demo */}
-                    <div className="col-span-full border-t border-border/50 relative">
+                    <div className="hero-demo col-span-full border-t border-border/50 relative">
                         <div className="pt-0 md:pt-8">
                              <Demo />
                         </div>

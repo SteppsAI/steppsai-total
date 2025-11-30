@@ -4,6 +4,12 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion"
+import { useRef } from "react"
+import gsap from "gsap"
+import { useGSAP } from "@gsap/react"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+
+gsap.registerPlugin(ScrollTrigger)
 
 const faqs = [
     {
@@ -65,10 +71,37 @@ const faqs = [
 ]
 
 export function FAQ() {
+    const containerRef = useRef<HTMLElement>(null)
+
+    useGSAP(() => {
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: containerRef.current,
+                start: "top 75%",
+                toggleActions: "play none none reverse"
+            }
+        })
+
+        tl.from(".faq-header", {
+            y: 30,
+            opacity: 0,
+            duration: 0.8,
+            ease: "power3.out"
+        })
+        .from(".faq-item", {
+            y: 20,
+            opacity: 0,
+            duration: 0.5,
+            stagger: 0.1,
+            ease: "power3.out"
+        }, "-=0.4")
+
+    }, { scope: containerRef })
+
     return (
-        <section id="faq" className="py-24 bg-background">
+        <section id="faq" ref={containerRef} className="py-24 bg-background">
             <div className="container mx-auto px-4 md:px-6 max-w-3xl">
-                <div className="text-center mb-16">
+                <div className="faq-header text-center mb-16">
                     <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
                         Frequently Asked Questions
                     </h2>
@@ -79,7 +112,7 @@ export function FAQ() {
 
                 <Accordion type="single" collapsible className="w-full">
                     {faqs.map((faq, index) => (
-                        <AccordionItem key={index} value={`item-${index}`}>
+                        <AccordionItem key={index} value={`item-${index}`} className="faq-item">
                             <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
                             <AccordionContent className="text-muted-foreground">
                                 {faq.answer}

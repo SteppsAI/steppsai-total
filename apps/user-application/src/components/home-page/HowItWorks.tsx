@@ -1,7 +1,39 @@
-import React from "react";
+import React, { useRef } from "react";
 import { cn } from "@/lib/utils";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export function HowItWorks() {
+    const containerRef = useRef<HTMLElement>(null);
+
+    useGSAP(() => {
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: containerRef.current,
+                start: "top 75%",
+                toggleActions: "play none none reverse"
+            }
+        });
+
+        tl.from(".hiw-header", {
+            y: 30,
+            opacity: 0,
+            duration: 0.8,
+            ease: "power3.out"
+        })
+        .from(".hiw-card", {
+            y: 50,
+            opacity: 0,
+            duration: 0.8,
+            stagger: 0.15,
+            ease: "power3.out"
+        }, "-=0.4");
+
+    }, { scope: containerRef });
+
     const features = [
         {
             title: "Install Extension",
@@ -39,9 +71,9 @@ export function HowItWorks() {
         },
     ];
     return (
-        <section id="how-it-works" className="py-24 bg-white dark:bg-neutral-950">
+        <section id="how-it-works" ref={containerRef} className="py-24 bg-white dark:bg-neutral-950">
             <div className="relative z-20 py-10 lg:py-40 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="px-8">
+                <div className="px-8 hiw-header">
                     <h4 className="text-3xl lg:text-5xl lg:leading-tight max-w-5xl mx-auto text-center tracking-tight font-medium text-black dark:text-white">
                         From recording to sharing in 4 simple steps
                     </h4>
@@ -54,7 +86,7 @@ export function HowItWorks() {
                 <div className="relative">
                     <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-6 mt-12 xl:border rounded-md dark:border-neutral-800">
                         {features.map((feature) => (
-                            <FeatureCard key={feature.title} className={feature.className}>
+                            <FeatureCard key={feature.title} className={cn(feature.className, "hiw-card")}>
                                 <FeatureTitle>{feature.title}</FeatureTitle>
                                 <FeatureDescription>{feature.description}</FeatureDescription>
                                 <div className={cn("w-full mt-8", feature.containerClassName)}>{feature.skeleton}</div>

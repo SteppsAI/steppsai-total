@@ -20,18 +20,18 @@ guidesRouter.post('/start', async (c) => {
         });
 
         console.log(`Created draft guide: ${guideId}`);
-        
-        return c.json({ 
-            success: true, 
+
+        return c.json({
+            success: true,
             guideId,
-            userId: HARDCODED_USER_ID 
+            userId: HARDCODED_USER_ID
         });
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         console.error('Failed to create guide:', errorMessage);
-        return c.json({ 
-            error: 'Failed to create guide', 
-            details: errorMessage 
+        return c.json({
+            error: 'Failed to create guide',
+            details: errorMessage
         }, 500);
     }
 });
@@ -39,7 +39,7 @@ guidesRouter.post('/start', async (c) => {
 // Complete Recording - Updates guide title and sends steps to queue
 guidesRouter.post('/:guideId/complete', async (c) => {
     const guideId = c.req.param('guideId');
-    
+
     try {
         const { title, steps } = await c.req.json();
 
@@ -57,14 +57,14 @@ guidesRouter.post('/:guideId/complete', async (c) => {
         });
 
         console.log(`Guide ${guideId} sent to queue with ${steps?.length || 0} steps`);
-        
+
         return c.json({ success: true, guideId });
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         console.error('Failed to complete guide:', errorMessage);
-        return c.json({ 
-            error: 'Failed to complete guide', 
-            details: errorMessage 
+        return c.json({
+            error: 'Failed to complete guide',
+            details: errorMessage
         }, 500);
     }
 });
@@ -72,31 +72,31 @@ guidesRouter.post('/:guideId/complete', async (c) => {
 // Delete Recording - Deletes guide from DB and images from R2
 guidesRouter.delete('/:guideId', async (c) => {
     const guideId = c.req.param('guideId');
-    
+
     try {
         // 1. Delete guide from DB (steps are embedded as JSONB)
         await deleteGuide(guideId);
-        
+
         // 2. Delete all images for this guide from R2
         const prefix = `screenshots/${guideId}/`;
         const listed = await c.env.BUCKET.list({ prefix });
-        
+
         if (listed.objects.length > 0) {
             await Promise.all(
                 listed.objects.map(obj => c.env.BUCKET.delete(obj.key))
             );
             console.log(`Deleted ${listed.objects.length} images from R2 for guide ${guideId}`);
         }
-        
+
         console.log(`Deleted guide: ${guideId}`);
-        
+
         return c.json({ success: true });
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         console.error('Failed to delete guide:', errorMessage);
-        return c.json({ 
-            error: 'Failed to delete guide', 
-            details: errorMessage 
+        return c.json({
+            error: 'Failed to delete guide',
+            details: errorMessage
         }, 500);
     }
 });

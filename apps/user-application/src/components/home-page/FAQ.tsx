@@ -1,0 +1,93 @@
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion"
+
+const faqs = [
+    {
+        question: "How does stepps.ai automatically create documentation?",
+        answer: "Our browser extension records your workflow as you navigate through any website. The app captures intelligent screenshots at each interaction point, automatically generates step descriptions, and creates professional guides you can instantly share."
+    },
+    {
+        question: "What can I do with the current MVP?",
+        answer: "Right now you can record any workflow, capture smart screenshots, add titles, edit guides in our interactive editor (with annotations, arrows, highlights, and sensitive info blurring), organize guides in folders, and share via public links. PDF export is coming very soon!"
+    },
+    {
+        question: "What browsers and websites does stepps.ai work with?",
+        answer: "stepps.ai currently works on Google Chrome and captures interactions on any modern website including SaaS platforms, web applications, e-commerce sites, and internal tools. If you can click it, we can document it."
+    },
+    {
+        question: "How is this different from screen recording tools?",
+        answer: "Unlike video recorders, stepps.ai creates searchable, editable documentation with optimized screenshots. Readers can follow at their own pace, copy-paste text, and you can easily update individual steps without re-recording everything."
+    },
+    {
+        question: "What editing features are available now?",
+        answer: "Our interactive editor lets you add arrows, highlights, boxes, and text annotations to screenshots. You can crop images, blur sensitive information, edit step descriptions, and rearrange the guide flow. Perfect for creating professional, polished documentation."
+    },
+    {
+        question: "Can I pause and resume recordings?",
+        answer: "Yes! You have full control to pause, resume, and stop recordings. The extension shows you a live preview of captured steps, so you know exactly what's being documented before you finish."
+    },
+    {
+        question: "What features are coming next?",
+        answer: "We're rolling out exciting features: Team Collaboration (real-time editing, comments, permissions), Guide Templates (professional layouts for common workflows), Website Embedding (put guides directly on your site), Marketing Export (LinkedIn carousels, social media), Custom Branding (your colors, logos), and additional export formats (Markdown, Word, HTML)."
+    },
+    {
+        question: "When will team collaboration be available?",
+        answer: "Team collaboration is our top priority and coming in the next major update. You'll be able to invite team members, edit guides together, leave comments, set permissions, and maintain brand consistency across your organization."
+    },
+    {
+        question: "What kind of content can I create with stepps.ai?",
+        answer: "Perfect for SOPs, user guides, training materials, bug reports, feature walkthroughs, onboarding docs, customer support guides, internal knowledge bases, and process documentation. Great for product teams, customer success, training departments, and agencies."
+    },
+    {
+        question: "How are screenshots handled and optimized?",
+        answer: "Screenshots are automatically captured at each interaction point, intelligently cropped to focus on relevant areas, and optimized for web viewing. You can enhance them with annotations, blur sensitive data, or replace them entirely in the editor."
+    },
+    {
+        question: "What's included in the lifetime deal?",
+        answer: "The one-time payment includes all current features (unlimited guides, advanced editor, sharing, organization) plus ALL upcoming features (team collaboration, templates, embedding, marketing exports, custom branding and more). No monthly fees or surprise charges - you get everything we build, forever."
+    },
+    {
+        question: "How secure is my data and guides?",
+        answer: "All data is stored securely in Cloudflare's infrastructure with enterprise-grade security. Your guides and screenshots are private until you share them. We use Better Auth for secure authentication and implement industry-standard security practices."
+    },
+    {
+        question: "Do you offer refunds?",
+        answer: "Yes, we offer a 30-day money-back guarantee. If you're not completely satisfied with stepps.ai, contact our support team within 30 days of purchase for a full refund."
+    },
+    {
+        question: "What happens to my guides over time?",
+        answer: "With the lifetime deal, your guides and all features remain accessible forever. No subscriptions to cancel. Plus, as we add new features like team collaboration and marketing exports, you'll automatically get access to them at no additional cost."
+    }
+]
+
+export function FAQ() {
+    return (
+        <section id="faq" className="py-24 bg-background">
+            <div className="container mx-auto px-4 md:px-6 max-w-3xl">
+                <div className="text-center mb-16">
+                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+                        Frequently Asked Questions
+                    </h2>
+                    <p className="text-lg text-muted-foreground">
+                        Have a question? We're here to help.
+                    </p>
+                </div>
+
+                <Accordion type="single" collapsible className="w-full">
+                    {faqs.map((faq, index) => (
+                        <AccordionItem key={index} value={`item-${index}`}>
+                            <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
+                            <AccordionContent className="text-muted-foreground">
+                                {faq.answer}
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                </Accordion>
+            </div>
+        </section>
+    )
+}

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { WaitlistForm } from '@/components/waitlist-form'
+
 
 function GridPattern({
   width,
@@ -89,13 +89,20 @@ export function Footer() {
             {/* Left Side: Heading & Description */}
             <div className="max-w-2xl w-full text-center md:text-left">
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-[1.2] font-sans text-white">
-                Document processes, share knowledge
+                Ready to automate your documentation?
               </h2>
               <p className="text-lg text-white/60 mb-8 max-w-xl leading-relaxed">
-                Join the waitlist for stepps.ai today. Be the first to generate beautiful step-by-step guides when we launch.
+                Join thousands of teams saving time with stepps.ai. Get lifetime access today.
               </p>
 
-              <WaitlistForm variant="footer" />
+              <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                <a
+                  href="#black-friday"
+                  className="inline-flex h-12 items-center justify-center rounded-full bg-white px-8 text-sm font-medium text-brand-dark shadow transition-colors hover:bg-white/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                >
+                  Get Lifetime Access
+                </a>
+              </div>
             </div>
           </div>
 

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Trash2, Plus, X, Check } from "lucide-react";
+import { Trash2, Plus, X, Check, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useRef, useEffect } from "react";
 import { Step } from "@/types/db";
@@ -14,6 +14,8 @@ interface StepSidebarProps {
     onDeleteStep: (id: string) => void;
     onReorderSteps: (steps: Step[]) => void;
     onAddStep?: (step: { title: string; file: File; previewUrl: string }) => void;
+    isCollapsed?: boolean;
+    onToggleCollapse?: () => void;
 }
 
 export function StepSidebar({
@@ -23,6 +25,8 @@ export function StepSidebar({
     onUpdateStep,
     onDeleteStep,
     onAddStep,
+    isCollapsed = false,
+    onToggleCollapse,
 }: StepSidebarProps) {
     const [editingStepId, setEditingStepId] = useState<string | null>(null);
     const [editValue, setEditValue] = useState("");
@@ -133,9 +137,52 @@ export function StepSidebar({
     };
 
     return (
-        <div className="w-[300px] bg-muted flex flex-col z-10 border-l border-border h-full">
+        <div className={cn(
+            "bg-muted flex flex-col z-10 border-l border-border h-full transition-all duration-300 relative",
+            isCollapsed ? "w-12" : "w-[300px]"
+        )}>
+            {/* Toggle Button */}
+            {onToggleCollapse && (
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onToggleCollapse}
+                    className="absolute -left-4 top-4 z-20 h-8 w-8 rounded-full bg-background border shadow-sm hover:bg-muted"
+                >
+                    {isCollapsed ? (
+                        <PanelRightOpen className="h-4 w-4" />
+                    ) : (
+                        <PanelRightClose className="h-4 w-4" />
+                    )}
+                </Button>
+            )}
+
+            {isCollapsed ? (
+                <div className="flex flex-col items-center pt-14 gap-2">
+                    {steps.slice(0, 5).map((step, index) => (
+                        <button
+                            key={step.id}
+                            onClick={() => {
+                                onStepSelect(step.id);
+                                onToggleCollapse?.();
+                            }}
+                            className={cn(
+                                "w-8 h-8 rounded-lg text-xs font-medium transition-colors",
+                                activeStepId === step.id
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-background hover:bg-muted-foreground/10"
+                            )}
+                        >
+                            {index + 1}
+                        </button>
+                    ))}
+                    {steps.length > 5 && (
+                        <span className="text-xs text-muted-foreground">+{steps.length - 5}</span>
+                    )}
+                </div>
+            ) : (
             <ScrollArea className="flex-1">
-                <div className="p-4 space-y-6 pb-20">
+                <div className="p-4 space-y-6 pb-20 pt-2">
                     {steps.map((step, index) => (
                         <div key={step.id} className="group relative flex flex-col gap-2">
                             <div className="flex items-center justify-between px-1">
@@ -191,17 +238,18 @@ export function StepSidebar({
                             </div>
 
                             {/* Actions (visible on hover) */}
-                            <div className="absolute top-8 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="absolute top-8 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                                 <Button
                                     variant="secondary"
                                     size="icon"
-                                    className="h-6 w-6 shadow-md bg-white hover:bg-white"
+                                    className="h-7 w-7 shadow-md bg-white hover:bg-red-50 border border-border"
                                     onClick={(e) => {
                                         e.stopPropagation();
+                                        e.preventDefault();
                                         onDeleteStep(step.id);
                                     }}
                                 >
-                                    <Trash2 className="w-3 h-3 text-red-600" />
+                                    <Trash2 className="w-3.5 h-3.5 text-red-600" />
                                 </Button>
                             </div>
                         </div>
@@ -276,6 +324,7 @@ export function StepSidebar({
                     )}
                 </div>
             </ScrollArea>
+            )}
         </div>
     );
 }

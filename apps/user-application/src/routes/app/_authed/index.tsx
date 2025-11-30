@@ -58,6 +58,7 @@ function Dashboard() {
     ...trpc.guides.update.mutationOptions(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
+      queryClient.invalidateQueries({ queryKey: trpc.folders.getAll.queryOptions().queryKey });
     },
   });
 

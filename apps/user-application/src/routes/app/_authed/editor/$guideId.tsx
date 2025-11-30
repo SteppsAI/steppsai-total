@@ -56,6 +56,7 @@ function EditorPage() {
   const [activeTool, setActiveTool] = useState<"pointer" | "arrow" | "highlight" | "hide">("pointer");
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Sync fetched guide to local state and set initial active step
   useEffect(() => {
@@ -210,6 +211,8 @@ function EditorPage() {
           onDeleteStep={handleDeleteStep}
           onReorderSteps={handleReorderSteps}
           onAddStep={handleAddStep}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
       </div>
 

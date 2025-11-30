@@ -2,7 +2,6 @@ import { z } from "zod";
 import { router, publicProcedure } from "../trpc-instance";
 import {
     createGuide,
-    deleteGuide,
     getGuide,
     getUserGuides,
     updateGuide,
@@ -51,7 +50,19 @@ export const guidesRouter = router({
 
     delete: publicProcedure
         .input(z.object({ id: z.string() }))
-        .mutation(async ({ input }) => {
-            return await deleteGuide(input.id);
+        .mutation(async ({ input, ctx }) => {
+            // Call data-service for atomic deletion (R2 + DB)
+            const response = await ctx.env.BACKEND_SERVICE.fetch(
+                new Request(`https://internal/guides/${input.id}`, {
+                    method: 'DELETE',
+                })
+            );
+
+            if (!response.ok) {
+                const error = await response.json() as { error?: string };
+                throw new Error(error.error || 'Failed to delete guide');
+            }
+
+            return { success: true };
         }),
 });

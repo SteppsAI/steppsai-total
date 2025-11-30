@@ -44,7 +44,7 @@ export function Canvas({
   activeTool,
   onAnnotationsChange
 }: CanvasProps) {
-  const [image] = useImage(screenshotUrl || "", "anonymous");
+  const [image] = useImage(screenshotUrl || "");
   const stageRef = useRef<Konva.Stage>(null);
   const layerRef = useRef<Konva.Layer>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
@@ -56,6 +56,9 @@ export function Canvas({
 
   // Ref to track if we are currently syncing from props to avoid triggering updates back to parent
   const isSyncingRef = useRef(false);
+  // Ref to store the latest callback without causing re-renders
+  const onAnnotationsChangeRef = useRef(onAnnotationsChange);
+  onAnnotationsChangeRef.current = onAnnotationsChange;
 
   // Initialize with overlays from props
   const { annotations, set: setAnnotations, undo, redo, canUndo, canRedo } = useAnnotationHistory(overlays || []);
@@ -91,12 +94,12 @@ export function Canvas({
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
-  // Notify parent of annotation changes
+  // Notify parent of annotation changes (use ref to avoid infinite loops)
   useEffect(() => {
     if (!isSyncingRef.current) {
-      onAnnotationsChange?.(annotations);
+      onAnnotationsChangeRef.current?.(annotations);
     }
-  }, [annotations, onAnnotationsChange]);
+  }, [annotations]);
 
   // Sync selectedColor with selected annotation
   useEffect(() => {

@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { Search, X, FileText, Folder as FolderIcon, Loader2 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/router";
@@ -18,7 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+
 
 export function DashboardHeader() {
   const navigate = useNavigate();
@@ -54,7 +54,7 @@ export function DashboardHeader() {
           to: "/app/stepps",
         });
       }
-      
+
       setIsMobileSearchOpen(false);
       inputRef.current?.blur();
     }
@@ -62,14 +62,14 @@ export function DashboardHeader() {
 
   // Sync search query with session storage
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = e.target.value;
-      setSearchQuery(newValue);
-      sessionStorage.setItem('searchQuery', newValue);
-      if (newValue.trim().length > 0) {
-        setOpen(true);
-      } else {
-        setOpen(false);
-      }
+    const newValue = e.target.value;
+    setSearchQuery(newValue);
+    sessionStorage.setItem('searchQuery', newValue);
+    if (newValue.trim().length > 0) {
+      setOpen(true);
+    } else {
+      setOpen(false);
+    }
   };
 
   // Filter results for preview
@@ -104,9 +104,9 @@ export function DashboardHeader() {
             className="flex-1 border-none bg-transparent focus-visible:ring-0 px-2 h-9"
             autoFocus
           />
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setIsMobileSearchOpen(false)}
             className="shrink-0"
           >
@@ -151,10 +151,10 @@ export function DashboardHeader() {
                     <Command shouldFilter={false}>
                       <CommandList>
                         {isLoadingGuides || isLoadingFolders ? (
-                           <div className="py-6 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
-                             <Loader2 className="size-4 animate-spin" />
-                             Searching...
-                           </div>
+                          <div className="py-6 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
+                            <Loader2 className="size-4 animate-spin" />
+                            Searching...
+                          </div>
                         ) : !hasResults ? (
                           <CommandEmpty>No results found.</CommandEmpty>
                         ) : (
@@ -196,9 +196,9 @@ export function DashboardHeader() {
               </div>
 
               {/* Mobile Search Trigger */}
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="md:hidden"
                 onClick={() => setIsMobileSearchOpen(true)}
               >

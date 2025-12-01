@@ -104,24 +104,23 @@ function GuideViewPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Screenshot */}
                 <div className="rounded-xl border overflow-hidden shadow-sm bg-muted/10 ring-1 ring-black/5">
-                   {step.imageKey ? (
-                       <img
-                           src={step.imageKey}
-                           alt={`Step ${index + 1}`}
-                           className="w-full h-auto object-contain bg-white"
-                           loading="lazy"
-                       />
-                   ) : (
-                       <div className="aspect-video flex flex-col items-center justify-center text-muted-foreground gap-2 bg-muted/20">
-                           <div className="size-12 rounded-full bg-muted flex items-center justify-center">
-                               <span className="text-2xl">?</span>
-                           </div>
-                           <p>No image available</p>
-                       </div>
-                   )}
+                  {step.imageKey ? (
+                    <img
+                      src={step.imageKey}
+                      alt={`Step ${index + 1}`}
+                      className="w-full h-auto object-contain bg-white"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="aspect-video flex items-center justify-center text-muted-foreground bg-muted/20">
+                      <p className="text-xl md:text-2xl font-medium text-center px-6">
+                        {step.caption || step.aiCaption || `Step ${index + 1}`}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -136,11 +135,11 @@ function GuideViewPage() {
         )}
       </main>
 
-      <ShareDialog 
-          open={isShareOpen} 
-          onOpenChange={setIsShareOpen}
-          guideTitle={guide.title || ""}
-          guideId={guide.id}
+      <ShareDialog
+        open={isShareOpen}
+        onOpenChange={setIsShareOpen}
+        guideTitle={guide.title || ""}
+        guideId={guide.id}
       />
     </div>
   );

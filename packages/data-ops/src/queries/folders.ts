@@ -44,21 +44,18 @@ export async function getFolder(folderId: string): Promise<FoldersSchemaType | n
 export async function getUserFolders(userId: string): Promise<FolderWithCount[]> {
 	const db = getDb();
 
-	// Get folders with guide count using subquery
 	const result = await db
 		.select({
 			id: folders.id,
 			userId: folders.userId,
 			name: folders.name,
 			createdAt: folders.createdAt,
-			guideCount: sql<number>`(
-				SELECT COUNT(*)::int 
-				FROM ${guides} 
-				WHERE ${guides.folderId} = ${folders.id}
-			)`,
+			guideCount: sql<number>`count(${guides.id})::int`,
 		})
 		.from(folders)
-		.where(eq(folders.userId, userId));
+		.leftJoin(guides, eq(folders.id, guides.folderId))
+		.where(eq(folders.userId, userId))
+		.groupBy(folders.id);
 
 	return result.map((folder) => ({
 		id: folder.id,

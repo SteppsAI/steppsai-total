@@ -1,5 +1,12 @@
-import { Pencil, Share2, Trash, Download, FolderInput } from "lucide-react";
+import { Pencil, Share2, Trash, Download, FolderInput, MoreVertical } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 interface DashboardCardProps {
   title: string;
@@ -25,50 +32,73 @@ export function DashboardCard({ title, image, viewUrl, onEdit, onShare, onMove, 
     <div className="flex flex-col gap-2 group">
       {/* Card Wrapper */}
       <div className="relative">
-        <div 
+        <div
           onClick={handleCardClick}
           className={`aspect-video w-full rounded-xl border border-border overflow-hidden bg-card relative transition-all duration-200 ${viewUrl ? 'cursor-pointer' : ''} group-hover:shadow-sm`}
         >
           <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
           {/* Overlay on hover */}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-200" />
+
+          {/* Dropdown Menu - Top Right */}
+          <div className="absolute top-2 right-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="h-8 w-8 rounded-full bg-white text-slate-900 shadow-md hover:bg-slate-100"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreVertical className="h-4 w-4" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {onEdit && (
+                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(e); }}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit
+                  </DropdownMenuItem>
+                )}
+                {onShare && (
+                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onShare(e); }}>
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share
+                  </DropdownMenuItem>
+                )}
+                {onMove && (
+                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onMove(e); }}>
+                    <FolderInput className="mr-2 h-4 w-4" />
+                    Move to folder
+                  </DropdownMenuItem>
+                )}
+                {onExport && (
+                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onExport(e); }}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Export
+                  </DropdownMenuItem>
+                )}
+                {onDelete && (
+                  <DropdownMenuItem
+                    onClick={(e) => { e.stopPropagation(); onDelete(e); }}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
-      {/* Card Footer - Flex container for Title and Actions */}
+      {/* Card Footer - Title only */}
       <div className="flex items-center justify-between px-0.5 h-8">
-        <span className="font-medium text-card-foreground truncate text-sm flex-1 pr-2" title={title}>
+        <span className="font-medium text-card-foreground truncate text-sm flex-1" title={title}>
           {title}
         </span>
-
-        {/* Actions - aligned right, only visible on hover */}
-        <div className="flex items-center gap-0.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-150 flex-shrink-0">
-          {onEdit && (
-            <button onClick={(e) => { e.preventDefault(); onEdit(e); }} className="p-1.5 hover:text-primary hover:bg-muted rounded-sm transition-colors" title="Edit">
-              <Pencil className="size-3.5" />
-            </button>
-          )}
-          {onShare && (
-            <button onClick={(e) => { e.preventDefault(); onShare(e); }} className="p-1.5 hover:text-primary hover:bg-muted rounded-sm transition-colors" title="Share">
-              <Share2 className="size-3.5" />
-            </button>
-          )}
-          {onMove && (
-            <button onClick={(e) => { e.preventDefault(); onMove(e); }} className="p-1.5 hover:text-primary hover:bg-muted rounded-sm transition-colors" title="Move to folder">
-              <FolderInput className="size-3.5" />
-            </button>
-          )}
-          {onExport && (
-            <button onClick={(e) => { e.preventDefault(); onExport(e); }} className="p-1.5 hover:text-primary hover:bg-muted rounded-sm transition-colors" title="Export">
-              <Download className="size-3.5" />
-            </button>
-          )}
-          {onDelete && (
-            <button onClick={(e) => { e.preventDefault(); onDelete(e); }} className="p-1.5 hover:text-destructive hover:bg-destructive/10 rounded-sm transition-colors" title="Delete">
-              <Trash className="size-3.5" />
-            </button>
-          )}
-        </div>
       </div>
     </div>
   );

@@ -16,6 +16,7 @@ export const queryClient = new QueryClient({
       retry: 2, // Retry failed requests twice
       refetchOnWindowFocus: false, // Don't refetch on tab focus
       refetchOnReconnect: true, // Refetch when internet reconnects
+      refetchOnMount: true, // Refetch when component mounts (including window reload)
     },
     mutations: {
       retry: 1, // Retry failed mutations once

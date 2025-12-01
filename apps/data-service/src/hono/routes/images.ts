@@ -45,7 +45,7 @@ imagesRouter.get('/*', async (c) => {
     const fullPath = url.pathname;
     // Remove /images/ prefix to get R2 key
     const key = fullPath.replace(/^\/images\//, '');
-    
+
     console.log(`GET image request - fullPath: ${fullPath}, key: ${key}`);
 
     if (!key) {
@@ -62,7 +62,7 @@ imagesRouter.get('/*', async (c) => {
     object.writeHttpMetadata(headers);
     headers.set('etag', object.httpEtag);
     headers.set('Cache-Control', 'public, max-age=31536000');
-    
+
     // Ensure content-type is set for images
     if (!headers.get('content-type')) {
         if (key.endsWith('.webp')) {
@@ -81,7 +81,7 @@ imagesRouter.get('/*', async (c) => {
 imagesRouter.delete('/*', async (c) => {
     const url = new URL(c.req.url);
     const key = url.pathname.replace(/^\/images\//, '');
-    
+
     try {
         await c.env.BUCKET.delete(key);
         return c.json({ success: true });

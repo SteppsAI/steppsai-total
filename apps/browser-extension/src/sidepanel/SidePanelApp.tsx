@@ -1,4 +1,4 @@
-import { Play, Pause, Trash2, Loader2 } from 'lucide-react';
+import { Play, Pause, Trash2, Loader2, Check } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import Logo from '../assets/logo.svg';
 import { Button } from '../components/Button';
@@ -240,40 +240,43 @@ function SidePanelApp() {
             {/* Fixed Footer */}
             <div className="z-10 shrink-0 px-6 pb-6">
                 {recordingState === 'finished' ? null : isRecording ? (
-                    <div className="space-y-2">
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-3">
+                            {recordingState === 'recording' ? (
+                                <Button
+                                    variant="ghost"
+                                    className="flex-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 shadow-sm rounded-xl py-2.5 text-sm font-medium"
+                                    onClick={handlePauseRecording}
+                                    icon={<Pause className="w-4 h-4" />}
+                                >
+                                    Pause
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="ghost"
+                                    className="flex-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 shadow-sm rounded-xl py-2.5 text-sm font-medium"
+                                    onClick={handleResumeRecording}
+                                    icon={<Play className="w-4 h-4" />}
+                                >
+                                    Resume
+                                </Button>
+                            )}
+                            <Button
+                                variant="ghost"
+                                className="flex-1 bg-white border border-slate-200 hover:bg-rose-50 text-slate-700 hover:text-rose-600 shadow-sm rounded-xl py-2.5 text-sm font-medium"
+                                onClick={handleDiscardRecording}
+                                icon={<Trash2 className="w-4 h-4" />}
+                            >
+                                Delete
+                            </Button>
+                        </div>
                         <Button
                             variant="primary"
                             className="w-full bg-[#6366F1] hover:bg-[#5558DD] text-white shadow-lg shadow-indigo-500/20 rounded-xl py-3 font-medium text-lg"
                             onClick={handleEndRecording}
+                            icon={<Check className="w-5 h-5" />}
                         >
-                            End Recording
-                        </Button>
-                        {recordingState === 'recording' ? (
-                            <Button
-                                variant="danger"
-                                className="w-full bg-[#F43F5E] hover:bg-[#E11D48] text-white shadow-lg shadow-rose-500/20 rounded-xl py-3 font-medium text-lg"
-                                onClick={handlePauseRecording}
-                                icon={<Pause className="w-5 h-5 fill-current" />}
-                            >
-                                Pause Recording
-                            </Button>
-                        ) : (
-                            <Button
-                                variant="secondary"
-                                className="w-full bg-[#06B6D4] hover:bg-[#0891B2] text-white shadow-lg shadow-cyan-500/20 rounded-xl py-3 font-medium text-lg"
-                                onClick={handleResumeRecording}
-                                icon={<Play className="w-5 h-5 fill-current" />}
-                            >
-                                Continue
-                            </Button>
-                        )}
-                        <Button
-                            variant="danger"
-                            className="w-full bg-slate-600 hover:bg-slate-700 text-white shadow-lg shadow-slate-500/20 rounded-xl py-3 font-medium text-lg"
-                            onClick={handleDiscardRecording}
-                            icon={<Trash2 className="w-5 h-5" />}
-                        >
-                            Delete Recording
+                            Complete Capture
                         </Button>
                     </div>
                 ) : (

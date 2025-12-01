@@ -72,23 +72,30 @@ export function Canvas({
     if (overlays) {
       isSyncingRef.current = true;
       setAnnotations(overlays);
-      // Reset the flag after a short delay to ensure the state update has processed
-      // and the subsequent effect has run (or been skipped)
       setTimeout(() => {
         isSyncingRef.current = false;
       }, 0);
     }
-  }, [screenshotUrl]); // Only sync when the step (screenshot) changes
+  }, [screenshotUrl]);
 
   // Container dimensions
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Update dimensions on mount and resize
+  // Update dimensions on mount, resize, and when image loads
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
-        const { width, height } = containerRef.current.getBoundingClientRect();
+        const { width } = containerRef.current.getBoundingClientRect();
+
+        let height;
+        if (image) {
+          height = width / (image.width / image.height);
+        } else {
+          // Default to 16:9 aspect ratio if no image is loaded yet
+          height = width / (16 / 9);
+        }
+
         setDimensions({ width, height });
       }
     };
@@ -96,7 +103,7 @@ export function Canvas({
     updateDimensions();
     window.addEventListener('resize', updateDimensions);
     return () => window.removeEventListener('resize', updateDimensions);
-  }, []);
+  }, [image]);
 
   // Notify parent of annotation changes (use ref to avoid infinite loops)
   useEffect(() => {

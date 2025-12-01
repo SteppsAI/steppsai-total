@@ -86,23 +86,54 @@ export function Canvas({
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
-        const { width } = containerRef.current.getBoundingClientRect();
+        const availableWidth = containerRef.current.clientWidth;
+        // Limit height to 75% of viewport height to prevent it from going off-screen
+        const maxHeight = window.innerHeight * 0.75;
 
-        let height;
+        let newWidth = availableWidth;
+        let newHeight;
+
         if (image) {
-          height = width / (image.width / image.height);
+          const aspectRatio = image.width / image.height;
+          // First try to fit by width
+          newHeight = newWidth / aspectRatio;
+
+          // If height is too tall, constrain by height instead
+          if (newHeight > maxHeight) {
+            newHeight = maxHeight;
+            newWidth = newHeight * aspectRatio;
+          }
         } else {
           // Default to 16:9 aspect ratio if no image is loaded yet
-          height = width / (16 / 9);
+          const aspectRatio = 16 / 9;
+          newHeight = newWidth / aspectRatio;
+          
+          if (newHeight > maxHeight) {
+            newHeight = maxHeight;
+            newWidth = newHeight * aspectRatio;
+          }
         }
 
-        setDimensions({ width, height });
+        setDimensions({ width: newWidth, height: newHeight });
       }
     };
 
     updateDimensions();
+    
+    const resizeObserver = new ResizeObserver(() => {
+      updateDimensions();
+    });
+    
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
     window.addEventListener('resize', updateDimensions);
-    return () => window.removeEventListener('resize', updateDimensions);
+    
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateDimensions);
+    };
   }, [image]);
 
   // Notify parent of annotation changes (use ref to avoid infinite loops)
@@ -442,12 +473,13 @@ export function Canvas({
         {/* Toolbar for undo/redo/delete with icons */}
 
         {/* Canvas */}
-        <div
-          ref={containerRef}
-          className="bg-background rounded-xl shadow-2xl overflow-hidden border border-border"
-        >
-          <Stage
-            ref={stageRef}
+        <div ref={containerRef} className="w-full flex justify-center">
+          <div
+            className="bg-background rounded-xl shadow-2xl overflow-hidden border border-border"
+            style={{ width: dimensions.width, height: dimensions.height }}
+          >
+            <Stage
+              ref={stageRef}
             width={dimensions.width}
             height={dimensions.height}
             onMouseDown={handleMouseDown}
@@ -489,6 +521,7 @@ export function Canvas({
               />
             </Layer>
           </Stage>
+        </div>
         </div>
 
         {/* Action buttons at bottom */}

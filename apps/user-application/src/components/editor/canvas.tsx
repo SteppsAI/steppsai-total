@@ -125,28 +125,24 @@ export function Canvas({
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Delete selected annotation
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId) {
         e.preventDefault();
         setAnnotations(annotations.filter(a => a.id !== selectedId));
         setSelectedId(null);
       }
 
-      // Undo
       if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey && canUndo) {
         e.preventDefault();
         undo();
         setSelectedId(null);
       }
 
-      // Redo
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'z' && canRedo) {
         e.preventDefault();
         redo();
         setSelectedId(null);
       }
 
-      // Escape to deselect
       if (e.key === 'Escape') {
         setSelectedId(null);
       }

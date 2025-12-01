@@ -3,23 +3,6 @@ import { uploadBase64ToR2 } from '../../helpers/base64toR2';
 
 export const imagesRouter = new Hono<{ Bindings: Env }>();
 
-// Upload Image via base64 (from Extension)
-imagesRouter.post('/upload', async (c) => {
-    try {
-        const { key, dataUrl } = await c.req.json<{ key: string; dataUrl: string }>();
-
-        if (!key || !dataUrl) {
-            return c.json({ error: 'Missing key or dataUrl' }, 400);
-        }
-
-        await uploadBase64ToR2(c.env.BUCKET, key, dataUrl);
-        console.log(`Uploaded image to R2: ${key}`);
-        return c.json({ success: true, key });
-    } catch (error) {
-        console.error('Failed to upload image:', error);
-        return c.json({ error: 'Upload failed' }, 500);
-    }
-});
 
 // Delete images (for discard recording)
 imagesRouter.post('/delete-batch', async (c) => {
@@ -45,7 +28,7 @@ imagesRouter.get('/*', async (c) => {
     const fullPath = url.pathname;
     // Remove /images/ prefix to get R2 key
     const key = fullPath.replace(/^\/images\//, '');
-    
+
     console.log(`GET image request - fullPath: ${fullPath}, key: ${key}`);
 
     if (!key) {
@@ -62,7 +45,7 @@ imagesRouter.get('/*', async (c) => {
     object.writeHttpMetadata(headers);
     headers.set('etag', object.httpEtag);
     headers.set('Cache-Control', 'public, max-age=31536000');
-    
+
     // Ensure content-type is set for images
     if (!headers.get('content-type')) {
         if (key.endsWith('.webp')) {
@@ -81,7 +64,7 @@ imagesRouter.get('/*', async (c) => {
 imagesRouter.delete('/*', async (c) => {
     const url = new URL(c.req.url);
     const key = url.pathname.replace(/^\/images\//, '');
-    
+
     try {
         await c.env.BUCKET.delete(key);
         return c.json({ success: true });

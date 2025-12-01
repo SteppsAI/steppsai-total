@@ -7,6 +7,8 @@ export const users = pgTable("users", {
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	name: text("name"),
 	email: text("email"),
+	avatarUrl: text("avatar_url"),
+	notificationPreferences: jsonb("notification_preferences").default({ newsletter: true }),
 },
 	(table) => {
 		return {

@@ -82,13 +82,20 @@ function SettingsPage() {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Convert to base64 data URL
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-            const dataUrl = event.target?.result as string;
-            await uploadAvatarMutation.mutateAsync({ dataUrl });
-        };
-        reader.readAsDataURL(file);
+        try {
+            // Convert to WebP in browser
+            const { convertToWebP } = await import("@/lib/convertToWebp");
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                const dataUrl = event.target?.result as string;
+                const webpDataUrl = await convertToWebP(dataUrl);
+                await uploadAvatarMutation.mutateAsync({ dataUrl: webpDataUrl });
+            };
+            reader.readAsDataURL(file);
+        } catch (error) {
+            console.error("Failed to process image:", error);
+            toast.error("Failed to process image");
+        }
 
         // Reset input
         if (fileInputRef.current) {

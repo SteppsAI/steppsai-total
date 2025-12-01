@@ -195,16 +195,19 @@ function SidePanelApp() {
                                                     className="w-full h-auto block"
                                                     loading="lazy"
                                                 />
-                                                {step.x && step.y && (
+                                                {step.x !== undefined && step.y !== undefined && (
                                                     <div
-                                                        className="absolute w-10 h-10 -ml-5 -mt-5 pointer-events-none drop-shadow-md"
+                                                        className="absolute pointer-events-none"
                                                         style={{
                                                             left: `${step.x}%`,
-                                                            top: `${step.y}%`
+                                                            top: `${step.y}%`,
+                                                            transform: 'translate(-50%, -50%)'
                                                         }}
                                                     >
-                                                        <div className="w-full h-full rounded-full border-2 border-rose-500 bg-rose-500/20 animate-ping absolute" />
-                                                        <div className="w-full h-full rounded-full border-2 border-rose-500 bg-rose-500/20" />
+                                                        {/* Outer pulsing ring */}
+                                                        <div className="absolute w-8 h-8 -ml-4 -mt-4 rounded-full border-2 border-rose-500 bg-rose-500/20 animate-ping" />
+                                                        {/* Inner solid circle */}
+                                                        <div className="w-4 h-4 -ml-2 -mt-2 rounded-full bg-rose-500 border-2 border-white shadow-lg" />
                                                     </div>
                                                 )}
                                             </div>

@@ -37,10 +37,13 @@ export interface GuideWithFolder extends Guide {
 
 export interface Step {
     id: string;
+    type?: 'click' | 'navigate';
     orderIndex: number;
-    imageKey: string;
+    imageKey?: string | null;  // Optional for navigation steps
     pageUrl: string;
-    domSelector: string;
+    domSelector?: string;  // Optional for navigation steps
+    x?: number;  // Click position as percentage
+    y?: number;  // Click position as percentage
     caption: string;
     aiCaption?: string;
     overlays?: Overlay[];

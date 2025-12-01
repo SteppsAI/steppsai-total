@@ -238,25 +238,18 @@ function SettingsPage() {
                         </div>
                         <Separator />
 
-                        <div className="rounded-lg border divide-y">
-                            <div className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                <div className="space-y-1">
-                                    <p className="font-medium">Subscription</p>
-                                    <p className="text-sm text-muted-foreground">Pro Plan • $29/month</p>
-                                </div>
-                                <Button variant="link" className="h-auto p-0">Change Plan</Button>
-                            </div>
-                            <div className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="h-10 w-16 bg-muted rounded flex items-center justify-center">
-                                        <CreditCard className="h-5 w-5" />
-                                    </div>
+                        <div className="space-y-4">
+                            <div className="rounded-lg border p-6">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                     <div className="space-y-1">
-                                        <p className="font-medium">Payment Method</p>
-                                        <p className="text-sm text-muted-foreground">Visa ending in 4242</p>
+                                        <p className="font-medium">Subscription</p>
+                                        <p className="text-sm text-muted-foreground">Pro Plan</p>
                                     </div>
+                                    <Button variant="outline" className="gap-2">
+                                        <CreditCard className="h-4 w-4" />
+                                        View Billing Info
+                                    </Button>
                                 </div>
-                                <Button variant="link" className="h-auto p-0">Update</Button>
                             </div>
                         </div>
                     </section>

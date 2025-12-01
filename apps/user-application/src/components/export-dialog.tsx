@@ -52,7 +52,7 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
         //   fileName: string
         // }
         // Response: Binary file download
-        
+
         const exportSettings = {
             guideId,
             fileName: fileName || guideTitle,
@@ -69,16 +69,16 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
         onOpenChange(false);
     };
 
-    const FormatOption = ({ 
-        id, 
-        label, 
-        icon: Icon, 
-        disabled, 
-        badge 
-    }: { 
-        id: ExportFormat, 
-        label: string, 
-        icon: any, 
+    const FormatOption = ({
+        id,
+        label,
+        icon: Icon,
+        disabled,
+        badge
+    }: {
+        id: ExportFormat,
+        label: string,
+        icon: any,
         disabled?: boolean,
         badge?: string
     }) => (
@@ -100,14 +100,14 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
                 <div className="space-y-1">
                     <p className="font-medium text-sm leading-none">{label}</p>
                     {disabled && badge && (
-                         <span className="inline-flex items-center rounded-full border border-transparent bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground uppercase">
-                             {badge}
-                         </span>
+                        <span className="inline-flex items-center rounded-full border border-transparent bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground uppercase">
+                            {badge}
+                        </span>
                     )}
                 </div>
             </div>
             {format === id && !disabled && (
-                 <div className="size-2.5 rounded-full bg-primary shadow-sm" />
+                <div className="size-2.5 rounded-full bg-primary shadow-sm" />
             )}
         </div>
     );
@@ -135,24 +135,24 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
             <div className="space-y-3">
                 <Label className="text-sm font-medium">Export Format</Label>
                 <div className="space-y-2">
-                    <FormatOption 
-                        id="pdf" 
-                        label="PDF Document" 
-                        icon={FileText} 
+                    <FormatOption
+                        id="pdf"
+                        label="PDF Document"
+                        icon={FileText}
                     />
-                    <FormatOption 
-                        id="markdown" 
-                        label="Markdown" 
-                        icon={FileCode} 
-                        disabled 
-                        badge="Soon" 
+                    <FormatOption
+                        id="markdown"
+                        label="Markdown"
+                        icon={FileCode}
+                        disabled
+                        badge="Soon"
                     />
-                    <FormatOption 
-                        id="word" 
-                        label="Microsoft Word" 
-                        icon={File} 
-                        disabled 
-                        badge="Soon" 
+                    <FormatOption
+                        id="word"
+                        label="Microsoft Word"
+                        icon={File}
+                        disabled
+                        badge="Soon"
                     />
                 </div>
             </div>
@@ -186,9 +186,6 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
                                 </>
                             )}
                         </Button>
-                        <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isExporting}>
-                            Cancel
-                        </Button>
                     </DrawerFooter>
                 </DrawerContent>
             </Drawer>
@@ -208,9 +205,6 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
                     <ExportForm />
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isExporting}>
-                        Cancel
-                    </Button>
                     <Button onClick={handleExport} disabled={isExporting} className="gap-2">
                         {isExporting ? (
                             <>

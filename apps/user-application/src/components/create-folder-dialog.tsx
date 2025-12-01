@@ -68,9 +68,6 @@ export function CreateFolderDialog({ open, onOpenChange, onCreate, isLoading = f
                             {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
                             Create Folder
                         </Button>
-                        <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
-                            Cancel
-                        </Button>
                     </DrawerFooter>
                 </DrawerContent>
             </Drawer>
@@ -99,9 +96,6 @@ export function CreateFolderDialog({ open, onOpenChange, onCreate, isLoading = f
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
-                        Cancel
-                    </Button>
                     <Button onClick={handleSubmit} disabled={isLoading}>
                         {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
                         Create Folder

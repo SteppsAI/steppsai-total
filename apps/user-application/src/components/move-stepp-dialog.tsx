@@ -118,9 +118,6 @@ export function MoveSteppDialog({
                             {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
                             Move
                         </Button>
-                        <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
-                            Cancel
-                        </Button>
                     </DrawerFooter>
                 </DrawerContent>
             </Drawer>
@@ -142,9 +139,6 @@ export function MoveSteppDialog({
                     </div>
                 </ScrollArea>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
-                        Cancel
-                    </Button>
                     <Button onClick={handleConfirm} disabled={isLoading}>
                         {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
                         Move

@@ -15,7 +15,7 @@ import {
   Lock,
   Download
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/router";
 

@@ -36,8 +36,8 @@ const COLORS = [
   '#22c55e', // Green
   '#3b82f6', // Blue
   '#6366f1', // Indigo
-  '#a855f7', // Purple
   '#ec4899', // Pink
+  '#0B0F19', // Dark
 ];
 
 export function Canvas({

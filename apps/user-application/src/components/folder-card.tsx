@@ -15,11 +15,15 @@ interface FolderCardProps {
     };
     onRename?: (folderId: string, currentName: string) => void;
     onDelete?: (folderId: string, folderName: string) => void;
+    onClick?: () => void;
 }
 
-export function FolderCard({ folder, onRename, onDelete }: FolderCardProps) {
+export function FolderCard({ folder, onRename, onDelete, onClick }: FolderCardProps) {
     return (
-        <div className="group relative flex flex-col justify-between p-4 h-28 rounded-lg border border-border bg-card hover:border-primary/50 hover:shadow-sm transition-all cursor-pointer">
+        <div
+            className="group relative flex flex-col justify-between p-4 h-28 rounded-lg border border-border bg-card hover:border-primary/50 hover:shadow-sm transition-all cursor-pointer"
+            onClick={onClick}
+        >
             <div className="flex justify-between items-start">
                 <div className="p-2 rounded-md bg-muted">
                     <Folder className="size-5 text-muted-foreground" strokeWidth={1.5} />

@@ -329,6 +329,7 @@ function SteppsPage() {
                             <button
                                 key={folder.id}
                                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted hover:bg-muted/80 transition-colors text-sm font-medium cursor-pointer border border-border hover:border-primary/50"
+                                onClick={() => navigate({ to: "/app/folder/$folderId", params: { folderId: folder.id } })}
                             >
                                 <FolderIcon className="size-3.5 text-muted-foreground" />
                                 <span>{folder.name}</span>
@@ -356,6 +357,7 @@ function SteppsPage() {
                                 }}
                                 onRename={handleRenameFolder}
                                 onDelete={handleDeleteFolder}
+                                onClick={() => navigate({ to: "/app/folder/$folderId", params: { folderId: folder.id } })}
                             />
                         ))}
                         {(folders ?? []).length === 0 && (

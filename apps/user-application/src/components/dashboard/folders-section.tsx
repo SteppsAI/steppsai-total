@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { FolderCard } from "@/components/folder-card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,6 +12,7 @@ interface FoldersSectionProps {
 }
 
 export function FoldersSection({ isLoading, folders = [], onRename, onDelete }: FoldersSectionProps) {
+  const navigate = useNavigate();
   if (isLoading) {
     return (
       <section className="flex flex-col gap-4">
@@ -55,6 +56,7 @@ export function FoldersSection({ isLoading, folders = [], onRename, onDelete }: 
                 }}
                 onRename={onRename}
                 onDelete={onDelete}
+                onClick={() => navigate({ to: "/app/folder/$folderId", params: { folderId: folder.id } })}
               />
             </div>
           ))}

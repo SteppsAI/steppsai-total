@@ -17,6 +17,9 @@ importers:
 
   apps/browser-extension:
     dependencies:
+      '@tanstack/react-router':
+        specifier: ^1.121.40
+        version: 1.121.40(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@trpc/client':
         specifier: ^11.4.2
         version: 11.4.2(@trpc/server@11.4.2(typescript@5.9.2))(typescript@5.9.2)

@@ -2,25 +2,38 @@ import { z } from "zod";
 import { router, publicProcedure } from "../trpc-instance";
 import {
     createGuide,
-    deleteGuide,
     getGuide,
     getUserGuides,
     updateGuide,
 } from "@repo/data-ops/queries";
 import { createGuideSchema } from "@repo/data-ops/zod-schema";
+import { transformStepsWithUrls } from "../helpers/transform-assets";
 
 export const guidesRouter = router({
-    getAll: publicProcedure.query(async () => {
+    getAll: publicProcedure.query(async ({ ctx }) => {
         // TODO: Get userId from context (auth)
         const userId = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366"; // Hardcoded for now
-        return await getUserGuides(userId);
+        const guides = await getUserGuides(userId);
+        const assetsUrl = ctx.env.ASSETS_URL;
+        
+        // Transform imageKeys to full URLs for all guides
+        return guides.map((guide) => ({
+            ...guide,
+            steps: transformStepsWithUrls(guide.steps as any[], assetsUrl),
+        }));
     }),
 
     getById: publicProcedure
         .input(z.object({ id: z.string() }))
-        .query(async ({ input }) => {
-            // Guide now includes steps as JSONB
-            return await getGuide(input.id);
+        .query(async ({ input, ctx }) => {
+            const guide = await getGuide(input.id);
+            if (!guide) return null;
+            
+            const assetsUrl = ctx.env.ASSETS_URL;
+            return {
+                ...guide,
+                steps: transformStepsWithUrls(guide.steps as any[], assetsUrl),
+            };
         }),
 
     create: publicProcedure
@@ -37,7 +50,19 @@ export const guidesRouter = router({
 
     delete: publicProcedure
         .input(z.object({ id: z.string() }))
-        .mutation(async ({ input }) => {
-            return await deleteGuide(input.id);
+        .mutation(async ({ input, ctx }) => {
+            // Call data-service for atomic deletion (R2 + DB)
+            const response = await ctx.env.BACKEND_SERVICE.fetch(
+                new Request(`https://internal/guides/${input.id}`, {
+                    method: 'DELETE',
+                })
+            );
+
+            if (!response.ok) {
+                const error = await response.json() as { error?: string };
+                throw new Error(error.error || 'Failed to delete guide');
+            }
+
+            return { success: true };
         }),
 });

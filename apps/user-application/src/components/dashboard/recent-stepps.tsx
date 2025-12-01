@@ -19,10 +19,6 @@ interface RecentSteppsProps {
   onMove?: (guide: Guide) => void;
 }
 
-// TODO: Future integration with tRPC
-// import { trpc } from "@/lib/trpc";
-// const { data: recentStepps, isLoading } = trpc.guide.getRecent.useQuery({ limit: 4 });
-
 export function RecentStepps({ isLoading, stepps = [], onDelete, onMove }: RecentSteppsProps) {
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
   const [shareGuide, setShareGuide] = useState<Guide | null>(null);

@@ -21,7 +21,6 @@ export const Route = createFileRoute("/app/_authed/editor/$guideId")({
   },
 });
 
-// Type for local guide state that uses our Overlay types
 interface LocalGuide extends Omit<Guide, 'steps'> {
   steps?: Step[];
 }
@@ -32,16 +31,13 @@ function EditorPage() {
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
 
-  // Fetch guide data
-  const { data: fetchedGuide } = useSuspenseQuery(
-    trpc.guides.getById.queryOptions({ id: guideId })
-  );
+  const { data: fetchedGuide } = useSuspenseQuery(trpc.guides.getById.queryOptions({ id: guideId }));
 
-  // Update mutation
   const updateGuideMutation = useMutation({
     ...trpc.guides.update.mutationOptions(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["guides"] });
+      queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
+      queryClient.invalidateQueries({ queryKey: trpc.guides.getById.queryOptions({ id: guideId }).queryKey });
     },
   });
 
@@ -60,6 +56,7 @@ function EditorPage() {
   const [activeTool, setActiveTool] = useState<"pointer" | "arrow" | "highlight" | "hide">("pointer");
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Sync fetched guide to local state and set initial active step
   useEffect(() => {
@@ -204,6 +201,8 @@ function EditorPage() {
           overlays={(currentStep?.overlays as Overlay[]) || []}
           activeTool={activeTool}
           onAnnotationsChange={handleAnnotationsChange}
+          onDeleteStep={() => currentStep && handleDeleteStep(currentStep.id)}
+          currentStepId={currentStep?.id}
         />
 
         <StepSidebar
@@ -214,6 +213,8 @@ function EditorPage() {
           onDeleteStep={handleDeleteStep}
           onReorderSteps={handleReorderSteps}
           onAddStep={handleAddStep}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
       </div>
 

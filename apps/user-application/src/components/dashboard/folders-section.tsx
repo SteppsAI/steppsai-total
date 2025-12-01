@@ -11,18 +11,7 @@ interface FoldersSectionProps {
   onDelete?: (folderId: string, folderName: string) => void;
 }
 
-// TODO: Future integration with tRPC
-// import { trpc } from "@/lib/trpc";
-// const { data: folders, isLoading } = trpc.folder.getAll.useQuery();
-
 export function FoldersSection({ isLoading, folders = [], onRename, onDelete }: FoldersSectionProps) {
-  // Mock data commented out
-  /*
-  const MOCK_FOLDERS: FolderRecord[] = [
-    ...
-  ];
-  */
-
   if (isLoading) {
     return (
       <section className="flex flex-col gap-4">

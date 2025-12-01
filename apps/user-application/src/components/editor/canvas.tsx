@@ -22,6 +22,8 @@ interface CanvasProps {
   activeTool: EditorTool;
   onAddOverlay?: (overlay: any) => void;
   onAnnotationsChange?: (annotations: Annotation[]) => void;
+  onDeleteStep?: () => void;
+  currentStepId?: string;
 }
 
 // Generate unique IDs for annotations
@@ -42,9 +44,11 @@ export function Canvas({
   screenshotUrl,
   overlays,
   activeTool,
-  onAnnotationsChange
+  onAnnotationsChange,
+  onDeleteStep,
+  currentStepId,
 }: CanvasProps) {
-  const [image] = useImage(screenshotUrl || "", "anonymous");
+  const [image] = useImage(screenshotUrl || "");
   const stageRef = useRef<Konva.Stage>(null);
   const layerRef = useRef<Konva.Layer>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
@@ -56,6 +60,9 @@ export function Canvas({
 
   // Ref to track if we are currently syncing from props to avoid triggering updates back to parent
   const isSyncingRef = useRef(false);
+  // Ref to store the latest callback without causing re-renders
+  const onAnnotationsChangeRef = useRef(onAnnotationsChange);
+  onAnnotationsChangeRef.current = onAnnotationsChange;
 
   // Initialize with overlays from props
   const { annotations, set: setAnnotations, undo, redo, canUndo, canRedo } = useAnnotationHistory(overlays || []);
@@ -91,12 +98,12 @@ export function Canvas({
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
-  // Notify parent of annotation changes
+  // Notify parent of annotation changes (use ref to avoid infinite loops)
   useEffect(() => {
     if (!isSyncingRef.current) {
-      onAnnotationsChange?.(annotations);
+      onAnnotationsChangeRef.current?.(annotations);
     }
-  }, [annotations, onAnnotationsChange]);
+  }, [annotations]);
 
   // Sync selectedColor with selected annotation
   useEffect(() => {
@@ -543,15 +550,18 @@ export function Canvas({
             <Button
               onClick={() => {
                 if (selectedId) {
+                  // Delete selected annotation
                   setAnnotations(annotations.filter(a => a.id !== selectedId));
                   setSelectedId(null);
+                } else if (onDeleteStep && currentStepId) {
+                  // Delete entire step if no annotation selected
+                  onDeleteStep();
                 }
               }}
-              disabled={!selectedId}
               variant="ghost"
               size="icon"
-              className="h-9 w-9 rounded-full hover:bg-red-50 text-red-600 disabled:opacity-40 disabled:cursor-not-allowed"
-              title="Delete"
+              className="h-9 w-9 rounded-full hover:bg-red-50 text-red-600"
+              title={selectedId ? "Delete annotation" : "Delete step"}
             >
               <Trash2 className="w-4 h-4" />
             </Button>

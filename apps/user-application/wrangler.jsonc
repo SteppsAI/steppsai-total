@@ -24,6 +24,9 @@
   },
   "env": {
     "stage": {
+      "vars": {
+        "ASSETS_URL": "https://stepps-assets-stage.stepps.ai"
+      },
       "services": [
         {
           "binding": "BACKEND_SERVICE",
@@ -33,6 +36,9 @@
       ]
     },
     "production": {
+      "vars": {
+        "ASSETS_URL": "https://assets.stepps.ai"
+      },
       "services": [
         {
           "binding": "BACKEND_SERVICE",

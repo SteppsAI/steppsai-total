@@ -21,9 +21,7 @@ function GuideViewPage() {
   const { guideId } = Route.useParams();
   const [isShareOpen, setIsShareOpen] = useState(false);
 
-  const { data: guide } = useSuspenseQuery(
-    trpc.guides.getById.queryOptions({ id: guideId })
-  );
+  const { data: guide } = useSuspenseQuery(trpc.guides.getById.queryOptions({ id: guideId }));
 
   if (!guide) {
     return (

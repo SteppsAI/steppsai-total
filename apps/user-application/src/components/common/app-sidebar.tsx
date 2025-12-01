@@ -42,7 +42,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { state, isMobile, setOpenMobile } = useSidebar();
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
 
-  // Fetch user data (non-blocking, uses regular useQuery)
   const { data: userData } = useQuery(trpc.users.getMe.queryOptions());
   const user = userData as UserType | null | undefined;
 
@@ -58,7 +57,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       .slice(0, 2);
   };
 
-  // Close sidebar on mobile when clicking a link
   const handleLinkClick = () => {
     if (isMobile) {
       setOpenMobile(false);

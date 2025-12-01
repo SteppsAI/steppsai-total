@@ -67,17 +67,13 @@ guidesRouter.post('/:guideId/complete', async (c) => {
             details: errorMessage
         }, 500);
     }
-});
-
-// Delete Recording - Deletes guide from DB and images from R2
+});// Delete Recording - Deletes images from R2 FIRST, then guide from DB
+// ATOMIC: If R2 fails, DB is NOT deleted. If DB fails after R2, error is returned.
 guidesRouter.delete('/:guideId', async (c) => {
     const guideId = c.req.param('guideId');
 
     try {
-        // 1. Delete guide from DB (steps are embedded as JSONB)
-        await deleteGuide(guideId);
-
-        // 2. Delete all images for this guide from R2
+        // 1. Delete all images for this guide from R2 FIRST
         const prefix = `screenshots/${guideId}/`;
         const listed = await c.env.BUCKET.list({ prefix });
 
@@ -87,6 +83,9 @@ guidesRouter.delete('/:guideId', async (c) => {
             );
             console.log(`Deleted ${listed.objects.length} images from R2 for guide ${guideId}`);
         }
+
+        // 2. Delete guide from DB AFTER R2 deletion succeeds
+        await deleteGuide(guideId);
 
         console.log(`Deleted guide: ${guideId}`);
 

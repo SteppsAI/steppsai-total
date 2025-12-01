@@ -55,14 +55,9 @@ import { MoveSteppDialog } from "@/components/move-stepp-dialog";
 export const Route = createFileRoute("/app/_authed/stepps/")({
     component: SteppsPage,
     loader: async ({ context }) => {
-        // Prefetch data in parallel
         await Promise.all([
-            context.queryClient.prefetchQuery(
-                context.trpc.guides.getAll.queryOptions()
-            ),
-            context.queryClient.prefetchQuery(
-                context.trpc.folders.getAll.queryOptions()
-            ),
+            context.queryClient.prefetchQuery(context.trpc.guides.getAll.queryOptions()),
+            context.queryClient.prefetchQuery(context.trpc.folders.getAll.queryOptions()),
         ]);
     },
 });
@@ -75,54 +70,48 @@ function SteppsPage() {
     const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
     const { isMobile } = useSidebar();
 
-    // Fetch data with useSuspenseQuery
-    const { data: guides } = useSuspenseQuery(
-        trpc.guides.getAll.queryOptions()
-    );
-    const { data: folders } = useSuspenseQuery(
-        trpc.folders.getAll.queryOptions()
-    );
+    const { data: guides } = useSuspenseQuery(trpc.guides.getAll.queryOptions());
+    const { data: folders } = useSuspenseQuery(trpc.folders.getAll.queryOptions());
 
-    // Enrich guides with folder names
     const guidesWithFolders: LocalGuideWithFolder[] = (guides ?? []).map(guide => ({
         ...guide,
         folderName: guide.folderId ? folders?.find(f => f.id === guide.folderId)?.name : null,
     }));
 
-    // Mutations
     const createFolderMutation = useMutation({
         ...trpc.folders.create.mutationOptions(),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["folders"] });
+            queryClient.invalidateQueries({ queryKey: trpc.folders.getAll.queryOptions().queryKey });
         },
     });
 
     const deleteFolderMutation = useMutation({
         ...trpc.folders.delete.mutationOptions(),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["folders"] });
-            queryClient.invalidateQueries({ queryKey: ["guides"] });
+            queryClient.invalidateQueries({ queryKey: trpc.folders.getAll.queryOptions().queryKey });
+            queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
         },
     });
 
     const updateFolderMutation = useMutation({
         ...trpc.folders.update.mutationOptions(),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["folders"] });
+            queryClient.invalidateQueries({ queryKey: trpc.folders.getAll.queryOptions().queryKey });
         },
     });
 
     const deleteGuideMutation = useMutation({
         ...trpc.guides.delete.mutationOptions(),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["guides"] });
+            queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
         },
     });
 
     const updateGuideMutation = useMutation({
         ...trpc.guides.update.mutationOptions(),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["guides"] });
+            queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
+            queryClient.invalidateQueries({ queryKey: trpc.folders.getAll.queryOptions().queryKey });
         },
     });
 

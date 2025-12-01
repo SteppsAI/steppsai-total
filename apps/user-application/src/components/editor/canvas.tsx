@@ -30,6 +30,48 @@ interface CanvasProps {
 // Generate unique IDs for annotations
 const generateId = () => `annotation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
+// Helper to convert percentage-based overlay to pixel-based for rendering
+function overlayToPixels(overlay: any, width: number, height: number): Annotation | null {
+  if (!overlay || !overlay.type) return null;
+  
+  // If already has pixel-based properties (from editor), return as-is
+  if (overlay.points || (overlay.type === 'circle' && overlay.radius > 100)) {
+    return overlay as Annotation;
+  }
+  
+  // Convert from percentage-based (from backend) to pixel-based
+  if (overlay.type === 'circle' && typeof overlay.x === 'number' && typeof overlay.y === 'number') {
+    return {
+      id: overlay.id || generateId(),
+      type: 'circle',
+      x: (overlay.x / 100) * width,
+      y: (overlay.y / 100) * height,
+      radius: (overlay.radius || 3) * (Math.min(width, height) / 100), // radius as % of smaller dimension
+      color: overlay.color || '#ef4444',
+      strokeWidth: overlay.strokeWidth || 3,
+    } as CircleAnnotation;
+  }
+  
+  // Arrow with from/to (legacy backend format)
+  if (overlay.type === 'arrow' && overlay.from && overlay.to) {
+    return {
+      id: overlay.id || generateId(),
+      type: 'arrow',
+      points: [
+        (overlay.from[0] / 100) * width,
+        (overlay.from[1] / 100) * height,
+        (overlay.to[0] / 100) * width,
+        (overlay.to[1] / 100) * height,
+      ],
+      color: overlay.color || '#ef4444',
+      strokeWidth: overlay.strokeWidth || 4,
+    } as ArrowAnnotation;
+  }
+  
+  return overlay as Annotation;
+}
+
+
 const COLORS = [
   '#ef4444', // Red
   '#f97316', // Orange
@@ -75,23 +117,27 @@ export function Canvas({
   const onAnnotationsChangeRef = useRef(onAnnotationsChange);
   onAnnotationsChangeRef.current = onAnnotationsChange;
 
+  // Container dimensions - must be declared before useEffect that uses it
+  const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const containerRef = useRef<HTMLDivElement>(null);
+
   // Initialize with overlays from props
-  const { annotations, set: setAnnotations, undo, redo, canUndo, canRedo } = useAnnotationHistory(overlays || []);
+  const { annotations, set: setAnnotations, undo, redo, canUndo, canRedo } = useAnnotationHistory([]);
 
   // Sync internal history with external props when they change (e.g. switching steps)
+  // Convert percentage-based overlays from backend to pixel-based for rendering
   useEffect(() => {
-    if (overlays) {
+    if (overlays && dimensions.width > 0 && dimensions.height > 0) {
       isSyncingRef.current = true;
-      setAnnotations(overlays);
+      const pixelOverlays = overlays
+        .map(o => overlayToPixels(o, dimensions.width, dimensions.height))
+        .filter((o): o is Annotation => o !== null);
+      setAnnotations(pixelOverlays);
       setTimeout(() => {
         isSyncingRef.current = false;
       }, 0);
     }
-  }, [screenshotUrl]);
-
-  // Container dimensions
-  const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
-  const containerRef = useRef<HTMLDivElement>(null);
+  }, [screenshotUrl, dimensions.width, dimensions.height]);
 
   // Update dimensions on mount, resize, and when image loads
   useEffect(() => {

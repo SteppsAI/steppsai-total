@@ -64,16 +64,11 @@ export async function getUserGuides(userId: string, folderId?: string): Promise<
 export async function updateGuide(guideId: string, data: Partial<Guide>): Promise<void> {
 	const db = getDb();
 	
-	// If steps are included, stringify them
-	const updateData: any = { ...data };
-	if (data.steps) {
-		updateData.steps = JSON.stringify(data.steps);
-	}
-	
+	// JSONB columns accept objects directly - no need to stringify
 	await db
 		.update(guides)
 		.set({
-			...updateData,
+			...data,
 			updatedAt: sql`now()`,
 		})
 		.where(eq(guides.id, guideId));
@@ -82,10 +77,11 @@ export async function updateGuide(guideId: string, data: Partial<Guide>): Promis
 export async function updateGuideSteps(guideId: string, steps: Step[]): Promise<void> {
 	const db = getDb();
 	
+	// JSONB columns accept arrays/objects directly - no need to stringify
 	await db
 		.update(guides)
 		.set({
-			steps: JSON.stringify(steps),
+			steps: steps,
 			updatedAt: sql`now()`,
 		})
 		.where(eq(guides.id, guideId));

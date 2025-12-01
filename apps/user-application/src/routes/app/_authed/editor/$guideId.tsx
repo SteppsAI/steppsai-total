@@ -31,7 +31,18 @@ function EditorPage() {
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
 
-  const { data: fetchedGuide } = useSuspenseQuery(trpc.guides.getById.queryOptions({ id: guideId }));
+  const { data: fetchedGuide, refetch } = useSuspenseQuery(trpc.guides.getById.queryOptions({ id: guideId }));
+
+  // Poll for data if guide is still processing (queue hasn't finished yet)
+  useEffect(() => {
+    if (fetchedGuide?.status === 'processing' || fetchedGuide?.status === 'recording') {
+      const interval = setInterval(() => {
+        refetch();
+      }, 2000); // Poll every 2 seconds
+      
+      return () => clearInterval(interval);
+    }
+  }, [fetchedGuide?.status, refetch]);
 
   const updateGuideMutation = useMutation({
     ...trpc.guides.update.mutationOptions(),
@@ -114,6 +125,8 @@ function EditorPage() {
         data: updates as any, // Backend accepts the Step[] format
       });
       setStatus("saved");
+      // Note: Annotations are saved as overlay data, not burned into the image.
+      // They will render dynamically when viewing the guide.
     } catch (error) {
       setStatus("unsaved");
       toast.error("Failed to save changes");
@@ -144,7 +157,10 @@ function EditorPage() {
       const updatedSteps = prev.steps.map((step) =>
         step.id === activeStepId ? { ...step, overlays: annotations } : step
       );
-      saveGuide({ steps: updatedSteps });
+      saveGuide({ steps: updatedSteps }).then(() => {
+        // Annotations saved as overlay data - they render dynamically on the image
+        toast.success("Annotations saved", { duration: 1500 });
+      });
       return { ...prev, steps: updatedSteps };
     });
   }, [activeStepId, saveGuide]);
@@ -152,42 +168,61 @@ function EditorPage() {
   const deleteImageMutation = useMutation(trpc.images.delete.mutationOptions());
 
   const handleDeleteStep = useCallback(async (id: string) => {
-    const stepToDelete = guide?.steps?.find((s) => s.id === id);
+    if (!guide?.steps) return;
+    
+    const stepToDelete = guide.steps.find((s) => s.id === id);
+    
+    // Calculate updated steps BEFORE any state changes
+    const updatedSteps = guide.steps.filter((step) => step.id !== id);
+    const reindexedSteps = updatedSteps.map((step, idx) => ({
+      ...step,
+      orderIndex: idx,
+    }));
 
     // Optimistic update
-    setGuide((prev) => {
-      if (!prev || !prev.steps) return prev;
-      const updatedSteps = prev.steps.filter((step) => step.id !== id);
-      const reindexed = updatedSteps.map((step, idx) => ({
-        ...step,
-        orderIndex: idx,
-      }));
-      // Don't save yet, wait for image delete if needed
-      return { ...prev, steps: reindexed };
-    });
+    setGuide((prev) => prev ? { ...prev, steps: reindexedSteps } : prev);
 
     try {
-      // Delete image from R2 if exists
+      // Delete image from R2 if exists (extract key from full URL)
       if (stepToDelete?.imageKey) {
-        await deleteImageMutation.mutateAsync({ key: stepToDelete.imageKey });
+        // imageKey is full URL like https://stepps-assets-stage.stepps.ai/screenshots/guideId/userId/stepId.webp
+        // We need just the path: screenshots/guideId/userId/stepId.webp
+        let key = stepToDelete.imageKey;
+        
+        // Extract path from full URL
+        if (key.startsWith('http')) {
+          try {
+            const url = new URL(key);
+            key = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname;
+          } catch {
+            // If URL parsing fails, try simple extraction
+            const match = key.match(/screenshots\/[^/]+\/[^/]+\/[^/]+\.webp$/);
+            key = match ? match[0] : key;
+          }
+        }
+        
+        try {
+          await deleteImageMutation.mutateAsync({ key });
+        } catch (imgError) {
+          console.warn("Image delete failed (may already be deleted):", imgError);
+          // Continue with step deletion even if image delete fails
+        }
       }
 
-      // Now save the guide with the step removed
-      if (guide?.steps) {
-        const updatedSteps = guide.steps.filter((step) => step.id !== id);
-        const reindexed = updatedSteps.map((step, idx) => ({
-          ...step,
-          orderIndex: idx,
-        }));
-        await saveGuide({ steps: reindexed });
+      // Save the guide with the step removed
+      await saveGuide({ steps: reindexedSteps });
+      
+      // Update active step if we deleted the current one
+      if (activeStepId === id && reindexedSteps.length > 0) {
+        setActiveStepId(reindexedSteps[0].id);
       }
     } catch (error) {
-      toast.error("Failed to delete step completely");
-      // Revert optimistic update? Or just let it be for now as it's complex to revert
-      // For now, we just log error, but the step is gone from UI
+      toast.error("Failed to delete step");
+      // Revert optimistic update
+      setGuide((prev) => prev ? { ...prev, steps: guide.steps } : prev);
       console.error(error);
     }
-  }, [guide?.steps, saveGuide, deleteImageMutation]);
+  }, [guide?.steps, saveGuide, deleteImageMutation, activeStepId]);
 
   const handleReorderSteps = useCallback((steps: Step[]) => {
     const reindexed = steps.map((step, idx) => ({

@@ -128,7 +128,7 @@ export function DashboardHeader() {
           {shouldShowSearch && (
             <>
               {/* Desktop Search */}
-              <div className="relative w-full max-w-md hidden md:block min-w-[320px]">
+              <div className="relative w-full max-w-[400px] lg:max-w-[480px] hidden md:block">
                 <Popover open={open && searchQuery.length > 0} onOpenChange={setOpen}>
                   <PopoverTrigger asChild>
                     <div className="relative">
@@ -143,17 +143,22 @@ export function DashboardHeader() {
                         onFocus={() => {
                           if (searchQuery.length > 0) setOpen(true);
                         }}
-                        className="pl-9 bg-muted/50 border-none focus-visible:ring-1 focus-visible:ring-primary"
+                        className="pl-9 pr-3 h-9 bg-muted/40 border border-border/50 focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:border-primary/50 transition-all duration-200 rounded-lg"
                       />
                     </div>
                   </PopoverTrigger>
-                  <PopoverContent className="p-0 w-[--radix-popover-trigger-width]" align="start" onOpenAutoFocus={(e) => e.preventDefault()}>
-                    <Command shouldFilter={false}>
-                      <CommandList>
+                  <PopoverContent
+                    className="p-0 w-[400px] lg:w-[480px] border-border/50 shadow-lg"
+                    align="start"
+                    sideOffset={8}
+                    onOpenAutoFocus={(e) => e.preventDefault()}
+                  >
+                    <Command shouldFilter={false} className="rounded-lg">
+                      <CommandList className="max-h-[320px]">
                         {isLoadingGuides || isLoadingFolders ? (
-                          <div className="py-6 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
+                          <div className="py-8 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
                             <Loader2 className="size-4 animate-spin" />
-                            Searching...
+                            <span>Searching...</span>
                           </div>
                         ) : !hasResults ? (
                           <CommandEmpty>No results found.</CommandEmpty>
@@ -165,10 +170,10 @@ export function DashboardHeader() {
                                   <CommandItem
                                     key={folder.id}
                                     onSelect={() => handleSelectFolder(folder.id)}
-                                    className="cursor-pointer"
+                                    className="cursor-pointer mx-1 my-0.5 rounded-md px-3 py-2.5 data-[selected=true]:bg-muted/80 hover:bg-muted/60 transition-colors"
                                   >
-                                    <FolderIcon className="mr-2 size-4 text-muted-foreground" />
-                                    <span>{folder.name}</span>
+                                    <FolderIcon className="mr-3 size-4 text-muted-foreground shrink-0" />
+                                    <span className="text-sm font-medium truncate">{folder.name}</span>
                                   </CommandItem>
                                 ))}
                               </CommandGroup>
@@ -179,10 +184,10 @@ export function DashboardHeader() {
                                   <CommandItem
                                     key={guide.id}
                                     onSelect={() => handleSelectGuide(guide.id)}
-                                    className="cursor-pointer"
+                                    className="cursor-pointer mx-1 my-0.5 rounded-md px-3 py-2.5 data-[selected=true]:bg-muted/80 hover:bg-muted/60 transition-colors"
                                   >
-                                    <FileText className="mr-2 size-4 text-muted-foreground" />
-                                    <span>{guide.title || "Untitled"}</span>
+                                    <FileText className="mr-3 size-4 text-muted-foreground shrink-0" />
+                                    <span className="text-sm font-medium truncate">{guide.title || "Untitled"}</span>
                                   </CommandItem>
                                 ))}
                               </CommandGroup>

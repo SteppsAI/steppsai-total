@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 export async function createGuide(data: CreateGuideSchemaType): Promise<string> {
 	const db = getDb();
 	const id = uuidv4();
-	
+
 	await db.insert(guides).values({
 		id,
 		userId: data.userId,
@@ -19,21 +19,21 @@ export async function createGuide(data: CreateGuideSchemaType): Promise<string> 
 		status: data.status || "recording",
 		visibility: data.visibility || "private",
 	});
-	
+
 	return id;
 }
 
 export async function getGuide(guideId: string): Promise<Guide | null> {
 	const db = getDb();
-	
+
 	const result = await db
 		.select()
 		.from(guides)
 		.where(eq(guides.id, guideId))
 		.limit(1);
-	
+
 	if (!result.length) return null;
-	
+
 	const guide = result[0];
 	return {
 		...guide,
@@ -43,18 +43,18 @@ export async function getGuide(guideId: string): Promise<Guide | null> {
 
 export async function getUserGuides(userId: string, folderId?: string): Promise<Guide[]> {
 	const db = getDb();
-	
+
 	const conditions = [eq(guides.userId, userId)];
 	if (folderId) {
 		conditions.push(eq(guides.folderId, folderId));
 	}
-	
+
 	const result = await db
 		.select()
 		.from(guides)
 		.where(and(...conditions))
 		.orderBy(desc(guides.updatedAt));
-	
+
 	return result.map(guide => ({
 		...guide,
 		steps: parseSteps(guide.steps),
@@ -63,7 +63,7 @@ export async function getUserGuides(userId: string, folderId?: string): Promise<
 
 export async function updateGuide(guideId: string, data: Partial<Guide>): Promise<void> {
 	const db = getDb();
-	
+
 	// JSONB columns accept objects directly - no need to stringify
 	await db
 		.update(guides)
@@ -76,7 +76,7 @@ export async function updateGuide(guideId: string, data: Partial<Guide>): Promis
 
 export async function updateGuideSteps(guideId: string, steps: Step[]): Promise<void> {
 	const db = getDb();
-	
+
 	// JSONB columns accept arrays/objects directly - no need to stringify
 	await db
 		.update(guides)
@@ -89,7 +89,7 @@ export async function updateGuideSteps(guideId: string, steps: Step[]): Promise<
 
 export async function deleteGuide(guideId: string): Promise<void> {
 	const db = getDb();
-	
+
 	await db.delete(guides).where(eq(guides.id, guideId));
 }
 
@@ -110,4 +110,36 @@ function parseSteps(steps: unknown): Step[] {
 	}
 	if (Array.isArray(steps)) return steps;
 	return [];
+}
+
+export async function updateGuideExportStatus(
+	guideId: string,
+	type: 'pdf' | 'markdown',
+	status: 'PENDING' | 'COMPLETED' | 'FAILED',
+	url?: string
+): Promise<void> {
+	const db = getDb();
+
+	// Fetch current guide to get existing exportedDocs
+	const guide = await getGuide(guideId);
+	if (!guide) throw new Error("Guide not found");
+
+	const currentDocs = (guide.exportedDocs as Record<string, any>) || {};
+
+	const updatedDocs = {
+		...currentDocs,
+		[type]: {
+			status,
+			url: url || currentDocs[type]?.url,
+			last_updated: new Date().toISOString()
+		}
+	};
+
+	await db
+		.update(guides)
+		.set({
+			exportedDocs: updatedDocs,
+			updatedAt: sql`now()`,
+		})
+		.where(eq(guides.id, guideId));
 }

@@ -38,7 +38,17 @@
 						"queue": "stepps-recording-ingest-queue-stage"
 					}
 				]
-			}
+			},
+			"browser": {
+				"binding": "VIRTUAL_BROWSER"
+			},
+			"workflows": [
+				{
+					"name": "guide-pdf-export-workflow-stage",
+					"binding": "GUIDE_EXPORT_WORKFLOW",
+					"class_name": "GuidePdfExportWorkflow"
+				}
+			]
 		},
 		"production": {
 			"vars": {
@@ -64,7 +74,17 @@
 						"queue": "stepps-recording-ingest-queue-production"
 					}
 				]
-			}
+			},
+			"browser": {
+				"binding": "VIRTUAL_BROWSER"
+			},
+			"workflows": [
+				{
+					"name": "guide-pdf-export-workflow",
+					"binding": "GUIDE_EXPORT_WORKFLOW",
+					"class_name": "GuidePdfExportWorkflow"
+				}
+			]
 		}
 	},
 }

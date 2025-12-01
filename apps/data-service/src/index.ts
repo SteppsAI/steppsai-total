@@ -3,6 +3,7 @@ import { App } from './hono/app'
 import { initDatabase } from '@repo/data-ops/database';
 import { queueMessageSchema } from "@repo/data-ops/zod-schema/queue";
 import { handleStepsInsert } from './queue-handlers/recording-ingest';
+export { GuidePdfExportWorkflow } from './workflows/guide-pdf-export';
 
 export default class DataService extends WorkerEntrypoint<Env> {
 	constructor(ctx: ExecutionContext, env: Env) {
@@ -33,10 +34,10 @@ export default class DataService extends WorkerEntrypoint<Env> {
 	async queue(batch: MessageBatch<unknown>) {
 		// Initialize database for queue context
 		initDatabase(this.env.DATABASE_URL);
-		
+
 		for (const message of batch.messages) {
 			const parsedEvent = queueMessageSchema.safeParse(message.body);
-			
+
 			if (!parsedEvent.success) {
 				console.error("Invalid Queue Message:", parsedEvent.error.message);
 				message.ack(); // Ack invalid messages to prevent infinite loop
@@ -44,7 +45,7 @@ export default class DataService extends WorkerEntrypoint<Env> {
 			}
 
 			const event = parsedEvent.data;
-			
+
 			try {
 				if (event.type === "STEPS_INSERT") {
 					await handleStepsInsert(this.env, event);
@@ -57,5 +58,11 @@ export default class DataService extends WorkerEntrypoint<Env> {
 				message.ack();
 			}
 		}
+	}
+
+	async triggerExport(params: { guideId: string, accountId: string }) {
+		return await this.env.GUIDE_EXPORT_WORKFLOW.create({
+			params
+		});
 	}
 }

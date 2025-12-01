@@ -30,10 +30,13 @@ export type Overlay = z.infer<typeof overlaySchema>;
  */
 export const stepSchema = z.object({
 	id: z.string().uuid(),
+	type: z.enum(['click', 'navigate']).default('click'),
 	orderIndex: z.number().int(),
-	imageKey: z.string(),                    // R2 path: screenshots/{guideId}/{userId}/{stepId}.webp
+	imageKey: z.string().optional(),         // Optional for navigation steps
 	pageUrl: z.string(),
-	domSelector: z.string(),                 // CSS selector for AI processing
+	domSelector: z.string().optional(),      // Optional for navigation steps
+	x: z.number().optional(),
+	y: z.number().optional(),
 	caption: z.string(),                     // "Step 1", user can edit
 	aiCaption: z.string().optional(),        // Future: AI-generated description
 	overlays: z.array(overlaySchema).optional(),
@@ -47,10 +50,13 @@ export type Step = z.infer<typeof stepSchema>;
  */
 export const stepFromExtensionSchema = z.object({
 	id: z.string().uuid(),
+	type: z.enum(['click', 'navigate']).default('click'),
 	orderIndex: z.number().int(),
-	imageKey: z.string(),
+	imageKey: z.string().optional(),
 	pageUrl: z.string(),
-	domSelector: z.string(),
+	domSelector: z.string().optional(),
+	x: z.number().optional(),
+	y: z.number().optional(),
 });
 
 export type StepFromExtension = z.infer<typeof stepFromExtensionSchema>;

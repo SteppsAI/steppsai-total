@@ -62,8 +62,15 @@ function SidePanelApp() {
         if (response?.success) setRecordingState('recording');
     };
 
-    const handlePauseRecording = () => setRecordingState('paused');
-    const handleResumeRecording = () => setRecordingState('recording');
+    const handlePauseRecording = async () => {
+        setRecordingState('paused');
+        await chrome.storage.local.set({ isPaused: true });
+    };
+
+    const handleResumeRecording = async () => {
+        setRecordingState('recording');
+        await chrome.storage.local.set({ isPaused: false });
+    };
 
     const handleEndRecording = async () => {
 
@@ -155,24 +162,58 @@ function SidePanelApp() {
                                 steps.map((step, index) => (
                                     <div
                                         key={step.id || index}
-                                        className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 shadow-sm overflow-hidden"
+                                        className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 shadow-sm overflow-hidden group"
                                     >
                                         <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100">
-                                            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[#6366F1] text-white text-xs font-bold">
+                                            <div className={`flex items-center justify-center w-6 h-6 rounded-full ${step.type === 'navigate' ? 'bg-slate-500' : 'bg-[#6366F1]'} text-white text-xs font-bold shrink-0`}>
                                                 {index + 1}
                                             </div>
                                             <span className="text-sm font-medium text-slate-800 truncate flex-1">
-                                                {generateStepDescription(step.domSelector)}
+                                                {step.type === 'navigate'
+                                                    ? `Navigate to ${new URL(step.pageUrl).hostname}`
+                                                    : generateStepDescription(step.domSelector || '')}
                                             </span>
+                                            <button
+                                                onClick={async (e) => {
+                                                    e.stopPropagation();
+                                                    await chrome.runtime.sendMessage({
+                                                        type: 'DELETE_STEP',
+                                                        payload: { stepId: step.id }
+                                                    });
+                                                }}
+                                                className="p-1 text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                title="Delete step"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
                                         </div>
-                                        <div className="aspect-video bg-slate-100">
-                                            <img
-                                                src={step.previewUrl || `${API_BASE_URL}/images/${step.imageKey}`}
-                                                alt={`Step ${index + 1}`}
-                                                className="w-full h-full object-cover"
-                                                loading="lazy"
-                                            />
-                                        </div>
+                                        {step.type === 'click' && (
+                                            <div className="w-full relative bg-slate-100">
+                                                <img
+                                                    src={step.previewUrl || `${API_BASE_URL}/images/${step.imageKey}`}
+                                                    alt={`Step ${index + 1}`}
+                                                    className="w-full h-auto block"
+                                                    loading="lazy"
+                                                />
+                                                {step.x && step.y && (
+                                                    <div
+                                                        className="absolute w-10 h-10 -ml-5 -mt-5 pointer-events-none drop-shadow-md"
+                                                        style={{
+                                                            left: `${step.x}%`,
+                                                            top: `${step.y}%`
+                                                        }}
+                                                    >
+                                                        <div className="w-full h-full rounded-full border-2 border-rose-500 bg-rose-500/20 animate-ping absolute" />
+                                                        <div className="w-full h-full rounded-full border-2 border-rose-500 bg-rose-500/20" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                        {step.type === 'navigate' && (
+                                            <div className="px-3 py-2 bg-slate-50 text-xs text-slate-500 truncate font-mono">
+                                                {step.pageUrl}
+                                            </div>
+                                        )}
                                     </div>
                                 ))
                             )}

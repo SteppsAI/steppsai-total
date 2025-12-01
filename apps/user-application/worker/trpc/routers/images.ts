@@ -35,6 +35,33 @@ export const imagesRouter = router({
                 key: string;
             }>;
         }),
+
+    /**
+     * Delete an image from R2
+     * Used by extension when discarding recording or deleting a step
+     */
+    delete: publicProcedure
+        .input(
+            z.object({
+                key: z.string(),
+            })
+        )
+        .mutation(async ({ ctx, input }) => {
+            const response = await ctx.env.BACKEND_SERVICE.fetch(
+                new Request(`https://internal/images/${input.key}`, {
+                    method: "DELETE",
+                })
+            );
+
+            if (!response.ok) {
+                const error = await response.text();
+                throw new Error(error || "Failed to delete image");
+            }
+
+            return response.json() as Promise<{
+                success: boolean;
+            }>;
+        }),
 });
 
 

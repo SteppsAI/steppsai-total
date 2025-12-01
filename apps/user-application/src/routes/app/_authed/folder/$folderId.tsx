@@ -3,7 +3,6 @@ import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-q
 import {
   Folder as FolderIcon,
   Plus,
-  Search,
   ArrowLeft,
   MoreVertical,
   FileText,
@@ -15,12 +14,11 @@ import {
   Lock,
   Download
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/router";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -43,6 +41,7 @@ import { ShareDialog } from "@/components/share-dialog";
 import { ExportDialog } from "@/components/export-dialog";
 import { DeleteSteppDialog } from "@/components/delete-stepp-dialog";
 import { MoveSteppDialog } from "@/components/move-stepp-dialog";
+import { DashboardCard } from "@/components/dashboard/dashboard-card";
 
 // Local type for guides with folder name
 interface LocalGuideWithFolder {
@@ -52,7 +51,7 @@ interface LocalGuideWithFolder {
   title?: string | null;
   status?: string | null;
   visibility?: string | null;
-  steps?: { id: string }[];
+  steps?: { id: string; imageKey?: string | null }[];
   updatedAt?: string | null;
   folderName?: string | null;
 }
@@ -84,6 +83,29 @@ function FolderPage() {
     ...guide,
     folderName: guide.folderId ? folders?.find(f => f.id === guide.folderId)?.name : null,
   }));
+
+  // Listen for search query changes from sessionStorage (from header search)
+  useState(() => { // Using useState initializer for initial check
+    const savedSearchQuery = sessionStorage.getItem('searchQuery');
+    if (savedSearchQuery) {
+      setSearchQuery(savedSearchQuery);
+    }
+  });
+
+  // Poll for changes to sync with header search
+  useEffect(() => {
+    const checkSearch = () => {
+      const savedSearchQuery = sessionStorage.getItem('searchQuery');
+      if (savedSearchQuery !== null) {
+        setSearchQuery(savedSearchQuery);
+      } else {
+        setSearchQuery("");
+      }
+    };
+
+    const interval = setInterval(checkSearch, 500);
+    return () => clearInterval(interval);
+  }, []);
 
   const deleteGuideMutation = useMutation({
     ...trpc.guides.delete.mutationOptions(),
@@ -208,10 +230,10 @@ function FolderPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8 w-full max-w-[1400px] mx-auto pb-8 px-4 sm:px-6">
+    <div className="flex flex-col gap-4 sm:gap-6 w-full mx-auto pb-6 sm:pb-8 px-4 sm:px-6 lg:px-8 max-w-[90rem]">
       {/* Header Section */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <Button
             variant="ghost"
             size="icon"
@@ -220,29 +242,19 @@ function FolderPage() {
           >
             <ArrowLeft className="size-5" />
           </Button>
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <FolderIcon className="size-6 text-muted-foreground" />
-              <h1 className="text-3xl font-bold tracking-tight">{currentFolder.name}</h1>
+              <FolderIcon className="size-5 sm:size-6 text-muted-foreground shrink-0" />
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight truncate">{currentFolder.name}</h1>
             </div>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
               {filteredGuides.length} {filteredGuides.length === 1 ? "guide" : "guides"} in this folder
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="relative w-full max-w-xs hidden md:block mr-2">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-            <Input
-              placeholder="Search stepps..."
-              className="pl-9 bg-muted/50 border-none"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
           <Button
-            className="gap-2 cursor-pointer"
+            className="gap-2 cursor-pointer flex-1 min-w-0 sm:flex-initial sm:min-w-[120px]"
             onClick={() => {
               if (isMobile) {
                 setIsMobileDialogOpen(true);
@@ -251,178 +263,207 @@ function FolderPage() {
               }
             }}
           >
-            <Plus className="size-4" />
-            New Stepp
+            <Plus className="size-4 shrink-0" />
+            <span className="hidden sm:inline truncate">New Stepp</span>
+            <span className="sm:hidden truncate">Stepp</span>
           </Button>
           <MobileCreationDialog open={isMobileDialogOpen} onOpenChange={setIsMobileDialogOpen} />
         </div>
       </div>
 
       {/* Stepps Section */}
-      <section className="space-y-4">
-        <div className="border rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[35%]">Title</TableHead>
-                <TableHead className="w-[8%]">Steps</TableHead>
-                <TableHead className="w-[17%]">Folder</TableHead>
-                <TableHead className="w-[12%]">Status</TableHead>
-                <TableHead className="w-[12%]">Visibility</TableHead>
-                <TableHead className="w-[12%]">Last Modified</TableHead>
-                <TableHead className="w-[4%]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredGuides.length > 0 ? (
-                filteredGuides.map((guide) => (
-                  <TableRow
-                    key={guide.id}
-                    className="cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => navigate({ to: "/app/stepps/$guideId", params: { guideId: guide.id } })}
-                  >
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        <FileText className="size-4 text-muted-foreground" />
-                        <Link
-                          to="/app/stepps/$guideId"
-                          params={{ guideId: guide.id }}
-                          className="hover:underline hover:text-primary"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {guide.title || "Untitled"}
-                        </Link>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {guide.steps?.length || 0}
-                    </TableCell>
-                    <TableCell>
-                      {guide.folderName ? (
-                        <div className="flex items-center gap-1.5 text-muted-foreground">
-                          <FolderIcon className="size-3.5" />
-                          <span className="text-sm">{guide.folderName}</span>
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground text-sm">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={guide.status === "published" ? "default" : "secondary"}
-                        className="capitalize"
-                      >
-                        {guide.status || "draft"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={guide.visibility === "public" ? "outline" : "secondary"}
-                        className="capitalize"
-                      >
-                        {guide.visibility || "private"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {formatDate(guide.updatedAt)}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className="size-8 p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+      <section className="space-y-3 sm:space-y-4">
+        {searchQuery && (
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            Found {filteredGuides.length} stepp{filteredGuides.length !== 1 ? 's' : ''} matching "{searchQuery}" in this folder
+          </p>
+        )}
+        <div className="hidden xl:block border rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="min-w-[200px] lg:w-auto">Title</TableHead>
+                  <TableHead className="w-20 lg:w-24">Steps</TableHead>
+                  <TableHead className="min-w-[140px] lg:w-auto">Folder</TableHead>
+                  <TableHead className="w-24 lg:w-28">Status</TableHead>
+                  <TableHead className="w-28 lg:w-32">Visibility</TableHead>
+                  <TableHead className="min-w-[120px] lg:w-auto">Last Modified</TableHead>
+                  <TableHead className="w-12"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredGuides.length > 0 ? (
+                  filteredGuides.map((guide) => (
+                    <TableRow
+                      key={guide.id}
+                      className="cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => navigate({ to: "/app/stepps/$guideId", params: { guideId: guide.id } })}
+                    >
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          <FileText className="size-4 text-muted-foreground shrink-0" />
+                          <Link
+                            to="/app/stepps/$guideId"
+                            params={{ guideId: guide.id }}
+                            className="hover:underline hover:text-primary truncate"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <span className="sr-only">Open menu</span>
-                            <MoreVertical className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            className="cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate({ to: "/app/editor/$guideId", params: { guideId: guide.id } });
-                            }}
-                          >
-                            <Pencil className="mr-2 size-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const newVisibility = guide.visibility === 'public' ? 'private' : 'public';
-                              handleVisibilityChange(guide, newVisibility);
-                            }}
-                          >
-                            {guide.visibility === 'public' ? (
-                              <>
-                                <Lock className="mr-2 size-4" />
-                                Make Private
-                              </>
-                            ) : (
-                              <>
-                                <Eye className="mr-2 size-4" />
-                                Make Public
-                              </>
-                            )}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleShare(guide);
-                            }}
-                          >
-                            <Share2 className="mr-2 size-4" />
-                            Share
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleExport(guide);
-                            }}
-                          >
-                            <Download className="mr-2 size-4" />
-                            Export
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleMoveStepp(guide);
-                            }}
-                          >
-                            <FolderInput className="mr-2 size-4" />
-                            Move to folder
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteStepp(guide);
-                            }}
-                          >
-                            <Trash className="mr-2 size-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                            {guide.title || "Untitled"}
+                          </Link>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {guide.steps?.length || 0}
+                      </TableCell>
+                      <TableCell>
+                        {guide.folderName ? (
+                          <div className="flex items-center gap-1.5 text-muted-foreground">
+                            <FolderIcon className="size-3.5 shrink-0" />
+                            <span className="text-sm truncate">{guide.folderName}</span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={guide.status === "published" ? "default" : "secondary"}
+                          className="capitalize"
+                        >
+                          {guide.status || "draft"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={guide.visibility === "public" ? "outline" : "secondary"}
+                          className="capitalize"
+                        >
+                          {guide.visibility || "private"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {formatDate(guide.updatedAt)}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="size-8 p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <span className="sr-only">Open menu</span>
+                              <MoreVertical className="size-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              className="cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate({ to: "/app/editor/$guideId", params: { guideId: guide.id } });
+                              }}
+                            >
+                              <Pencil className="mr-2 size-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const newVisibility = guide.visibility === 'public' ? 'private' : 'public';
+                                handleVisibilityChange(guide, newVisibility);
+                              }}
+                            >
+                              {guide.visibility === 'public' ? (
+                                <>
+                                  <Lock className="mr-2 size-4" />
+                                  Make Private
+                                </>
+                              ) : (
+                                <>
+                                  <Eye className="mr-2 size-4" />
+                                  Make Public
+                                </>
+                              )}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleShare(guide);
+                              }}
+                            >
+                              <Share2 className="mr-2 size-4" />
+                              Share
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleExport(guide);
+                              }}
+                            >
+                              <Download className="mr-2 size-4" />
+                              Export
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleMoveStepp(guide);
+                              }}
+                            >
+                              <FolderInput className="mr-2 size-4" />
+                              Move to folder
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteStepp(guide);
+                              }}
+                            >
+                              <Trash className="mr-2 size-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={7} className="h-24 text-center">
+                      No stepps found in this folder.
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
-                    No stepps found in this folder.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        <div className="xl:hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          {filteredGuides.map((guide) => (
+            <DashboardCard
+              key={guide.id}
+              title={guide.title || "Untitled"}
+              image={guide.steps?.[0]?.imageKey || "/og-image.svg"}
+              viewUrl={`/app/stepps/${guide.id}`}
+              onEdit={() => navigate({ to: `/app/editor/${guide.id}` })}
+              onShare={() => handleShare(guide)}
+              onDelete={() => handleDeleteStepp(guide)}
+              onMove={() => handleMoveStepp(guide)}
+              onExport={() => handleExport(guide)}
+            />
+          ))}
+          {filteredGuides.length === 0 && (
+            <div className="col-span-full flex flex-col items-center justify-center py-12 sm:py-16 text-center border border-dashed rounded-xl bg-muted/30">
+              <p className="text-muted-foreground text-sm">No stepps found in this folder.</p>
+            </div>
+          )}
         </div>
       </section>
 

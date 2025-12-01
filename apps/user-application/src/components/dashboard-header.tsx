@@ -24,7 +24,13 @@ export function DashboardHeader() {
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
-  const [searchQuery, setSearchQuery] = useState("");
+  // Initialize search query from session storage if available to keep UI in sync with applied filters
+  const [searchQuery, setSearchQuery] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('searchQuery') || "";
+    }
+    return "";
+  });
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -41,10 +47,38 @@ export function DashboardHeader() {
   // checking shouldShowSearch logic
   const shouldShowSearch = pathname === '/app' || pathname === '/app/stepps' || pathname.startsWith('/app/folder');
 
+  // Filter results for preview - moved up so handleSearch can use them
+  const filteredGuides = guides?.filter(g => g.title?.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5) || [];
+  const filteredFolders = folders?.filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 3) || [];
+  const hasResults = filteredGuides.length > 0 || filteredFolders.length > 0;
+
   // Handle search submission (Enter key)
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       setOpen(false); // Close preview
+
+      // Check for single match redirect
+      // Only redirect if we are not loading to ensure accurate count
+      if (!isLoadingGuides && !isLoadingFolders) {
+         if (filteredFolders.length === 1 && filteredGuides.length === 0) {
+           navigate({ to: "/app/folder/$folderId", params: { folderId: filteredFolders[0].id } });
+           setIsMobileSearchOpen(false);
+           inputRef.current?.blur();
+           setSearchQuery("");
+           sessionStorage.removeItem('searchQuery');
+           return;
+         }
+         
+         if (filteredFolders.length === 0 && filteredGuides.length === 1) {
+           navigate({ to: "/app/stepps/$guideId", params: { guideId: filteredGuides[0].id } });
+           setIsMobileSearchOpen(false);
+           inputRef.current?.blur();
+           setSearchQuery("");
+           sessionStorage.removeItem('searchQuery');
+           return;
+         }
+      }
+
       // Always update session storage for page filtering
       sessionStorage.setItem('searchQuery', searchQuery);
 
@@ -64,7 +98,8 @@ export function DashboardHeader() {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setSearchQuery(newValue);
-    sessionStorage.setItem('searchQuery', newValue);
+    // Removed automatic syncing with sessionStorage to prevent filtering the main UI while typing
+    // sessionStorage.setItem('searchQuery', newValue);
     if (newValue.trim().length > 0) {
       setOpen(true);
     } else {
@@ -72,21 +107,20 @@ export function DashboardHeader() {
     }
   };
 
-  // Filter results for preview
-  const filteredGuides = guides?.filter(g => g.title?.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5) || [];
-  const filteredFolders = folders?.filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 3) || [];
-  const hasResults = filteredGuides.length > 0 || filteredFolders.length > 0;
-
   const handleSelectGuide = (guideId: string) => {
     navigate({ to: "/app/stepps/$guideId", params: { guideId } });
     setOpen(false);
     setIsMobileSearchOpen(false);
+    setSearchQuery("");
+    sessionStorage.removeItem('searchQuery');
   };
 
   const handleSelectFolder = (folderId: string) => {
     navigate({ to: "/app/folder/$folderId", params: { folderId } });
     setOpen(false);
     setIsMobileSearchOpen(false);
+    setSearchQuery("");
+    sessionStorage.removeItem('searchQuery');
   };
 
   return (
@@ -169,6 +203,7 @@ export function DashboardHeader() {
                                 {filteredFolders.map((folder) => (
                                   <CommandItem
                                     key={folder.id}
+                                    value={folder.id}
                                     onSelect={() => handleSelectFolder(folder.id)}
                                     className="cursor-pointer mx-1 my-0.5 rounded-md px-3 py-2.5 data-[selected=true]:bg-muted/80 hover:bg-muted/60 transition-colors"
                                   >
@@ -183,6 +218,7 @@ export function DashboardHeader() {
                                 {filteredGuides.map((guide) => (
                                   <CommandItem
                                     key={guide.id}
+                                    value={guide.id}
                                     onSelect={() => handleSelectGuide(guide.id)}
                                     className="cursor-pointer mx-1 my-0.5 rounded-md px-3 py-2.5 data-[selected=true]:bg-muted/80 hover:bg-muted/60 transition-colors"
                                   >
@@ -216,4 +252,3 @@ export function DashboardHeader() {
     </header>
   );
 }
-

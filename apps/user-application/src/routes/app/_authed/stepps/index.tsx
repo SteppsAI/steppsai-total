@@ -325,11 +325,6 @@ function SteppsPage() {
             <section className="space-y-3 sm:space-y-4">
                 <div className="flex items-center justify-between">
                     <h2 className="text-lg sm:text-xl font-semibold text-foreground">Folders</h2>
-                    {searchQuery && (
-                        <p className="text-xs sm:text-sm text-muted-foreground">
-                            Found {filteredFolders.length} folder{filteredFolders.length !== 1 ? 's' : ''} matching "{searchQuery}"
-                        </p>
-                    )}
                 </div>
                 <>
                     {/* Mobile View - Filter chips */}
@@ -382,11 +377,6 @@ function SteppsPage() {
             <section className="space-y-3 sm:space-y-4">
                 <div className="flex items-center justify-between">
                     <h2 className="text-lg sm:text-xl font-semibold text-foreground">All Stepps</h2>
-                    {searchQuery && (
-                        <p className="text-xs sm:text-sm text-muted-foreground">
-                            Found {filteredGuides.length} stepp{filteredGuides.length !== 1 ? 's' : ''} matching "{searchQuery}"
-                        </p>
-                    )}
                 </div>
 
                 <div className="hidden xl:block border rounded-lg overflow-hidden">

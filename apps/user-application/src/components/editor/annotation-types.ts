@@ -26,7 +26,20 @@ export interface HideAnnotation {
     color: string;
 }
 
-export type Annotation = ArrowAnnotation | CircleAnnotation | HideAnnotation;
+export interface TextAnnotation {
+    id: string;
+    type: 'text';
+    x: number;
+    y: number;
+    text: string;
+    fontSize: number;
+    fontFamily?: string;
+    fill: string;
+    width?: number;
+    rotation?: number;
+}
+
+export type Annotation = ArrowAnnotation | CircleAnnotation | HideAnnotation | TextAnnotation;
 
 // Configuration constants for annotations
 export const ANNOTATION_DEFAULTS = {
@@ -40,5 +53,10 @@ export const ANNOTATION_DEFAULTS = {
     },
     hide: {
         color: '#000000',
+    },
+    text: {
+        fontSize: 20,
+        fontFamily: 'Arial',
+        fill: '#000000',
     },
 } as const;

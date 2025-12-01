@@ -76,7 +76,20 @@ export interface HideAnnotation {
     color: string;
 }
 
-export type Overlay = ArrowAnnotation | CircleAnnotation | HideAnnotation;
+export interface TextAnnotation {
+    id: string;
+    type: 'text';
+    x: number;
+    y: number;
+    text: string;
+    fontSize: number;
+    fontFamily?: string;
+    fill: string;
+    width?: number;
+    rotation?: number;
+}
+
+export type Overlay = ArrowAnnotation | CircleAnnotation | HideAnnotation | TextAnnotation;
 
 export interface NotificationPreferences {
     newsletter: boolean;

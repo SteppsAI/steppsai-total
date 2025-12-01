@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { EditorHeader } from "@/components/editor/editor-header";
-import { EditorToolbar } from "@/components/editor/editor-toolbar";
+import { EditorToolbar, EditorTool } from "@/components/editor/editor-toolbar";
 import { Canvas } from "@/components/editor/canvas";
 import { StepSidebar } from "@/components/editor/step-sidebar";
 import { useState, useCallback, useEffect } from "react";
@@ -53,7 +53,7 @@ function EditorPage() {
   const [title, setTitle] = useState("Untitled Stepps");
   const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const [activeStepId, setActiveStepId] = useState<string>("");
-  const [activeTool, setActiveTool] = useState<"pointer" | "arrow" | "highlight" | "hide">("pointer");
+  const [activeTool, setActiveTool] = useState<EditorTool>("pointer");
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);

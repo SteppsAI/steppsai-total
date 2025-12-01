@@ -3,12 +3,13 @@ import {
     ArrowRight,
     Circle,
     EyeOff,
-    MousePointer2
+    MousePointer2,
+    Type
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-export type EditorTool = "pointer" | "arrow" | "highlight" | "hide";
+export type EditorTool = "pointer" | "arrow" | "highlight" | "hide" | "text";
 
 interface EditorToolbarProps {
     activeTool: EditorTool;
@@ -21,6 +22,7 @@ export function EditorToolbar({ activeTool, onToolChange }: EditorToolbarProps) 
         { icon: ArrowRight, label: "Arrow", id: "arrow", shortcut: "A" },
         { icon: Circle, label: "Highlight", id: "highlight", shortcut: "H" },
         { icon: EyeOff, label: "Hide", id: "hide", shortcut: "B" },
+        { icon: Type, label: "Text", id: "text", shortcut: "T" },
     ];
 
     return (

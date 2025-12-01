@@ -1,14 +1,15 @@
 import { useState, useRef, useEffect } from "react";
-import { Stage, Layer, Image as KonvaImage, Arrow, Circle, Group, Transformer, Rect } from "react-konva";
+import { Stage, Layer, Image as KonvaImage, Arrow, Circle, Group, Transformer, Rect, Text } from "react-konva";
 import useImage from "use-image";
 import Konva from "konva";
-import { Undo2, Redo2, Trash2 } from "lucide-react";
+import { Undo2, Redo2, Trash2, Minus, Plus } from "lucide-react";
 import { EditorTool } from "./editor-toolbar";
 import {
   Overlay as Annotation,
   ArrowAnnotation,
   CircleAnnotation,
   HideAnnotation,
+  TextAnnotation,
 } from "@/types/db";
 import { ANNOTATION_DEFAULTS } from "./annotation-types";
 import { useAnnotationHistory } from "@/hooks/use-annotation-history";
@@ -40,6 +41,12 @@ const COLORS = [
   '#0B0F19', // Dark
 ];
 
+const FONT_FAMILIES = [
+  { name: 'Sans Serif', value: 'Arial' },
+  { name: 'Serif', value: 'Georgia' },
+  { name: 'Mono', value: 'Courier New' },
+];
+
 export function Canvas({
   screenshotUrl,
   overlays,
@@ -52,11 +59,15 @@ export function Canvas({
   const stageRef = useRef<Konva.Stage>(null);
   const layerRef = useRef<Konva.Layer>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [tempAnnotation, setTempAnnotation] = useState<Annotation | null>(null);
   const [selectedColor, setSelectedColor] = useState<string>(COLORS[5]); // Default to Indigo
+  const [selectedFontFamily, setSelectedFontFamily] = useState<string>(ANNOTATION_DEFAULTS.text.fontFamily || 'Arial');
+  const [selectedFontSize, setSelectedFontSize] = useState<number>(ANNOTATION_DEFAULTS.text.fontSize);
 
   // Ref to track if we are currently syncing from props to avoid triggering updates back to parent
   const isSyncingRef = useRef(false);
@@ -148,7 +159,13 @@ export function Canvas({
     if (selectedId) {
       const annotation = annotations.find(a => a.id === selectedId);
       if (annotation) {
-        setSelectedColor(annotation.color);
+        if (annotation.type === 'text') {
+          setSelectedColor(annotation.fill);
+          setSelectedFontFamily(annotation.fontFamily || 'Arial');
+          setSelectedFontSize(annotation.fontSize);
+        } else {
+          setSelectedColor(annotation.color);
+        }
       }
     }
   }, [selectedId, annotations]);
@@ -199,7 +216,32 @@ export function Canvas({
   const handleColorChange = (color: string) => {
     setSelectedColor(color);
     if (selectedId) {
-      handleAnnotationChange(selectedId, { color });
+      const annotation = annotations.find(a => a.id === selectedId);
+      if (annotation?.type === 'text') {
+        handleAnnotationChange(selectedId, { fill: color } as any);
+      } else {
+        handleAnnotationChange(selectedId, { color });
+      }
+    }
+  };
+
+  const handleFontFamilyChange = (fontFamily: string) => {
+    setSelectedFontFamily(fontFamily);
+    if (selectedId) {
+      const annotation = annotations.find(a => a.id === selectedId);
+      if (annotation?.type === 'text') {
+        handleAnnotationChange(selectedId, { fontFamily } as any);
+      }
+    }
+  };
+
+  const handleFontSizeChange = (fontSize: number) => {
+    setSelectedFontSize(fontSize);
+    if (selectedId) {
+      const annotation = annotations.find(a => a.id === selectedId);
+      if (annotation?.type === 'text') {
+        handleAnnotationChange(selectedId, { fontSize } as any);
+      }
     }
   };
 
@@ -208,6 +250,7 @@ export function Canvas({
     const clickedOnEmpty = e.target === e.target.getStage() || e.target.getType() === 'Layer';
     if (clickedOnEmpty) {
       setSelectedId(null);
+      setEditingId(null);
       if (activeTool === 'pointer') return;
     }
 
@@ -223,6 +266,23 @@ export function Canvas({
 
     const pos = stage.getPointerPosition();
     if (!pos) return;
+
+    // Handle text tool
+    if (activeTool === 'text') {
+      const newText: TextAnnotation = {
+        id: generateId(),
+        type: 'text',
+        x: pos.x,
+        y: pos.y,
+        text: 'Double click to edit',
+        fontSize: selectedFontSize,
+        fontFamily: selectedFontFamily,
+        fill: selectedColor,
+      };
+      setAnnotations([...annotations, newText]);
+      setSelectedId(newText.id);
+      return;
+    }
 
     setIsDrawing(true);
 
@@ -386,10 +446,70 @@ export function Canvas({
     );
   };
 
+  const renderTextAnnotation = (annotation: TextAnnotation) => {
+    const isSelected = annotation.id === selectedId;
+    const isEditing = annotation.id === editingId;
+
+    if (isEditing) return null;
+
+    return (
+      <Text
+        key={annotation.id}
+        id={annotation.id}
+        x={annotation.x}
+        y={annotation.y}
+        text={annotation.text}
+        fontSize={annotation.fontSize}
+        fontFamily={annotation.fontFamily}
+        fill={annotation.fill}
+        draggable={activeTool === 'pointer'}
+        onClick={() => activeTool === 'pointer' && setSelectedId(annotation.id)}
+        onTap={() => activeTool === 'pointer' && setSelectedId(annotation.id)}
+        onDblClick={() => {
+          if (activeTool === 'pointer') {
+            setEditingId(annotation.id);
+            setSelectedId(annotation.id);
+          }
+        }}
+        onDragEnd={(e) => {
+          handleAnnotationChange(annotation.id, {
+            x: e.target.x(),
+            y: e.target.y(),
+          });
+        }}
+        onTransformEnd={(e) => {
+          const node = e.target;
+          const scaleX = node.scaleX();
+          const scaleY = node.scaleY();
+          
+          // Update font size based on scale
+          const newFontSize = annotation.fontSize * Math.max(scaleX, scaleY);
+          
+          handleAnnotationChange(annotation.id, {
+            x: node.x(),
+            y: node.y(),
+            fontSize: newFontSize,
+            rotation: node.rotation(),
+          } as any);
+          
+          node.scaleX(1);
+          node.scaleY(1);
+        }}
+        shadowColor={isSelected ? '#000' : undefined}
+        shadowBlur={isSelected ? 10 : undefined}
+        shadowOpacity={isSelected ? 0.3 : undefined}
+      />
+    );
+  };
+
   // Render annotation components
   const renderAnnotations = (annotationsToRender: Annotation[]) => {
     return annotationsToRender.map((annotation) => {
       const isSelected = annotation.id === selectedId;
+
+      if (annotation.type === 'text') {
+        return renderTextAnnotation(annotation as TextAnnotation);
+      }
 
       if (annotation.type === 'arrow') {
         return (
@@ -475,7 +595,7 @@ export function Canvas({
         {/* Canvas */}
         <div ref={containerRef} className="w-full flex justify-center">
           <div
-            className="bg-background rounded-xl shadow-2xl overflow-hidden border border-border"
+            className="bg-background rounded-xl shadow-2xl overflow-hidden border border-border relative"
             style={{ width: dimensions.width, height: dimensions.height }}
           >
             <Stage
@@ -520,8 +640,48 @@ export function Canvas({
                 }}
               />
             </Layer>
-          </Stage>
-        </div>
+            </Stage>
+            {editingId && (() => {
+              const annotation = annotations.find(a => a.id === editingId);
+              if (!annotation || annotation.type !== 'text') return null;
+              const textAnnotation = annotation as TextAnnotation;
+
+              return (
+                <textarea
+                  ref={textareaRef}
+                  value={textAnnotation.text}
+                  onChange={(e) => handleAnnotationChange(textAnnotation.id, { text: e.target.value } as any)}
+                  onBlur={() => setEditingId(null)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      setEditingId(null);
+                    }
+                  }}
+                  style={{
+                    position: 'absolute',
+                    top: textAnnotation.y - 2, // Adjustment for padding/border
+                    left: textAnnotation.x - 2,
+                    fontSize: `${textAnnotation.fontSize}px`,
+                    fontFamily: textAnnotation.fontFamily || 'Arial',
+                    color: textAnnotation.fill,
+                    border: '1px dashed #000',
+                    background: 'rgba(255, 255, 255, 0.5)',
+                    resize: 'none',
+                    outline: 'none',
+                    padding: '0px',
+                    margin: 0,
+                    lineHeight: 1,
+                    whiteSpace: 'pre',
+                    overflow: 'hidden',
+                    minWidth: '100px',
+                    minHeight: `${textAnnotation.fontSize}px`,
+                  }}
+                  autoFocus
+                />
+              );
+            })()}
+          </div>
         </div>
 
         {/* Action buttons at bottom */}
@@ -549,6 +709,68 @@ export function Canvas({
             </Button>
 
             <div className="h-6 w-px bg-border/50" />
+
+            {(activeTool === 'text' || (selectedId && annotations.find(a => a.id === selectedId)?.type === 'text')) && (
+              <>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 px-2 hover:bg-primary/10 text-sm font-medium w-24 justify-between"
+                      title="Font Family"
+                    >
+                      <span className="truncate">
+                        {FONT_FAMILIES.find(f => f.value === selectedFontFamily)?.name || 'Font'}
+                      </span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-32 p-1" side="top">
+                    <div className="flex flex-col gap-1">
+                      {FONT_FAMILIES.map((font) => (
+                        <button
+                          key={font.value}
+                          className={cn(
+                            "w-full text-left px-2 py-1.5 rounded text-sm hover:bg-primary/10 transition-colors",
+                            selectedFontFamily === font.value && "bg-primary/10 text-primary"
+                          )}
+                          style={{ fontFamily: font.value }}
+                          onClick={() => handleFontFamilyChange(font.value)}
+                        >
+                          {font.name}
+                        </button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+
+                <div className="h-6 w-px bg-border/50" />
+
+                <div className="flex items-center gap-1">
+                   <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full hover:bg-primary/10"
+                    onClick={() => handleFontSizeChange(Math.max(12, selectedFontSize - 4))}
+                    title="Decrease font size"
+                  >
+                    <Minus className="w-3 h-3" />
+                  </Button>
+                  <span className="text-xs font-medium w-6 text-center">{selectedFontSize}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full hover:bg-primary/10"
+                    onClick={() => handleFontSizeChange(Math.min(128, selectedFontSize + 4))}
+                    title="Increase font size"
+                  >
+                    <Plus className="w-3 h-3" />
+                  </Button>
+                </div>
+
+                <div className="h-6 w-px bg-border/50" />
+              </>
+            )}
 
             <Popover>
               <PopoverTrigger asChild>

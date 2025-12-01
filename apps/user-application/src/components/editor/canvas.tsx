@@ -118,7 +118,7 @@ export function Canvas({
           // Default to 16:9 aspect ratio if no image is loaded yet
           const aspectRatio = 16 / 9;
           newHeight = newWidth / aspectRatio;
-          
+
           if (newHeight > maxHeight) {
             newHeight = maxHeight;
             newWidth = newHeight * aspectRatio;
@@ -130,17 +130,17 @@ export function Canvas({
     };
 
     updateDimensions();
-    
+
     const resizeObserver = new ResizeObserver(() => {
       updateDimensions();
     });
-    
+
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
 
     window.addEventListener('resize', updateDimensions);
-    
+
     return () => {
       resizeObserver.disconnect();
       window.removeEventListener('resize', updateDimensions);
@@ -170,13 +170,32 @@ export function Canvas({
     }
   }, [selectedId, annotations]);
 
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  // Reset delete confirm when selection changes
+  useEffect(() => {
+    setDeleteConfirmId(null);
+  }, [selectedId]);
+
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't handle delete if we are editing text
+      if (editingId) return;
+
+      // Don't handle delete if focus is on an input/textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId) {
         e.preventDefault();
-        setAnnotations(annotations.filter(a => a.id !== selectedId));
-        setSelectedId(null);
+
+        if (deleteConfirmId === selectedId) {
+          setAnnotations(annotations.filter(a => a.id !== selectedId));
+          setSelectedId(null);
+          setDeleteConfirmId(null);
+        } else {
+          setDeleteConfirmId(selectedId);
+        }
       }
 
       if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey && canUndo) {
@@ -198,7 +217,7 @@ export function Canvas({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedId, annotations, setAnnotations, undo, redo, canUndo, canRedo]);
+  }, [selectedId, annotations, setAnnotations, undo, redo, canUndo, canRedo, editingId, deleteConfirmId]);
 
   // Update transformer when selection changes
   useEffect(() => {
@@ -481,17 +500,17 @@ export function Canvas({
           const node = e.target;
           const scaleX = node.scaleX();
           const scaleY = node.scaleY();
-          
+
           // Update font size based on scale
           const newFontSize = annotation.fontSize * Math.max(scaleX, scaleY);
-          
+
           handleAnnotationChange(annotation.id, {
             x: node.x(),
             y: node.y(),
             fontSize: newFontSize,
             rotation: node.rotation(),
           } as any);
-          
+
           node.scaleX(1);
           node.scaleY(1);
         }}
@@ -600,46 +619,46 @@ export function Canvas({
           >
             <Stage
               ref={stageRef}
-            width={dimensions.width}
-            height={dimensions.height}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onTouchStart={handleMouseDown as any}
-            onTouchMove={handleMouseMove as any}
-            onTouchEnd={handleMouseUp}
-            style={{ cursor: activeTool === 'pointer' ? 'default' : 'crosshair' }}
-          >
-            <Layer ref={layerRef}>
-              {/* Background Image */}
-              {image && (
-                <KonvaImage
-                  image={image}
-                  width={dimensions.width}
-                  height={dimensions.height}
-                  listening={false}
+              width={dimensions.width}
+              height={dimensions.height}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onTouchStart={handleMouseDown as any}
+              onTouchMove={handleMouseMove as any}
+              onTouchEnd={handleMouseUp}
+              style={{ cursor: activeTool === 'pointer' ? 'default' : 'crosshair' }}
+            >
+              <Layer ref={layerRef}>
+                {/* Background Image */}
+                {image && (
+                  <KonvaImage
+                    image={image}
+                    width={dimensions.width}
+                    height={dimensions.height}
+                    listening={false}
+                  />
+                )}
+
+                {/* Render saved annotations */}
+                {renderAnnotations(annotations)}
+
+                {/* Render temporary annotation while drawing */}
+                {tempAnnotation && renderAnnotations([tempAnnotation])}
+
+                {/* Transformer for selected annotation */}
+                <Transformer
+                  ref={transformerRef}
+                  enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
+                  boundBoxFunc={(oldBox, newBox) => {
+                    // Limit resize
+                    if (newBox.width < 10 || newBox.height < 10) {
+                      return oldBox;
+                    }
+                    return newBox;
+                  }}
                 />
-              )}
-
-              {/* Render saved annotations */}
-              {renderAnnotations(annotations)}
-
-              {/* Render temporary annotation while drawing */}
-              {tempAnnotation && renderAnnotations([tempAnnotation])}
-
-              {/* Transformer for selected annotation */}
-              <Transformer
-                ref={transformerRef}
-                enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
-                boundBoxFunc={(oldBox, newBox) => {
-                  // Limit resize
-                  if (newBox.width < 10 || newBox.height < 10) {
-                    return oldBox;
-                  }
-                  return newBox;
-                }}
-              />
-            </Layer>
+              </Layer>
             </Stage>
             {editingId && (() => {
               const annotation = annotations.find(a => a.id === editingId);
@@ -747,7 +766,7 @@ export function Canvas({
                 <div className="h-6 w-px bg-border/50" />
 
                 <div className="flex items-center gap-1">
-                   <Button
+                  <Button
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 rounded-full hover:bg-primary/10"

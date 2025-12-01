@@ -2,9 +2,12 @@ export type RecordingState = 'idle' | 'recording' | 'paused' | 'finished';
 
 export interface Step {
     id: string;
+    type: 'click' | 'navigate';
     orderIndex: number;
-    imageKey: string;
+    imageKey?: string;
     pageUrl: string;
-    domSelector: string;
+    domSelector?: string;
+    x?: number;
+    y?: number;
     previewUrl?: string; // Data URL for immediate display
 }

@@ -30,7 +30,7 @@ function getCssSelector(el: Element): string {
 document.addEventListener('mousedown', (event) => {
     // Only capture left mouse button
     if (event.button !== 0) return;
-    
+
     const target = event.target as Element;
     const selector = getCssSelector(target);
 
@@ -39,11 +39,18 @@ document.addEventListener('mousedown', (event) => {
         return;
     }
 
+    const x = (event as MouseEvent).clientX;
+    const y = (event as MouseEvent).clientY;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
     chrome.runtime.sendMessage({
         type: 'STEP_ACTION',
         payload: {
             selector,
-            url: window.location.href
+            url: window.location.href,
+            x: (x / windowWidth) * 100,
+            y: (y / windowHeight) * 100
         }
     }).catch(() => {
         // Extension context invalidated - silently ignore

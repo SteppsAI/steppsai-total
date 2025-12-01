@@ -106,22 +106,16 @@ function GuideViewPage() {
                 </div>
 
                 {/* Screenshot */}
-                <div className="rounded-xl border overflow-hidden shadow-sm bg-muted/10 ring-1 ring-black/5">
-                  {step.imageKey ? (
+                {step.imageKey && (
+                  <div className="rounded-xl border overflow-hidden shadow-sm bg-muted/10 ring-1 ring-black/5">
                     <img
                       src={step.imageKey}
                       alt={`Step ${index + 1}`}
                       className="w-full h-auto object-contain bg-white"
                       loading="lazy"
                     />
-                  ) : (
-                    <div className="aspect-video flex items-center justify-center text-muted-foreground bg-muted/20">
-                      <p className="text-xl md:text-2xl font-medium text-center px-6">
-                        {step.caption || step.aiCaption || `Step ${index + 1}`}
-                      </p>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

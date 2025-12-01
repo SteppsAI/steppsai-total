@@ -66,15 +66,43 @@ function EditorPage() {
       setGuide(localGuide);
       setTitle(fetchedGuide.title || "Untitled Stepps");
 
-      // Set initial active step if not set
+      // Set initial active step if not set - prioritize steps with images
       if (!activeStepId && localGuide.steps && localGuide.steps.length > 0) {
         const sorted = [...localGuide.steps].sort((a, b) =>
           (a.orderIndex ?? 0) - (b.orderIndex ?? 0)
         );
-        setActiveStepId(sorted[0].id);
+        // Find first step with an image, or fall back to first step
+        const firstStepWithImage = sorted.find(step => step.imageKey);
+        setActiveStepId(firstStepWithImage?.id || sorted[0].id);
       }
     }
   }, [fetchedGuide, activeStepId]);
+
+  // Auto-skip to next step with image if current step has no image
+  useEffect(() => {
+    if (!guide?.steps || !activeStepId) return;
+
+    const currentStep = guide.steps.find(s => s.id === activeStepId);
+    if (!currentStep || currentStep.imageKey) return; // Current step has image, no need to skip
+
+    // Find next step with an image
+    const sorted = [...guide.steps].sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
+    const currentIndex = sorted.findIndex(s => s.id === activeStepId);
+
+    // Look for next step with image (circular search)
+    let foundStepWithImage = null;
+    for (let i = 1; i < sorted.length; i++) {
+      const nextIndex = (currentIndex + i) % sorted.length;
+      if (sorted[nextIndex].imageKey) {
+        foundStepWithImage = sorted[nextIndex];
+        break;
+      }
+    }
+
+    if (foundStepWithImage) {
+      setActiveStepId(foundStepWithImage.id);
+    }
+  }, [activeStepId, guide?.steps]);
 
   const saveGuide = useCallback(async (updates: { title?: string; steps?: Step[] }) => {
     if (!guide) return;

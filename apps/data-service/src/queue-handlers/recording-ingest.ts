@@ -26,9 +26,9 @@ export async function handleStepsInsert(env: Env, event: StepsInsertMessage) {
                 type: 'circle' as const,
                 x: step.x,
                 y: step.y,
-                radius: 5, // 5% of smaller dimension - visible but not too large
+                radius: 2.5, // 2.5% of smaller dimension - smaller as requested
                 color: CLICK_INDICATOR_COLOR,
-                strokeWidth: 4,
+                strokeWidth: 3,
             }] : undefined;
 
             return {

@@ -49,7 +49,7 @@ export const ANNOTATION_DEFAULTS = {
     },
     circle: {
         color: '#F59E0B', // amber-500 - better contrast than yellow
-        strokeWidth: 5, // increased for better visibility
+        strokeWidth: 3, // reduced for better aesthetics
     },
     hide: {
         color: '#000000',

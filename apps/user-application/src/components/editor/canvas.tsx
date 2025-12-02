@@ -33,12 +33,12 @@ const generateId = () => `annotation-${Date.now()}-${Math.random().toString(36).
 // Helper to convert percentage-based overlay to pixel-based for rendering
 function overlayToPixels(overlay: any, width: number, height: number): Annotation | null {
   if (!overlay || !overlay.type) return null;
-  
+
   // If already has pixel-based properties (from editor), return as-is
   if (overlay.points || (overlay.type === 'circle' && overlay.radius > 100)) {
     return overlay as Annotation;
   }
-  
+
   // Convert from percentage-based (from backend) to pixel-based
   if (overlay.type === 'circle' && typeof overlay.x === 'number' && typeof overlay.y === 'number') {
     return {
@@ -46,12 +46,12 @@ function overlayToPixels(overlay: any, width: number, height: number): Annotatio
       type: 'circle',
       x: (overlay.x / 100) * width,
       y: (overlay.y / 100) * height,
-      radius: (overlay.radius || 3) * (Math.min(width, height) / 100), // radius as % of smaller dimension
+      radius: (overlay.radius || 2.5) * (Math.min(width, height) / 100), // radius as % of smaller dimension
       color: overlay.color || '#ef4444',
       strokeWidth: overlay.strokeWidth || 3,
     } as CircleAnnotation;
   }
-  
+
   // Arrow with from/to (legacy backend format)
   if (overlay.type === 'arrow' && overlay.from && overlay.to) {
     return {
@@ -67,7 +67,7 @@ function overlayToPixels(overlay: any, width: number, height: number): Annotatio
       strokeWidth: overlay.strokeWidth || 4,
     } as ArrowAnnotation;
   }
-  
+
   return overlay as Annotation;
 }
 

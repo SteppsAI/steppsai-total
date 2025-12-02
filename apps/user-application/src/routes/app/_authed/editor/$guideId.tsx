@@ -145,7 +145,7 @@ function EditorPage() {
     });
   }, [activeStepId]);
 
-  const deleteImageMutation = useMutation(trpc.images.delete.mutationOptions());
+  const deleteStepMutation = useMutation(trpc.guides.deleteStep.mutationOptions());
 
   const handleDeleteStep = useCallback(async (id: string) => {
     if (!guide?.steps) return;
@@ -163,34 +163,14 @@ function EditorPage() {
     setGuide((prev) => prev ? { ...prev, steps: reindexedSteps } : prev);
 
     try {
-      // Delete image from R2 if exists (extract key from full URL)
-      if (stepToDelete?.imageKey) {
-        // imageKey is full URL like https://stepps-assets-stage.stepps.ai/screenshots/guideId/userId/stepId.webp
-        // We need just the path: screenshots/guideId/userId/stepId.webp
-        let key = stepToDelete.imageKey;
+      // Call atomic deletion endpoint (R2 + DB)
+      await deleteStepMutation.mutateAsync({
+        guideId: guideId,
+        stepId: id,
+        imageKey: stepToDelete?.imageKey || undefined,
+      });
 
-        // Extract path from full URL
-        if (key.startsWith('http')) {
-          try {
-            const url = new URL(key);
-            key = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname;
-          } catch {
-            // If URL parsing fails, try simple extraction
-            const match = key.match(/screenshots\/[^/]+\/[^/]+\/[^/]+\.webp$/);
-            key = match ? match[0] : key;
-          }
-        }
-
-        try {
-          await deleteImageMutation.mutateAsync({ key });
-        } catch (imgError) {
-          console.warn("Image delete failed (may already be deleted):", imgError);
-          // Continue with step deletion even if image delete fails
-        }
-      }
-
-      // Note: Step deletion is local only - will sync via Durable Objects later
-      toast.success("Step deleted (local only)", { duration: 1500 });
+      toast.success("Step deleted", { duration: 1500 });
 
       // Update active step if we deleted the current one
       if (activeStepId === id && reindexedSteps.length > 0) {
@@ -202,7 +182,7 @@ function EditorPage() {
       setGuide((prev) => prev ? { ...prev, steps: guide.steps } : prev);
       console.error(error);
     }
-  }, [guide?.steps, deleteImageMutation, activeStepId]);
+  }, [guide?.steps, deleteStepMutation, activeStepId, guideId]);
 
   const handleReorderSteps = useCallback((steps: Step[]) => {
     const reindexed = steps.map((step, idx) => ({

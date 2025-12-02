@@ -45,7 +45,7 @@ export function DashboardHeader() {
   // Note: This logic was in _authed.tsx, but now we might not need it if we only render this component in _authed.tsx
   // and _authed.tsx handles the conditional rendering of the header.
   // checking shouldShowSearch logic
-  const shouldShowSearch = pathname === '/app' || pathname === '/app/stepps' || pathname.startsWith('/app/folder');
+  const shouldShowSearch = pathname === '/app' || pathname === '/app/stepps' || pathname.startsWith('/app/folder') || pathname.startsWith('/app/exports');
 
   // Filter results for preview - moved up so handleSearch can use them
   const filteredGuides = guides?.filter(g => g.title?.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5) || [];

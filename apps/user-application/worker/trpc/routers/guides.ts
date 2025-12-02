@@ -15,7 +15,7 @@ export const guidesRouter = router({
         const userId = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366"; // Hardcoded for now
         const guides = await getUserGuides(userId);
         const assetsUrl = ctx.env.ASSETS_URL;
-        
+
         // Transform imageKeys to full URLs for all guides
         return guides.map((guide) => ({
             ...guide,
@@ -28,7 +28,7 @@ export const guidesRouter = router({
         .query(async ({ input, ctx }) => {
             const guide = await getGuide(input.id);
             if (!guide) return null;
-            
+
             const assetsUrl = ctx.env.ASSETS_URL;
             return {
                 ...guide,
@@ -61,6 +61,33 @@ export const guidesRouter = router({
             if (!response.ok) {
                 const error = await response.json() as { error?: string };
                 throw new Error(error.error || 'Failed to delete guide');
+            }
+
+            return { success: true };
+        }),
+
+    deleteStep: publicProcedure
+        .input(z.object({
+            guideId: z.string(),
+            stepId: z.string(),
+            imageKey: z.string().optional()
+        }))
+        .mutation(async ({ input, ctx }) => {
+            // Call data-service for atomic deletion (R2 + DB)
+            const response = await ctx.env.BACKEND_SERVICE.fetch(
+                new Request(`https://internal/guides/steps/${input.stepId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        guideId: input.guideId,
+                        imageKey: input.imageKey,
+                    }),
+                })
+            );
+
+            if (!response.ok) {
+                const error = await response.json() as { error?: string };
+                throw new Error(error.error || 'Failed to delete step');
             }
 
             return { success: true };

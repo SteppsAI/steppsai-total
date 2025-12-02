@@ -114,7 +114,7 @@ function parseSteps(steps: unknown): Step[] {
 
 export async function updateGuideExportStatus(
 	guideId: string,
-	type: 'pdf' | 'markdown',
+	type: 'pdf' | 'html' | 'markdown',
 	status: 'PENDING' | 'COMPLETED' | 'FAILED',
 	url?: string
 ): Promise<void> {
@@ -139,6 +139,35 @@ export async function updateGuideExportStatus(
 		.update(guides)
 		.set({
 			exportedDocs: updatedDocs,
+			updatedAt: sql`now()`,
+		})
+		.where(eq(guides.id, guideId));
+}
+
+/**
+ * Delete a step from a guide
+ * Removes the step from the guide's steps array and reindexes remaining steps
+ */
+export async function deleteStep(guideId: string, stepId: string): Promise<void> {
+	const db = getDb();
+
+	// Get current guide
+	const guide = await getGuide(guideId);
+	if (!guide) throw new Error("Guide not found");
+
+	// Filter out the step to delete
+	const updatedSteps = (guide.steps || [])
+		.filter((step: Step) => step.id !== stepId)
+		.map((step: Step, idx: number) => ({
+			...step,
+			orderIndex: idx,
+		}));
+
+	// Update guide with new steps array
+	await db
+		.update(guides)
+		.set({
+			steps: updatedSteps,
 			updatedAt: sql`now()`,
 		})
 		.where(eq(guides.id, guideId));

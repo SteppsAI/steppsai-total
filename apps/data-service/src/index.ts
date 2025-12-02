@@ -59,10 +59,4 @@ export default class DataService extends WorkerEntrypoint<Env> {
 			}
 		}
 	}
-
-	async triggerExport(params: { guideId: string, accountId: string }) {
-		return await this.env.GUIDE_EXPORT_WORKFLOW.create({
-			params
-		});
-	}
 }

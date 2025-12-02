@@ -121,10 +121,10 @@ function SettingsPage() {
     };
 
     return (
-        <div className="container max-w-6xl mx-auto py-10 px-4 md:px-8">
-            <div className="flex flex-col md:flex-row gap-12 relative">
+        <div className="w-full max-w-6xl mx-auto py-10 px-4 md:px-8">
+            <div className="flex flex-col lg:flex-row gap-12 relative items-start">
                 {/* Sidebar Navigation */}
-                <aside className="hidden md:block w-64 fixed top-24 h-[calc(100vh-6rem)] overflow-y-auto">
+                <aside className="hidden lg:block w-64 sticky top-6 h-fit">
                     <nav className="flex flex-col space-y-2">
                         <Button
                             variant="ghost"
@@ -151,7 +151,7 @@ function SettingsPage() {
                 </aside>
 
                 {/* Content */}
-                <div className="flex-1 space-y-16 md:ml-72">
+                <div className="flex-1 space-y-16 min-w-0">
                     {/* Profile Section */}
                     <section id="profile" className="space-y-6 scroll-mt-6">
                         <div className="space-y-1">

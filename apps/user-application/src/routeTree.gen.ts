@@ -16,6 +16,7 @@ import { Route as AppAuthedRouteImport } from './routes/app/_authed'
 import { Route as AppAuthedIndexRouteImport } from './routes/app/_authed/index'
 import { Route as AppAuthedSteppsRouteImport } from './routes/app/_authed/stepps'
 import { Route as AppAuthedSettingsRouteImport } from './routes/app/_authed/settings'
+import { Route as AppAuthedFeedbackRouteImport } from './routes/app/_authed/feedback'
 import { Route as AppAuthedSteppsIndexRouteImport } from './routes/app/_authed/stepps/index'
 import { Route as AppAuthedExportsIndexRouteImport } from './routes/app/_authed/exports/index'
 import { Route as AppAuthedEditorIndexRouteImport } from './routes/app/_authed/editor/index'
@@ -54,6 +55,11 @@ const AppAuthedSettingsRoute = AppAuthedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppAuthedRoute,
 } as any)
+const AppAuthedFeedbackRoute = AppAuthedFeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => AppAuthedRoute,
+} as any)
 const AppAuthedSteppsIndexRoute = AppAuthedSteppsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -88,6 +94,7 @@ const AppAuthedEditorGuideIdRoute = AppAuthedEditorGuideIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppAuthedRouteWithChildren
+  '/app/feedback': typeof AppAuthedFeedbackRoute
   '/app/settings': typeof AppAuthedSettingsRoute
   '/app/stepps': typeof AppAuthedSteppsRouteWithChildren
   '/app/': typeof AppAuthedIndexRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppAuthedIndexRoute
+  '/app/feedback': typeof AppAuthedFeedbackRoute
   '/app/settings': typeof AppAuthedSettingsRoute
   '/app/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
   '/app/folder/$folderId': typeof AppAuthedFolderFolderIdRoute
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/app/_authed': typeof AppAuthedRouteWithChildren
+  '/app/_authed/feedback': typeof AppAuthedFeedbackRoute
   '/app/_authed/settings': typeof AppAuthedSettingsRoute
   '/app/_authed/stepps': typeof AppAuthedSteppsRouteWithChildren
   '/app/_authed/': typeof AppAuthedIndexRoute
@@ -129,6 +138,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/app/feedback'
     | '/app/settings'
     | '/app/stepps'
     | '/app/'
@@ -142,6 +152,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/app'
+    | '/app/feedback'
     | '/app/settings'
     | '/app/editor/$guideId'
     | '/app/folder/$folderId'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/app/_authed'
+    | '/app/_authed/feedback'
     | '/app/_authed/settings'
     | '/app/_authed/stepps'
     | '/app/_authed/'
@@ -212,6 +224,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/app/settings'
       preLoaderRoute: typeof AppAuthedSettingsRouteImport
+      parentRoute: typeof AppAuthedRoute
+    }
+    '/app/_authed/feedback': {
+      id: '/app/_authed/feedback'
+      path: '/feedback'
+      fullPath: '/app/feedback'
+      preLoaderRoute: typeof AppAuthedFeedbackRouteImport
       parentRoute: typeof AppAuthedRoute
     }
     '/app/_authed/stepps/': {
@@ -274,6 +293,7 @@ const AppAuthedSteppsRouteWithChildren = AppAuthedSteppsRoute._addFileChildren(
 )
 
 interface AppAuthedRouteChildren {
+  AppAuthedFeedbackRoute: typeof AppAuthedFeedbackRoute
   AppAuthedSettingsRoute: typeof AppAuthedSettingsRoute
   AppAuthedSteppsRoute: typeof AppAuthedSteppsRouteWithChildren
   AppAuthedIndexRoute: typeof AppAuthedIndexRoute
@@ -284,6 +304,7 @@ interface AppAuthedRouteChildren {
 }
 
 const AppAuthedRouteChildren: AppAuthedRouteChildren = {
+  AppAuthedFeedbackRoute: AppAuthedFeedbackRoute,
   AppAuthedSettingsRoute: AppAuthedSettingsRoute,
   AppAuthedSteppsRoute: AppAuthedSteppsRouteWithChildren,
   AppAuthedIndexRoute: AppAuthedIndexRoute,

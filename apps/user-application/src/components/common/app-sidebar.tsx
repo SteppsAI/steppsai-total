@@ -190,15 +190,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <a
-                href="https://feedback.stepps.ai"
-                target="_blank"
-                rel="noreferrer"
-                className="flex w-full items-center"
+              <Link
+                to="/app/feedback"
+                className="flex w-full items-center cursor-pointer"
               >
                 <MessageSquare className="mr-2 h-4 w-4" />
                 <span>Send feedback</span>
-              </a>
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

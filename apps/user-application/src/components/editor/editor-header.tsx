@@ -1,17 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Check, Share2, Download } from "lucide-react";
+import { ArrowLeft, Share2, Download } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 interface EditorHeaderProps {
     title: string;
-    status: "saved" | "saving" | "unsaved";
+    status?: "saved" | "saving" | "unsaved"; // Optional - not used until Durable Objects
     onTitleChange: (title: string) => void;
     onShare?: () => void;
     onExport?: () => void;
 }
 
-export function EditorHeader({ title, status, onTitleChange, onShare, onExport }: EditorHeaderProps) {
+export function EditorHeader({ title, onTitleChange, onShare, onExport }: EditorHeaderProps) {
     return (
         <header className="h-14 border-b bg-background flex items-center justify-between px-4 shrink-0 z-10">
             <div className="flex items-center flex-1">
@@ -29,15 +29,11 @@ export function EditorHeader({ title, status, onTitleChange, onShare, onExport }
                     className="text-center font-medium text-lg border-transparent hover:border-input focus:border-input bg-transparent w-[400px] h-9 px-0 shadow-none focus-visible:ring-0"
                 />
                 <span className="text-sm text-muted-foreground italic">
-                    ({status === "saving" ? "saving..." : status === "saved" ? "saved" : "unsaved"})
+                    (local only)
                 </span>
             </div>
 
             <div className="flex items-center justify-end gap-2 flex-1">
-                <div className="flex items-center gap-1 text-sm font-medium text-muted-foreground mr-4">
-                    {status === "saved" && <Check className="w-4 h-4" />}
-                    {status === "saved" ? "Save" : "Saving..."}
-                </div>
                 <Button
                     variant="ghost"
                     size="sm"

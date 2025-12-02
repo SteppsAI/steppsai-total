@@ -1,6 +1,10 @@
 import { updateGuide, updateGuideSteps, deleteGuide } from "@repo/data-ops/queries";
 import type { StepsInsertMessage, Step } from "@repo/data-ops/zod-schema";
 import { generateStepDescription } from "../helpers/generateStepDescription";
+import { nanoid } from "nanoid";
+
+// Default colors for annotations
+const CLICK_INDICATOR_COLOR = '#ef4444'; // Red
 
 export async function handleStepsInsert(env: Env, event: StepsInsertMessage) {
     const { guideId, steps: rawSteps } = event;
@@ -15,6 +19,18 @@ export async function handleStepsInsert(env: Env, event: StepsInsertMessage) {
                 ? `Navigate to ${new URL(step.pageUrl).hostname}`
                 : generateStepDescription(step.domSelector || '');
 
+            // Create circle overlay at click position (matching frontend Overlay format)
+            // Coordinates are percentages of viewport, radius is % of smaller dimension
+            const overlays = (!isNavigate && step.x !== undefined && step.y !== undefined) ? [{
+                id: `overlay-${nanoid(8)}`,
+                type: 'circle' as const,
+                x: step.x,
+                y: step.y,
+                radius: 2.5, // 2.5% of smaller dimension - smaller as requested
+                color: CLICK_INDICATOR_COLOR,
+                strokeWidth: 3,
+            }] : undefined;
+
             return {
                 id: step.id,
                 type: step.type,
@@ -26,13 +42,7 @@ export async function handleStepsInsert(env: Env, event: StepsInsertMessage) {
                 y: step.y,
                 caption,
                 isExcluded: false,
-                overlays: (!isNavigate && step.x && step.y) ? [{
-                    type: 'arrow',
-                    // Simple arrow pointing to the click location
-                    // Adjust coordinates slightly to have the arrow tip at the click point
-                    from: [step.x - 50, step.y + 50],
-                    to: [step.x, step.y]
-                }] : undefined
+                overlays,
             };
         });
 

@@ -24,14 +24,16 @@ export const queryClient = new QueryClient({
   },
 });
 
+export const trpcClient = createTRPCClient<AppRouter>({
+  links: [
+    httpBatchLink({
+      url: "/trpc",
+    }),
+  ],
+});
+
 export const trpc = createTRPCOptionsProxy<AppRouter>({
-  client: createTRPCClient({
-    links: [
-      httpBatchLink({
-        url: "/trpc",
-      }),
-    ],
-  }),
+  client: trpcClient,
   queryClient,
 });
 

@@ -56,6 +56,7 @@ export const guides = pgTable("guides", {
 	status: text("status").default('draft'), // 'draft' | 'recording' | 'processing' | 'published'
 	visibility: text("visibility"),
 	steps: jsonb("steps").default([]), // Step[] - embedded steps as JSONB
+	exportedDocs: jsonb("exported_docs"), // { pdf: { url, last_updated, status }, ... }
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 });

@@ -19,9 +19,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Download, Loader2, FileText, FileCode, File } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { trpc, trpcClient } from "@/router";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 interface ExportDialogProps {
     open: boolean;
@@ -34,40 +36,62 @@ type ExportFormat = "pdf" | "markdown" | "word";
 
 export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: ExportDialogProps) {
     const isMobile = useIsMobile();
-    const [isExporting, setIsExporting] = useState(false);
     const [fileName, setFileName] = useState(guideTitle);
     const [format, setFormat] = useState<ExportFormat>("pdf");
+    const [isPolling, setIsPolling] = useState(false);
 
-    const handleExport = async () => {
-        setIsExporting(true);
+    // Mutation to trigger export
+    const triggerExport = useMutation({
+        mutationFn: async (data: { guideId: string, format: "pdf" | "markdown" | "word" }) => {
+            return await trpcClient.guideExports.triggerExport.mutate(data);
+        },
+        onSuccess: () => {
+            toast.success("Export started. We are generating your PDF...");
+            setIsPolling(true);
+        },
+        onError: (error: Error) => {
+            toast.error(`Failed to start export: ${error.message}`);
+        }
+    });
 
-        // TODO: Backend Integration for Export
-        // The goal is to generate a minimalistic PDF that mirrors the guide view UI.
-        // Reference UI: apps/user-application/src/routes/app/_authed/stepps/$guideId.tsx
-        //
-        // API Requirement:
-        // Endpoint: POST /api/v1/guides/${guideId}/export
-        // Payload: { 
-        //   format: "pdf" | "markdown" | "word",
-        //   fileName: string
-        // }
-        // Response: Binary file download
+    // Query to poll for status
+    const { data: guide } = useQuery({
+        ...trpc.guides.getById.queryOptions({ id: guideId }),
+        enabled: isPolling && open,
+        refetchInterval: isPolling ? 2000 : false
+    });
 
-        const exportSettings = {
+    // Check status
+    useEffect(() => {
+        if (!isPolling || !guide) return;
+
+        const exportStatus = (guide as any).exportedDocs?.[format];
+
+        if (exportStatus?.status === 'COMPLETED' && exportStatus?.url) {
+            setIsPolling(false);
+            toast.success("PDF Ready! Download starting...");
+            // Trigger download
+            window.open(exportStatus.url, '_blank');
+            onOpenChange(false);
+        } else if (exportStatus?.status === 'FAILED') {
+            setIsPolling(false);
+            toast.error("Export failed. Please try again.");
+        }
+    }, [guide, isPolling, format, onOpenChange]);
+
+    const handleExport = () => {
+        if (format !== 'pdf') {
+            toast.info("This format is coming soon!");
+            return;
+        }
+
+        triggerExport.mutate({
             guideId,
-            fileName: fileName || guideTitle,
-            format,
-        };
-
-        console.log("Export settings:", exportSettings);
-
-        // Simulate export process
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-
-        toast.success(`Exported "${fileName || guideTitle}" successfully!`);
-        setIsExporting(false);
-        onOpenChange(false);
+            format
+        });
     };
+
+    const isExporting = triggerExport.isPending || isPolling;
 
     const FormatOption = ({
         id,
@@ -177,7 +201,7 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
                             {isExporting ? (
                                 <>
                                     <Loader2 className="size-4 animate-spin" />
-                                    Exporting...
+                                    {isPolling ? "Generating PDF..." : "Exporting..."}
                                 </>
                             ) : (
                                 <>
@@ -209,7 +233,7 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
                         {isExporting ? (
                             <>
                                 <Loader2 className="size-4 animate-spin" />
-                                Exporting...
+                                {isPolling ? "Generating PDF..." : "Exporting..."}
                             </>
                         ) : (
                             <>

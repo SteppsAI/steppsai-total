@@ -12,6 +12,7 @@ export const guidesSchema = z.object({
 	status: z.string().nullable().optional(),
 	visibility: z.string().nullable().optional(),
 	steps: z.array(stepSchema).optional(),
+	exportedDocs: z.any().optional(), // TODO: Define strict schema for exported docs
 	createdAt: z.string().nullable().optional(),
 	updatedAt: z.string().nullable().optional(),
 });

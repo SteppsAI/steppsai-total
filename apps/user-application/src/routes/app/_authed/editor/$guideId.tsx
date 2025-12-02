@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSuspenseQuery, useMutation } from "@tanstack/react-query";
 import { EditorHeader } from "@/components/editor/editor-header";
 import { EditorToolbar, EditorTool } from "@/components/editor/editor-toolbar";
 import { Canvas } from "@/components/editor/canvas";
@@ -27,19 +27,29 @@ interface LocalGuide extends Omit<Guide, 'steps'> {
 
 function EditorPage() {
   const { guideId } = Route.useParams();
-  const queryClient = useQueryClient();
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
 
-  const { data: fetchedGuide } = useSuspenseQuery(trpc.guides.getById.queryOptions({ id: guideId }));
+  const { data: fetchedGuide, refetch } = useSuspenseQuery(trpc.guides.getById.queryOptions({ id: guideId }));
 
-  const updateGuideMutation = useMutation({
-    ...trpc.guides.update.mutationOptions(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
-      queryClient.invalidateQueries({ queryKey: trpc.guides.getById.queryOptions({ id: guideId }).queryKey });
-    },
-  });
+  // Poll for data if guide is still processing (queue hasn't finished yet)
+  useEffect(() => {
+    if (fetchedGuide?.status === 'processing' || fetchedGuide?.status === 'recording') {
+      const interval = setInterval(() => {
+        refetch();
+      }, 2000); // Poll every 2 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [fetchedGuide?.status, refetch]);
+
+  // Mutation temporarily disabled - will be replaced with Durable Objects
+  // const updateGuideMutation = useMutation({
+  //   ...trpc.guides.update.mutationOptions(),
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
+  //   },
+  // });
 
   useEffect(() => {
     if (isMobile) {
@@ -51,7 +61,6 @@ function EditorPage() {
   // Local state for editor (synced with fetched data initially)
   const [guide, setGuide] = useState<LocalGuide | null>(null);
   const [title, setTitle] = useState("Untitled Stepps");
-  const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const [activeStepId, setActiveStepId] = useState<string>("");
   const [activeTool, setActiveTool] = useState<EditorTool>("pointer");
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -66,36 +75,51 @@ function EditorPage() {
       setGuide(localGuide);
       setTitle(fetchedGuide.title || "Untitled Stepps");
 
-      // Set initial active step if not set
+      // Set initial active step if not set - prioritize steps with images
       if (!activeStepId && localGuide.steps && localGuide.steps.length > 0) {
         const sorted = [...localGuide.steps].sort((a, b) =>
           (a.orderIndex ?? 0) - (b.orderIndex ?? 0)
         );
-        setActiveStepId(sorted[0].id);
+        // Find first step with an image, or fall back to first step
+        const firstStepWithImage = sorted.find(step => step.imageKey);
+        setActiveStepId(firstStepWithImage?.id || sorted[0].id);
       }
     }
   }, [fetchedGuide, activeStepId]);
 
-  const saveGuide = useCallback(async (updates: { title?: string; steps?: Step[] }) => {
-    if (!guide) return;
+  // Auto-skip to next step with image if current step has no image
+  useEffect(() => {
+    if (!guide?.steps || !activeStepId) return;
 
-    setStatus("saving");
-    try {
-      await updateGuideMutation.mutateAsync({
-        id: guideId,
-        data: updates as any, // Backend accepts the Step[] format
-      });
-      setStatus("saved");
-    } catch (error) {
-      setStatus("unsaved");
-      toast.error("Failed to save changes");
+    const currentStep = guide.steps.find(s => s.id === activeStepId);
+    if (!currentStep || currentStep.imageKey) return; // Current step has image, no need to skip
+
+    // Find next step with an image
+    const sorted = [...guide.steps].sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
+    const currentIndex = sorted.findIndex(s => s.id === activeStepId);
+
+    // Look for next step with image (circular search)
+    let foundStepWithImage = null;
+    for (let i = 1; i < sorted.length; i++) {
+      const nextIndex = (currentIndex + i) % sorted.length;
+      if (sorted[nextIndex].imageKey) {
+        foundStepWithImage = sorted[nextIndex];
+        break;
+      }
     }
-  }, [guide, guideId, updateGuideMutation]);
+
+    if (foundStepWithImage) {
+      setActiveStepId(foundStepWithImage.id);
+    }
+  }, [activeStepId, guide?.steps]);
+
+  // Save function removed - will be replaced with Durable Objects architecture
+  // All changes are now local-only until explicitly saved
 
   const handleTitleChange = useCallback((newTitle: string) => {
     setTitle(newTitle);
-    saveGuide({ title: newTitle });
-  }, [saveGuide]);
+    // Auto-save disabled - title changes are local only
+  }, []);
 
   const handleUpdateStep = useCallback((id: string, stepTitle: string) => {
     setGuide((prev) => {
@@ -103,10 +127,10 @@ function EditorPage() {
       const updatedSteps = prev.steps.map((step) =>
         step.id === id ? { ...step, caption: stepTitle } : step
       );
-      saveGuide({ steps: updatedSteps });
+      // Auto-save disabled - step updates are local only
       return { ...prev, steps: updatedSteps };
     });
-  }, [saveGuide]);
+  }, []);
 
   const handleAnnotationsChange = useCallback((annotations: Overlay[]) => {
     if (!activeStepId) return;
@@ -116,50 +140,69 @@ function EditorPage() {
       const updatedSteps = prev.steps.map((step) =>
         step.id === activeStepId ? { ...step, overlays: annotations } : step
       );
-      saveGuide({ steps: updatedSteps });
+      // Auto-save disabled - annotations are local only
       return { ...prev, steps: updatedSteps };
     });
-  }, [activeStepId, saveGuide]);
+  }, [activeStepId]);
 
   const deleteImageMutation = useMutation(trpc.images.delete.mutationOptions());
 
   const handleDeleteStep = useCallback(async (id: string) => {
-    const stepToDelete = guide?.steps?.find((s) => s.id === id);
+    if (!guide?.steps) return;
+
+    const stepToDelete = guide.steps.find((s) => s.id === id);
+
+    // Calculate updated steps BEFORE any state changes
+    const updatedSteps = guide.steps.filter((step) => step.id !== id);
+    const reindexedSteps = updatedSteps.map((step, idx) => ({
+      ...step,
+      orderIndex: idx,
+    }));
 
     // Optimistic update
-    setGuide((prev) => {
-      if (!prev || !prev.steps) return prev;
-      const updatedSteps = prev.steps.filter((step) => step.id !== id);
-      const reindexed = updatedSteps.map((step, idx) => ({
-        ...step,
-        orderIndex: idx,
-      }));
-      // Don't save yet, wait for image delete if needed
-      return { ...prev, steps: reindexed };
-    });
+    setGuide((prev) => prev ? { ...prev, steps: reindexedSteps } : prev);
 
     try {
-      // Delete image from R2 if exists
+      // Delete image from R2 if exists (extract key from full URL)
       if (stepToDelete?.imageKey) {
-        await deleteImageMutation.mutateAsync({ key: stepToDelete.imageKey });
+        // imageKey is full URL like https://stepps-assets-stage.stepps.ai/screenshots/guideId/userId/stepId.webp
+        // We need just the path: screenshots/guideId/userId/stepId.webp
+        let key = stepToDelete.imageKey;
+
+        // Extract path from full URL
+        if (key.startsWith('http')) {
+          try {
+            const url = new URL(key);
+            key = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname;
+          } catch {
+            // If URL parsing fails, try simple extraction
+            const match = key.match(/screenshots\/[^/]+\/[^/]+\/[^/]+\.webp$/);
+            key = match ? match[0] : key;
+          }
+        }
+
+        try {
+          await deleteImageMutation.mutateAsync({ key });
+        } catch (imgError) {
+          console.warn("Image delete failed (may already be deleted):", imgError);
+          // Continue with step deletion even if image delete fails
+        }
       }
 
-      // Now save the guide with the step removed
-      if (guide?.steps) {
-        const updatedSteps = guide.steps.filter((step) => step.id !== id);
-        const reindexed = updatedSteps.map((step, idx) => ({
-          ...step,
-          orderIndex: idx,
-        }));
-        await saveGuide({ steps: reindexed });
+      // Note: Step deletion is local only - will sync via Durable Objects later
+      toast.success("Step deleted (local only)", { duration: 1500 });
+
+      // Update active step if we deleted the current one
+      if (activeStepId === id && reindexedSteps.length > 0) {
+        setActiveStepId(reindexedSteps[0].id);
       }
     } catch (error) {
-      toast.error("Failed to delete step completely");
-      // Revert optimistic update? Or just let it be for now as it's complex to revert
-      // For now, we just log error, but the step is gone from UI
+      toast.error("Failed to delete step");
+      // Revert optimistic update
+      setGuide((prev) => prev ? { ...prev, steps: guide.steps } : prev);
       console.error(error);
     }
-  }, [guide?.steps, saveGuide, deleteImageMutation]);
+  }, [guide?.steps, deleteImageMutation, activeStepId]);
 
   const handleReorderSteps = useCallback((steps: Step[]) => {
     const reindexed = steps.map((step, idx) => ({
@@ -167,8 +210,8 @@ function EditorPage() {
       orderIndex: idx,
     }));
     setGuide((prev) => prev ? { ...prev, steps: reindexed } : prev);
-    saveGuide({ steps: reindexed });
-  }, [saveGuide]);
+    // Auto-save disabled - reordering is local only
+  }, []);
 
   const handleAddStep = useCallback((stepData: { title: string; file: File; previewUrl: string }) => {
     const newStep: Step = {
@@ -184,12 +227,12 @@ function EditorPage() {
     setGuide((prev) => {
       if (!prev) return prev;
       const updatedSteps = [...(prev.steps || []), newStep];
-      saveGuide({ steps: updatedSteps });
+      // Auto-save disabled - new steps are local only
       return { ...prev, steps: updatedSteps };
     });
 
     setActiveStepId(newStep.id);
-  }, [guide?.steps?.length, saveGuide]);
+  }, [guide?.steps?.length]);
 
   if (!guide) {
     return (
@@ -211,7 +254,6 @@ function EditorPage() {
     <div className="h-screen w-full flex flex-col overflow-hidden bg-background">
       <EditorHeader
         title={title}
-        status={status}
         onTitleChange={handleTitleChange}
         onShare={() => setIsShareOpen(true)}
         onExport={() => setIsExportOpen(true)}

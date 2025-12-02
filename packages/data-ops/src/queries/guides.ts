@@ -114,7 +114,7 @@ function parseSteps(steps: unknown): Step[] {
 
 export async function updateGuideExportStatus(
 	guideId: string,
-	type: 'pdf' | 'markdown',
+	type: 'pdf' | 'html' | 'markdown',
 	status: 'PENDING' | 'COMPLETED' | 'FAILED',
 	url?: string
 ): Promise<void> {

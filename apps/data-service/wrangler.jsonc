@@ -16,7 +16,8 @@
 	"env": {
 		"stage": {
 			"vars": {
-				"ASSETS_URL": "https://stepps-assets-stage.stepps.ai"
+				"ASSETS_URL": "https://stepps-assets-stage.stepps.ai",
+				"CLOUDFLARE_ACCOUNT_ID": "c2ed9b335ebebbe0fbfa7aa17935b3b5"
 			},
 			"r2_buckets": [
 				{
@@ -39,20 +40,18 @@
 					}
 				]
 			},
-			"browser": {
-				"binding": "VIRTUAL_BROWSER"
-			},
 			"workflows": [
 				{
 					"name": "guide-pdf-export-workflow-stage",
 					"binding": "GUIDE_EXPORT_WORKFLOW",
 					"class_name": "GuidePdfExportWorkflow"
 				}
-			]
+			],
 		},
 		"production": {
 			"vars": {
-				"ASSETS_URL": "https://assets.stepps.ai"
+				"ASSETS_URL": "https://assets.stepps.ai",
+				"CLOUDFLARE_ACCOUNT_ID": "c2ed9b335ebebbe0fbfa7aa17935b3b5"
 			},
 			"r2_buckets": [
 				{
@@ -74,9 +73,6 @@
 						"queue": "stepps-recording-ingest-queue-production"
 					}
 				]
-			},
-			"browser": {
-				"binding": "VIRTUAL_BROWSER"
 			},
 			"workflows": [
 				{

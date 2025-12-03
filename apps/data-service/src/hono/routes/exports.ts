@@ -42,6 +42,8 @@ exportsRouter.post('/trigger', async (c) => {
     }
 });
 
+
+//TESTING ENDPOINTS
 // POST /exports/pdf - Direct PDF export (synchronous, for testing)
 exportsRouter.post('/pdf', async (c) => {
     try {

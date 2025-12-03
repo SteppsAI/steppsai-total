@@ -26,7 +26,6 @@ import { trpc, trpcClient } from "@/router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { renderToStaticMarkup } from "react-dom/server";
 import { GuideExportTemplate } from "@/components/guide-export-template";
-
 import { useNavigate } from "@tanstack/react-router";
 
 interface ExportDialogProps {
@@ -159,7 +158,7 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
             toast.success(`${format.toUpperCase()} Ready! Downloading...`, { duration: 5000 });
             // Trigger download
             window.open(exportStatus.url, '_blank');
-            
+
             // Redirect to exports page
             navigate({ to: "/app/exports" });
             onOpenChange(false);

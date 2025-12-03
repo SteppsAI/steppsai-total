@@ -551,7 +551,7 @@ function SteppsPage() {
                         <DashboardCard
                             key={guide.id}
                             title={guide.title || "Untitled"}
-                            image={guide.steps?.[0]?.imageKey || "/og-image.svg"}
+                            image={guide.steps?.[0]?.imageKey || "/default-preview.svg"}
                             viewUrl={`/app/stepps/${guide.id}`}
                             onEdit={() => navigate({ to: `/app/editor/${guide.id}` })}
                             onShare={() => handleShare(guide)}

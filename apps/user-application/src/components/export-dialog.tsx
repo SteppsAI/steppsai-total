@@ -27,6 +27,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { renderToStaticMarkup } from "react-dom/server";
 import { GuideExportTemplate } from "@/components/guide-export-template";
 
+import { useNavigate } from "@tanstack/react-router";
+
 interface ExportDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -36,8 +38,56 @@ interface ExportDialogProps {
 
 type ExportFormat = "pdf" | "html" | "word";
 
+const FormatOption = ({
+    id,
+    label,
+    icon: Icon,
+    disabled,
+    badge,
+    selectedFormat,
+    onSelect
+}: {
+    id: ExportFormat,
+    label: string,
+    icon: any,
+    disabled?: boolean,
+    badge?: string,
+    selectedFormat: ExportFormat,
+    onSelect: (format: ExportFormat) => void
+}) => (
+    <div
+        className={cn(
+            "relative flex items-center justify-between rounded-lg border p-4 transition-all cursor-pointer",
+            selectedFormat === id ? "border-primary ring-1 ring-primary bg-primary/5" : "border-muted hover:bg-muted/50",
+            disabled && "opacity-50 cursor-not-allowed hover:bg-transparent border-muted"
+        )}
+        onClick={() => !disabled && onSelect(id)}
+    >
+        <div className="flex items-center gap-3">
+            <div className={cn(
+                "flex items-center justify-center size-10 rounded-full transition-colors",
+                selectedFormat === id ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+            )}>
+                <Icon className="size-5" />
+            </div>
+            <div className="space-y-1">
+                <p className="font-medium text-sm leading-none">{label}</p>
+                {disabled && badge && (
+                    <span className="inline-flex items-center rounded-full border border-transparent bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground uppercase">
+                        {badge}
+                    </span>
+                )}
+            </div>
+        </div>
+        {selectedFormat === id && !disabled && (
+            <div className="size-2.5 rounded-full bg-primary shadow-sm" />
+        )}
+    </div>
+);
+
 export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: ExportDialogProps) {
     const isMobile = useIsMobile();
+    const navigate = useNavigate();
     const [fileName, setFileName] = useState(guideTitle);
     const [format, setFormat] = useState<ExportFormat>("pdf");
     const [isPolling, setIsPolling] = useState(false);
@@ -109,14 +159,16 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
             toast.success(`${format.toUpperCase()} Ready! Downloading...`, { duration: 5000 });
             // Trigger download
             window.open(exportStatus.url, '_blank');
-            // Keep dialog open a bit longer to show success
-            setTimeout(() => onOpenChange(false), 2000);
+            
+            // Redirect to exports page
+            navigate({ to: "/app/exports" });
+            onOpenChange(false);
         } else if (exportStatus?.status === 'FAILED') {
             setIsPolling(false);
             setPollCount(0);
             toast.error("Export failed. Please try again.", { duration: 5000 });
         }
-    }, [guide, isPolling, format, onOpenChange]);
+    }, [guide, isPolling, format, onOpenChange, navigate]);
 
     const handleExport = async () => {
         if (format === 'word') {
@@ -155,50 +207,7 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
 
     const isExporting = triggerExport.isPending || isPolling;
 
-    const FormatOption = ({
-        id,
-        label,
-        icon: Icon,
-        disabled,
-        badge
-    }: {
-        id: ExportFormat,
-        label: string,
-        icon: any,
-        disabled?: boolean,
-        badge?: string
-    }) => (
-        <div
-            className={cn(
-                "relative flex items-center justify-between rounded-lg border p-4 transition-all cursor-pointer",
-                format === id ? "border-primary ring-1 ring-primary bg-primary/5" : "border-muted hover:bg-muted/50",
-                disabled && "opacity-50 cursor-not-allowed hover:bg-transparent border-muted"
-            )}
-            onClick={() => !disabled && setFormat(id)}
-        >
-            <div className="flex items-center gap-3">
-                <div className={cn(
-                    "flex items-center justify-center size-10 rounded-full transition-colors",
-                    format === id ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                )}>
-                    <Icon className="size-5" />
-                </div>
-                <div className="space-y-1">
-                    <p className="font-medium text-sm leading-none">{label}</p>
-                    {disabled && badge && (
-                        <span className="inline-flex items-center rounded-full border border-transparent bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground uppercase">
-                            {badge}
-                        </span>
-                    )}
-                </div>
-            </div>
-            {format === id && !disabled && (
-                <div className="size-2.5 rounded-full bg-primary shadow-sm" />
-            )}
-        </div>
-    );
-
-    const ExportForm = () => (
+    const renderExportForm = () => (
         <div className="space-y-6">
             {/* File Name */}
             <div className="space-y-2">
@@ -225,11 +234,15 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
                         id="pdf"
                         label="PDF Document"
                         icon={FileText}
+                        selectedFormat={format}
+                        onSelect={setFormat}
                     />
                     <FormatOption
                         id="html"
                         label="HTML Document"
                         icon={FileCode}
+                        selectedFormat={format}
+                        onSelect={setFormat}
                     />
                     <FormatOption
                         id="word"
@@ -237,6 +250,8 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
                         icon={File}
                         disabled
                         badge="Soon"
+                        selectedFormat={format}
+                        onSelect={setFormat}
                     />
                 </div>
             </div>
@@ -254,7 +269,7 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
                         </DrawerDescription>
                     </DrawerHeader>
                     <div className="px-4 py-4">
-                        <ExportForm />
+                        {renderExportForm()}
                     </div>
                     <DrawerFooter className="pt-2">
                         <Button onClick={handleExport} disabled={isExporting} className="gap-2">
@@ -286,7 +301,7 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
                     </DialogDescription>
                 </DialogHeader>
                 <div className="py-4">
-                    <ExportForm />
+                    {renderExportForm()}
                 </div>
                 <DialogFooter>
                     <Button onClick={handleExport} disabled={isExporting} className="gap-2">

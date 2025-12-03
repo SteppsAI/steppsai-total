@@ -22,7 +22,8 @@
 			"r2_buckets": [
 				{
 					"binding": "BUCKET",
-					"bucket_name": "stepps-assets-stage"
+					"bucket_name": "stepps-assets-stage",
+					"remote": true
 				}
 			],
 			"queues": {
@@ -36,7 +37,8 @@
 				"producers": [
 					{
 						"binding": "QUEUE",
-						"queue": "stepps-recording-ingest-queue-stage"
+						"queue": "stepps-recording-ingest-queue-stage",
+						"remote": true
 					}
 				]
 			},
@@ -44,7 +46,8 @@
 				{
 					"name": "guide-pdf-export-workflow-stage",
 					"binding": "GUIDE_EXPORT_WORKFLOW",
-					"class_name": "GuidePdfExportWorkflow"
+					"class_name": "GuidePdfExportWorkflow",
+					"remote": true
 				}
 			],
 			"durable_objects": {
@@ -58,7 +61,9 @@
 			"migrations": [
 				{
 					"tag": "v1",
-					"new_classes": ["GuideSession"]
+					"new_classes": [
+						"GuideSession"
+					]
 				}
 			]
 		},
@@ -70,7 +75,8 @@
 			"r2_buckets": [
 				{
 					"binding": "BUCKET",
-					"bucket_name": "stepps-assets-production"
+					"bucket_name": "stepps-assets-production",
+					"remote": true
 				}
 			],
 			"queues": {
@@ -84,7 +90,8 @@
 				"producers": [
 					{
 						"binding": "QUEUE",
-						"queue": "stepps-recording-ingest-queue-production"
+						"queue": "stepps-recording-ingest-queue-production",
+						"remote": true
 					}
 				]
 			},
@@ -92,7 +99,8 @@
 				{
 					"name": "guide-pdf-export-workflow",
 					"binding": "GUIDE_EXPORT_WORKFLOW",
-					"class_name": "GuidePdfExportWorkflow"
+					"class_name": "GuidePdfExportWorkflow",
+					"remote": true
 				}
 			],
 			"durable_objects": {
@@ -106,7 +114,9 @@
 			"migrations": [
 				{
 					"tag": "v1",
-					"new_classes": ["GuideSession"]
+					"new_classes": [
+						"GuideSession"
+					]
 				}
 			]
 		}

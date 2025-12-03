@@ -47,7 +47,7 @@ export function DashboardCard({ title, image, viewUrl, onEdit, onShare, onMove, 
                 <Button
                   variant="secondary"
                   size="icon"
-                  className="h-8 w-8 rounded-full bg-white text-slate-900 shadow-md hover:bg-slate-100"
+                  className="h-8 w-8 rounded-full bg-white text-slate-900 shadow-md hover:bg-slate-100 border-none outline-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <MoreVertical className="h-4 w-4" />

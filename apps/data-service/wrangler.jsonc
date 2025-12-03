@@ -47,6 +47,20 @@
 					"class_name": "GuidePdfExportWorkflow"
 				}
 			],
+			"durable_objects": {
+				"bindings": [
+					{
+						"name": "GUIDE_SESSION",
+						"class_name": "GuideSession"
+					}
+				]
+			},
+			"migrations": [
+				{
+					"tag": "v1",
+					"new_classes": ["GuideSession"]
+				}
+			]
 		},
 		"production": {
 			"vars": {
@@ -80,7 +94,21 @@
 					"binding": "GUIDE_EXPORT_WORKFLOW",
 					"class_name": "GuidePdfExportWorkflow"
 				}
+			],
+			"durable_objects": {
+				"bindings": [
+					{
+						"name": "GUIDE_SESSION",
+						"class_name": "GuideSession"
+					}
+				]
+			},
+			"migrations": [
+				{
+					"tag": "v1",
+					"new_classes": ["GuideSession"]
+				}
 			]
 		}
-	},
+	}
 }

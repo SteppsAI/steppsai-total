@@ -34,7 +34,6 @@ function EditorIndexPage() {
             <div className="absolute inset-0 flex flex-col pointer-events-none opacity-50 filter blur-[2px]">
                 <EditorHeader
                     title="Select a Stepp..."
-                    status="saved"
                     onTitleChange={noop}
                 />
 

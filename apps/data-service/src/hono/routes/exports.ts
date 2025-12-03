@@ -1,7 +1,6 @@
 import { Hono } from 'hono';
 import { renderGuideToPdf, prepareHtmlForExport } from '../../helpers/browser-render';
-import { updateGuideExportStatus } from '@repo/data-ops/queries/guides';
-import { v4 as uuidv4 } from 'uuid';
+
 
 export const exportsRouter = new Hono<{ Bindings: Env }>();
 

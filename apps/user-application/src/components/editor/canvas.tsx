@@ -31,44 +31,129 @@ interface CanvasProps {
 const generateId = () => `annotation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 // Helper to convert percentage-based overlay to pixel-based for rendering
+// ALL overlays are stored as percentages (0-100 range) for consistency
 function overlayToPixels(overlay: any, width: number, height: number): Annotation | null {
   if (!overlay || !overlay.type) return null;
 
-  // If already has pixel-based properties (from editor), return as-is
-  if (overlay.points || (overlay.type === 'circle' && overlay.radius > 100)) {
-    return overlay as Annotation;
-  }
+  const minDim = Math.min(width, height);
 
-  // Convert from percentage-based (from backend) to pixel-based
-  if (overlay.type === 'circle' && typeof overlay.x === 'number' && typeof overlay.y === 'number') {
+  if (overlay.type === 'circle') {
     return {
       id: overlay.id || generateId(),
       type: 'circle',
       x: (overlay.x / 100) * width,
       y: (overlay.y / 100) * height,
-      radius: (overlay.radius || 2.5) * (Math.min(width, height) / 100), // radius as % of smaller dimension
+      radius: (overlay.radius || 2.5) * (minDim / 100),
       color: overlay.color || '#ef4444',
       strokeWidth: overlay.strokeWidth || 3,
     } as CircleAnnotation;
   }
 
-  // Arrow with from/to (legacy backend format)
-  if (overlay.type === 'arrow' && overlay.from && overlay.to) {
-    return {
-      id: overlay.id || generateId(),
-      type: 'arrow',
-      points: [
-        (overlay.from[0] / 100) * width,
-        (overlay.from[1] / 100) * height,
-        (overlay.to[0] / 100) * width,
-        (overlay.to[1] / 100) * height,
-      ],
-      color: overlay.color || '#ef4444',
-      strokeWidth: overlay.strokeWidth || 4,
-    } as ArrowAnnotation;
+  if (overlay.type === 'arrow') {
+    // Handle both new format (points as percentages) and legacy format (from/to)
+    if (overlay.points) {
+      return {
+        id: overlay.id || generateId(),
+        type: 'arrow',
+        points: [
+          (overlay.points[0] / 100) * width,
+          (overlay.points[1] / 100) * height,
+          (overlay.points[2] / 100) * width,
+          (overlay.points[3] / 100) * height,
+        ],
+        color: overlay.color || '#ef4444',
+        strokeWidth: overlay.strokeWidth || 4,
+      } as ArrowAnnotation;
+    }
+    // Legacy format with from/to
+    if (overlay.from && overlay.to) {
+      return {
+        id: overlay.id || generateId(),
+        type: 'arrow',
+        points: [
+          (overlay.from[0] / 100) * width,
+          (overlay.from[1] / 100) * height,
+          (overlay.to[0] / 100) * width,
+          (overlay.to[1] / 100) * height,
+        ],
+        color: overlay.color || '#ef4444',
+        strokeWidth: overlay.strokeWidth || 4,
+      } as ArrowAnnotation;
+    }
   }
 
-  return overlay as Annotation;
+  if (overlay.type === 'hide') {
+    return {
+      id: overlay.id || generateId(),
+      type: 'hide',
+      x: (overlay.x / 100) * width,
+      y: (overlay.y / 100) * height,
+      width: (overlay.width / 100) * width,
+      height: (overlay.height / 100) * height,
+      color: overlay.color || '#000000',
+    } as HideAnnotation;
+  }
+
+  if (overlay.type === 'text') {
+    return {
+      id: overlay.id || generateId(),
+      type: 'text',
+      x: (overlay.x / 100) * width,
+      y: (overlay.y / 100) * height,
+      text: overlay.text || '',
+      fontSize: overlay.fontSize || 20,
+      fontFamily: overlay.fontFamily || 'Arial',
+      fill: overlay.fill || '#000000',
+    } as TextAnnotation;
+  }
+
+  return null;
+}
+
+// Helper to convert pixel-based annotation to percentage-based for storage
+function annotationToPercent(annotation: Annotation, width: number, height: number): any {
+  const minDim = Math.min(width, height);
+
+  if (annotation.type === 'circle') {
+    return {
+      ...annotation,
+      x: (annotation.x / width) * 100,
+      y: (annotation.y / height) * 100,
+      radius: (annotation.radius / minDim) * 100,
+    };
+  }
+
+  if (annotation.type === 'arrow') {
+    return {
+      ...annotation,
+      points: [
+        (annotation.points[0] / width) * 100,
+        (annotation.points[1] / height) * 100,
+        (annotation.points[2] / width) * 100,
+        (annotation.points[3] / height) * 100,
+      ],
+    };
+  }
+
+  if (annotation.type === 'hide') {
+    return {
+      ...annotation,
+      x: (annotation.x / width) * 100,
+      y: (annotation.y / height) * 100,
+      width: (annotation.width / width) * 100,
+      height: (annotation.height / height) * 100,
+    };
+  }
+
+  if (annotation.type === 'text') {
+    return {
+      ...annotation,
+      x: (annotation.x / width) * 100,
+      y: (annotation.y / height) * 100,
+    };
+  }
+
+  return annotation;
 }
 
 
@@ -132,12 +217,13 @@ export function Canvas({
       const pixelOverlays = overlays
         .map(o => overlayToPixels(o, dimensions.width, dimensions.height))
         .filter((o): o is Annotation => o !== null);
+      console.log('[Canvas] Syncing overlays from props:', overlays.length, '→', pixelOverlays.length, 'pixel overlays');
       setAnnotations(pixelOverlays);
       setTimeout(() => {
         isSyncingRef.current = false;
       }, 0);
     }
-  }, [screenshotUrl, dimensions.width, dimensions.height]);
+  }, [currentStepId, screenshotUrl, dimensions.width, dimensions.height]);
 
   // Update dimensions on mount, resize, and when image loads
   useEffect(() => {
@@ -194,11 +280,15 @@ export function Canvas({
   }, [image]);
 
   // Notify parent of annotation changes (use ref to avoid infinite loops)
+  // Convert pixel-based annotations to percentage-based for storage
   useEffect(() => {
-    if (!isSyncingRef.current) {
-      onAnnotationsChangeRef.current?.(annotations);
+    if (!isSyncingRef.current && dimensions.width > 0 && dimensions.height > 0) {
+      const percentAnnotations = annotations.map(a => 
+        annotationToPercent(a, dimensions.width, dimensions.height)
+      );
+      onAnnotationsChangeRef.current?.(percentAnnotations);
     }
-  }, [annotations]);
+  }, [annotations, dimensions.width, dimensions.height]);
 
   // Sync selectedColor with selected annotation
   useEffect(() => {

@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { Step, Guide } from '@/types/db';
 import { trpc } from '@/router';
 
+// Local session state type - uses DB Step type for compatibility
 interface SessionState {
 	title: string;
 	steps: Step[];

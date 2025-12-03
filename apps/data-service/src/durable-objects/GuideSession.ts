@@ -1,25 +1,15 @@
 import { DurableObject } from "cloudflare:workers";
 import { updateGuide } from "@repo/data-ops/queries";
 import { initDatabase } from "@repo/data-ops/database";
-import type { Step } from "@repo/data-ops/zod-schema";
+import type { GuideState, SessionResponse } from "@repo/data-ops/zod-schema";
 
-export interface GuideState {
-	title: string;
-	steps: Step[];
-	lastModified: number;
-}
-
-export interface SessionResponse {
-	source: "draft" | "none";
-	data: GuideState | null;
-}
 
 /**
  * GuideSession Durable Object
  * 
  * Manages editor session state for a single guide.
  * - Stores draft changes in DO storage (fast, persistent)
- * - Syncs to Postgres on explicit "save" action
+ * - Syncs to Postgres on explicit "save" action ? Because we otherwise store everything in DO
  * - Survives page refreshes and browser crashes
  * 
  * Call methods directly via stub - no HTTP requests needed!

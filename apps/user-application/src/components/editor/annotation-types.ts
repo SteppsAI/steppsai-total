@@ -1,45 +1,11 @@
-export interface ArrowAnnotation {
-    id: string;
-    type: 'arrow';
-    points: [number, number, number, number]; // x1, y1, x2, y2
-    color: string;
-    strokeWidth: number;
-}
-
-export interface CircleAnnotation {
-    id: string;
-    type: 'circle';
-    x: number;
-    y: number;
-    radius: number;
-    color: string;
-    strokeWidth: number;
-}
-
-export interface HideAnnotation {
-    id: string;
-    type: 'hide';
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    color: string;
-}
-
-export interface TextAnnotation {
-    id: string;
-    type: 'text';
-    x: number;
-    y: number;
-    text: string;
-    fontSize: number;
-    fontFamily?: string;
-    fill: string;
-    width?: number;
-    rotation?: number;
-}
-
-export type Annotation = ArrowAnnotation | CircleAnnotation | HideAnnotation | TextAnnotation;
+// Re-export annotation types from centralized Zod schemas
+export type {
+    Annotation,
+    ArrowAnnotation,
+    CircleAnnotation,
+    HideAnnotation,
+    TextAnnotation,
+} from "@repo/data-ops/zod-schema";
 
 // Configuration constants for annotations
 export const ANNOTATION_DEFAULTS = {
@@ -60,3 +26,4 @@ export const ANNOTATION_DEFAULTS = {
         fill: '#000000',
     },
 } as const;
+

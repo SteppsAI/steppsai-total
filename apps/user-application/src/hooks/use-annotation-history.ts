@@ -1,11 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Annotation } from '@/components/editor/annotation-types';
+import type { HistoryState } from '@repo/data-ops/zod-schema';
 
-interface HistoryState {
-    past: Annotation[][];
-    present: Annotation[];
-    future: Annotation[][];
-}
 
 export function useAnnotationHistory(initialAnnotations: Annotation[] = []) {
     const [history, setHistory] = useState<HistoryState>({

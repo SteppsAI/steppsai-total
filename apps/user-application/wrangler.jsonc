@@ -31,7 +31,7 @@
         {
           "binding": "BACKEND_SERVICE",
           "service": "data-service-stage",
-          "remote": true
+          "experimental_remote": true,
         }
       ]
     },
@@ -43,7 +43,7 @@
         {
           "binding": "BACKEND_SERVICE",
           "service": "data-service-production",
-          "remote": true
+          "experimental_remote": true,
         }
       ]
     }

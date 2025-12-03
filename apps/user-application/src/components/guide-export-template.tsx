@@ -16,7 +16,9 @@ export function GuideExportTemplate({ guide, assetsUrl }: GuideExportTemplatePro
         <title>{guide.title}</title>
         <style>
           {`
-            /* Reset & Base */
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Space+Grotesk:wght@300..700&display=swap');
+
+            /* Reset */
             * {
               margin: 0;
               padding: 0;
@@ -24,172 +26,130 @@ export function GuideExportTemplate({ guide, assetsUrl }: GuideExportTemplatePro
             }
 
             body {
-              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+              font-family: "Inter", sans-serif;
               background: #ffffff;
-              color: #000000;
+              /* Matching the body gradient from globals.css */
+              background: linear-gradient(to bottom right, #ffffff, #f8fafc, #f1f5f9);
+              color: #0B0F19; /* --foreground */
               line-height: 1.5;
+              -webkit-font-smoothing: antialiased;
+              min-height: 100vh;
             }
 
-            /* Container - mimics max-w-3xl mx-auto p-6 py-12 md:py-16 */
+            /* Container - max-w-3xl (768px content) mx-auto p-6 py-12 md:py-16 */
             .container {
-              max-width: 768px;
+              max-width: 48rem; /* 768px */
               margin: 0 auto;
-              padding: 48px 24px;
+              padding: 64px 24px;
             }
 
-            @media (min-width: 768px) {
-              .container {
-                padding: 64px 24px;
-              }
-            }
-
-            /* Header - mimics space-y-6 text-center border-b pb-12 */
+            /* Header - space-y-6 text-center border-b pb-12 */
             .header {
               text-align: center;
-              padding-bottom: 48px;
-              border-bottom: 1px solid #e5e7eb;
-              margin-bottom: 64px;
+              border-bottom: 1px solid #E2E8F0; /* --border */
+              padding-bottom: 48px; /* pb-12 */
+              margin-bottom: 64px; /* space-y-16 spacer */
             }
 
-            .header-content {
-              margin-bottom: 24px;
-            }
-
-            /* Badge - mimics uppercase tracking-wider text-[10px] */
-            .badge {
-              display: inline-block;
-              padding: 2px 8px;
-              background: #000;
-              color: #fff;
-              border-radius: 4px;
-              font-size: 10px;
-              font-weight: 600;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-              margin-bottom: 16px;
-            }
-
-            .badge-secondary {
-              background: #6b7280;
-            }
-
-            /* Title - mimics text-3xl md:text-5xl font-bold tracking-tight */
+            /* Title - text-3xl md:text-5xl font-bold tracking-tight text-foreground */
             h1 {
-              font-size: 1.875rem;
+              font-family: "Space Grotesk", sans-serif;
+              font-size: 3rem; /* md:text-5xl */
               font-weight: 700;
-              letter-spacing: -0.025em;
-              margin-bottom: 16px;
-              color: #000;
+              letter-spacing: -0.025em; /* tracking-tight */
+              color: #0B0F19; /* --foreground */
+              margin-bottom: 16px; /* space-y-4 gap */
+              line-height: 1.2;
             }
 
-            @media (min-width: 768px) {
-              h1 {
-                font-size: 3rem;
-              }
-            }
-
-            /* Description - mimics text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto */
+            /* Description - text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto */
             .description {
-              font-size: 1.25rem;
-              color: #6b7280;
-              line-height: 1.75;
-              max-width: 672px;
-              margin: 0 auto 24px;
+              font-size: 1.25rem; /* text-xl */
+              color: #475569; /* --muted-foreground */
+              line-height: 1.625; /* leading-relaxed */
+              max-width: 42rem; /* max-w-2xl */
+              margin: 0 auto 16px;
             }
 
-            /* Meta - mimics flex items-center justify-center gap-4 text-sm text-muted-foreground */
+            /* Meta - text-sm text-muted-foreground */
             .meta {
               display: flex;
               align-items: center;
               justify-content: center;
               gap: 16px;
-              font-size: 0.875rem;
-              color: #6b7280;
+              font-size: 0.875rem; /* text-sm */
+              color: #475569; /* --muted-foreground */
+              margin-top: 24px; /* Adjust for space-y-4 in header group */
             }
 
-            /* Steps - mimics space-y-20 */
+            /* Steps List - space-y-20 */
             .steps {
               display: flex;
               flex-direction: column;
-              gap: 80px;
+              gap: 80px; /* space-y-20 = 5rem = 80px */
             }
 
-            /* Step - mimics space-y-6 group */
+            /* Step Item - space-y-6 */
             .step {
               display: flex;
               flex-direction: column;
-              gap: 24px;
+              gap: 24px; /* space-y-6 = 1.5rem = 24px */
+              page-break-inside: avoid;
             }
 
-            /* Step content - mimics flex flex-col gap-4 */
-            .step-content {
-              display: flex;
-              flex-direction: column;
-              gap: 16px;
-            }
-
-            /* Step header - mimics flex items-start gap-4 */
+            /* Step Header - flex items-start gap-4 */
             .step-header {
               display: flex;
               align-items: flex-start;
-              gap: 16px;
+              gap: 16px; /* gap-4 */
             }
 
-            /* Step number - mimics flex-none flex items-center justify-center size-8 rounded-full bg-primary/10 text-primary font-bold text-sm mt-1 */
+            /* Number - flex-none flex items-center justify-center size-8 rounded-full bg-primary/10 text-primary font-bold text-sm mt-1 */
             .step-number {
-              flex-shrink: 0;
-              width: 32px;
+              flex: none;
+              width: 32px; /* size-8 */
               height: 32px;
-              border-radius: 50%;
-              background: rgba(99, 102, 241, 0.1); /* #6366F1 with 10% opacity */
-              color: #6366F1; /* Primary brand color */
+              border-radius: 9999px; /* rounded-full */
+              background: rgba(99, 102, 241, 0.1); /* bg-primary/10 */
+              color: #6366F1; /* text-primary */
               font-weight: 700;
-              font-size: 0.875rem;
+              font-size: 0.875rem; /* text-sm */
               display: flex;
               align-items: center;
               justify-content: center;
-              margin-top: 4px;
+              margin-top: 4px; /* mt-1 */
             }
 
-            /* Step title wrapper - mimics space-y-2 pt-1 */
-            .step-title-wrapper {
-              padding-top: 4px;
+            /* Title - text-xl md:text-2xl font-medium text-foreground leading-snug */
+            .step-title {
+              font-family: "Space Grotesk", sans-serif;
+              font-size: 1.5rem; /* md:text-2xl */
+              font-weight: 500; /* font-medium */
+              color: #0B0F19; /* --foreground */
+              line-height: 1.375; /* leading-snug */
+              padding-top: 4px; /* pt-1 in wrapper */
             }
 
-            /* Step title - mimics text-xl md:text-2xl font-medium text-foreground leading-snug */
-            .step h2 {
-              font-size: 1.25rem;
-              font-weight: 500;
-              line-height: 1.4;
-              color: #000;
-            }
-
-            @media (min-width: 768px) {
-              .step h2 {
-                font-size: 1.5rem;
-              }
-            }
-
-            /* Screenshot container - mimics rounded-xl border overflow-hidden shadow-sm bg-muted/10 ring-1 ring-black/5 */
-            .screenshot {
-              border-radius: 12px;
-              border: 1px solid #e5e7eb;
+            /* Screenshot - rounded-xl border overflow-hidden shadow-sm bg-muted/10 ring-1 ring-black/5 */
+            .screenshot-container {
+              border-radius: 0.75rem; /* rounded-xl */
+              border: 1px solid #E2E8F0; /* border */
               overflow: hidden;
-              box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-              background: rgba(249, 250, 251, 0.1);
+              background: rgba(226, 232, 240, 0.1); /* bg-muted/10 (slate-200 @ 10%) */
+              /* shadow-sm + ring-1 ring-black/5 */
+              box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.05);
               position: relative;
             }
 
-            /* Screenshot image - mimics w-full h-auto object-contain bg-white */
-            .screenshot img {
+            .screenshot-img {
               width: 100%;
               height: auto;
               display: block;
               object-fit: contain;
-              background: #fff;
+              background: #ffffff;
             }
 
-            /* Overlays SVG */
+            /* Overlays */
             .overlays {
               position: absolute;
               top: 0;
@@ -199,18 +159,37 @@ export function GuideExportTemplate({ guide, assetsUrl }: GuideExportTemplatePro
               pointer-events: none;
             }
 
-            /* Print optimizations */
-            @media print {
+            @media (max-width: 768px) {
               .container {
-                padding: 24px;
+                padding: 48px 24px;
               }
-              
+              h1 {
+                font-size: 1.875rem; /* text-3xl */
+              }
+              .step-title {
+                font-size: 1.25rem; /* text-xl */
+              }
+            }
+
+            @media print {
+              body {
+                background: white;
+              }
+              .container {
+                padding: 0;
+                max-width: 100%;
+              }
               .step {
-                page-break-inside: avoid;
+                break-inside: avoid;
               }
-              
-              .screenshot {
-                page-break-inside: avoid;
+              .header {
+                margin-bottom: 48px;
+                padding-bottom: 32px;
+              }
+              /* Ensure background colors print */
+              .step-number {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
               }
             }
           `}
@@ -219,39 +198,35 @@ export function GuideExportTemplate({ guide, assetsUrl }: GuideExportTemplatePro
       <body>
         <div className="container">
           <div className="header">
-            <div className="header-content">
-              <h1>{guide.title}</h1>
-              {guide.description && (
-                <p className="description">{guide.description}</p>
-              )}
-            </div>
+            <h1>{guide.title}</h1>
+            {guide.description && (
+              <p className="description">{guide.description}</p>
+            )}
             <div className="meta">
               <span>{steps.length} steps</span>
+              <span>•</span>
+              <span>Last updated {new Date(guide.updatedAt || new Date()).toLocaleDateString()}</span>
             </div>
           </div>
 
-          {/* Steps */}
           <div className="steps">
             {steps.map((step, index) => (
               <div key={step.id || index} className="step">
-                <div className="step-content">
-                  <div className="step-header">
-                    <div className="step-number">{index + 1}</div>
-                    <div className="step-title-wrapper">
-                      <h2>{step.caption || step.aiCaption || `Step ${index + 1}`}</h2>
-                    </div>
+                <div className="step-header">
+                  <div className="step-number">{index + 1}</div>
+                  <div className="step-title">
+                    {step.caption || step.aiCaption || `Step ${index + 1}`}
                   </div>
                 </div>
 
-                {/* Screenshot */}
                 {step.imageKey && (
-                  <div className="screenshot">
+                  <div className="screenshot-container">
                     <img
                       src={`${assetsUrl}/${step.imageKey}`}
                       alt={`Step ${index + 1}`}
+                      className="screenshot-img"
                     />
 
-                    {/* Overlays */}
                     {step.overlays && step.overlays.length > 0 && (
                       <svg className="overlays" viewBox="0 0 100 100" preserveAspectRatio="none">
                         {step.overlays.map((overlay: any) => {
@@ -264,7 +239,7 @@ export function GuideExportTemplate({ guide, assetsUrl }: GuideExportTemplatePro
                                 r={overlay.radius}
                                 fill="none"
                                 stroke={overlay.color}
-                                stroke-width={overlay.strokeWidth || 3}
+                                strokeWidth={overlay.strokeWidth || 3}
                               />
                             );
                           }

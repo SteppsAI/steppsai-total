@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useSuspenseQuery, useMutation } from "@tanstack/react-query";
+import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { EditorHeader } from "@/components/editor/editor-header";
 import { EditorToolbar, EditorTool } from "@/components/editor/editor-toolbar";
 import { Canvas } from "@/components/editor/canvas";
@@ -11,6 +11,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { toast } from "sonner";
 import { trpc } from "@/router";
 import { Step, Overlay, Guide } from "@/types/db";
+import { useEditorSession } from "@/hooks/use-editor-session";
 
 export const Route = createFileRoute("/app/_authed/editor/$guideId")({
   component: EditorPage,
@@ -21,14 +22,11 @@ export const Route = createFileRoute("/app/_authed/editor/$guideId")({
   },
 });
 
-interface LocalGuide extends Omit<Guide, 'steps'> {
-  steps?: Step[];
-}
-
 function EditorPage() {
   const { guideId } = Route.useParams();
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: fetchedGuide, refetch } = useSuspenseQuery(trpc.guides.getById.queryOptions({ id: guideId }));
 
@@ -43,14 +41,6 @@ function EditorPage() {
     }
   }, [fetchedGuide?.status, refetch]);
 
-  // Mutation temporarily disabled - will be replaced with Durable Objects
-  // const updateGuideMutation = useMutation({
-  //   ...trpc.guides.update.mutationOptions(),
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
-  //   },
-  // });
-
   useEffect(() => {
     if (isMobile) {
       toast.error("Editing is only available on desktop devices.");
@@ -58,44 +48,37 @@ function EditorPage() {
     }
   }, [isMobile, navigate]);
 
-  // Local state for editor (synced with fetched data initially)
-  const [guide, setGuide] = useState<LocalGuide | null>(null);
-  const [title, setTitle] = useState("Untitled Stepps");
+  // Use editor session hook for DO-backed state management
+  const session = useEditorSession(guideId, fetchedGuide as Guide | null);
+
+  // Local UI state
   const [activeStepId, setActiveStepId] = useState<string>("");
   const [activeTool, setActiveTool] = useState<EditorTool>("pointer");
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  // Sync fetched guide to local state and set initial active step
+  // Set initial active step when guide loads
   useEffect(() => {
-    if (fetchedGuide) {
-      // Cast to LocalGuide - overlays might have different format from backend
-      const localGuide = fetchedGuide as unknown as LocalGuide;
-      setGuide(localGuide);
-      setTitle(fetchedGuide.title || "Untitled Stepps");
-
-      // Set initial active step if not set - prioritize steps with images
-      if (!activeStepId && localGuide.steps && localGuide.steps.length > 0) {
-        const sorted = [...localGuide.steps].sort((a, b) =>
-          (a.orderIndex ?? 0) - (b.orderIndex ?? 0)
-        );
-        // Find first step with an image, or fall back to first step
-        const firstStepWithImage = sorted.find(step => step.imageKey);
-        setActiveStepId(firstStepWithImage?.id || sorted[0].id);
-      }
+    if (session.guide?.steps && session.guide.steps.length > 0 && !activeStepId) {
+      const sorted = [...session.guide.steps].sort((a, b) =>
+        (a.orderIndex ?? 0) - (b.orderIndex ?? 0)
+      );
+      // Find first step with an image, or fall back to first step
+      const firstStepWithImage = sorted.find(step => step.imageKey);
+      setActiveStepId(firstStepWithImage?.id || sorted[0].id);
     }
-  }, [fetchedGuide, activeStepId]);
+  }, [session.guide?.steps, activeStepId]);
 
   // Auto-skip to next step with image if current step has no image
   useEffect(() => {
-    if (!guide?.steps || !activeStepId) return;
+    if (!session.guide?.steps || !activeStepId) return;
 
-    const currentStep = guide.steps.find(s => s.id === activeStepId);
+    const currentStep = session.guide.steps.find(s => s.id === activeStepId);
     if (!currentStep || currentStep.imageKey) return; // Current step has image, no need to skip
 
     // Find next step with an image
-    const sorted = [...guide.steps].sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
+    const sorted = [...session.guide.steps].sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
     const currentIndex = sorted.findIndex(s => s.id === activeStepId);
 
     // Look for next step with image (circular search)
@@ -111,56 +94,41 @@ function EditorPage() {
     if (foundStepWithImage) {
       setActiveStepId(foundStepWithImage.id);
     }
-  }, [activeStepId, guide?.steps]);
+  }, [activeStepId, session.guide?.steps]);
 
-  // Save function removed - will be replaced with Durable Objects architecture
-  // All changes are now local-only until explicitly saved
-
+  // Handle title change - syncs to DO
   const handleTitleChange = useCallback((newTitle: string) => {
-    setTitle(newTitle);
-    // Auto-save disabled - title changes are local only
-  }, []);
+    session.updateTitle(newTitle);
+  }, [session]);
 
+  // Handle step caption update - syncs to DO
   const handleUpdateStep = useCallback((id: string, stepTitle: string) => {
-    setGuide((prev) => {
-      if (!prev || !prev.steps) return prev;
-      const updatedSteps = prev.steps.map((step) =>
-        step.id === id ? { ...step, caption: stepTitle } : step
-      );
-      // Auto-save disabled - step updates are local only
-      return { ...prev, steps: updatedSteps };
-    });
-  }, []);
+    session.updateStep(id, { caption: stepTitle });
+  }, [session]);
 
+  // Handle annotations change - syncs to DO
   const handleAnnotationsChange = useCallback((annotations: Overlay[]) => {
     if (!activeStepId) return;
+    session.updateStep(activeStepId, { overlays: annotations });
+  }, [activeStepId, session]);
 
-    setGuide((prev) => {
-      if (!prev || !prev.steps) return prev;
-      const updatedSteps = prev.steps.map((step) =>
-        step.id === activeStepId ? { ...step, overlays: annotations } : step
-      );
-      // Auto-save disabled - annotations are local only
-      return { ...prev, steps: updatedSteps };
-    });
-  }, [activeStepId]);
-
+  // Delete step mutation (still goes directly to DB for atomic R2 + DB delete)
   const deleteStepMutation = useMutation(trpc.guides.deleteStep.mutationOptions());
 
   const handleDeleteStep = useCallback(async (id: string) => {
-    if (!guide?.steps) return;
+    if (!session.guide?.steps) return;
 
-    const stepToDelete = guide.steps.find((s) => s.id === id);
+    const stepToDelete = session.guide.steps.find((s) => s.id === id);
 
     // Calculate updated steps BEFORE any state changes
-    const updatedSteps = guide.steps.filter((step) => step.id !== id);
+    const updatedSteps = session.guide.steps.filter((step) => step.id !== id);
     const reindexedSteps = updatedSteps.map((step, idx) => ({
       ...step,
       orderIndex: idx,
     }));
 
-    // Optimistic update
-    setGuide((prev) => prev ? { ...prev, steps: reindexedSteps } : prev);
+    // Optimistic update via session
+    session.updateSteps(reindexedSteps);
 
     try {
       // Call atomic deletion endpoint (R2 + DB)
@@ -179,42 +147,59 @@ function EditorPage() {
     } catch (error) {
       toast.error("Failed to delete step");
       // Revert optimistic update
-      setGuide((prev) => prev ? { ...prev, steps: guide.steps } : prev);
+      session.updateSteps(session.guide.steps);
       console.error(error);
     }
-  }, [guide?.steps, deleteStepMutation, activeStepId, guideId]);
+  }, [session, deleteStepMutation, activeStepId, guideId]);
 
+  // Handle step reorder - syncs to DO
   const handleReorderSteps = useCallback((steps: Step[]) => {
     const reindexed = steps.map((step, idx) => ({
       ...step,
       orderIndex: idx,
     }));
-    setGuide((prev) => prev ? { ...prev, steps: reindexed } : prev);
-    // Auto-save disabled - reordering is local only
-  }, []);
+    session.updateSteps(reindexed);
+  }, [session]);
 
+  // Handle add step - syncs to DO
   const handleAddStep = useCallback((stepData: { title: string; file: File; previewUrl: string }) => {
     const newStep: Step = {
       id: crypto.randomUUID(),
       caption: stepData.title,
       imageKey: stepData.previewUrl,
-      orderIndex: (guide?.steps?.length || 0),
+      orderIndex: (session.guide?.steps?.length || 0),
       overlays: [],
       pageUrl: "",
       domSelector: "",
     };
 
-    setGuide((prev) => {
-      if (!prev) return prev;
-      const updatedSteps = [...(prev.steps || []), newStep];
-      // Auto-save disabled - new steps are local only
-      return { ...prev, steps: updatedSteps };
-    });
-
+    const updatedSteps = [...(session.guide?.steps || []), newStep];
+    session.updateSteps(updatedSteps);
     setActiveStepId(newStep.id);
-  }, [guide?.steps?.length]);
+  }, [session]);
 
-  if (!guide) {
+  // Handle save - persists to database
+  const handleSave = useCallback(async () => {
+    try {
+      await session.save();
+      toast.success("Changes saved", { duration: 2000 });
+      // Invalidate guides query to refresh list
+      queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
+    } catch (error) {
+      toast.error("Failed to save changes");
+    }
+  }, [session, queryClient]);
+
+  // Loading state
+  if (session.isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-background">
+        <div className="text-muted-foreground">Loading editor...</div>
+      </div>
+    );
+  }
+
+  if (!session.guide) {
     return (
       <div className="h-screen flex items-center justify-center bg-background">
         <div className="text-muted-foreground">Guide not found</div>
@@ -223,7 +208,7 @@ function EditorPage() {
   }
 
   // Sort steps by orderIndex
-  const sortedSteps = [...(guide.steps || [])].sort((a, b) =>
+  const sortedSteps = [...(session.guide.steps || [])].sort((a, b) =>
     (a.orderIndex ?? 0) - (b.orderIndex ?? 0)
   );
 
@@ -233,8 +218,14 @@ function EditorPage() {
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden bg-background">
       <EditorHeader
-        title={title}
+        title={session.guide.title || "Untitled Stepps"}
+        isDirty={session.isDirty}
+        isSyncing={session.isSyncing}
+        isSaving={session.isSaving}
+        lastSaved={session.lastSaved}
+        error={session.error}
         onTitleChange={handleTitleChange}
+        onSave={handleSave}
         onShare={() => setIsShareOpen(true)}
         onExport={() => setIsExportOpen(true)}
       />
@@ -270,14 +261,14 @@ function EditorPage() {
       <ShareDialog
         open={isShareOpen}
         onOpenChange={setIsShareOpen}
-        guideTitle={title}
+        guideTitle={session.guide.title || "Untitled Stepps"}
         guideId={guideId}
       />
 
       <ExportDialog
         open={isExportOpen}
         onOpenChange={setIsExportOpen}
-        guideTitle={title}
+        guideTitle={session.guide.title || "Untitled Stepps"}
         guideId={guideId}
       />
     </div>

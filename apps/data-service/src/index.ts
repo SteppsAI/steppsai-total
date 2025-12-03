@@ -4,6 +4,7 @@ import { initDatabase } from '@repo/data-ops/database';
 import { queueMessageSchema } from "@repo/data-ops/zod-schema/queue";
 import { handleStepsInsert } from './queue-handlers/recording-ingest';
 export { GuidePdfExportWorkflow } from './workflows/guide-pdf-export';
+export { GuideSession } from './durable-objects/GuideSession';
 
 export default class DataService extends WorkerEntrypoint<Env> {
 	constructor(ctx: ExecutionContext, env: Env) {

@@ -1,8 +1,45 @@
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc-instance";
 import { TRPCError } from "@trpc/server";
+import { getUserGuides } from "@repo/data-ops/queries";
 
 export const guideExportsRouter = router({
+    getAll: publicProcedure.query(async () => {
+        // TODO: Get userId from context (auth)
+        const userId = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366"; // Hardcoded for now
+        const guides = await getUserGuides(userId);
+
+        // Transform guides with exported_docs into flat list of exports
+        const exports = guides.flatMap(guide => {
+            if (!guide.exportedDocs) return [];
+
+            const exportedDocs = guide.exportedDocs as Record<string, {
+                status: string;
+                url?: string;
+                last_updated?: string;
+            }>;
+
+            return Object.entries(exportedDocs).map(([type, doc]) => ({
+                id: `${guide.id}-${type}`,
+                guideId: guide.id,
+                guideTitle: guide.title || "Untitled Guide",
+                type: type as "pdf" | "html" | "markdown",
+                fileUrl: doc.url || null,
+                status: doc.status?.toLowerCase() || "pending",
+                createdAt: doc.last_updated || guide.createdAt,
+            }));
+        });
+
+        // Sort by createdAt descending
+        exports.sort((a, b) => {
+            const dateA = new Date(a.createdAt || 0).getTime();
+            const dateB = new Date(b.createdAt || 0).getTime();
+            return dateB - dateA;
+        });
+
+        return exports;
+    }),
+
     triggerExport: publicProcedure
         .input(z.object({
             guideId: z.string(),

@@ -9,6 +9,8 @@ import {
     Trash,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { trpc } from "@/router";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,65 +29,15 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-// Mock type definition matching Drizzle schema (camelCase) + joined guide info
-interface Export {
-    id: string;
-    guideId: string;
-    guideTitle: string;
-    type: "pdf" | "html" | "markdown";
-    fileUrl: string | null;
-    status: "pending" | "processing" | "completed" | "failed";
-    createdAt: string;
-}
-
-// Mock data
-const MOCK_EXPORTS: Export[] = [
-    {
-        id: "exp_1",
-        guideId: "guide_1",
-        guideTitle: "How to Deploy a Worker",
-        type: "pdf",
-        fileUrl: "https://example.com/export.pdf",
-        status: "completed",
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
-    },
-    {
-        id: "exp_2",
-        guideId: "guide_2",
-        guideTitle: "Setting up TanStack Router",
-        type: "html",
-        fileUrl: "https://example.com/export.html",
-        status: "processing",
-        createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(), // 5 mins ago
-    },
-    {
-        id: "exp_3",
-        guideId: "guide_3",
-        guideTitle: "Database Schema Design",
-        type: "markdown",
-        fileUrl: null,
-        status: "failed",
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-    },
-    {
-        id: "exp_4",
-        guideId: "guide_1",
-        guideTitle: "How to Deploy a Worker",
-        type: "pdf",
-        fileUrl: "https://example.com/export-old.pdf",
-        status: "completed",
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(), // 3 days ago
-    },
-];
-
 export const Route = createFileRoute("/app/_authed/exports/")({
     component: ExportsPage,
+    loader: async ({ context }) => {
+        await context.queryClient.prefetchQuery(context.trpc.guideExports.getAll.queryOptions());
+    },
 });
 
 function ExportsPage() {
-    // In a real app, we would fetch this data using tRPC
-    // const { data: exports } = useQuery(trpc.exports.getAll.queryOptions());
-    const [exports] = useState<Export[]>(MOCK_EXPORTS);
+    const { data: exports } = useSuspenseQuery(trpc.guideExports.getAll.queryOptions());
     const [searchQuery, setSearchQuery] = useState("");
 
     // Listen for search query changes from sessionStorage (from header search)
@@ -112,11 +64,12 @@ function ExportsPage() {
     }, []);
 
     const filteredExports = exports.filter(item =>
-        item.guideTitle.toLowerCase().includes(searchQuery.toLowerCase())
+        (item.guideTitle || "").toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
+    const formatDate = (dateInput: Date | string | null) => {
+        if (!dateInput) return "N/A";
+        const date = new Date(dateInput);
         return new Intl.DateTimeFormat("en-US", {
             month: "short",
             day: "numeric",
@@ -125,7 +78,7 @@ function ExportsPage() {
         }).format(date);
     };
 
-    const getStatusIcon = (status: Export["status"]) => {
+    const getStatusIcon = (status: string | null) => {
         switch (status) {
             case "completed":
                 return <CheckCircle2 className="size-4 text-green-500 shrink-0" />;
@@ -199,7 +152,7 @@ function ExportsPage() {
                                                 <div className="flex items-center gap-2">
                                                     <FileText className="size-4 text-muted-foreground shrink-0" />
                                                     <span className="hover:underline hover:text-primary truncate cursor-pointer">
-                                                        {item.guideTitle}
+                                                        {item.guideTitle || "Untitled Guide"}
                                                     </span>
                                                 </div>
                                             </TableCell>
@@ -217,7 +170,7 @@ function ExportsPage() {
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-muted-foreground text-sm">
-                                                {formatDate(item.createdAt)}
+                                                {formatDate(item.createdAt || null)}
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <DropdownMenu>
@@ -281,7 +234,7 @@ function ExportsPage() {
                                 }}>
                                     <FileText className="size-4 shrink-0 text-muted-foreground" />
                                     <span className="font-semibold truncate hover:underline">
-                                        {item.guideTitle}
+                                        {item.guideTitle || "Untitled Guide"}
                                     </span>
                                 </div>
                                 <Badge variant="outline" className="uppercase text-[10px] font-mono shrink-0">
@@ -295,7 +248,7 @@ function ExportsPage() {
                                     <span className="capitalize text-xs">{item.status}</span>
                                 </div>
                                 <div className="flex items-center gap-1.5 text-xs">
-                                    {formatDate(item.createdAt)}
+                                    {formatDate(item.createdAt || null)}
                                 </div>
                             </div>
 

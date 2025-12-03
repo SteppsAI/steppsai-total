@@ -69,11 +69,11 @@ export function Hero() {
                             className="space-y-8 flex flex-col items-center opacity-0" // Start invisible to prevent flash
                         >
                             <h1 className="hero-text-stagger text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.1] max-w-4xl">
-                                Stop writing docs <span className="text-primary">manually</span>.
+                                Turn <span className="text-primary">Actions</span> into <span className="text-primary">Instructions</span>.
                             </h1>
-                            
+
                             <p className="hero-text-stagger text-lg text-muted-foreground leading-relaxed max-w-2xl">
-                                stepps.ai automatically records your workflow and generates beautiful, step-by-step guides in seconds.
+                                Automatically capture any workflow and generate beautiful documentation in seconds, not hours.
                             </p>
                             
                             <div className="hero-text-stagger flex flex-wrap gap-4 pt-2 justify-center">

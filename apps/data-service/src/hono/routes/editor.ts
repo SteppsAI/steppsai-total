@@ -8,6 +8,10 @@ editorRouter.get('/:guideId/state', async (c) => {
 
 	try {
 		const stub = c.env.GUIDE_SESSION.get(c.env.GUIDE_SESSION.idFromName(guideId));
+
+		// Ensure DO knows its guideId for auto-save functionality
+		await stub.setGuideId(guideId);
+
 		const result = await stub.getState();
 		return c.json(result);
 	} catch (error) {

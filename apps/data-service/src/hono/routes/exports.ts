@@ -1,35 +1,35 @@
 import { Hono } from 'hono';
 import { renderGuideToPdf, prepareHtmlForExport } from '../../helpers/browser-render';
 
-
 export const exportsRouter = new Hono<{ Bindings: Env }>();
 
-// POST /exports/trigger - Trigger export workflow
+/**
+ * POST /exports/trigger - Trigger export workflow
+ * The workflow will:
+ * 1. Fetch guide data from DB
+ * 2. Fetch images from R2 and convert to base64
+ * 3. Generate HTML server-side
+ * 4. Convert to PDF (if needed)
+ * 5. Upload to R2 and update DB
+ */
 exportsRouter.post('/trigger', async (c) => {
     try {
-        const { guideId, accountId, format, htmlContent } = await c.req.json<{
+        const { guideId, format } = await c.req.json<{
             guideId: string;
-            accountId: string;
             format: 'pdf' | 'html';
-            htmlContent: string;
         }>();
 
-        if (!guideId || !accountId || !format || !htmlContent) {
-            return c.json({ error: 'Missing required fields' }, 400);
+        if (!guideId || !format) {
+            return c.json({ error: 'Missing guideId or format' }, 400);
         }
 
         if (format !== 'pdf' && format !== 'html') {
             return c.json({ error: 'Invalid format. Must be pdf or html' }, 400);
         }
 
-        // Trigger the workflow
+        // Trigger the workflow - it will fetch all data server-side
         await c.env.GUIDE_EXPORT_WORKFLOW.create({
-            params: {
-                guideId,
-                accountId,
-                format,
-                htmlContent,
-            }
+            params: { guideId, format }
         });
 
         return c.json({ success: true, status: 'PENDING' });
@@ -42,6 +42,9 @@ exportsRouter.post('/trigger', async (c) => {
     }
 });
 
+
+// TESTING ENDPOINTS (keep for debugging)
+
 // POST /exports/pdf - Direct PDF export (synchronous, for testing)
 exportsRouter.post('/pdf', async (c) => {
     try {
@@ -51,10 +54,8 @@ exportsRouter.post('/pdf', async (c) => {
             return c.json({ error: 'Missing htmlContent' }, 400);
         }
 
-        // Render HTML to PDF using Cloudflare REST API
         const pdfBytes = await renderGuideToPdf(c.env, htmlContent);
 
-        // Return PDF as blob
         return new Response(pdfBytes, {
             headers: {
                 'Content-Type': 'application/pdf',
@@ -79,10 +80,8 @@ exportsRouter.post('/html', async (c) => {
             return c.json({ error: 'Missing htmlContent' }, 400);
         }
 
-        // Prepare HTML for export
         const processedHtml = prepareHtmlForExport(htmlContent);
 
-        // Return HTML as blob
         return new Response(processedHtml, {
             headers: {
                 'Content-Type': 'text/html',

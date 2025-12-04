@@ -112,6 +112,10 @@ function parseSteps(steps: unknown): Step[] {
 	return [];
 }
 
+/**
+ * Updates the export status for a guide atomically using JSONB operators
+ * This avoids fetching the guide first, preventing race conditions
+ */
 export async function updateGuideExportStatus(
 	guideId: string,
 	type: 'pdf' | 'html' | 'markdown',
@@ -120,28 +124,22 @@ export async function updateGuideExportStatus(
 ): Promise<void> {
 	const db = getDb();
 
-	// Fetch current guide to get existing exportedDocs
-	const guide = await getGuide(guideId);
-	if (!guide) throw new Error("Guide not found");
-
-	const currentDocs = (guide.exportedDocs as Record<string, any>) || {};
-
-	const updatedDocs = {
-		...currentDocs,
-		[type]: {
-			status,
-			url: url || currentDocs[type]?.url,
-			last_updated: new Date().toISOString()
-		}
+	// Build the export doc object
+	const exportDoc = {
+		status,
+		url: url || null,
+		last_updated: new Date().toISOString()
 	};
 
-	await db
-		.update(guides)
-		.set({
-			exportedDocs: updatedDocs,
-			updatedAt: sql`now()`,
-		})
-		.where(eq(guides.id, guideId));
+	// Use raw SQL for atomic JSONB update
+	// This merges the new export doc into existing exported_docs without fetching first
+	await db.execute(sql`
+		UPDATE guides 
+		SET 
+			exported_docs = COALESCE(exported_docs, '{}'::jsonb) || jsonb_build_object(${type}::text, ${JSON.stringify(exportDoc)}::jsonb),
+			updated_at = NOW()
+		WHERE id = ${guideId}::uuid
+	`);
 }
 
 /**

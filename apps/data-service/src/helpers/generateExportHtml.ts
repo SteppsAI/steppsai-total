@@ -151,12 +151,12 @@ export function generateExportHtml(
         .step {
             display: flex;
             flex-direction: column;
-            gap: 32px;
+            gap: 12px; /* Reduced gap from 24px */
             min-height: 100vh;
             /* justify-content: center; - Removed to let text sit at top */
             page-break-after: always;
             break-after: page;
-            padding: 40px 0;
+            padding: 80px 0 40px; /* Increased top padding from 40px */
         }
 
         .step:last-child {
@@ -172,38 +172,41 @@ export function generateExportHtml(
             width: 100%;
             margin: 0 auto;
             flex-shrink: 0; /* Ensure text doesn't shrink */
+            align-items: center; /* Center text horizontally */
+            text-align: center;
         }
 
         .step-header {
             display: flex;
-            align-items: flex-start;
+            align-items: center; /* Center vertically */
+            justify-content: center; /* Center horizontally */
             gap: 16px;
         }
 
         /* Step number with primary color background - matches frontend */
         .step-number {
             flex-shrink: 0;
-            width: 32px;
-            height: 32px;
+            width: 48px; /* Increased from 32px */
+            height: 48px; /* Increased from 32px */
             border-radius: 50%;
             background: rgba(99, 102, 241, 0.1);
             color: #6366F1;
             font-family: 'Space Grotesk', sans-serif;
             font-weight: 700;
-            font-size: 0.875rem;
+            font-size: 1.25rem; /* Increased from 0.875rem */
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 4px;
+            margin-top: 0; /* Removed margin-top since we align-items: center */
         }
 
         .step-title-wrapper {
-            flex: 1;
-            padding-top: 4px;
+            /* flex: 1; - Removed to allow centering */
+            padding-top: 0; /* Removed padding */
         }
 
         .step h2 {
-            font-size: 1.25rem;
+            font-size: 1.5rem; /* Increased from 1.25rem */
             font-weight: 500;
             line-height: 1.4;
             color: #0B0F19;
@@ -212,7 +215,7 @@ export function generateExportHtml(
 
         @media (min-width: 768px) {
             .step h2 {
-                font-size: 1.5rem;
+                font-size: 2rem; /* Increased from 1.5rem */
             }
         }
 
@@ -226,9 +229,9 @@ export function generateExportHtml(
             /* Ring effect like frontend */
             outline: 1px solid rgba(0, 0, 0, 0.05);
             outline-offset: -1px;
-            max-width: 85%; /* Constrain width as requested */
+            max-width: 90%; /* Widen to 90% */
             width: 100%;
-            margin: auto; /* Center vertically and horizontally in remaining space */
+            margin: 0 auto; /* Center horizontally only, remove vertical centering */
         }
 
         .screenshot img {

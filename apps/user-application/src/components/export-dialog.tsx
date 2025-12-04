@@ -19,13 +19,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Download, Loader2, FileText, FileCode, File } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { trpc, trpcClient } from "@/router";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { renderToStaticMarkup } from "react-dom/server";
-import { GuideExportTemplate } from "@/components/guide-export-template";
+import { trpcClient } from "@/router";
+import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
 interface ExportDialogProps {
@@ -48,7 +46,7 @@ const FormatOption = ({
 }: {
     id: ExportFormat,
     label: string,
-    icon: any,
+    icon: React.ElementType,
     disabled?: boolean,
     badge?: string,
     selectedFormat: ExportFormat,
@@ -89,122 +87,35 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
     const navigate = useNavigate();
     const [fileName, setFileName] = useState(guideTitle);
     const [format, setFormat] = useState<ExportFormat>("pdf");
-    const [isPolling, setIsPolling] = useState(false);
-    const [pollCount, setPollCount] = useState(0);
 
-    // Mutation to trigger export
+    // Mutation to trigger export - simplified, no polling
     const triggerExport = useMutation({
-        mutationFn: async (data: { guideId: string, format: "pdf" | "html" | "word", htmlContent: string }) => {
+        mutationFn: async (data: { guideId: string; format: "pdf" | "html" }) => {
             return await trpcClient.guideExports.triggerExport.mutate(data);
         },
-        onSuccess: (_, variables) => {
-            const formatName = variables.format.toUpperCase();
-            toast.success(`Export started. Generating your ${formatName}...`);
-            setIsPolling(true);
-            setPollCount(0); // Reset poll count
+        onSuccess: () => {
+            toast.success(`${format.toUpperCase()} export started! Check the exports page for progress.`);
+            onOpenChange(false);
+            navigate({ to: "/app/exports" });
         },
         onError: (error: Error) => {
             toast.error(`Failed to start export: ${error.message}`);
         }
     });
 
-    // Query to poll for status - max 5 requests over 2 minutes (24 sec interval)
-    const { data: guide } = useQuery({
-        ...trpc.guides.getById.queryOptions({ id: guideId }),
-        enabled: isPolling && open && pollCount < 5,
-        refetchInterval: isPolling && open && pollCount < 5 ? 24000 : false // 24 seconds
-    });
-
-    // Track poll count
-    useEffect(() => {
-        if (isPolling && guide) {
-            setPollCount(prev => prev + 1);
-        }
-    }, [guide, isPolling]);
-
-    // Stop polling after 5 attempts
-    useEffect(() => {
-        if (pollCount >= 5 && isPolling) {
-            setIsPolling(false);
-            setPollCount(0);
-            toast.info('Export is processing in the background. Refresh the page to check status.');
-        }
-    }, [pollCount, isPolling]);
-
-    // Stop polling when dialog closes
-    useEffect(() => {
-        if (!open && isPolling) {
-            setIsPolling(false);
-            setPollCount(0);
-        }
-    }, [open, isPolling]);
-
-    // Check status
-    useEffect(() => {
-        if (!isPolling || !guide) return;
-
-        console.log('🔍 Polling check:', {
-            format,
-            exportedDocs: guide.exportedDocs,
-            status: guide.exportedDocs?.[format]?.status
-        });
-
-        const exportStatus = guide.exportedDocs?.[format];
-
-        if (exportStatus?.status === 'COMPLETED' && exportStatus?.url) {
-            setIsPolling(false);
-            setPollCount(0);
-            console.log('✅ Export completed!', exportStatus.url);
-            toast.success(`${format.toUpperCase()} Ready! Downloading...`, { duration: 5000 });
-            // Trigger download
-            window.open(exportStatus.url, '_blank');
-
-            // Redirect to exports page
-            navigate({ to: "/app/exports" });
-            onOpenChange(false);
-        } else if (exportStatus?.status === 'FAILED') {
-            setIsPolling(false);
-            setPollCount(0);
-            toast.error("Export failed. Please try again.", { duration: 5000 });
-        }
-    }, [guide, isPolling, format, onOpenChange, navigate]);
-
     const handleExport = async () => {
         if (format === 'word') {
-            toast.info("This format is coming soon!");
+            toast.info("Word export is coming soon!");
             return;
         }
 
-        try {
-            // Fetch the guide data
-            const guide = await trpcClient.guides.getById.query({ id: guideId });
-
-            if (!guide) {
-                toast.error("Guide not found");
-                return;
-            }
-
-            // Get the assets URL from environment (assuming it's available) 
-            const assetsUrl = import.meta.env.VITE_ASSETS_URL || "https://assets.stepps.ai"; // this is also not necesarry
-
-            // Render the React component to HTML string
-            const htmlContent = renderToStaticMarkup(
-                <GuideExportTemplate guide={guide} assetsUrl={assetsUrl} />
-            );
-            // assets url shouldnt be send to the data-service
-
-            // Trigger the export mutation
-            triggerExport.mutate({
-                guideId,
-                format,
-                htmlContent,
-            });
-        } catch (error) {
-            toast.error(`Failed to prepare export: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
+        triggerExport.mutate({
+            guideId,
+            format: format as "pdf" | "html",
+        });
     };
 
-    const isExporting = triggerExport.isPending || isPolling;
+    const isExporting = triggerExport.isPending;
 
     const renderExportForm = () => (
         <div className="space-y-6">
@@ -275,7 +186,7 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
                             {isExporting ? (
                                 <>
                                     <Loader2 className="size-4 animate-spin" />
-                                    {isPolling ? `Generating ${format.toUpperCase()}...` : "Preparing export..."}
+                                    Starting export...
                                 </>
                             ) : (
                                 <>
@@ -307,7 +218,7 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
                         {isExporting ? (
                             <>
                                 <Loader2 className="size-4 animate-spin" />
-                                {isPolling ? `Generating ${format.toUpperCase()}...` : "Preparing export..."}
+                                Starting export...
                             </>
                         ) : (
                             <>

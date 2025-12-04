@@ -27,8 +27,6 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { renderToStaticMarkup } from "react-dom/server";
 import { GuideExportTemplate } from "@/components/guide-export-template";
 
-import { useNavigate } from "@tanstack/react-router";
-
 interface ExportDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -37,6 +35,26 @@ interface ExportDialogProps {
 }
 
 type ExportFormat = "pdf" | "html" | "word";
+
+export const PdfIcon = (props: React.ComponentProps<"img">) => (
+    <img 
+        src="/icons/pdf-icon.svg" 
+        alt="PDF" 
+        width={40} 
+        height={40} 
+        {...props} 
+    />
+);
+
+export const HtmlIcon = (props: React.ComponentProps<"img">) => (
+    <img 
+        src="/icons/html-icon.svg" 
+        alt="HTML" 
+        width={40} 
+        height={40} 
+        {...props} 
+    />
+);
 
 const FormatOption = ({
     id,
@@ -57,37 +75,41 @@ const FormatOption = ({
 }) => (
     <div
         className={cn(
-            "relative flex items-center justify-between rounded-lg border p-4 transition-all cursor-pointer",
+            "relative flex items-center justify-between rounded-xl border p-4 transition-all cursor-pointer",
             selectedFormat === id ? "border-primary ring-1 ring-primary bg-primary/5" : "border-muted hover:bg-muted/50",
             disabled && "opacity-50 cursor-not-allowed hover:bg-transparent border-muted"
         )}
         onClick={() => !disabled && onSelect(id)}
     >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
             <div className={cn(
-                "flex items-center justify-center size-10 rounded-full transition-colors",
-                selectedFormat === id ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                "flex items-center justify-center size-12 rounded-lg transition-colors shrink-0",
+                selectedFormat === id ? "bg-background shadow-sm" : "bg-muted/50"
             )}>
-                <Icon className="size-5" />
+                {id === 'pdf' ? <PdfIcon /> : id === 'html' ? <HtmlIcon /> : <Icon className="size-6 text-muted-foreground" />}
             </div>
             <div className="space-y-1">
-                <p className="font-medium text-sm leading-none">{label}</p>
+                <p className="font-semibold text-base leading-none">{label}</p>
+                <p className="text-xs text-muted-foreground">
+                    {id === 'pdf' ? 'Best for sharing and printing' : id === 'html' ? 'Best for web integration' : 'Coming soon'}
+                </p>
                 {disabled && badge && (
-                    <span className="inline-flex items-center rounded-full border border-transparent bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground uppercase">
+                    <span className="inline-flex items-center rounded-full border border-transparent bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground uppercase mt-1">
                         {badge}
                     </span>
                 )}
             </div>
         </div>
         {selectedFormat === id && !disabled && (
-            <div className="size-2.5 rounded-full bg-primary shadow-sm" />
+            <div className="size-4 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-sm">
+                <div className="size-1.5 rounded-full bg-white" />
+            </div>
         )}
     </div>
 );
 
 export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: ExportDialogProps) {
     const isMobile = useIsMobile();
-    const navigate = useNavigate();
     const [fileName, setFileName] = useState(guideTitle);
     const [format, setFormat] = useState<ExportFormat>("pdf");
     const [isPolling, setIsPolling] = useState(false);
@@ -159,16 +181,15 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
             toast.success(`${format.toUpperCase()} Ready! Downloading...`, { duration: 5000 });
             // Trigger download
             window.open(exportStatus.url, '_blank');
-            
-            // Redirect to exports page
-            navigate({ to: "/app/exports" });
+
+            // Close dialog
             onOpenChange(false);
         } else if (exportStatus?.status === 'FAILED') {
             setIsPolling(false);
             setPollCount(0);
             toast.error("Export failed. Please try again.", { duration: 5000 });
         }
-    }, [guide, isPolling, format, onOpenChange, navigate]);
+    }, [guide, isPolling, format, onOpenChange]);
 
     const handleExport = async () => {
         if (format === 'word') {

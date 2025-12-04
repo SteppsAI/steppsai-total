@@ -6,7 +6,6 @@ import {
   Edit,
   Plus,
   MessageSquare,
-  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useLocation } from "@tanstack/react-router";
@@ -115,19 +114,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Link to="/app/stepps" onClick={handleLinkClick}>
                     <Library />
                     <span>My Stepps</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive("/app/exports")}
-                  tooltip="Exports"
-                >
-                  <Link to="/app/exports" onClick={handleLinkClick}>
-                    <Download />
-                    <span>Exports</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

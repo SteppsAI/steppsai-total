@@ -3,8 +3,16 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Share2, Pencil, ChevronLeft } from "lucide-react";
+import { Share2, Pencil, ChevronLeft, Download, MoreVertical, Calendar, ExternalLink } from "lucide-react";
 import { ShareDialog } from "@/components/share-dialog";
+import { ExportDialog, PdfIcon, HtmlIcon } from "@/components/export-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { trpc } from "@/router";
 import { Step } from "@/types/db";
 
@@ -20,6 +28,7 @@ export const Route = createFileRoute("/app/_authed/stepps/$guideId")({
 function GuideViewPage() {
   const { guideId } = Route.useParams();
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   const { data: guide } = useSuspenseQuery(trpc.guides.getById.queryOptions({ id: guideId }));
 
@@ -61,6 +70,81 @@ function GuideViewPage() {
                 <span className="hidden sm:inline">Edit</span>
               </Link>
             </Button>
+            <Button variant="ghost" size="sm" className="h-8 gap-2 text-muted-foreground hover:text-foreground" onClick={() => setIsExportOpen(true)}>
+              <Download className="size-4" />
+              <span className="hidden sm:inline">Export</span>
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                  <MoreVertical className="size-4" />
+                  <span className="sr-only">More options</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuLabel>Previous Exports</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {guide.exportedDocs && Object.keys(guide.exportedDocs).length > 0 ? (
+                  <div className="p-2 space-y-2">
+                    {/* Check for PDF */}
+                    {(guide.exportedDocs as any)?.pdf?.status === 'COMPLETED' && (guide.exportedDocs as any)?.pdf?.url && (
+                      <a
+                        href={(guide.exportedDocs as any).pdf.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors group"
+                      >
+                        <div className="size-8 rounded-md bg-muted/50 flex items-center justify-center shrink-0 group-hover:bg-background group-hover:shadow-sm transition-all">
+                          <PdfIcon className="size-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">PDF Document</p>
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Calendar className="size-3" />
+                            {new Date((guide.exportedDocs as any).pdf.updatedAt || new Date()).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <ExternalLink className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </a>
+                    )}
+
+                    {/* Check for HTML */}
+                    {(guide.exportedDocs as any)?.html?.status === 'COMPLETED' && (guide.exportedDocs as any)?.html?.url && (
+                      <a
+                        href={(guide.exportedDocs as any).html.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors group"
+                      >
+                        <div className="size-8 rounded-md bg-muted/50 flex items-center justify-center shrink-0 group-hover:bg-background group-hover:shadow-sm transition-all">
+                          <HtmlIcon className="size-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">HTML Document</p>
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Calendar className="size-3" />
+                            {new Date((guide.exportedDocs as any).html.updatedAt || new Date()).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <ExternalLink className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </a>
+                    )}
+
+                    {/* Fallback if no valid exports found despite object existing */}
+                    {(!((guide.exportedDocs as any)?.pdf?.status === 'COMPLETED') && !((guide.exportedDocs as any)?.html?.status === 'COMPLETED')) && (
+                      <div className="text-xs text-muted-foreground text-center py-2">
+                        No completed exports yet.
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-xs text-muted-foreground text-center py-4">
+                    No exports generated yet.
+                  </div>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
@@ -132,6 +216,13 @@ function GuideViewPage() {
       <ShareDialog
         open={isShareOpen}
         onOpenChange={setIsShareOpen}
+        guideTitle={guide.title || ""}
+        guideId={guide.id}
+      />
+
+      <ExportDialog
+        open={isExportOpen}
+        onOpenChange={setIsExportOpen}
         guideTitle={guide.title || ""}
         guideId={guide.id}
       />

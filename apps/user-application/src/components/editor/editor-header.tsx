@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Share2, Download, Save, Loader2, Check, AlertCircle } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { useRouter } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 
 interface EditorHeaderProps {
@@ -29,6 +29,8 @@ export function EditorHeader({
     onShare,
     onExport
 }: EditorHeaderProps) {
+    const router = useRouter();
+
     // Format last saved time
     const formatLastSaved = (date: Date) => {
         const now = new Date();
@@ -45,10 +47,8 @@ export function EditorHeader({
     return (
         <header className="h-14 border-b bg-background flex items-center justify-between px-4 shrink-0 z-10">
             <div className="flex items-center flex-1">
-                <Button variant="ghost" size="icon" asChild className="mr-2">
-                    <Link to="/app">
-                        <ArrowLeft className="w-4 h-4" />
-                    </Link>
+                <Button variant="ghost" size="icon" className="mr-2" onClick={() => router.history.back()}>
+                    <ArrowLeft className="w-4 h-4" />
                 </Button>
             </div>
 

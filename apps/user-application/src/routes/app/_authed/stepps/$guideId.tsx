@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ export const Route = createFileRoute("/app/_authed/stepps/$guideId")({
 });
 
 function GuideViewPage() {
+  const router = useRouter();
   const { guideId } = Route.useParams();
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -79,11 +80,9 @@ function GuideViewPage() {
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-14">
         <div className="container max-w-5xl h-full mx-auto flex items-center justify-between px-4">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild className="-ml-2 hover:bg-muted/50">
-              <Link to="/app/stepps">
-                <ChevronLeft className="size-5 text-muted-foreground" />
-                <span className="sr-only">Back</span>
-              </Link>
+            <Button variant="ghost" size="icon" className="-ml-2 hover:bg-muted/50" onClick={() => router.history.back()}>
+              <ChevronLeft className="size-5 text-muted-foreground" />
+              <span className="sr-only">Back</span>
             </Button>
             <span className="font-medium text-sm hidden sm:inline-block truncate max-w-[300px]">
               {guide.title}

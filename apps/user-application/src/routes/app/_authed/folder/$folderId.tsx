@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link, useRouter } from "@tanstack/react-router";
 import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Folder as FolderIcon,
@@ -68,6 +68,7 @@ export const Route = createFileRoute("/app/_authed/folder/$folderId")({
 
 function FolderPage() {
   const { folderId } = Route.useParams();
+  const router = useRouter();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
@@ -222,8 +223,8 @@ function FolderPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[50vh] gap-4">
         <h1 className="text-2xl font-bold">Folder not found</h1>
-        <Button onClick={() => navigate({ to: "/app/stepps" })}>
-          Go back to My Stepps
+        <Button onClick={() => router.history.back()}>
+          Go back
         </Button>
       </div>
     );
@@ -237,7 +238,7 @@ function FolderPage() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate({ to: "/app/stepps" })}
+            onClick={() => router.history.back()}
             className="shrink-0"
           >
             <ArrowLeft className="size-5" />

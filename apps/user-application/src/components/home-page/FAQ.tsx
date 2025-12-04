@@ -17,8 +17,8 @@ const faqs = [
         answer: "Our browser extension records your workflow as you navigate through any website. The app captures intelligent screenshots at each interaction point, automatically generates step descriptions, and creates professional guides you can instantly share."
     },
     {
-        question: "What can I do with the current MVP?",
-        answer: "Right now you can record any workflow, capture smart screenshots, add titles, edit guides in our interactive editor (with annotations, arrows, highlights, and sensitive info blurring), organize guides in folders, share via public links and export to PDF."
+        question: "What can I do with the current version of Stepps?",
+        answer: "Right now you can record any workflow, capture smart screenshots, add titles, edit guides in our interactive editor (with annotations, arrows, highlights, and sensitive info blurring), organize guides in folders, share via public links and export to PDF and HTML."
     },
     {
         question: "What browsers and websites does stepps.ai work with?",
@@ -38,7 +38,7 @@ const faqs = [
     },
     {
         question: "What features are coming next?",
-        answer: "We're rolling out exciting features: Team Collaboration (real-time editing, comments, permissions), Guide Templates (professional layouts for common workflows), Website Embedding (put guides directly on your site), Marketing Export (LinkedIn carousels, social media), Custom Branding (your colors, logos), and additional export formats (Markdown, Word, HTML)."
+        answer: "We're rolling out exciting features: Team Collaboration (real-time editing, comments, permissions), Guide Templates (professional layouts for common workflows), Website Embedding (put guides directly on your site), Marketing Export (LinkedIn carousels, social media), Custom Branding (your colors, logos), and additional export formats (Markdown, Word,..)."
     },
     {
         question: "When will team collaboration be available?",

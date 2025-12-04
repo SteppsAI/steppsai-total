@@ -36,7 +36,7 @@ export function Navbar() {
             Log in
           </a>
           <NavbarButton href="#black-friday" className="rounded-full font-sans relative z-20">
-            Black Friday Deal
+            Launch Special Offer
           </NavbarButton>
         </div>
       </NavBody>
@@ -73,7 +73,7 @@ export function Navbar() {
             href="#black-friday"
             className="w-full rounded-full font-sans mt-2"
           >
-            Black Friday Deal
+            Launch Special Offer
           </NavbarButton>
         </MobileNavMenu>
       </MobileNav>

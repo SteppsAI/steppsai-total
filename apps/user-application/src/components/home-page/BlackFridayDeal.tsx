@@ -77,12 +77,12 @@ export function BlackFridayDeal() {
                                     <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                                 </span>
-                                Limited Time Offer
+                                Limited Time Offer:
                             </div>
                             <h2 className="bf-title text-4xl md:text-7xl font-bold tracking-tighter text-foreground">
-                                BLACK <br className="hidden md:block" />
+                                LAUNCH <br className="hidden md:block" />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-violet-500">
-                                    FRIDAY
+                                    SPECIAL
                                 </span>
                             </h2>
                         </div>

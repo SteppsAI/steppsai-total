@@ -1,7 +1,6 @@
 import { Navbar } from "./Navbar";
 import { Hero } from "./Hero";
 import { SocialProof } from "./SocialProof";
-import { WhoIsItFor } from "./WhoIsItFor";
 import {HowItWorks} from "./HowItWorks";
 import { BlackFridayDeal } from "./BlackFridayDeal";
 import { FAQ } from "./FAQ";
@@ -15,7 +14,6 @@ export function LandingPage() {
             <main className="flex-grow">
                 <Hero />
                 <SocialProof />
-                <WhoIsItFor />
                 <HowItWorks />
                 <BlackFridayDeal />
                 <FAQ />

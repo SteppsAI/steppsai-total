@@ -3,7 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Share2, Pencil, ChevronLeft, Download, MoreVertical, ExternalLink } from "lucide-react";
+import { Share2, Pencil, ChevronLeft, Download, MoreVertical, ExternalLink, Check, X } from "lucide-react";
 import { ShareDialog } from "@/components/share-dialog";
 import { ExportDialog, PdfIcon, HtmlIcon } from "@/components/export-dialog";
 import { formatRelativeTime } from "@/lib/utils";
@@ -118,7 +118,7 @@ function GuideViewPage() {
                 <DropdownMenuSeparator />
                 {guide.exportedDocs && Object.keys(guide.exportedDocs).length > 0 ? (
                   <div className="p-2 space-y-2">
-                    {(guide.exportedDocs as any)?.pdf?.status === 'COMPLETED' && (guide.exportedDocs as any)?.pdf?.url && (
+                    {(guide.exportedDocs as any)?.pdf && (
                       <a
                         href={(guide.exportedDocs as any).pdf.url}
                         target="_blank"
@@ -129,16 +129,25 @@ function GuideViewPage() {
                           <PdfIcon className="size-5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">PDF</p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-sm font-medium truncate">PDF</p>
+                            {(guide.exportedDocs as any).pdf.status === 'COMPLETED' ? (
+                              <Check className="size-3.5 text-green-500" />
+                            ) : (guide.exportedDocs as any).pdf.status === 'FAILED' ? (
+                              <X className="size-3.5 text-red-500" />
+                            ) : null}
+                          </div>
                           <p className="text-xs text-muted-foreground">
                             {formatRelativeTime((guide.exportedDocs as any).pdf.last_updated || new Date().toISOString())}
                           </p>
                         </div>
-                        <ExternalLink className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        {(guide.exportedDocs as any).pdf.url && (
+                          <ExternalLink className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        )}
                       </a>
                     )}
 
-                    {(guide.exportedDocs as any)?.html?.status === 'COMPLETED' && (guide.exportedDocs as any)?.html?.url && (
+                    {(guide.exportedDocs as any)?.html && (
                       <a
                         href={(guide.exportedDocs as any).html.url}
                         target="_blank"
@@ -149,12 +158,21 @@ function GuideViewPage() {
                           <HtmlIcon className="size-5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">HTML</p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-sm font-medium truncate">HTML</p>
+                            {(guide.exportedDocs as any).html.status === 'COMPLETED' ? (
+                              <Check className="size-3.5 text-green-500" />
+                            ) : (guide.exportedDocs as any).html.status === 'FAILED' ? (
+                              <X className="size-3.5 text-red-500" />
+                            ) : null}
+                          </div>
                           <p className="text-xs text-muted-foreground">
                             {formatRelativeTime((guide.exportedDocs as any).html.last_updated || new Date().toISOString())}
                           </p>
                         </div>
-                        <ExternalLink className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        {(guide.exportedDocs as any).html.url && (
+                          <ExternalLink className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        )}
                       </a>
                     )}
 

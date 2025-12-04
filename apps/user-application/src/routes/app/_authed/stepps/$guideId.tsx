@@ -1,12 +1,12 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Share2, Pencil, ChevronLeft, Download, MoreVertical, ExternalLink, Check, X } from "lucide-react";
+import { Share2, Pencil, ChevronLeft, Download, MoreVertical, ExternalLink, Check, X, Loader2 } from "lucide-react";
 import { ShareDialog } from "@/components/share-dialog";
 import { ExportDialog, PdfIcon, HtmlIcon } from "@/components/export-dialog";
-import { formatRelativeTime } from "@/lib/utils";
+import { formatRelativeTime, cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,9 +16,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { trpc } from "@/router";
 import { Step } from "@/types/db";
+import { z } from "zod";
+
+const searchSchema = z.object({
+  exporting: z.enum(['pdf', 'html']).optional(),
+});
 
 export const Route = createFileRoute("/app/_authed/stepps/$guideId")({
   component: GuideViewPage,
+  validateSearch: searchSchema,
   loader: async ({ context, params }) => {
     await context.queryClient.prefetchQuery(
       context.trpc.guides.getById.queryOptions({ id: params.guideId })
@@ -28,41 +34,85 @@ export const Route = createFileRoute("/app/_authed/stepps/$guideId")({
 
 function GuideViewPage() {
   const router = useRouter();
+  const navigate = useNavigate();
   const { guideId } = Route.useParams();
+  const { exporting } = Route.useSearch();
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [successAnimation, setSuccessAnimation] = useState<'pdf' | 'html' | null>(null);
+  const [failureAnimation, setFailureAnimation] = useState<'pdf' | 'html' | null>(null);
+  const exportStartTime = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (exporting) {
+      setIsDropdownOpen(true);
+      exportStartTime.current = new Date().toISOString();
+    } else {
+      exportStartTime.current = null;
+    }
+  }, [exporting]);
 
   const queryOptions = trpc.guides.getById.queryOptions({ id: guideId });
   const { data: guide } = useSuspenseQuery({
     ...queryOptions,
     refetchInterval: (query) => {
+      if (!exporting) return false;
+
       const data = query.state.data;
-      if (!data?.exportedDocs) return false;
+      if (!data?.exportedDocs) return 2000;
       const docs = data.exportedDocs as Record<string, any>;
-      const hasPending = Object.values(docs).some(
-        (doc) => doc.status === 'PENDING' || doc.status === 'PROCESSING'
-      );
-      return hasPending ? 1000 : false;
+      const exportDoc = docs[exporting];
+
+      if (!exportDoc) return 2000;
+
+      // If last_updated is before we started exporting, data is stale - keep polling
+      if (exportStartTime.current && exportDoc.last_updated < exportStartTime.current) {
+        return 2000;
+      }
+
+      // Fresh data - stop polling if complete/failed
+      if (exportDoc.status === 'COMPLETED' || exportDoc.status === 'FAILED') {
+        return false;
+      }
+      return 2000;
     },
   });
 
   const lastDocsStr = useRef(JSON.stringify(guide?.exportedDocs || {}));
 
-  if (JSON.stringify(guide?.exportedDocs || {}) !== lastDocsStr.current) {
-    const currentDocs = guide?.exportedDocs as Record<string, any> || {};
-    const prevDocs = JSON.parse(lastDocsStr.current) as Record<string, any>;
+  // Detect status changes and trigger animations
+  useEffect(() => {
+    const currentDocsStr = JSON.stringify(guide?.exportedDocs || {});
+    if (currentDocsStr !== lastDocsStr.current) {
+      const currentDocs = guide?.exportedDocs as Record<string, any> || {};
+      const prevDocs = JSON.parse(lastDocsStr.current) as Record<string, any>;
 
-    const hasNewCompleted = Object.entries(currentDocs).some(([key, doc]) => {
-      const prevDoc = prevDocs[key];
-      return doc.status === 'COMPLETED' && (!prevDoc || prevDoc.status !== 'COMPLETED');
-    });
+      Object.entries(currentDocs).forEach(([key, doc]) => {
+        const prevDoc = prevDocs[key];
+        const wasNotCompleted = !prevDoc || prevDoc.status !== 'COMPLETED';
+        const wasNotFailed = !prevDoc || prevDoc.status !== 'FAILED';
 
-    if (hasNewCompleted) {
-      setIsDropdownOpen(true);
+        if (doc.status === 'COMPLETED' && wasNotCompleted) {
+          setSuccessAnimation(key as 'pdf' | 'html');
+          setIsDropdownOpen(true);
+          setTimeout(() => setSuccessAnimation(null), 2000);
+          if (exporting === key) {
+            navigate({ to: '.', search: {}, replace: true });
+          }
+        } else if (doc.status === 'FAILED' && wasNotFailed) {
+          setFailureAnimation(key as 'pdf' | 'html');
+          setIsDropdownOpen(true);
+          setTimeout(() => setFailureAnimation(null), 2000);
+          if (exporting === key) {
+            navigate({ to: '.', search: {}, replace: true });
+          }
+        }
+      });
+
+      lastDocsStr.current = currentDocsStr;
     }
-    lastDocsStr.current = JSON.stringify(guide?.exportedDocs || {});
-  }
+  }, [guide?.exportedDocs, exporting, navigate]);
 
   if (!guide) {
     return (
@@ -112,17 +162,27 @@ function GuideViewPage() {
                   <span className="sr-only">More options</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64">
-                <DropdownMenuLabel>Previous Exports</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-64 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200">
+                <DropdownMenuLabel>Exports</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {guide.exportedDocs && Object.keys(guide.exportedDocs).length > 0 ? (
+                {(guide.exportedDocs && Object.keys(guide.exportedDocs).length > 0) || exporting ? (
                   <div className="p-2 space-y-2">
-                    {(guide.exportedDocs as any)?.pdf && (
-                      <a
-                        href={(guide.exportedDocs as any).pdf.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors group"
+                    {/* PDF Export Item */}
+                    {((guide.exportedDocs as any)?.pdf || exporting === 'pdf') && (
+                      <div
+                        className={cn(
+                          "flex items-center gap-3 p-2 rounded-lg transition-all group",
+                          (guide.exportedDocs as any)?.pdf?.status === 'COMPLETED'
+                            ? 'hover:bg-muted/50 cursor-pointer'
+                            : 'cursor-default',
+                          successAnimation === 'pdf' && 'animate-pulse bg-green-500/10 ring-1 ring-green-500/30',
+                          failureAnimation === 'pdf' && 'animate-pulse bg-red-500/10 ring-1 ring-red-500/30'
+                        )}
+                        onClick={() => {
+                          if ((guide.exportedDocs as any)?.pdf?.url) {
+                            window.open((guide.exportedDocs as any).pdf.url, '_blank');
+                          }
+                        }}
                       >
                         <div className="size-8 rounded-md bg-muted/50 flex items-center justify-center shrink-0 group-hover:bg-background group-hover:shadow-sm transition-all">
                           <PdfIcon className="size-5" />
@@ -130,28 +190,47 @@ function GuideViewPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5">
                             <p className="text-sm font-medium truncate">PDF</p>
-                            {(guide.exportedDocs as any).pdf.status === 'COMPLETED' ? (
+                            {exporting === 'pdf' ? (
+                              <Loader2 className="size-3.5 text-primary animate-spin" />
+                            ) : (guide.exportedDocs as any)?.pdf?.status === 'COMPLETED' ? (
                               <Check className="size-3.5 text-green-500" />
-                            ) : (guide.exportedDocs as any).pdf.status === 'FAILED' ? (
+                            ) : (guide.exportedDocs as any)?.pdf?.status === 'FAILED' ? (
                               <X className="size-3.5 text-red-500" />
+                            ) : ((guide.exportedDocs as any)?.pdf?.status === 'PENDING' || (guide.exportedDocs as any)?.pdf?.status === 'PROCESSING') ? (
+                              <Loader2 className="size-3.5 text-primary animate-spin" />
                             ) : null}
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            {formatRelativeTime((guide.exportedDocs as any).pdf.last_updated || new Date().toISOString())}
+                            {exporting === 'pdf' ||
+                              (guide.exportedDocs as any)?.pdf?.status === 'PENDING' ||
+                              (guide.exportedDocs as any)?.pdf?.status === 'PROCESSING'
+                              ? 'Exporting...'
+                              : formatRelativeTime((guide.exportedDocs as any)?.pdf?.last_updated || new Date().toISOString())
+                            }
                           </p>
                         </div>
-                        {(guide.exportedDocs as any).pdf.url && (
+                        {(guide.exportedDocs as any)?.pdf?.url && (
                           <ExternalLink className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                         )}
-                      </a>
+                      </div>
                     )}
 
-                    {(guide.exportedDocs as any)?.html && (
-                      <a
-                        href={(guide.exportedDocs as any).html.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors group"
+                    {/* HTML Export Item */}
+                    {((guide.exportedDocs as any)?.html || exporting === 'html') && (
+                      <div
+                        className={cn(
+                          "flex items-center gap-3 p-2 rounded-lg transition-all group",
+                          (guide.exportedDocs as any)?.html?.status === 'COMPLETED'
+                            ? 'hover:bg-muted/50 cursor-pointer'
+                            : 'cursor-default',
+                          successAnimation === 'html' && 'animate-pulse bg-green-500/10 ring-1 ring-green-500/30',
+                          failureAnimation === 'html' && 'animate-pulse bg-red-500/10 ring-1 ring-red-500/30'
+                        )}
+                        onClick={() => {
+                          if ((guide.exportedDocs as any)?.html?.url) {
+                            window.open((guide.exportedDocs as any).html.url, '_blank');
+                          }
+                        }}
                       >
                         <div className="size-8 rounded-md bg-muted/50 flex items-center justify-center shrink-0 group-hover:bg-background group-hover:shadow-sm transition-all">
                           <HtmlIcon className="size-5" />
@@ -159,28 +238,39 @@ function GuideViewPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5">
                             <p className="text-sm font-medium truncate">HTML</p>
-                            {(guide.exportedDocs as any).html.status === 'COMPLETED' ? (
+                            {exporting === 'html' ? (
+                              <Loader2 className="size-3.5 text-primary animate-spin" />
+                            ) : (guide.exportedDocs as any)?.html?.status === 'COMPLETED' ? (
                               <Check className="size-3.5 text-green-500" />
-                            ) : (guide.exportedDocs as any).html.status === 'FAILED' ? (
+                            ) : (guide.exportedDocs as any)?.html?.status === 'FAILED' ? (
                               <X className="size-3.5 text-red-500" />
+                            ) : ((guide.exportedDocs as any)?.html?.status === 'PENDING' || (guide.exportedDocs as any)?.html?.status === 'PROCESSING') ? (
+                              <Loader2 className="size-3.5 text-primary animate-spin" />
                             ) : null}
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            {formatRelativeTime((guide.exportedDocs as any).html.last_updated || new Date().toISOString())}
+                            {exporting === 'html' ||
+                              (guide.exportedDocs as any)?.html?.status === 'PENDING' ||
+                              (guide.exportedDocs as any)?.html?.status === 'PROCESSING'
+                              ? 'Exporting...'
+                              : formatRelativeTime((guide.exportedDocs as any)?.html?.last_updated || new Date().toISOString())
+                            }
                           </p>
                         </div>
-                        {(guide.exportedDocs as any).html.url && (
+                        {(guide.exportedDocs as any)?.html?.url && (
                           <ExternalLink className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                         )}
-                      </a>
-                    )}
-
-                    {/* Fallback if no valid exports found despite object existing */}
-                    {(!((guide.exportedDocs as any)?.pdf?.status === 'COMPLETED') && !((guide.exportedDocs as any)?.html?.status === 'COMPLETED')) && (
-                      <div className="text-xs text-muted-foreground text-center py-2">
-                        No completed exports yet.
                       </div>
                     )}
+
+                    {/* Fallback if no exports and not currently exporting */}
+                    {!exporting &&
+                      !((guide.exportedDocs as any)?.pdf) &&
+                      !((guide.exportedDocs as any)?.html) && (
+                        <div className="text-xs text-muted-foreground text-center py-2">
+                          No exports yet.
+                        </div>
+                      )}
                   </div>
                 ) : (
                   <div className="text-xs text-muted-foreground text-center py-4">

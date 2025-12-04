@@ -22,8 +22,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { trpcClient } from "@/router";
-import { useMutation } from "@tanstack/react-query";
+import { trpcClient, trpc } from "@/router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
 interface ExportDialogProps {
@@ -95,8 +95,9 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
     const [fileName, setFileName] = useState(guideTitle);
     const [format, setFormat] = useState<ExportFormat>("pdf");
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
-    // Mutation to trigger export - simplified, no polling
+    // Mutation to trigger export - invalidates query before navigating to show fresh state
     const triggerExport = useMutation({
         mutationFn: async (data: { guideId: string; format: "pdf" | "html" }) => {
             return await trpcClient.guideExports.triggerExport.mutate(data);
@@ -104,7 +105,15 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
         onSuccess: () => {
             toast.success(`${format.toUpperCase()} export started!`);
             onOpenChange(false);
-            navigate({ to: "/app/stepps/$guideId", params: { guideId } });
+            // Invalidate in background - don't block navigation for faster perceived performance
+            queryClient.invalidateQueries({
+                queryKey: trpc.guides.getById.queryOptions({ id: guideId }).queryKey
+            });
+            navigate({
+                to: "/app/stepps/$guideId",
+                params: { guideId },
+                search: { exporting: format as 'pdf' | 'html' }
+            });
         },
         onError: (error: Error) => {
             toast.error(`Failed to start export: ${error.message}`);

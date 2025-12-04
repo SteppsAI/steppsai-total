@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { trpcClient } from "@/router";
 import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 
 interface ExportDialogProps {
     open: boolean;
@@ -93,6 +94,7 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
     const isMobile = useIsMobile();
     const [fileName, setFileName] = useState(guideTitle);
     const [format, setFormat] = useState<ExportFormat>("pdf");
+    const navigate = useNavigate();
 
     // Mutation to trigger export - simplified, no polling
     const triggerExport = useMutation({
@@ -102,6 +104,7 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
         onSuccess: () => {
             toast.success(`${format.toUpperCase()} export started!`);
             onOpenChange(false);
+            navigate({ to: "/app/stepps/$guideId", params: { guideId } });
         },
         onError: (error: Error) => {
             toast.error(`Failed to start export: ${error.message}`);

@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Share2, Pencil, ChevronLeft, Download, MoreVertical, Calendar, ExternalLink } from "lucide-react";
+import { Share2, Pencil, ChevronLeft, Download, MoreVertical, ExternalLink } from "lucide-react";
 import { ShareDialog } from "@/components/share-dialog";
 import { ExportDialog, PdfIcon, HtmlIcon } from "@/components/export-dialog";
+import { formatRelativeTime } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,8 +30,38 @@ function GuideViewPage() {
   const { guideId } = Route.useParams();
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const { data: guide } = useSuspenseQuery(trpc.guides.getById.queryOptions({ id: guideId }));
+  const queryOptions = trpc.guides.getById.queryOptions({ id: guideId });
+  const { data: guide } = useSuspenseQuery({
+    ...queryOptions,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data?.exportedDocs) return false;
+      const docs = data.exportedDocs as Record<string, any>;
+      const hasPending = Object.values(docs).some(
+        (doc) => doc.status === 'PENDING' || doc.status === 'PROCESSING'
+      );
+      return hasPending ? 1000 : false;
+    },
+  });
+
+  const lastDocsStr = useRef(JSON.stringify(guide?.exportedDocs || {}));
+
+  if (JSON.stringify(guide?.exportedDocs || {}) !== lastDocsStr.current) {
+    const currentDocs = guide?.exportedDocs as Record<string, any> || {};
+    const prevDocs = JSON.parse(lastDocsStr.current) as Record<string, any>;
+
+    const hasNewCompleted = Object.entries(currentDocs).some(([key, doc]) => {
+      const prevDoc = prevDocs[key];
+      return doc.status === 'COMPLETED' && (!prevDoc || prevDoc.status !== 'COMPLETED');
+    });
+
+    if (hasNewCompleted) {
+      setIsDropdownOpen(true);
+    }
+    lastDocsStr.current = JSON.stringify(guide?.exportedDocs || {});
+  }
 
   if (!guide) {
     return (
@@ -75,9 +106,9 @@ function GuideViewPage() {
               <span className="hidden sm:inline">Export</span>
             </Button>
 
-            <DropdownMenu>
+            <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
                   <MoreVertical className="size-4" />
                   <span className="sr-only">More options</span>
                 </Button>
@@ -87,7 +118,6 @@ function GuideViewPage() {
                 <DropdownMenuSeparator />
                 {guide.exportedDocs && Object.keys(guide.exportedDocs).length > 0 ? (
                   <div className="p-2 space-y-2">
-                    {/* Check for PDF */}
                     {(guide.exportedDocs as any)?.pdf?.status === 'COMPLETED' && (guide.exportedDocs as any)?.pdf?.url && (
                       <a
                         href={(guide.exportedDocs as any).pdf.url}
@@ -99,17 +129,15 @@ function GuideViewPage() {
                           <PdfIcon className="size-5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">PDF Document</p>
-                          <p className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Calendar className="size-3" />
-                            {new Date((guide.exportedDocs as any).pdf.updatedAt || new Date()).toLocaleDateString()}
+                          <p className="text-sm font-medium truncate">PDF</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatRelativeTime((guide.exportedDocs as any).pdf.last_updated || new Date().toISOString())}
                           </p>
                         </div>
                         <ExternalLink className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                       </a>
                     )}
 
-                    {/* Check for HTML */}
                     {(guide.exportedDocs as any)?.html?.status === 'COMPLETED' && (guide.exportedDocs as any)?.html?.url && (
                       <a
                         href={(guide.exportedDocs as any).html.url}
@@ -121,10 +149,9 @@ function GuideViewPage() {
                           <HtmlIcon className="size-5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">HTML Document</p>
-                          <p className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Calendar className="size-3" />
-                            {new Date((guide.exportedDocs as any).html.updatedAt || new Date()).toLocaleDateString()}
+                          <p className="text-sm font-medium truncate">HTML</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatRelativeTime((guide.exportedDocs as any).html.last_updated || new Date().toISOString())}
                           </p>
                         </div>
                         <ExternalLink className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />

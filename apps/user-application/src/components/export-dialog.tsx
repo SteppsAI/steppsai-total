@@ -17,14 +17,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Download, Loader2, FileText, FileCode, File } from "lucide-react";
+import { Download, Loader2, FileText, File } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { trpcClient } from "@/router";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 
 interface ExportDialogProps {
     open: boolean;
@@ -34,6 +33,14 @@ interface ExportDialogProps {
 }
 
 type ExportFormat = "pdf" | "html" | "word";
+
+export const PdfIcon = (props: React.ComponentProps<"img">) => (
+    <img src="/icons/pdf-icon.svg" alt="PDF" {...props} />
+);
+
+export const HtmlIcon = (props: React.ComponentProps<"img">) => (
+    <img src="/icons/html-icon.svg" alt="HTML" {...props} />
+);
 
 const FormatOption = ({
     id,
@@ -84,7 +91,6 @@ const FormatOption = ({
 
 export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: ExportDialogProps) {
     const isMobile = useIsMobile();
-    const navigate = useNavigate();
     const [fileName, setFileName] = useState(guideTitle);
     const [format, setFormat] = useState<ExportFormat>("pdf");
 
@@ -94,9 +100,8 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
             return await trpcClient.guideExports.triggerExport.mutate(data);
         },
         onSuccess: () => {
-            toast.success(`${format.toUpperCase()} export started! Check the exports page for progress.`);
+            toast.success(`${format.toUpperCase()} export started!`);
             onOpenChange(false);
-            navigate({ to: "/app/exports" });
         },
         onError: (error: Error) => {
             toast.error(`Failed to start export: ${error.message}`);
@@ -143,14 +148,14 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
                     <FormatOption
                         id="pdf"
                         label="PDF Document"
-                        icon={FileText}
+                        icon={PdfIcon}
                         selectedFormat={format}
                         onSelect={setFormat}
                     />
                     <FormatOption
                         id="html"
                         label="HTML Document"
-                        icon={FileCode}
+                        icon={HtmlIcon}
                         selectedFormat={format}
                         onSelect={setFormat}
                     />

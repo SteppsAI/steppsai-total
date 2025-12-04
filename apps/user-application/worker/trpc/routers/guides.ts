@@ -11,9 +11,8 @@ import { transformStepsWithUrls } from "../helpers/transform-assets";
 
 export const guidesRouter = router({
     getAll: publicProcedure.query(async ({ ctx }) => {
-        // TODO: Get userId from context (auth)
-        const userId = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366"; // Hardcoded for now
-        const guides = await getUserGuides(userId);
+        if (!ctx.userId) throw new Error("Unauthorized");
+        const guides = await getUserGuides(ctx.userId);
         const assetsUrl = ctx.env.ASSETS_URL;
 
         // Transform imageKeys to full URLs for all guides

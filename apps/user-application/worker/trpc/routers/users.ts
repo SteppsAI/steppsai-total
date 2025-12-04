@@ -14,9 +14,8 @@ import { prependAssetsUrl } from "../helpers/transform-assets";
 export const usersRouter = router({
     // Get current user profile
     getMe: publicProcedure.query(async ({ ctx }) => {
-        // TODO: Get userId from context (auth)
-        const userId = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366"; // Hardcoded for now
-        const user = await getUser(userId);
+        if (!ctx.userId) throw new Error("Unauthorized");
+        const user = await getUser(ctx.userId);
 
         if (!user) return null;
 
@@ -30,20 +29,18 @@ export const usersRouter = router({
     // Update user profile (name, avatar)
     updateProfile: publicProcedure
         .input(updateUserSchema)
-        .mutation(async ({ input }) => {
-            // TODO: Get userId from context (auth)
-            const userId = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366"; // Hardcoded for now
-            await updateUser(userId, input);
+        .mutation(async ({ input, ctx }) => {
+            if (!ctx.userId) throw new Error("Unauthorized");
+            await updateUser(ctx.userId, input);
             return { success: true };
         }),
 
     // Update notification preferences
     updateNotifications: publicProcedure
         .input(updateNotificationPreferencesSchema)
-        .mutation(async ({ input }) => {
-            // TODO: Get userId from context (auth)
-            const userId = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366"; // Hardcoded for now
-            await updateNotificationPreferences(userId, input);
+        .mutation(async ({ input, ctx }) => {
+            if (!ctx.userId) throw new Error("Unauthorized");
+            await updateNotificationPreferences(ctx.userId, input);
             return { success: true };
         }),
 
@@ -51,8 +48,7 @@ export const usersRouter = router({
     uploadAvatar: publicProcedure
         .input(z.object({ dataUrl: z.string() }))
         .mutation(async ({ input, ctx }) => {
-            // TODO: Get userId from context (auth)
-            const userId = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366"; // Hardcoded for now
+            if (!ctx.userId) throw new Error("Unauthorized");
 
             // Call data-service (receives already-converted WebP from frontend)
             const response = await ctx.env.BACKEND_SERVICE.fetch(
@@ -60,7 +56,7 @@ export const usersRouter = router({
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        userId,
+                        userId: ctx.userId,
                         dataUrl: input.dataUrl, // Already WebP from frontend
                     }),
                 })
@@ -82,14 +78,13 @@ export const usersRouter = router({
     // Delete avatar
     deleteAvatar: publicProcedure
         .mutation(async ({ ctx }) => {
-            // TODO: Get userId from context (auth)
-            const userId = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366"; // Hardcoded for now
+            if (!ctx.userId) throw new Error("Unauthorized");
 
             const response = await ctx.env.BACKEND_SERVICE.fetch(
                 new Request('https://internal/users/avatar', {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId }),
+                    body: JSON.stringify({ userId: ctx.userId }),
                 })
             );
 

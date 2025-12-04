@@ -4,10 +4,9 @@ import { TRPCError } from "@trpc/server";
 import { getUserGuides } from "@repo/data-ops/queries";
 
 export const guideExportsRouter = router({
-    getAll: publicProcedure.query(async () => {
-        // TODO: Get userId from context (auth)
-        const userId = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366"; // Hardcoded for now
-        const guides = await getUserGuides(userId);
+    getAll: publicProcedure.query(async ({ ctx }) => {
+        if (!ctx.userId) throw new Error("Unauthorized");
+        const guides = await getUserGuides(ctx.userId);
 
         // Transform guides with exported_docs into flat list of exports
         const exports = guides.flatMap(guide => {

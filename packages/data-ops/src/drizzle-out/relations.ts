@@ -1,7 +1,37 @@
 import { relations } from "drizzle-orm/relations";
 import { users, subscriptions, teamMembers, folders, guides, exports } from "./schema";
+import { user, session, account } from "./auth-schema";
 
-export const usersRelations = relations(users, ({ many }) => ({
+// Better Auth Relations
+export const userRelations = relations(user, ({ many, one }) => ({
+	sessions: many(session),
+	accounts: many(account),
+	profile: one(users, {
+		fields: [user.id],
+		references: [users.userId],
+	}),
+}));
+
+export const sessionRelations = relations(session, ({ one }) => ({
+	user: one(user, {
+		fields: [session.userId],
+		references: [user.id],
+	}),
+}));
+
+export const accountRelations = relations(account, ({ one }) => ({
+	user: one(user, {
+		fields: [account.userId],
+		references: [user.id],
+	}),
+}));
+
+// App Relations
+export const usersRelations = relations(users, ({ many, one }) => ({
+	authUser: one(user, {
+		fields: [users.userId],
+		references: [user.id],
+	}),
 	subscriptions: many(subscriptions),
 	ownedTeamMembers: many(teamMembers, { relationName: "teamMembers_ownerId_fkey" }),
 	memberTeamMembers: many(teamMembers, { relationName: "teamMembers_memberId_fkey" }),

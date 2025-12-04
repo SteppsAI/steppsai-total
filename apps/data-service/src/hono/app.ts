@@ -4,6 +4,7 @@ import { imagesRouter } from './routes/images';
 import { usersRouter } from './routes/users';
 import { exportsRouter } from './routes/exports';
 import { editorRouter } from './routes/editor';
+import { authRouter } from './routes/auth';
 
 export const App = new Hono<{ Bindings: Env }>();
 
@@ -12,5 +13,6 @@ App.route('/images', imagesRouter);
 App.route('/users', usersRouter);
 App.route('/exports', exportsRouter);
 App.route('/api/editor', editorRouter);
+App.route('/auth', authRouter);
 
 App.get('/', (c) => c.text('SteppsAI Data Service'));

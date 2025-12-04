@@ -37,12 +37,18 @@
     "./durable-objects-helpers": {
       "types": "./dist/durable-object-helpers/*.d.ts",
       "default": "./dist/durable-object-helpers/*.js"
+    },
+    "./auth": {
+      "types": "./dist/auth-gen/auth.d.ts",
+      "default": "./dist/auth-gen/auth.js"
     }
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@creem_io/better-auth": "^0.0.12",
+    "better-auth": "^1.3.4",
     "drizzle-orm": "^0.44.2",
     "nanoid": "^5.1.5",
     "stripe": "^18.4.0",

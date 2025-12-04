@@ -1,6 +1,6 @@
 import { pgTable, uuid, timestamp, text, foreignKey, boolean, jsonb, integer, primaryKey } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
-import { authUsers } from "./auth-schema";
+import { user } from "./auth-schema";
 
 export const users = pgTable("users", {
 	userId: uuid("user_id").defaultRandom().primaryKey().notNull(),
@@ -14,7 +14,7 @@ export const users = pgTable("users", {
 		return {
 			usersUserIdFkey: foreignKey({
 				columns: [table.userId],
-				foreignColumns: [authUsers.id],
+				foreignColumns: [user.id],
 				name: "users_user_id_fkey"
 			}).onUpdate("cascade").onDelete("cascade"),
 		}

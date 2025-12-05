@@ -14,3 +14,5 @@ export function getAuth(
         }),
     }) as BetterAuthInstance;
 }
+
+export const auth: BetterAuthInstance = getAuth();

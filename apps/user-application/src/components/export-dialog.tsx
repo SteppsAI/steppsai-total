@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Download, Loader2, FileText, File } from "lucide-react";
+import { Download, Loader2, FileText } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -41,6 +41,10 @@ export const PdfIcon = (props: React.ComponentProps<"img">) => (
 
 export const HtmlIcon = (props: React.ComponentProps<"img">) => (
     <img src="/icons/html-icon.svg" alt="HTML" {...props} />
+);
+
+export const WordIcon = (props: React.ComponentProps<"img">) => (
+    <img src="/icons/word-icon.svg" alt="Word" {...props} />
 );
 
 const FormatOption = ({
@@ -174,7 +178,7 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
                     <FormatOption
                         id="word"
                         label="Microsoft Word"
-                        icon={File}
+                        icon={WordIcon}
                         disabled
                         badge="Soon"
                         selectedFormat={format}

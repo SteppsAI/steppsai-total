@@ -140,15 +140,15 @@ function GuideViewPage() {
           </div>
 
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" className="h-8 gap-2 text-muted-foreground hover:text-foreground" onClick={() => setIsShareOpen(true)}>
-              <Share2 className="size-4" />
-              <span className="hidden sm:inline">Share</span>
-            </Button>
             <Button variant="ghost" size="sm" className="h-8 gap-2 text-muted-foreground hover:text-foreground" asChild>
               <Link to="/app/editor/$guideId" params={{ guideId: guide.id }}>
                 <Pencil className="size-4" />
                 <span className="hidden sm:inline">Edit</span>
               </Link>
+            </Button>
+            <Button variant="ghost" size="sm" className="h-8 gap-2 text-muted-foreground hover:text-foreground" onClick={() => setIsShareOpen(true)}>
+              <Share2 className="size-4" />
+              <span className="hidden sm:inline">Share</span>
             </Button>
             <Button variant="ghost" size="sm" className="h-8 gap-2 text-muted-foreground hover:text-foreground" onClick={() => setIsExportOpen(true)}>
               <Download className="size-4" />

@@ -100,7 +100,7 @@ export function SocialProof() {
                         </span>
 
                         <p className="my-8 text-2xl font-semibold">
-                            Organize guides into folders and share with your team. Export to PDF, Markdown, or share via link.
+                            Organize guides into folders and share with your team. Export to PDF, HTML, or share via link.
                         </p>
                     </div>
                     <div aria-hidden className="flex flex-col gap-6 mt-8 sp-item-right-content">

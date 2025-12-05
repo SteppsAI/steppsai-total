@@ -6,6 +6,30 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+interface ResponsiveImageProps {
+    src: string;
+    alt: string;
+    className?: string;
+}
+
+/**
+ * ResponsiveImage component for optimal performance.
+ * - Uses lazy loading to defer loading until the image is near the viewport
+ * - Uses async decoding to prevent blocking the main thread
+ * - Uses object-contain to prevent image deformation on different screen sizes
+ */
+const ResponsiveImage = ({ src, alt, className }: ResponsiveImageProps) => {
+    return (
+        <img
+            src={src}
+            alt={alt}
+            loading="lazy"
+            decoding="async"
+            className={cn("w-full h-full object-contain rounded-lg", className)}
+        />
+    );
+};
+
 export function HowItWorks() {
     const containerRef = useRef<HTMLElement>(null);
 
@@ -24,13 +48,13 @@ export function HowItWorks() {
             duration: 0.8,
             ease: "power3.out"
         })
-        .from(".hiw-card", {
-            y: 50,
-            opacity: 0,
-            duration: 0.8,
-            stagger: 0.15,
-            ease: "power3.out"
-        }, "-=0.4");
+            .from(".hiw-card", {
+                y: 50,
+                opacity: 0,
+                duration: 0.8,
+                stagger: 0.15,
+                ease: "power3.out"
+            }, "-=0.4");
 
     }, { scope: containerRef });
 
@@ -39,34 +63,52 @@ export function HowItWorks() {
             title: "Install Extension",
             description:
                 "Add our browser extension in 30 seconds and start creating guides instantly.",
-            skeleton: <PlaceholderImage />,
-            className:
-                "col-span-1 md:col-span-4 lg:col-span-4 border-b md:border-r dark:border-neutral-800",
+            skeleton: (
+                <ResponsiveImage
+                    src="/website/install-extension.webp"
+                    alt="Install our browser extension in 30 seconds and start creating guides instantly"
+                />
+            ),
+            className: "col-span-1 md:col-span-4 lg:col-span-4 md:border-b md:border-r border-r-0 border-b-0 dark:border-neutral-800",
             containerClassName: "aspect-video"
         },
         {
             title: "Record Your Workflow",
             description:
                 "Click record and go through your process. We capture every step automatically.",
-            skeleton: <PlaceholderImage />,
-            className: "col-span-1 md:col-span-2 lg:col-span-2 border-b dark:border-neutral-800",
+            skeleton: (
+                <ResponsiveImage
+                    src="/website/record-workflow.webp"
+                    alt="Record your workflow using our browser extension and capture every click"
+                />
+            ),
+            className: "col-span-1 md:col-span-2 lg:col-span-2 md:border-b border-b-0 dark:border-neutral-800",
             containerClassName: "h-full flex-1 min-h-[200px]"
         },
         {
             title: "Generate Perfect Guide",
             description:
-                "Watch as we turn your recording into a beautiful step-by-step guide instantly.",
-            skeleton: <PlaceholderImage />,
-            className:
-                "col-span-1 md:col-span-3 lg:col-span-3 border-b md:border-r dark:border-neutral-800",
+                "Watch as we turn your recording into a beautiful step-by-step guide instantly. Tweak if needed in our editor.",
+            skeleton: (
+                <ResponsiveImage
+                    src="/website/generate-guide.webp"
+                    alt="Generate step-by-step guide and edit it in our editor"
+                />
+            ),
+            className: "col-span-1 md:col-span-3 lg:col-span-3 md:border-r border-r-0 dark:border-neutral-800",
             containerClassName: "aspect-video"
         },
         {
             title: "Edit & Share",
             description:
-                "Tweak if needed, then share with your team. Export to PDF or share via link.",
-            skeleton: <PlaceholderImage />,
-            className: "col-span-1 md:col-span-3 lg:col-span-3 border-b md:border-none",
+                "Share with your team and users via link or export to PDF or HTML.",
+            skeleton: (
+                <ResponsiveImage
+                    src="/website/share-export.webp"
+                    alt="Share and export your guides - showing export options including PDF and link sharing"
+                />
+            ),
+            className: "col-span-1 md:col-span-3 lg:col-span-3",
             containerClassName: "aspect-video"
         },
     ];
@@ -138,10 +180,10 @@ const FeatureDescription = ({ children }: { children?: React.ReactNode }) => {
 export const PlaceholderImage = () => {
     return (
         <div className="w-full h-full bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center rounded-lg border border-neutral-200 dark:border-neutral-800">
-            <img 
-                src="/brand/logo-symbol.svg" 
-                alt="Placeholder" 
-                className="w-12 h-12 opacity-20 grayscale" 
+            <img
+                src="/brand/logo-symbol.svg"
+                alt="Placeholder"
+                className="w-12 h-12 opacity-20 grayscale"
             />
         </div>
     );

@@ -1,6 +1,5 @@
 import { Hono } from 'hono';
 import { createMiddleware } from 'hono/factory';
-import { getAuth } from '@repo/data-ops/auth';
 import { guidesRouter } from './routes/guides';
 import { imagesRouter } from './routes/images';
 import { usersRouter } from './routes/users';
@@ -13,39 +12,29 @@ export const App = new Hono<{
     Variables: { userId: string };
 }>();
 
-// Auth middleware - validates session from forwarded headers
-const authMiddleware = createMiddleware<{
+/**
+ * User ID Middleware
+ * 
+ * Trusts X-User-Id header from user-application (via Service Binding).
+ * Auth is already validated by user-application before calling data-service.
+ */
+const userIdMiddleware = createMiddleware<{
     Bindings: Env;
     Variables: { userId: string };
 }>(async (c, next) => {
-    const auth = getAuth(
-        {
-            clientId: c.env.GOOGLE_CLIENT_ID,
-            clientSecret: c.env.GOOGLE_CLIENT_SECRET,
-        },
-        {
-            apiKey: c.env.CREEM_API_KEY,
-        },
-        c.env.BETTER_AUTH_SECRET
-    );
-
-    const session = await auth.api.getSession({
-        headers: c.req.raw.headers
-    });
-
-    if (!session?.user) {
-        return c.json({ error: 'Unauthorized' }, 401);
+    const userId = c.req.header('X-User-Id');
+    if (!userId) {
+        return c.json({ error: 'Missing X-User-Id header' }, 400);
     }
-
-    c.set('userId', session.user.id);
+    c.set('userId', userId);
     await next();
 });
 
-// Apply auth middleware to protected routes
-App.use('/guides/*', authMiddleware);
-App.use('/users/*', authMiddleware);
-App.use('/exports/*', authMiddleware);
-App.use('/api/editor/*', authMiddleware);
+// Apply userIdMiddleware to protected routes
+App.use('/guides/*', userIdMiddleware);
+App.use('/users/*', userIdMiddleware);
+App.use('/exports/*', userIdMiddleware);
+App.use('/api/editor/*', userIdMiddleware);
 
 // Public routes (no auth)
 App.route('/images', imagesRouter);

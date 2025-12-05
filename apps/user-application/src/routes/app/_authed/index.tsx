@@ -12,6 +12,7 @@ import { RenameFolderDialog } from "@/components/rename-folder-dialog";
 import { DeleteSteppDialog } from "@/components/delete-stepp-dialog";
 import { MoveSteppDialog } from "@/components/move-stepp-dialog";
 import { trpc } from "@/router";
+import { useDeleteGuide } from "@/hooks/use-api";
 
 export const Route = createFileRoute("/app/_authed/")({
   component: Dashboard,
@@ -47,12 +48,7 @@ function Dashboard() {
     },
   });
 
-  const deleteGuideMutation = useMutation({
-    ...trpc.guides.delete.mutationOptions(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
-    },
-  });
+  const deleteGuideMutation = useDeleteGuide();
 
   const updateGuideMutation = useMutation({
     ...trpc.guides.update.mutationOptions(),

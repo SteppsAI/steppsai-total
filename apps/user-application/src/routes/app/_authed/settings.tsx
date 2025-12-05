@@ -10,6 +10,7 @@ import { LogOut, Mail, CreditCard, Loader2 } from "lucide-react";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/router";
+import { useUploadAvatar } from "@/hooks/use-api";
 import { User } from "@/types/db";
 
 export const Route = createFileRoute("/app/_authed/settings")({
@@ -53,16 +54,7 @@ function SettingsPage() {
         },
     });
 
-    const uploadAvatarMutation = useMutation({
-        ...trpc.users.uploadAvatar.mutationOptions(),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: trpc.users.getMe.queryOptions().queryKey });
-            toast.success("Avatar updated!");
-        },
-        onError: () => {
-            toast.error("Failed to upload avatar");
-        },
-    });
+    const uploadAvatarMutation = useUploadAvatar();
 
     const handleSaveName = async () => {
         if (displayName.trim() === user?.name) return;
@@ -90,6 +82,7 @@ function SettingsPage() {
                 const dataUrl = event.target?.result as string;
                 const webpDataUrl = await convertToWebP(dataUrl);
                 await uploadAvatarMutation.mutateAsync({ dataUrl: webpDataUrl });
+                toast.success("Avatar updated!");
             };
             reader.readAsDataURL(file);
         } catch (error) {

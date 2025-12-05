@@ -1,11 +1,15 @@
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc-instance";
-import { TRPCError } from "@trpc/server";
 import { getUserGuides } from "@repo/data-ops/queries";
 
+/**
+ * Guide Exports tRPC Router
+ * 
+ * Uses data-ops for direct DB queries.
+ * Uses BACKEND_SERVICE RPC for triggering exports.
+ */
 export const guideExportsRouter = router({
     getAll: publicProcedure.query(async ({ ctx }) => {
-        if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
         const guides = await getUserGuides(ctx.userInfo.userId);
 
         // Transform guides with exported_docs into flat list of exports
@@ -38,42 +42,18 @@ export const guideExportsRouter = router({
 
         return exports;
     }),
+
+    // Trigger export via RPC (workflow)
     triggerExport: publicProcedure
         .input(z.object({
             guideId: z.string(),
             format: z.enum(["pdf", "html"]),
         }))
         .mutation(async ({ input, ctx }) => {
-            const { guideId, format } = input;
-
-            try {
-                // Forward original headers for auth
-                const headers = new Headers(ctx.req.headers);
-                headers.set('Content-Type', 'application/json');
-
-                const response = await ctx.env.BACKEND_SERVICE.fetch(
-                    new Request('https://internal/exports/trigger', {
-                        method: 'POST',
-                        headers,
-                        body: JSON.stringify({ guideId, format }),
-                    })
-                );
-
-                if (!response.ok) {
-                    const error = await response.json() as { error?: string };
-                    throw new Error(error.error || 'Failed to trigger export');
-                }
-
-                const result = await response.json() as { success: boolean; status: string };
-                return result;
-            } catch (error) {
-                console.error("Failed to trigger export workflow:", error);
-                throw new TRPCError({
-                    code: 'INTERNAL_SERVER_ERROR',
-                    message: 'Failed to start export process',
-                });
-            }
+            const backend = ctx.env.BACKEND_SERVICE as any;
+            await backend.triggerExport(input.guideId, input.format);
+            return { success: true };
         }),
-}
+});
 
-);
+

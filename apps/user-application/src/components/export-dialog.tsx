@@ -22,8 +22,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { trpcClient } from "@/router";
 import { useMutation } from "@tanstack/react-query";
+import { trpc } from "@/router";
 
 interface ExportDialogProps {
     open: boolean;
@@ -94,17 +94,15 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
     const [fileName, setFileName] = useState(guideTitle);
     const [format, setFormat] = useState<ExportFormat>("pdf");
 
-    // Mutation to trigger export - simplified, no polling
-    const triggerExport = useMutation({
-        mutationFn: async (data: { guideId: string; format: "pdf" | "html" }) => {
-            return await trpcClient.guideExports.triggerExport.mutate(data);
-        },
+    // Mutation to trigger export via tRPC (internally calls BACKEND_SERVICE RPC)
+    const triggerExportMutation = useMutation({
+        ...trpc.guideExports.triggerExport.mutationOptions(),
         onSuccess: () => {
             toast.success(`${format.toUpperCase()} export started!`);
             onOpenChange(false);
         },
-        onError: (error: Error) => {
-            toast.error(`Failed to start export: ${error.message}`);
+        onError: () => {
+            toast.error(`Failed to start export`);
         }
     });
 
@@ -114,13 +112,13 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
             return;
         }
 
-        triggerExport.mutate({
+        triggerExportMutation.mutate({
             guideId,
             format: format as "pdf" | "html",
         });
     };
 
-    const isExporting = triggerExport.isPending;
+    const isExporting = triggerExportMutation.isPending;
 
     const renderExportForm = () => (
         <div className="space-y-6">

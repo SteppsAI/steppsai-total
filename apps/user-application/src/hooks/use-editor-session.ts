@@ -29,7 +29,7 @@ interface EditorSession {
 	discard: () => Promise<void>;
 }
 
-// Sync to DO after 5 seconds of inactivity (not every change!)
+// Sync to DO after 10 seconds of inactivity
 const INACTIVITY_SYNC_DELAY = 10000;
 // Max retries before giving up
 const MAX_SYNC_RETRIES = 3;
@@ -42,7 +42,7 @@ const MAX_SYNC_RETRIES = 3;
  * 2. After 10s of inactivity, sync to Durable Object (draft persistence)
  * 3. On explicit "Save", sync to DO then write to Database
  * 
- * Uses tRPC mutations for all backend communication.
+ * Uses tRPC mutations which internally call BACKEND_SERVICE RPC methods.
  */
 export function useEditorSession(guideId: string, initialGuide: Guide | null): EditorSession {
 	// Local state - source of truth for UI
@@ -306,7 +306,7 @@ export function useEditorSession(guideId: string, initialGuide: Guide | null): E
 			setError('Failed to discard draft');
 			throw err;
 		}
-	}, [guideId, initialGuide, discardSessionMutation]);
+	}, [guideId, initialGuide]);
 
 	// Build guide object from local state
 	const guide: Guide | null = localState && initialGuide ? {

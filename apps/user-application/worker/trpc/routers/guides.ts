@@ -9,9 +9,14 @@ import {
 import { createGuideSchema } from "@repo/data-ops/zod-schema";
 import { transformStepsWithUrls } from "../helpers/transform-assets";
 
+/**
+ * Guides tRPC Router
+ * 
+ * Uses data-ops for direct DB queries.
+ * Uses BACKEND_SERVICE RPC for operations requiring R2/Queues (delete).
+ */
 export const guidesRouter = router({
     getAll: publicProcedure.query(async ({ ctx }) => {
-        if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
         const guides = await getUserGuides(ctx.userInfo.userId);
         const assetsUrl = ctx.env.ASSETS_URL;
 
@@ -47,52 +52,27 @@ export const guidesRouter = router({
             return await updateGuide(input.id, input.data);
         }),
 
+    // Delete guide with R2 cleanup via RPC
     delete: publicProcedure
         .input(z.object({ id: z.string() }))
         .mutation(async ({ input, ctx }) => {
-            // Forward original headers for auth
-            const response = await ctx.env.BACKEND_SERVICE.fetch(
-                new Request(`https://internal/guides/${input.id}`, {
-                    method: 'DELETE',
-                    headers: ctx.req.headers,
-                })
-            );
-
-            if (!response.ok) {
-                const error = await response.json() as { error?: string };
-                throw new Error(error.error || 'Failed to delete guide');
-            }
-
+            const backend = ctx.env.BACKEND_SERVICE as any;
+            await backend.deleteGuideWithImages(input.id);
             return { success: true };
         }),
 
+    // Delete step with R2 cleanup via RPC
     deleteStep: publicProcedure
         .input(z.object({
             guideId: z.string(),
             stepId: z.string(),
-            imageKey: z.string().optional()
+            imageKey: z.string().optional(),
         }))
         .mutation(async ({ input, ctx }) => {
-            // Forward original headers for auth
-            const headers = new Headers(ctx.req.headers);
-            headers.set('Content-Type', 'application/json');
-
-            const response = await ctx.env.BACKEND_SERVICE.fetch(
-                new Request(`https://internal/guides/steps/${input.stepId}`, {
-                    method: 'DELETE',
-                    headers,
-                    body: JSON.stringify({
-                        guideId: input.guideId,
-                        imageKey: input.imageKey,
-                    }),
-                })
-            );
-
-            if (!response.ok) {
-                const error = await response.json() as { error?: string };
-                throw new Error(error.error || 'Failed to delete step');
-            }
-
+            const backend = ctx.env.BACKEND_SERVICE as any;
+            await backend.deleteStepWithImage(input.guideId, input.stepId, input.imageKey);
             return { success: true };
         }),
 });
+
+

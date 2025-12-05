@@ -11,10 +11,15 @@ import {
 } from "@repo/data-ops/zod-schema";
 import { prependAssetsUrl } from "../helpers/transform-assets";
 
+/**
+ * Users tRPC Router
+ * 
+ * Uses data-ops for direct DB queries.
+ * Uses BACKEND_SERVICE RPC for R2 operations (avatar upload/delete).
+ */
 export const usersRouter = router({
     // Get current user profile
     getMe: publicProcedure.query(async ({ ctx }) => {
-        if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
         const user = await getUser(ctx.userInfo.userId);
 
         if (!user) return null;
@@ -30,7 +35,6 @@ export const usersRouter = router({
     updateProfile: publicProcedure
         .input(updateUserSchema)
         .mutation(async ({ input, ctx }) => {
-            if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
             await updateUser(ctx.userInfo.userId, input);
             return { success: true };
         }),
@@ -39,61 +43,25 @@ export const usersRouter = router({
     updateNotifications: publicProcedure
         .input(updateNotificationPreferencesSchema)
         .mutation(async ({ input, ctx }) => {
-            if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
             await updateNotificationPreferences(ctx.userInfo.userId, input);
             return { success: true };
         }),
 
-    // Upload avatar (via data-service)
+    // Upload avatar via RPC (R2)
     uploadAvatar: publicProcedure
         .input(z.object({ dataUrl: z.string() }))
         .mutation(async ({ input, ctx }) => {
-            if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
-
-            // Forward original headers for auth
-            const headers = new Headers(ctx.req.headers);
-            headers.set('Content-Type', 'application/json');
-
-            const response = await ctx.env.BACKEND_SERVICE.fetch(
-                new Request('https://internal/users/upload-avatar', {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify({
-                        dataUrl: input.dataUrl,
-                    }),
-                })
-            );
-
-            if (!response.ok) {
-                const error = await response.json() as { error?: string };
-                throw new Error(error.error || 'Failed to upload avatar');
-            }
-
-            const result = await response.json() as { key: string };
-
-            // Transform key to full URL
-            const avatarUrl = prependAssetsUrl(result.key, ctx.env.ASSETS_URL);
-
-            return { success: true, avatarUrl };
+            const backend = ctx.env.BACKEND_SERVICE as any;
+            const result = await backend.uploadAvatar(ctx.userInfo.userId, input.dataUrl);
+            return result as { key: string };
         }),
 
-    // Delete avatar
-    deleteAvatar: publicProcedure
-        .mutation(async ({ ctx }) => {
-            if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
-
-            // Forward original headers for auth
-            const response = await ctx.env.BACKEND_SERVICE.fetch(
-                new Request('https://internal/users/avatar', {
-                    method: 'DELETE',
-                    headers: ctx.req.headers,
-                })
-            );
-
-            if (!response.ok) {
-                throw new Error('Failed to delete avatar');
-            }
-
-            return { success: true };
-        }),
+    // Delete avatar via RPC (R2)
+    deleteAvatar: publicProcedure.mutation(async ({ ctx }) => {
+        const backend = ctx.env.BACKEND_SERVICE as any;
+        await backend.deleteAvatar(ctx.userInfo.userId);
+        return { success: true };
+    }),
 });
+
+

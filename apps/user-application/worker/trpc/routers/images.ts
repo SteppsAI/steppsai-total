@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc-instance";
 
+/**
+ * Images tRPC Router
+ * 
+ * Uses BACKEND_SERVICE RPC for R2 operations.
+ */
 export const imagesRouter = router({
     /**
      * Upload a base64 image to R2
@@ -14,26 +19,9 @@ export const imagesRouter = router({
             })
         )
         .mutation(async ({ ctx, input }) => {
-            const response = await ctx.env.BACKEND_SERVICE.fetch(
-                new Request("https://internal/images/upload", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        key: input.key,
-                        dataUrl: input.dataUrl,
-                    }),
-                })
-            );
-
-            if (!response.ok) {
-                const error = await response.text();
-                throw new Error(error || "Failed to upload image");
-            }
-
-            return response.json() as Promise<{
-                success: boolean;
-                key: string;
-            }>;
+            const backend = ctx.env.BACKEND_SERVICE as any;
+            const result = await backend.uploadImage(input.key, input.dataUrl);
+            return result as { success: boolean; key: string };
         }),
 
     /**
@@ -47,21 +35,26 @@ export const imagesRouter = router({
             })
         )
         .mutation(async ({ ctx, input }) => {
-            const response = await ctx.env.BACKEND_SERVICE.fetch(
-                new Request(`https://internal/images/${input.key}`, {
-                    method: "DELETE",
-                })
-            );
+            const backend = ctx.env.BACKEND_SERVICE as any;
+            await backend.deleteImage(input.key);
+            return { success: true };
+        }),
 
-            if (!response.ok) {
-                const error = await response.text();
-                throw new Error(error || "Failed to delete image");
-            }
-
-            return response.json() as Promise<{
-                success: boolean;
-            }>;
+    /**
+     * Delete multiple images from R2
+     */
+    deleteBatch: publicProcedure
+        .input(
+            z.object({
+                keys: z.array(z.string()),
+            })
+        )
+        .mutation(async ({ ctx, input }) => {
+            const backend = ctx.env.BACKEND_SERVICE as any;
+            const result = await backend.deleteImagesBatch(input.keys);
+            return result as { success: boolean; deleted: number };
         }),
 });
+
 
 

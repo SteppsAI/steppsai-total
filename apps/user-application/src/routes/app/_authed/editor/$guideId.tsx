@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { EditorHeader } from "@/components/editor/editor-header";
 import { EditorToolbar, EditorTool } from "@/components/editor/editor-toolbar";
 import { Canvas } from "@/components/editor/canvas";
@@ -10,6 +10,7 @@ import { ExportDialog } from "@/components/export-dialog";
 import { useSidebar } from "@/components/ui/sidebar";
 import { toast } from "sonner";
 import { trpc } from "@/router";
+import { useDeleteStep } from "@/hooks/use-api";
 import { Step, Overlay, Guide } from "@/types/db";
 import { useEditorSession } from "@/hooks/use-editor-session";
 
@@ -112,8 +113,8 @@ function EditorPage() {
     session.updateStep(activeStepId, { overlays: annotations });
   }, [activeStepId, session]);
 
-  // Delete step mutation (still goes directly to DB for atomic R2 + DB delete)
-  const deleteStepMutation = useMutation(trpc.guides.deleteStep.mutationOptions());
+  // Delete step mutation (via Hono API to RPC for atomic R2 + DB delete)
+  const deleteStepMutation = useDeleteStep();
 
   const handleDeleteStep = useCallback(async (id: string) => {
     if (!session.guide?.steps) return;

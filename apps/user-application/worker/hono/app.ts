@@ -4,11 +4,6 @@ import { appRouter } from "../trpc/router";
 import { createContext } from "../trpc/context";
 import { getAuth } from "@repo/data-ops/auth";
 import { createMiddleware } from "hono/factory";
-import { guidesRoutes } from "./routes/guides";
-import { usersRoutes } from "./routes/users";
-import { exportsRoutes } from "./routes/exports";
-import { editorRoutes } from "./routes/editor";
-import { recordingRoutes } from "./routes/recording";
 
 export const App = new Hono<{
     Bindings: ServiceBindings;
@@ -35,22 +30,21 @@ const authMiddleware = createMiddleware(async (c, next) => {
     if (!session?.user) {
         return c.text("Unauthorized", 401);
     }
-    const userId = session.user.id;
-    c.set("userId", userId);
+    c.set("userId", session.user.id);
     await next();
 });
 
-// Protected API routes (with auth middleware)
-App.route('/api/guides', guidesRoutes);
-App.route('/api/users', usersRoutes);
-App.route('/api/exports', exportsRoutes);
-App.route('/api/editor', editorRoutes);
-App.route('/api/recording', recordingRoutes);
+// ========== PUBLIC ROUTES ==========
 
-// Apply auth middleware to API routes
-App.use('/api/*', authMiddleware);
+// Auth routes (Better Auth handler)
+App.on(["POST", "GET"], "/api/auth/*", (c) => {
+    const auth = getAuthInstance(c.env);
+    return auth.handler(c.req.raw);
+});
 
-// tRPC (already protected)
+// ========== PROTECTED ROUTES ==========
+
+// tRPC → data-ops (DB) + RPC bindings (R2, DOs, Queues)
 App.all("/trpc/*", authMiddleware, (c) => {
     const userId = c.get("userId");
     return fetchRequestHandler({
@@ -67,16 +61,3 @@ App.all("/trpc/*", authMiddleware, (c) => {
     });
 });
 
-App.get("/click-socket", authMiddleware, async (c) => {
-    const userId = c.get("userId");
-    const headers = new Headers(c.req.raw.headers);
-    headers.set("account-id", userId);
-    const proxiedRequest = new Request(c.req.raw, { headers });
-    return c.env.BACKEND_SERVICE.fetch(proxiedRequest);
-});
-
-// Auth routes (public)
-App.on(["POST", "GET"], "/api/auth/*", (c) => {
-    const auth = getAuthInstance(c.env);
-    return auth.handler(c.req.raw);
-});

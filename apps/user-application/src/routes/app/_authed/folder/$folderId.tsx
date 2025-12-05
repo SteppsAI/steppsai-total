@@ -17,6 +17,7 @@ import {
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/router";
+import { useDeleteGuide } from "@/hooks/use-api";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -107,12 +108,7 @@ function FolderPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const deleteGuideMutation = useMutation({
-    ...trpc.guides.delete.mutationOptions(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
-    },
-  });
+  const deleteGuideMutation = useDeleteGuide();
 
   const updateGuideMutation = useMutation({
     ...trpc.guides.update.mutationOptions(),

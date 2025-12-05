@@ -4,6 +4,11 @@ import { appRouter } from "../trpc/router";
 import { createContext } from "../trpc/context";
 import { getAuth } from "@repo/data-ops/auth";
 import { createMiddleware } from "hono/factory";
+import { guidesRoutes } from "./routes/guides";
+import { usersRoutes } from "./routes/users";
+import { exportsRoutes } from "./routes/exports";
+import { editorRoutes } from "./routes/editor";
+import { recordingRoutes } from "./routes/recording";
 
 export const App = new Hono<{
     Bindings: ServiceBindings;
@@ -35,6 +40,17 @@ const authMiddleware = createMiddleware(async (c, next) => {
     await next();
 });
 
+// Protected API routes (with auth middleware)
+App.route('/api/guides', guidesRoutes);
+App.route('/api/users', usersRoutes);
+App.route('/api/exports', exportsRoutes);
+App.route('/api/editor', editorRoutes);
+App.route('/api/recording', recordingRoutes);
+
+// Apply auth middleware to API routes
+App.use('/api/*', authMiddleware);
+
+// tRPC (already protected)
 App.all("/trpc/*", authMiddleware, (c) => {
     const userId = c.get("userId");
     return fetchRequestHandler({
@@ -59,6 +75,7 @@ App.get("/click-socket", authMiddleware, async (c) => {
     return c.env.BACKEND_SERVICE.fetch(proxiedRequest);
 });
 
+// Auth routes (public)
 App.on(["POST", "GET"], "/api/auth/*", (c) => {
     const auth = getAuthInstance(c.env);
     return auth.handler(c.req.raw);

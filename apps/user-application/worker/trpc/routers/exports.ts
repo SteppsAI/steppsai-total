@@ -5,8 +5,8 @@ import { getUserGuides } from "@repo/data-ops/queries";
 
 export const guideExportsRouter = router({
     getAll: publicProcedure.query(async ({ ctx }) => {
-        if (!ctx.userId) throw new Error("Unauthorized");
-        const guides = await getUserGuides(ctx.userId);
+        if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
+        const guides = await getUserGuides(ctx.userInfo.userId);
 
         // Transform guides with exported_docs into flat list of exports
         const exports = guides.flatMap(guide => {
@@ -38,7 +38,6 @@ export const guideExportsRouter = router({
 
         return exports;
     }),
-
     triggerExport: publicProcedure
         .input(z.object({
             guideId: z.string(),
@@ -48,12 +47,14 @@ export const guideExportsRouter = router({
             const { guideId, format } = input;
 
             try {
-                // Call data-service Hono route - only send guideId and format
-                // The workflow will fetch guide data and generate HTML server-side
+                // Forward original headers for auth
+                const headers = new Headers(ctx.req.headers);
+                headers.set('Content-Type', 'application/json');
+
                 const response = await ctx.env.BACKEND_SERVICE.fetch(
                     new Request('https://internal/exports/trigger', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers,
                         body: JSON.stringify({ guideId, format }),
                     })
                 );
@@ -73,4 +74,6 @@ export const guideExportsRouter = router({
                 });
             }
         }),
-});
+}
+
+);

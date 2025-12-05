@@ -14,8 +14,8 @@ import { prependAssetsUrl } from "../helpers/transform-assets";
 export const usersRouter = router({
     // Get current user profile
     getMe: publicProcedure.query(async ({ ctx }) => {
-        if (!ctx.userId) throw new Error("Unauthorized");
-        const user = await getUser(ctx.userId);
+        if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
+        const user = await getUser(ctx.userInfo.userId);
 
         if (!user) return null;
 
@@ -30,8 +30,8 @@ export const usersRouter = router({
     updateProfile: publicProcedure
         .input(updateUserSchema)
         .mutation(async ({ input, ctx }) => {
-            if (!ctx.userId) throw new Error("Unauthorized");
-            await updateUser(ctx.userId, input);
+            if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
+            await updateUser(ctx.userInfo.userId, input);
             return { success: true };
         }),
 
@@ -39,8 +39,8 @@ export const usersRouter = router({
     updateNotifications: publicProcedure
         .input(updateNotificationPreferencesSchema)
         .mutation(async ({ input, ctx }) => {
-            if (!ctx.userId) throw new Error("Unauthorized");
-            await updateNotificationPreferences(ctx.userId, input);
+            if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
+            await updateNotificationPreferences(ctx.userInfo.userId, input);
             return { success: true };
         }),
 
@@ -48,16 +48,18 @@ export const usersRouter = router({
     uploadAvatar: publicProcedure
         .input(z.object({ dataUrl: z.string() }))
         .mutation(async ({ input, ctx }) => {
-            if (!ctx.userId) throw new Error("Unauthorized");
+            if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
 
-            // Call data-service (receives already-converted WebP from frontend)
+            // Forward original headers for auth
+            const headers = new Headers(ctx.req.headers);
+            headers.set('Content-Type', 'application/json');
+
             const response = await ctx.env.BACKEND_SERVICE.fetch(
                 new Request('https://internal/users/upload-avatar', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers,
                     body: JSON.stringify({
-                        userId: ctx.userId,
-                        dataUrl: input.dataUrl, // Already WebP from frontend
+                        dataUrl: input.dataUrl,
                     }),
                 })
             );
@@ -78,13 +80,13 @@ export const usersRouter = router({
     // Delete avatar
     deleteAvatar: publicProcedure
         .mutation(async ({ ctx }) => {
-            if (!ctx.userId) throw new Error("Unauthorized");
+            if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
 
+            // Forward original headers for auth
             const response = await ctx.env.BACKEND_SERVICE.fetch(
                 new Request('https://internal/users/avatar', {
                     method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: ctx.userId }),
+                    headers: ctx.req.headers,
                 })
             );
 

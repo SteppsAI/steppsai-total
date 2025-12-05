@@ -11,8 +11,8 @@ import { transformStepsWithUrls } from "../helpers/transform-assets";
 
 export const guidesRouter = router({
     getAll: publicProcedure.query(async ({ ctx }) => {
-        if (!ctx.userId) throw new Error("Unauthorized");
-        const guides = await getUserGuides(ctx.userId);
+        if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
+        const guides = await getUserGuides(ctx.userInfo.userId);
         const assetsUrl = ctx.env.ASSETS_URL;
 
         // Transform imageKeys to full URLs for all guides
@@ -50,10 +50,11 @@ export const guidesRouter = router({
     delete: publicProcedure
         .input(z.object({ id: z.string() }))
         .mutation(async ({ input, ctx }) => {
-            // Call data-service for atomic deletion (R2 + DB)
+            // Forward original headers for auth
             const response = await ctx.env.BACKEND_SERVICE.fetch(
                 new Request(`https://internal/guides/${input.id}`, {
                     method: 'DELETE',
+                    headers: ctx.req.headers,
                 })
             );
 
@@ -72,11 +73,14 @@ export const guidesRouter = router({
             imageKey: z.string().optional()
         }))
         .mutation(async ({ input, ctx }) => {
-            // Call data-service for atomic deletion (R2 + DB)
+            // Forward original headers for auth
+            const headers = new Headers(ctx.req.headers);
+            headers.set('Content-Type', 'application/json');
+
             const response = await ctx.env.BACKEND_SERVICE.fetch(
                 new Request(`https://internal/guides/steps/${input.stepId}`, {
                     method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers,
                     body: JSON.stringify({
                         guideId: input.guideId,
                         imageKey: input.imageKey,

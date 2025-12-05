@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { bearer } from "better-auth/plugins";
 import { creem } from "@creem_io/better-auth";
 import { getDb } from "../src/db/database";
 import * as authSchema from "../src/drizzle-out/auth-schema";
@@ -27,6 +28,7 @@ export function getAuth(
             enabled: true,
         },
         plugins: [
+            bearer(),
             creem({
                 apiKey: creemConfig.apiKey,
                 webhookSecret: creemConfig.webhookSecret,

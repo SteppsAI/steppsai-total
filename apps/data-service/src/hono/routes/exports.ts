@@ -1,7 +1,10 @@
 import { Hono } from 'hono';
 import { renderGuideToPdf, prepareHtmlForExport } from '../../helpers/browser-render';
 
-export const exportsRouter = new Hono<{ Bindings: Env }>();
+export const exportsRouter = new Hono<{
+    Bindings: Env;
+    Variables: { userId: string };
+}>();
 
 /**
  * POST /exports/trigger - Trigger export workflow

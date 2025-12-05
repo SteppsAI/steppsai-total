@@ -10,8 +10,8 @@ import {
 
 export const foldersRouter = router({
 	getAll: publicProcedure.query(async ({ ctx }) => {
-		if (!ctx.userId) throw new Error("Unauthorized");
-		return await getUserFolders(ctx.userId);
+		if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
+		return await getUserFolders(ctx.userInfo.userId);
 	}),
 
 	getById: publicProcedure
@@ -23,9 +23,9 @@ export const foldersRouter = router({
 	create: publicProcedure
 		.input(z.object({ name: z.string().min(1) }))
 		.mutation(async ({ input, ctx }) => {
-			if (!ctx.userId) throw new Error("Unauthorized");
+			if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
 			const id = await createFolder({
-				userId: ctx.userId,
+				userId: ctx.userInfo.userId,
 				name: input.name,
 			});
 			return { id };

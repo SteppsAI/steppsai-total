@@ -2,18 +2,21 @@ import { Hono } from 'hono';
 import { uploadBase64ToR2 } from '../../helpers/base64toR2';
 import { updateUser } from '@repo/data-ops/queries';
 
-export const usersRouter = new Hono<{ Bindings: Env }>();
+export const usersRouter = new Hono<{
+    Bindings: Env;
+    Variables: { userId: string };
+}>();
 
 // Upload Avatar - Receives already-converted WebP, deletes old, uploads new, updates DB
 usersRouter.post('/upload-avatar', async (c) => {
     try {
-        const { userId, dataUrl } = await c.req.json<{
-            userId: string;
+        const userId = c.var.userId; // from auth middleware
+        const { dataUrl } = await c.req.json<{
             dataUrl: string; // Already WebP from frontend
         }>();
 
-        if (!userId || !dataUrl) {
-            return c.json({ error: 'Missing userId or dataUrl' }, 400);
+        if (!dataUrl) {
+            return c.json({ error: 'Missing dataUrl' }, 400);
         }
 
         // 1. Delete old avatar from R2 if exists (construct URL pattern from userId)
@@ -53,11 +56,7 @@ usersRouter.post('/upload-avatar', async (c) => {
 // Delete Avatar - Removes from R2 and clears DB field
 usersRouter.delete('/avatar', async (c) => {
     try {
-        const { userId } = await c.req.json<{ userId: string }>();
-
-        if (!userId) {
-            return c.json({ error: 'Missing userId' }, 400);
-        }
+        const userId = c.var.userId; // from auth middleware
 
         // 1. Delete from R2 using prefix pattern
         try {

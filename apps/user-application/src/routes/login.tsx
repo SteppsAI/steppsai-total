@@ -75,9 +75,14 @@ function LoginPage() {
             {/* Left Side - Marketing & Visuals */}
             <div className="hidden lg:flex flex-col items-center justify-center bg-[#0B0F19] p-12 text-white relative overflow-hidden">
                 {/* Subtle Background Effects */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(99,102,241,0.08)_0%,transparent_50%)]" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_100%,rgba(6,182,212,0.08)_0%,transparent_50%)]" />
-                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
+                {/* Background Effects */}
+                <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                    <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] bg-[#6366F1] rounded-full blur-[120px] opacity-[0.15]" />
+                    <div className="absolute top-[20%] right-[10%] w-[50%] h-[60%] bg-[#06B6D4] rounded-full blur-[100px] opacity-[0.15]" />
+                    <div className="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] bg-[#F43F5E] rounded-full blur-[120px] opacity-[0.12]" />
+                    <div className="absolute bottom-[10%] left-[20%] w-[40%] h-[40%] bg-[#6366F1] rounded-full blur-[100px] opacity-[0.12]" />
+                </div>
+                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03]" />
 
                 <div className="absolute top-12 left-1/2 -translate-x-1/2 z-10">
                     <img

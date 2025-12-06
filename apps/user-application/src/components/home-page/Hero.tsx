@@ -6,6 +6,7 @@ import { useRef } from 'react'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { Link } from '@tanstack/react-router'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -77,13 +78,13 @@ export function Hero() {
                             </p>
 
                             <div className="hero-text-stagger flex flex-wrap gap-4 pt-2 justify-center">
-                                <a
-                                    href="/login"
+                                <Link
+                                    to="/login"
                                     className="inline-flex h-12 items-center justify-center rounded-full bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                                 >
                                     Get Started
                                     <ArrowRight className="ml-2 size-4" />
-                                </a>
+                                </Link>
                                 <a
                                     href="#demo"
                                     className="inline-flex h-12 items-center justify-center rounded-full border border-input bg-background/50 px-8 text-sm font-medium shadow-sm transition-all hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"

@@ -11,6 +11,7 @@ import {
   NavbarLogo,
   NavbarButton,
 } from "@/components/ui/resizable-navbar";
+import { Link } from '@tanstack/react-router'
 
 const navigation = [
   { name: "Why Stepps", link: "#save-time" },
@@ -28,12 +29,12 @@ export function Navbar() {
         <NavItems items={navigation} />
         {/* Spacer to balance the logo on the left, or just the buttons */}
         <div className="flex items-center gap-2">
-          <a
-            href="/login"
+          <Link
+            to="/login"
             className="relative z-20 text-sm font-medium font-sans leading-6 text-zinc-600 hover:text-black dark:text-neutral-300 dark:hover:text-white transition-colors whitespace-nowrap px-4 py-2"
           >
             Log in
-          </a>
+          </Link>
           <NavbarButton href="#black-friday" className="rounded-full font-sans relative z-20">
             Launch Special Offer
           </NavbarButton>
@@ -62,12 +63,12 @@ export function Navbar() {
             </a>
           ))}
           <div className="my-2 h-px bg-gray-200 w-full dark:bg-zinc-800" />
-          <a
-            href="/login"
+          <Link
+            to="/login"
             className="block w-full rounded-md px-3 py-2 text-base font-medium text-zinc-700 hover:bg-gray-50 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >
             Log in
-          </a>
+          </Link>
           <NavbarButton
             href="#black-friday"
             className="w-full rounded-full font-sans mt-2"

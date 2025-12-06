@@ -167,7 +167,15 @@ function LoginPage() {
             </div>
 
             {/* Right Side - Auth Form */}
-            <div className="flex items-center justify-center p-8 bg-background relative">
+            <div className="flex items-center justify-center p-8 bg-background relative overflow-hidden">
+                {/* Background Effects */}
+                <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                    <div className="absolute -top-[20%] -right-[10%] w-[70%] h-[70%] bg-[#6366F1] rounded-full blur-[120px] opacity-[0.10]" />
+                    <div className="absolute top-[20%] left-[10%] w-[50%] h-[60%] bg-[#06B6D4] rounded-full blur-[100px] opacity-[0.10]" />
+                    <div className="absolute -bottom-[20%] -left-[10%] w-[60%] h-[60%] bg-[#F43F5E] rounded-full blur-[120px] opacity-[0.08]" />
+                    <div className="absolute bottom-[10%] right-[20%] w-[40%] h-[40%] bg-[#6366F1] rounded-full blur-[100px] opacity-[0.08]" />
+                </div>
+                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
                 {/* Mobile Logo */}
                 <div className="absolute top-8 w-full flex justify-center lg:hidden">
                     <img

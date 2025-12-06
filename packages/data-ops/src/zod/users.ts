@@ -7,14 +7,17 @@ export const notificationPreferencesSchema = z.object({
 
 export type NotificationPreferences = z.infer<typeof notificationPreferencesSchema>;
 
-// User schema
+// User schema - matches users table with userId as UUID
 export const userSchema = z.object({
 	userId: z.string().uuid(),
-	name: z.string().nullable(),
-	email: z.string().email().nullable(),
+	name: z.string(),
+	email: z.string().email(),
+	emailVerified: z.boolean().default(false),
+	image: z.string().nullable().optional(),
 	avatarUrl: z.string().nullable().optional(),
 	notificationPreferences: notificationPreferencesSchema.nullable().optional(),
 	createdAt: z.string().nullable().optional(),
+	updatedAt: z.string().nullable().optional(),
 });
 
 export type User = z.infer<typeof userSchema>;
@@ -31,4 +34,3 @@ export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 export const updateNotificationPreferencesSchema = notificationPreferencesSchema.partial();
 
 export type UpdateNotificationPreferencesInput = z.infer<typeof updateNotificationPreferencesSchema>;
-

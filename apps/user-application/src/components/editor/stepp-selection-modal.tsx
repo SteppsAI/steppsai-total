@@ -21,7 +21,7 @@ import { MobileCreationDialog } from "@/components/mobile-creation-dialog";
 import { trpc } from "@/router";
 
 interface ModalGuide {
-    id: string;
+    guideId: string;
     title?: string | null;
     folderId?: string | null;
     status?: string | null;
@@ -30,7 +30,7 @@ interface ModalGuide {
 }
 
 interface ModalFolder {
-    id: string;
+    folderId: string;
     name: string;
 }
 
@@ -63,16 +63,16 @@ export function SteppSelectionModal({ open, onOpenChange }: SteppSelectionModalP
     const looseGuides = guides.filter((g) => !g.folderId);
 
     const guidesByFolder = folders.reduce((acc, folder) => {
-        acc[folder.id] = guides.filter((g) => g.folderId === folder.id);
+        acc[folder.folderId] = guides.filter((g) => g.folderId === folder.folderId);
         return acc;
     }, {} as Record<string, ModalGuide[]>);
 
     const filteredGuides = searchQuery
         ? guides.filter(
-              (guide) =>
-                  guide.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                  folders.find((f) => f.id === guide.folderId)?.name?.toLowerCase().includes(searchQuery.toLowerCase())
-          )
+            (guide) =>
+                guide.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                folders.find((f) => f.folderId === guide.folderId)?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+        )
         : [];
 
     const toggleFolder = (folderId: string) => {
@@ -101,7 +101,7 @@ export function SteppSelectionModal({ open, onOpenChange }: SteppSelectionModalP
 
     const getFolderName = (folderId: string | null | undefined) => {
         if (!folderId) return null;
-        return folders.find((f) => f.id === folderId)?.name || null;
+        return folders.find((f) => f.folderId === folderId)?.name || null;
     };
 
     return (
@@ -144,10 +144,10 @@ export function SteppSelectionModal({ open, onOpenChange }: SteppSelectionModalP
                                         <div className="flex flex-col gap-1">
                                             {filteredGuides.map((guide) => (
                                                 <GuideItem
-                                                    key={guide.id}
+                                                    key={guide.guideId}
                                                     guide={guide}
                                                     folderName={getFolderName(guide.folderId)}
-                                                    onClick={() => handleSelect(guide.id)}
+                                                    onClick={() => handleSelect(guide.guideId)}
                                                 />
                                             ))}
                                         </div>
@@ -168,10 +168,10 @@ export function SteppSelectionModal({ open, onOpenChange }: SteppSelectionModalP
                                             <div className="flex flex-col gap-1">
                                                 {recentGuides.map((guide) => (
                                                     <GuideItem
-                                                        key={`recent-${guide.id}`}
+                                                        key={`recent-${guide.guideId}`}
                                                         guide={guide}
                                                         folderName={getFolderName(guide.folderId)}
-                                                        onClick={() => handleSelect(guide.id)}
+                                                        onClick={() => handleSelect(guide.guideId)}
                                                         showDate
                                                     />
                                                 ))}
@@ -182,7 +182,7 @@ export function SteppSelectionModal({ open, onOpenChange }: SteppSelectionModalP
 
                                     {(() => {
                                         const foldersWithGuides = folders.filter(
-                                            (folder) => (guidesByFolder[folder.id] || []).length > 0
+                                            (folder) => (guidesByFolder[folder.folderId] || []).length > 0
                                         );
                                         return foldersWithGuides.length > 0 && (
                                             <div className="mb-2">
@@ -191,13 +191,13 @@ export function SteppSelectionModal({ open, onOpenChange }: SteppSelectionModalP
                                                 </div>
                                                 <div className="flex flex-col gap-1">
                                                     {foldersWithGuides.map((folder) => {
-                                                        const isExpanded = expandedFolders.has(folder.id);
-                                                        const folderGuides = guidesByFolder[folder.id] || [];
+                                                        const isExpanded = expandedFolders.has(folder.folderId);
+                                                        const folderGuides = guidesByFolder[folder.folderId] || [];
                                                         return (
-                                                            <div key={folder.id}>
+                                                            <div key={folder.folderId}>
                                                                 <button
                                                                     className="flex items-center justify-between w-full p-3 rounded-lg hover:bg-muted/50 transition-colors text-left group"
-                                                                    onClick={() => toggleFolder(folder.id)}
+                                                                    onClick={() => toggleFolder(folder.folderId)}
                                                                 >
                                                                     <div className="flex items-center gap-3">
                                                                         <div className="flex-shrink-0 size-10 rounded-lg bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
@@ -220,9 +220,9 @@ export function SteppSelectionModal({ open, onOpenChange }: SteppSelectionModalP
                                                                     <div className="ml-6 pl-4 border-l border-border">
                                                                         {folderGuides.map((guide) => (
                                                                             <GuideItem
-                                                                                key={guide.id}
+                                                                                key={guide.guideId}
                                                                                 guide={guide}
-                                                                                onClick={() => handleSelect(guide.id)}
+                                                                                onClick={() => handleSelect(guide.guideId)}
                                                                                 compact
                                                                             />
                                                                         ))}
@@ -245,9 +245,9 @@ export function SteppSelectionModal({ open, onOpenChange }: SteppSelectionModalP
                                             <div className="flex flex-col gap-1">
                                                 {looseGuides.map((guide) => (
                                                     <GuideItem
-                                                        key={guide.id}
+                                                        key={guide.guideId}
                                                         guide={guide}
-                                                        onClick={() => handleSelect(guide.id)}
+                                                        onClick={() => handleSelect(guide.guideId)}
                                                     />
                                                 ))}
                                             </div>

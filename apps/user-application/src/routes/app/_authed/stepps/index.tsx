@@ -7,6 +7,7 @@ import {
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/router";
+import { useDeleteGuide } from "@/hooks/use-api";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +25,7 @@ import { DashboardCard } from "@/components/dashboard/dashboard-card";
 
 // Local type for guides with folder name - avoids tRPC type conflicts
 interface LocalGuideWithFolder {
-    id: string;
+    guideId: string;
     userId: string;
     folderId?: string | null;
     title?: string | null;
@@ -103,11 +104,7 @@ function SteppsPage() {
         }
     }));
 
-    const deleteGuideMutation = useMutation(trpc.guides.delete.mutationOptions({
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryKey() });
-        }
-    }));
+    const deleteGuideMutation = useDeleteGuide();
 
     const updateGuideMutation = useMutation(trpc.guides.update.mutationOptions({
         onSuccess: () => {
@@ -117,7 +114,7 @@ function SteppsPage() {
 
     const guidesWithFolders: LocalGuideWithFolder[] = (guides ?? []).map(guide => ({
         ...guide,
-        folderName: guide.folderId ? folders?.find(f => f.id === guide.folderId)?.name : null,
+        folderName: guide.folderId ? folders?.find(f => f.folderId === guide.folderId)?.name : null,
     }));
 
     // Listen for search query changes from sessionStorage (from header search)
@@ -199,7 +196,7 @@ function SteppsPage() {
     const confirmDeleteStepp = async () => {
         if (selectedSteppForAction) {
             try {
-                await deleteGuideMutation.mutateAsync({ id: selectedSteppForAction.id });
+                await deleteGuideMutation.mutateAsync({ id: selectedSteppForAction.guideId });
                 setDeleteSteppOpen(false);
                 toast.success(`Stepp "${selectedSteppForAction.title}" deleted`);
                 setSelectedSteppForAction(null);
@@ -218,10 +215,10 @@ function SteppsPage() {
         if (selectedSteppForAction) {
             try {
                 await updateGuideMutation.mutateAsync({
-                    id: selectedSteppForAction.id,
+                    id: selectedSteppForAction.guideId,
                     data: { folderId: folderId ?? undefined },
                 });
-                const folderName = folderId ? folders?.find(f => f.id === folderId)?.name : undefined;
+                const folderName = folderId ? folders?.find(f => f.folderId === folderId)?.name : undefined;
                 setMoveSteppOpen(false);
                 toast.success(`Stepp moved to ${folderName || "Root"}`);
                 setSelectedSteppForAction(null);
@@ -234,7 +231,7 @@ function SteppsPage() {
     const handleVisibilityChange = async (guide: LocalGuideWithFolder, visibility: 'public' | 'private') => {
         try {
             await updateGuideMutation.mutateAsync({
-                id: guide.id,
+                id: guide.guideId,
                 data: { visibility },
             });
             toast.success(`Stepp is now ${visibility}`);
@@ -244,12 +241,12 @@ function SteppsPage() {
     };
 
     const handleShare = (guide: LocalGuideWithFolder) => {
-        setSelectedGuide({ id: guide.id, title: guide.title || "Untitled" });
+        setSelectedGuide({ id: guide.guideId, title: guide.title || "Untitled" });
         setShareDialogOpen(true);
     };
 
     const handleExport = (guide: LocalGuideWithFolder) => {
-        setSelectedGuide({ id: guide.id, title: guide.title || "Untitled" });
+        setSelectedGuide({ id: guide.guideId, title: guide.title || "Untitled" });
         setExportDialogOpen(true);
     };
 
@@ -331,9 +328,9 @@ function SteppsPage() {
                     <div className="flex flex-wrap gap-2 md:hidden">
                         {filteredFolders.map((folder) => (
                             <button
-                                key={folder.id}
+                                key={folder.folderId}
                                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted hover:bg-muted/80 transition-colors text-sm font-medium cursor-pointer border border-border hover:border-primary/50"
-                                onClick={() => navigate({ to: "/app/folder/$folderId", params: { folderId: folder.id } })}
+                                onClick={() => navigate({ to: "/app/folder/$folderId", params: { folderId: folder.folderId } })}
                             >
                                 <FolderIcon className="size-3.5 text-muted-foreground" />
                                 <span>{folder.name}</span>
@@ -353,15 +350,15 @@ function SteppsPage() {
                     <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-4">
                         {filteredFolders.map((folder) => (
                             <FolderCard
-                                key={folder.id}
+                                key={folder.folderId}
                                 folder={{
-                                    id: folder.id,
+                                    folderId: folder.folderId,
                                     name: folder.name,
                                     guideCount: folder.guideCount || 0
                                 }}
                                 onRename={handleRenameFolder}
                                 onDelete={handleDeleteFolder}
-                                onClick={() => navigate({ to: "/app/folder/$folderId", params: { folderId: folder.id } })}
+                                onClick={() => navigate({ to: "/app/folder/$folderId", params: { folderId: folder.folderId } })}
                             />
                         ))}
                         {filteredFolders.length === 0 && (
@@ -397,16 +394,16 @@ function SteppsPage() {
                                 {filteredGuides.length > 0 ? (
                                     filteredGuides.map((guide) => (
                                         <TableRow
-                                            key={guide.id}
+                                            key={guide.guideId}
                                             className="cursor-pointer hover:bg-muted/50 transition-colors"
-                                            onClick={() => navigate({ to: "/app/stepps/$guideId", params: { guideId: guide.id } })}
+                                            onClick={() => navigate({ to: "/app/stepps/$guideId", params: { guideId: guide.guideId } })}
                                         >
                                             <TableCell className="font-medium">
                                                 <div className="flex items-center gap-2">
                                                     <FileText className="size-4 text-muted-foreground" />
                                                     <Link
                                                         to="/app/stepps/$guideId"
-                                                        params={{ guideId: guide.id }}
+                                                        params={{ guideId: guide.guideId }}
                                                         className="hover:underline hover:text-primary"
                                                         onClick={(e) => e.stopPropagation()}
                                                     >
@@ -463,7 +460,7 @@ function SteppsPage() {
                                                             className="cursor-pointer"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                navigate({ to: "/app/editor/$guideId", params: { guideId: guide.id } });
+                                                                navigate({ to: "/app/editor/$guideId", params: { guideId: guide.guideId } });
                                                             }}
                                                         >
                                                             <Pencil className="mr-2 size-4" />
@@ -549,11 +546,11 @@ function SteppsPage() {
                 <div className="xl:hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     {filteredGuides.map((guide) => (
                         <DashboardCard
-                            key={guide.id}
+                            key={guide.guideId}
                             title={guide.title || "Untitled"}
                             image={guide.steps?.[0]?.imageKey || "/default-preview.svg"}
-                            viewUrl={`/app/stepps/${guide.id}`}
-                            onEdit={() => navigate({ to: `/app/editor/${guide.id}` })}
+                            viewUrl={`/app/stepps/${guide.guideId}`}
+                            onEdit={() => navigate({ to: `/app/editor/${guide.guideId}` })}
                             onShare={() => handleShare(guide)}
                             onDelete={() => handleDeleteStepp(guide)}
                             onMove={() => handleMoveStepp(guide)}

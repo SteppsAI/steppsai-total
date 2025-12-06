@@ -11,12 +11,16 @@ import {
 } from "@repo/data-ops/zod-schema";
 import { prependAssetsUrl } from "../helpers/transform-assets";
 
+/**
+ * Users tRPC Router
+ * 
+ * Uses data-ops for direct DB queries.
+ * Uses BACKEND_SERVICE RPC for R2 operations (avatar upload/delete).
+ */
 export const usersRouter = router({
     // Get current user profile
     getMe: publicProcedure.query(async ({ ctx }) => {
-        // TODO: Get userId from context (auth)
-        const userId = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366"; // Hardcoded for now
-        const user = await getUser(userId);
+        const user = await getUser(ctx.userInfo.userId);
 
         if (!user) return null;
 
@@ -30,73 +34,34 @@ export const usersRouter = router({
     // Update user profile (name, avatar)
     updateProfile: publicProcedure
         .input(updateUserSchema)
-        .mutation(async ({ input }) => {
-            // TODO: Get userId from context (auth)
-            const userId = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366"; // Hardcoded for now
-            await updateUser(userId, input);
+        .mutation(async ({ input, ctx }) => {
+            await updateUser(ctx.userInfo.userId, input);
             return { success: true };
         }),
 
     // Update notification preferences
     updateNotifications: publicProcedure
         .input(updateNotificationPreferencesSchema)
-        .mutation(async ({ input }) => {
-            // TODO: Get userId from context (auth)
-            const userId = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366"; // Hardcoded for now
-            await updateNotificationPreferences(userId, input);
+        .mutation(async ({ input, ctx }) => {
+            await updateNotificationPreferences(ctx.userInfo.userId, input);
             return { success: true };
         }),
 
-    // Upload avatar (via data-service)
+    // Upload avatar via RPC (R2)
     uploadAvatar: publicProcedure
         .input(z.object({ dataUrl: z.string() }))
         .mutation(async ({ input, ctx }) => {
-            // TODO: Get userId from context (auth)
-            const userId = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366"; // Hardcoded for now
-
-            // Call data-service (receives already-converted WebP from frontend)
-            const response = await ctx.env.BACKEND_SERVICE.fetch(
-                new Request('https://internal/users/upload-avatar', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        userId,
-                        dataUrl: input.dataUrl, // Already WebP from frontend
-                    }),
-                })
-            );
-
-            if (!response.ok) {
-                const error = await response.json() as { error?: string };
-                throw new Error(error.error || 'Failed to upload avatar');
-            }
-
-            const result = await response.json() as { key: string };
-
-            // Transform key to full URL
-            const avatarUrl = prependAssetsUrl(result.key, ctx.env.ASSETS_URL);
-
-            return { success: true, avatarUrl };
+            const backend = ctx.env.BACKEND_SERVICE as any;
+            const result = await backend.uploadAvatar(ctx.userInfo.userId, input.dataUrl);
+            return result as { key: string };
         }),
 
-    // Delete avatar
-    deleteAvatar: publicProcedure
-        .mutation(async ({ ctx }) => {
-            // TODO: Get userId from context (auth)
-            const userId = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366"; // Hardcoded for now
-
-            const response = await ctx.env.BACKEND_SERVICE.fetch(
-                new Request('https://internal/users/avatar', {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId }),
-                })
-            );
-
-            if (!response.ok) {
-                throw new Error('Failed to delete avatar');
-            }
-
-            return { success: true };
-        }),
+    // Delete avatar via RPC (R2)
+    deleteAvatar: publicProcedure.mutation(async ({ ctx }) => {
+        const backend = ctx.env.BACKEND_SERVICE as any;
+        await backend.deleteAvatar(ctx.userInfo.userId);
+        return { success: true };
+    }),
 });
+
+

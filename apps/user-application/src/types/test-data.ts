@@ -3,28 +3,28 @@ import { FolderWithCount, GuideWithFolder } from "@/types/db";
 // Test Folders Data
 export const TEST_FOLDERS: FolderWithCount[] = [
     {
-        id: "fd_onboarding_001",
+        folderId: "fd_onboarding_001",
         userId: "user_001",
         name: "Onboarding",
         createdAt: "2024-10-01T08:00:00Z",
         guideCount: 5,
     },
     {
-        id: "fd_demos_002",
+        folderId: "fd_demos_002",
         userId: "user_001",
         name: "Product Demos",
         createdAt: "2024-09-12T12:00:00Z",
         guideCount: 12,
     },
     {
-        id: "fd_sops_003",
+        folderId: "fd_sops_003",
         userId: "user_001",
         name: "Internal SOPs",
         createdAt: "2024-07-18T15:45:00Z",
         guideCount: 8,
     },
     {
-        id: "fd_marketing_004",
+        folderId: "fd_marketing_004",
         userId: "user_001",
         name: "Marketing Assets",
         createdAt: "2024-08-05T11:25:00Z",
@@ -35,7 +35,7 @@ export const TEST_FOLDERS: FolderWithCount[] = [
 // Test Guides Data
 export const TEST_GUIDES: GuideWithFolder[] = [
     {
-        id: "gd_searching_101",
+        guideId: "gd_searching_101",
         userId: "user_001",
         folderId: "fd_onboarding_001",
         folderName: "Onboarding",
@@ -48,7 +48,7 @@ export const TEST_GUIDES: GuideWithFolder[] = [
         updatedAt: "2024-11-25T10:30:00Z",
     },
     {
-        id: "gd_render_102",
+        guideId: "gd_render_102",
         userId: "user_001",
         folderId: "fd_demos_002",
         folderName: "Product Demos",
@@ -61,7 +61,7 @@ export const TEST_GUIDES: GuideWithFolder[] = [
         updatedAt: "2024-11-24T14:20:00Z",
     },
     {
-        id: "gd_email_103",
+        guideId: "gd_email_103",
         userId: "user_001",
         folderId: null,
         folderName: null,
@@ -74,7 +74,7 @@ export const TEST_GUIDES: GuideWithFolder[] = [
         updatedAt: "2024-11-23T09:15:00Z",
     },
     {
-        id: "gd_sales_104",
+        guideId: "gd_sales_104",
         userId: "user_001",
         folderId: "fd_sops_003",
         folderName: "Internal SOPs",
@@ -87,7 +87,7 @@ export const TEST_GUIDES: GuideWithFolder[] = [
         updatedAt: "2024-11-26T08:45:00Z",
     },
     {
-        id: "gd_sso_105",
+        guideId: "gd_sso_105",
         userId: "user_001",
         folderId: "fd_onboarding_001",
         folderName: "Onboarding",
@@ -100,7 +100,7 @@ export const TEST_GUIDES: GuideWithFolder[] = [
         updatedAt: "2024-11-22T09:12:00Z",
     },
     {
-        id: "gd_okrs_106",
+        guideId: "gd_okrs_106",
         userId: "user_001",
         folderId: "fd_sops_003",
         folderName: "Internal SOPs",
@@ -113,7 +113,7 @@ export const TEST_GUIDES: GuideWithFolder[] = [
         updatedAt: "2024-11-18T07:00:00Z",
     },
     {
-        id: "gd_linkedin_107",
+        guideId: "gd_linkedin_107",
         userId: "user_001",
         folderId: "fd_marketing_004",
         folderName: "Marketing Assets",

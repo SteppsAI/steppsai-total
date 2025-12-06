@@ -16,7 +16,6 @@
     "run_worker_first": [
       "/api/auth/*",
       "/trpc/*",
-      "/click-socket"
     ]
   },
   "observability": {
@@ -31,7 +30,7 @@
         {
           "binding": "BACKEND_SERVICE",
           "service": "data-service-stage",
-          "experimental_remote": true,
+          "remote": true,
         }
       ]
     },
@@ -43,7 +42,7 @@
         {
           "binding": "BACKEND_SERVICE",
           "service": "data-service-production",
-          "experimental_remote": true,
+          "remote": true,
         }
       ]
     }

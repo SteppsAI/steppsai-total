@@ -4,7 +4,7 @@ import { router, publicProcedure } from "../trpc-instance";
 /**
  * Editor Session Router
  * 
- * Proxies requests to the GuideSession Durable Object in data-service.
+ * Uses BACKEND_SERVICE RPC for GuideSession Durable Object operations.
  * Provides draft persistence without constant DB writes.
  */
 
@@ -22,20 +22,12 @@ export const editorRouter = router({
 	getSession: publicProcedure
 		.input(z.object({ guideId: z.string() }))
 		.mutation(async ({ input, ctx }) => {
-			const response = await ctx.env.BACKEND_SERVICE.fetch(
-				new Request(`https://internal/api/editor/${input.guideId}/state`, {
-					method: 'GET',
-				})
-			);
-
-			if (!response.ok) {
-				throw new Error('Failed to get session state');
-			}
-
-			return response.json() as Promise<{
+			const backend = ctx.env.BACKEND_SERVICE as any;
+			const result = await backend.getEditorState(input.guideId);
+			return result as {
 				source: 'draft' | 'none';
 				data: { title: string; steps: any[]; lastModified: number } | null;
-			}>;
+			};
 		}),
 
 	/**
@@ -48,19 +40,9 @@ export const editorRouter = router({
 			state: sessionStateSchema,
 		}))
 		.mutation(async ({ input, ctx }) => {
-			const response = await ctx.env.BACKEND_SERVICE.fetch(
-				new Request(`https://internal/api/editor/${input.guideId}/update`, {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(input.state),
-				})
-			);
-
-			if (!response.ok) {
-				throw new Error('Failed to update session');
-			}
-
-			return response.json() as Promise<{ success: boolean; lastModified: number }>;
+			const backend = ctx.env.BACKEND_SERVICE as any;
+			const result = await backend.updateEditorState(input.guideId, input.state);
+			return result as { success: boolean; lastModified: number };
 		}),
 
 	/**
@@ -70,18 +52,9 @@ export const editorRouter = router({
 	saveSession: publicProcedure
 		.input(z.object({ guideId: z.string() }))
 		.mutation(async ({ input, ctx }) => {
-			const response = await ctx.env.BACKEND_SERVICE.fetch(
-				new Request(`https://internal/api/editor/${input.guideId}/save`, {
-					method: 'POST',
-				})
-			);
-
-			if (!response.ok) {
-				const error = await response.json() as { error?: string };
-				throw new Error(error.error || 'Failed to save session');
-			}
-
-			return response.json() as Promise<{ success: boolean; savedAt: number }>;
+			const backend = ctx.env.BACKEND_SERVICE as any;
+			const result = await backend.saveEditorSession(input.guideId);
+			return result as { success: boolean; savedAt: number };
 		}),
 
 	/**
@@ -91,19 +64,12 @@ export const editorRouter = router({
 	discardSession: publicProcedure
 		.input(z.object({ guideId: z.string() }))
 		.mutation(async ({ input, ctx }) => {
-			const response = await ctx.env.BACKEND_SERVICE.fetch(
-				new Request(`https://internal/api/editor/${input.guideId}/discard`, {
-					method: 'POST',
-				})
-			);
-
-			if (!response.ok) {
-				throw new Error('Failed to discard session');
-			}
-
-			return response.json() as Promise<{ success: boolean }>;
+			const backend = ctx.env.BACKEND_SERVICE as any;
+			await backend.discardEditorSession(input.guideId);
+			return { success: true };
 		}),
 });
+
 
 
 

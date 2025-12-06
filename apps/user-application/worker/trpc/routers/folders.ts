@@ -8,12 +8,10 @@ import {
 	updateFolder,
 } from "@repo/data-ops/queries";
 
-// TODO: Replace with ctx.userInfo.userId when auth is implemented
-const TEST_USER_ID = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366";
-
 export const foldersRouter = router({
-	getAll: publicProcedure.query(async () => {
-		return await getUserFolders(TEST_USER_ID);
+	getAll: publicProcedure.query(async ({ ctx }) => {
+		if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
+		return await getUserFolders(ctx.userInfo.userId);
 	}),
 
 	getById: publicProcedure
@@ -24,9 +22,10 @@ export const foldersRouter = router({
 
 	create: publicProcedure
 		.input(z.object({ name: z.string().min(1) }))
-		.mutation(async ({ input }) => {
+		.mutation(async ({ input, ctx }) => {
+			if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
 			const id = await createFolder({
-				userId: TEST_USER_ID,
+				userId: ctx.userInfo.userId,
 				name: input.name,
 			});
 			return { id };
@@ -46,5 +45,3 @@ export const foldersRouter = router({
 			return { success: true };
 		}),
 });
-
-

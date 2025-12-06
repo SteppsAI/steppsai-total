@@ -1,17 +1,19 @@
 import { Hono } from 'hono';
-import { createGuide, deleteGuide, updateGuide, deleteStep } from '@repo/data-ops/queries';
+import { createGuide, deleteGuide, updateGuide, deleteStep } from "@repo/data-ops/queries";
 import { nanoid } from 'nanoid';
 
-export const guidesRouter = new Hono<{ Bindings: Env }>();
-
-// HARDCODED: Replace with auth context user ID when auth is implemented
-const HARDCODED_USER_ID = 'f1d84914-ec7c-4b1a-9a89-eaeff6b2f366';
+export const guidesRouter = new Hono<{
+    Bindings: Env;
+    Variables: { userId: string };
+}>();
 
 // Start Recording - Creates a draft guide and returns guideId
 guidesRouter.post('/start', async (c) => {
+    const userId = c.var.userId;
+
     try {
         const guideId = await createGuide({
-            userId: HARDCODED_USER_ID,
+            userId,
             title: 'Recording in progress...',
             description: '',
             slug: nanoid(10),
@@ -24,7 +26,7 @@ guidesRouter.post('/start', async (c) => {
         return c.json({
             success: true,
             guideId,
-            userId: HARDCODED_USER_ID
+            userId
         });
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -67,7 +69,9 @@ guidesRouter.post('/:guideId/complete', async (c) => {
             details: errorMessage
         }, 500);
     }
-});// Delete Recording - Deletes images from R2 FIRST, then guide from DB
+});
+
+// Delete Recording - Deletes images from R2 FIRST, then guide from DB
 // ATOMIC: If R2 fails, DB is NOT deleted. If DB fails after R2, error is returned.
 guidesRouter.delete('/:guideId', async (c) => {
     const guideId = c.req.param('guideId');
@@ -146,4 +150,3 @@ guidesRouter.delete('/steps/:stepId', async (c) => {
         }, 500);
     }
 });
-

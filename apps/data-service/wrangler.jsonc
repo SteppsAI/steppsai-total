@@ -17,7 +17,11 @@
 		"stage": {
 			"vars": {
 				"ASSETS_URL": "https://stepps-assets-stage.stepps.ai",
-				"CLOUDFLARE_ACCOUNT_ID": "c2ed9b335ebebbe0fbfa7aa17935b3b5"
+				"CLOUDFLARE_ACCOUNT_ID": "c2ed9b335ebebbe0fbfa7aa17935b3b5",
+				"GOOGLE_CLIENT_ID": "",
+				"GOOGLE_CLIENT_SECRET": "",
+				"CREEM_API_KEY": "",
+				"BETTER_AUTH_SECRET": ""
 			},
 			"r2_buckets": [
 				{

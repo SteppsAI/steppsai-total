@@ -2,29 +2,24 @@ import { z } from "zod";
 import { router, publicProcedure } from "../trpc-instance";
 import { stepFromExtensionSchema } from "@repo/data-ops/zod-schema";
 
+/**
+ * Recording Router
+ * 
+ * Uses BACKEND_SERVICE RPC for guide recording operations.
+ */
 export const recordingRouter = router({
     /**
      * Start a new recording - creates draft guide in DB
      * Returns guideId and userId for the extension to use
      */
     start: publicProcedure.mutation(async ({ ctx }) => {
-        const response = await ctx.env.BACKEND_SERVICE.fetch(
-            new Request("https://internal/guides/start", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-            })
-        );
-
-        if (!response.ok) {
-            const error = await response.json() as { details?: string };
-            throw new Error(error.details || "Failed to start recording");
-        }
-
-        return response.json() as Promise<{
+        const backend = ctx.env.BACKEND_SERVICE as any;
+        const result = await backend.startRecording(ctx.userInfo.userId);
+        return result as {
             success: boolean;
             guideId: string;
             userId: string;
-        }>;
+        };
     }),
 
     /**
@@ -39,26 +34,16 @@ export const recordingRouter = router({
             })
         )
         .mutation(async ({ ctx, input }) => {
-            const response = await ctx.env.BACKEND_SERVICE.fetch(
-                new Request(`https://internal/guides/${input.guideId}/complete`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        title: input.title,
-                        steps: input.steps,
-                    }),
-                })
+            const backend = ctx.env.BACKEND_SERVICE as any;
+            const result = await backend.completeRecording(
+                input.guideId,
+                input.title,
+                input.steps
             );
-
-            if (!response.ok) {
-                const error = await response.json() as { details?: string };
-                throw new Error(error.details || "Failed to complete recording");
-            }
-
-            return response.json() as Promise<{
+            return result as {
                 success: boolean;
                 guideId: string;
-            }>;
+            };
         }),
 
     /**
@@ -67,18 +52,10 @@ export const recordingRouter = router({
     discard: publicProcedure
         .input(z.object({ guideId: z.string() }))
         .mutation(async ({ ctx, input }) => {
-            const response = await ctx.env.BACKEND_SERVICE.fetch(
-                new Request(`https://internal/guides/${input.guideId}`, {
-                    method: "DELETE",
-                })
-            );
-
-            if (!response.ok) {
-                const error = await response.json() as { details?: string };
-                throw new Error(error.details || "Failed to discard recording");
-            }
-
-            return response.json() as Promise<{ success: boolean }>;
+            const backend = ctx.env.BACKEND_SERVICE as any;
+            await backend.deleteGuideWithImages(input.guideId);
+            return { success: true };
         }),
 });
+
 

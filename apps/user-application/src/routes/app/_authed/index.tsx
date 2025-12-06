@@ -12,6 +12,7 @@ import { RenameFolderDialog } from "@/components/rename-folder-dialog";
 import { DeleteSteppDialog } from "@/components/delete-stepp-dialog";
 import { MoveSteppDialog } from "@/components/move-stepp-dialog";
 import { trpc } from "@/router";
+import { useDeleteGuide } from "@/hooks/use-api";
 
 export const Route = createFileRoute("/app/_authed/")({
   component: Dashboard,
@@ -47,12 +48,7 @@ function Dashboard() {
     },
   });
 
-  const deleteGuideMutation = useMutation({
-    ...trpc.guides.delete.mutationOptions(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
-    },
-  });
+  const deleteGuideMutation = useDeleteGuide();
 
   const updateGuideMutation = useMutation({
     ...trpc.guides.update.mutationOptions(),
@@ -114,7 +110,7 @@ function Dashboard() {
   const confirmDeleteStepp = async () => {
     if (selectedSteppForAction) {
       try {
-        await deleteGuideMutation.mutateAsync({ id: selectedSteppForAction.id });
+        await deleteGuideMutation.mutateAsync({ id: selectedSteppForAction.guideId });
         setDeleteSteppOpen(false);
         toast.success(`Stepp "${selectedSteppForAction.title}" deleted`);
         setSelectedSteppForAction(null);
@@ -133,10 +129,10 @@ function Dashboard() {
     if (selectedSteppForAction) {
       try {
         await updateGuideMutation.mutateAsync({
-          id: selectedSteppForAction.id,
+          id: selectedSteppForAction.guideId,
           data: { folderId: folderId ?? undefined },
         });
-        const folderName = folderId ? folders?.find(f => f.id === folderId)?.name : undefined;
+        const folderName = folderId ? folders?.find(f => f.folderId === folderId)?.name : undefined;
         setMoveSteppOpen(false);
         toast.success(`Stepp moved to ${folderName || "Root"}`);
         setSelectedSteppForAction(null);

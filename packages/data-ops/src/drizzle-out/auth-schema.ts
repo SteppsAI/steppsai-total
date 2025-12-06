@@ -1,40 +1,84 @@
-import { pgSchema, uuid, timestamp, text, boolean, jsonb, smallint } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, index, jsonb, uuid } from "drizzle-orm/pg-core";
 
-export const authSchema = pgSchema("auth");
-
-export const authUsers = authSchema.table("users", {
-    instanceId: uuid("instance_id"),
-    id: uuid("id").primaryKey().notNull(),
-    aud: text("aud"),
-    role: text("role"),
-    email: text("email"),
-    encryptedPassword: text("encrypted_password"),
-    emailConfirmedAt: timestamp("email_confirmed_at", { withTimezone: true, mode: 'string' }),
-    invitedAt: timestamp("invited_at", { withTimezone: true, mode: 'string' }),
-    confirmationToken: text("confirmation_token"),
-    confirmationSentAt: timestamp("confirmation_sent_at", { withTimezone: true, mode: 'string' }),
-    recoveryToken: text("recovery_token"),
-    recoverySentAt: timestamp("recovery_sent_at", { withTimezone: true, mode: 'string' }),
-    emailChangeTokenNew: text("email_change_token_new"),
-    emailChange: text("email_change"),
-    emailChangeSentAt: timestamp("email_change_sent_at", { withTimezone: true, mode: 'string' }),
-    lastSignInAt: timestamp("last_sign_in_at", { withTimezone: true, mode: 'string' }),
-    rawAppMetaData: jsonb("raw_app_meta_data"),
-    rawUserMetaData: jsonb("raw_user_meta_data"),
-    isSuperAdmin: boolean("is_super_admin"),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }),
-    phone: text("phone"),
-    phoneConfirmedAt: timestamp("phone_confirmed_at", { withTimezone: true, mode: 'string' }),
-    phoneChange: text("phone_change").default(''),
-    phoneChangeToken: text("phone_change_token").default(''),
-    phoneChangeSentAt: timestamp("phone_change_sent_at", { withTimezone: true, mode: 'string' }),
-    emailChangeTokenCurrent: text("email_change_token_current").default(''),
-    emailChangeConfirmStatus: smallint("email_change_confirm_status").default(0),
-    bannedUntil: timestamp("banned_until", { withTimezone: true, mode: 'string' }),
-    reauthenticationToken: text("reauthentication_token").default(''),
-    reauthenticationSentAt: timestamp("reauthentication_sent_at", { withTimezone: true, mode: 'string' }),
-    isSsoUser: boolean("is_sso_user").default(false).notNull(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true, mode: 'string' }),
-    isAnonymous: boolean("is_anonymous").default(false).notNull(),
+// Better Auth - Users table with custom columns
+export const user = pgTable("users", {
+  userId: uuid("user_id").defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  emailVerified: boolean("email_verified").default(false).notNull(),
+  image: text("image"),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' })
+    .defaultNow()
+    .$onUpdate(() => new Date().toISOString())
+    .notNull(),
+  // Custom app columns
+  avatarUrl: text("avatar_url"),
+  notificationPreferences: jsonb("notification_preferences").default({ newsletter: true }),
+  // Creem customer ID for payments
+  creemCustomerId: text("creem_customer_id"),
 });
+
+// Better Auth - Sessions table
+export const session = pgTable(
+  "sessions",
+  {
+    sessionId: uuid("session_id").defaultRandom().primaryKey(),
+    expiresAt: timestamp("expires_at").notNull(),
+    token: text("token").notNull().unique(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => user.userId, { onDelete: "cascade" }),
+  },
+  (table) => [index("sessions_userId_idx").on(table.userId)],
+);
+
+// Better Auth - Accounts table (OAuth providers)
+export const account = pgTable(
+  "accounts",
+  {
+    accountId: uuid("account_id").defaultRandom().primaryKey(),
+    providerAccountId: text("provider_account_id").notNull(),
+    providerId: text("provider_id").notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => user.userId, { onDelete: "cascade" }),
+    accessToken: text("access_token"),
+    refreshToken: text("refresh_token"),
+    idToken: text("id_token"),
+    accessTokenExpiresAt: timestamp("access_token_expires_at"),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
+    scope: text("scope"),
+    password: text("password"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("accounts_userId_idx").on(table.userId)],
+);
+
+// Better Auth - Verification tokens
+export const verification = pgTable(
+  "verifications",
+  {
+    verificationId: uuid("verification_id").defaultRandom().primaryKey(),
+    identifier: text("identifier").notNull(),
+    value: text("value").notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("verifications_identifier_idx").on(table.identifier)],
+);

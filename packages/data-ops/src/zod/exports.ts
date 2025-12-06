@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const exportsSchema = z.object({
-	id: z.string().uuid(),
+	exportId: z.string().uuid(),
 	guideId: z.string().uuid(),
 	type: z.enum(["pdf", "carousel", "markdown"]),
 	fileUrl: z.string().url().optional(),
@@ -10,7 +10,7 @@ export const exportsSchema = z.object({
 });
 
 
-export const createExportSchema = exportsSchema.omit({ id: true, createdAt: true });
+export const createExportSchema = exportsSchema.omit({ exportId: true, createdAt: true });
 
 export type ExportsSchemaType = z.infer<typeof exportsSchema>;
 export type CreateExportSchemaType = z.infer<typeof createExportSchema>;

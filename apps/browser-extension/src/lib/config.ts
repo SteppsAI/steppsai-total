@@ -1,28 +1,23 @@
 /**
  * Extension Configuration
  * 
- * URLs for different environments
+ * URLs from environment variables with stage fallbacks
  */
 
 // User Application (Frontend + tRPC API)
-export const USER_APP_URL = {
-    stage: 'https://user-application-stage.flat-dream-7a29.workers.dev',
-    production: 'https://stepps.ai', // TODO: Update when ready
-} as const;
+export const WEB_APP_URL = import.meta.env.VITE_USER_APP_URL
+    || import.meta.env.VITE_USER_APP_URL_STAGE
+    || 'https://user-application-stage.flat-dream-7a29.workers.dev';
 
 // Data Service (Images only - direct access for serving)
-export const DATA_SERVICE_URL = {
-    stage: 'https://data-service-stage.flat-dream-7a29.workers.dev',
-    production: 'https://api.stepps.ai', // TODO: Update when ready
-} as const;
+export const IMAGES_URL = import.meta.env.VITE_DATA_SERVICE_URL
+    || import.meta.env.VITE_DATA_SERVICE_URL_STAGE
+    || 'https://data-service-stage.flat-dream-7a29.workers.dev';
 
-// Current environment
-const ENV = 'stage' as const;
+// tRPC endpoint
+export const TRPC_URL = `${WEB_APP_URL}/trpc`;
 
-// Export active URLs
-export const TRPC_URL = `${USER_APP_URL[ENV]}/trpc`;
-export const WEB_APP_URL = USER_APP_URL[ENV];
-export const IMAGES_URL = DATA_SERVICE_URL[ENV];
+
 
 
 

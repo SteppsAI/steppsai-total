@@ -92,12 +92,12 @@ export function RecentStepps({ isLoading, stepps = [], onDelete, onMove }: Recen
             // Get first step's imageKey for thumbnail
             const firstStepImage = stepp.steps?.[0]?.imageKey;
             return (
-              <div key={stepp.id} className={index >= 2 ? "hidden lg:block" : ""}>
+              <div key={stepp.guideId} className={index >= 2 ? "hidden lg:block" : ""}>
                 <DashboardCard
                   title={stepp.title || "Untitled Stepp"}
                   image={firstStepImage || "/default-preview.svg"}
-                  viewUrl={`/app/stepps/${stepp.id}`}
-                  onEdit={() => navigate({ to: `/app/editor/${stepp.id}` })}
+                  viewUrl={`/app/stepps/${stepp.guideId}`}
+                  onEdit={() => navigate({ to: `/app/editor/${stepp.guideId}` })}
                   onShare={() => setShareGuide(stepp)}
                   onDelete={onDelete ? () => onDelete(stepp) : undefined}
                   onMove={onMove ? () => onMove(stepp) : undefined}
@@ -122,16 +122,16 @@ export function RecentStepps({ isLoading, stepps = [], onDelete, onMove }: Recen
           open={!!shareGuide}
           onOpenChange={(open) => !open && setShareGuide(null)}
           guideTitle={shareGuide.title || "Untitled Stepp"}
-          guideId={shareGuide.id}
+          guideId={shareGuide.guideId}
         />
       )}
 
       {exportGuide && (
         <ExportDialog
-            open={!!exportGuide}
-            onOpenChange={(open) => !open && setExportGuide(null)}
-            guideTitle={exportGuide.title || "Untitled Stepp"}
-            guideId={exportGuide.id}
+          open={!!exportGuide}
+          onOpenChange={(open) => !open && setExportGuide(null)}
+          guideTitle={exportGuide.title || "Untitled Stepp"}
+          guideId={exportGuide.guideId}
         />
       )}
     </section>

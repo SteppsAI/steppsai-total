@@ -44,7 +44,7 @@ export class GuidePdfExportWorkflow extends WorkflowEntrypoint<Env, ExportParams
         const htmlContent = await step.do('Generate HTML with Images', retryConfig, async () => {
             const steps = (guide.steps || []) as Step[];
             console.log('🖼️ Preparing images for', steps.length, 'steps');
-            
+
             // ImageMap now includes aspect ratio for proper overlay scaling
             const imageMap: Record<string, ImageDataResult> = {};
 
@@ -56,7 +56,7 @@ export class GuidePdfExportWorkflow extends WorkflowEntrypoint<Env, ExportParams
 
                 console.log(`📥 Fetching image for step ${stepItem.id}: ${stepItem.imageKey}`);
                 const imageData = await imageToBase64DataUrl(this.env.BUCKET, stepItem.imageKey);
-                
+
                 if (imageData) {
                     imageMap[stepItem.id] = imageData;
                     console.log(`✅ Image loaded for step ${stepItem.id} (${imageData.dataUrl.length} chars, AR: ${imageData.aspectRatio.toFixed(2)})`);
@@ -67,10 +67,10 @@ export class GuidePdfExportWorkflow extends WorkflowEntrypoint<Env, ExportParams
 
             console.log(`📊 Loaded ${Object.keys(imageMap).length} images`);
             console.log('📄 Generating HTML...');
-            
+
             const html = generateExportHtml(guide, imageMap);
             console.log(`✅ HTML generated: ${html.length} bytes`);
-            
+
             return html;
         });
 
@@ -102,29 +102,43 @@ export class GuidePdfExportWorkflow extends WorkflowEntrypoint<Env, ExportParams
         });
 
         // Step 4: Render PDF (if format is pdf)
-        let fileContent: Uint8Array | string;
+        // For PDFs: Store temporarily in R2 to avoid 1 MiB step output limit
+        // For HTML: Store temporarily in R2 as well for consistency with large guides
+        const tempR2Key = await step.do('Render Export', retryConfig, async () => {
+            const tempKey = `temp-exports/${userId}/${guideId}/${uuidv4()}.${format === 'pdf' ? 'pdf' : 'html'}`;
 
-        if (format === 'pdf') {
-            fileContent = await step.do('Render PDF', retryConfig, async () => {
+            if (format === 'pdf') {
                 console.log('🎨 Rendering PDF...');
                 console.log(`📊 HTML size for PDF: ${htmlContent.length} bytes`);
 
                 try {
                     const pdfBytes = await renderGuideToPdf(this.env, htmlContent);
                     console.log(`✅ PDF rendered: ${pdfBytes.length} bytes`);
-                    return pdfBytes;
+
+                    // Store PDF in R2 temporarily to avoid step output size limit
+                    await this.env.BUCKET.put(tempKey, pdfBytes, {
+                        httpMetadata: { contentType: 'application/pdf' }
+                    });
+                    console.log(`📦 PDF stored temporarily at: ${tempKey}`);
+
+                    return tempKey;
                 } catch (error) {
                     console.error('❌ PDF render failed:', error);
                     initDatabase(this.env.DATABASE_URL);
                     await updateGuideExportStatus(guideId, format, 'FAILED');
                     throw error;
                 }
-            });
-        } else {
-            fileContent = htmlContent;
-        }
+            } else {
+                // Store HTML in R2 temporarily as well (large guides can exceed limit)
+                await this.env.BUCKET.put(tempKey, htmlContent, {
+                    httpMetadata: { contentType: 'text/html' }
+                });
+                console.log(`📦 HTML stored temporarily at: ${tempKey}`);
+                return tempKey;
+            }
+        });
 
-        // Step 5: Upload to R2 and update DB to COMPLETED
+        // Step 5: Move from temp location to final location and update DB to COMPLETED
         await step.do('Upload Export', retryConfig, async () => {
             initDatabase(this.env.DATABASE_URL);
 
@@ -133,13 +147,26 @@ export class GuidePdfExportWorkflow extends WorkflowEntrypoint<Env, ExportParams
             const r2Key = `exports/${userId}/${guideId}/${fileId}.${extension}`;
             const contentType = format === 'pdf' ? 'application/pdf' : 'text/html';
 
-            console.log(`☁️ Uploading to R2: ${r2Key}`);
+            console.log(`☁️ Moving from temp to final location: ${r2Key}`);
 
             try {
+                // Fetch from temp location
+                const tempObject = await this.env.BUCKET.get(tempR2Key);
+                if (!tempObject) {
+                    throw new Error(`Temp file not found: ${tempR2Key}`);
+                }
+
+                const fileContent = await tempObject.arrayBuffer();
+
+                // Upload to final location
                 await this.env.BUCKET.put(r2Key, fileContent, {
                     httpMetadata: { contentType }
                 });
                 console.log('✅ Upload successful');
+
+                // Delete temp file
+                await this.env.BUCKET.delete(tempR2Key);
+                console.log('🗑️ Temp file deleted');
 
                 const baseUrl = this.env.ASSETS_URL ?? 'https://stepps-assets-stage.stepps.ai';
                 const publicUrl = `${baseUrl}/${r2Key}`;

@@ -1,50 +1,69 @@
 import { relations } from "drizzle-orm/relations";
-import { users, subscriptions, teamMembers, folders, guides, exports } from "./schema";
+import { subscriptions, teamMembers, folders, guides, exports } from "./schema";
+import { user, session, account } from "./auth-schema";
 
-export const usersRelations = relations(users, ({ many }) => ({
+// Better Auth Relations
+export const userRelations = relations(user, ({ many }) => ({
+	sessions: many(session),
+	accounts: many(account),
 	subscriptions: many(subscriptions),
-	ownedTeamMembers: many(teamMembers, { relationName: "teamMembers_ownerId_fkey" }),
-	memberTeamMembers: many(teamMembers, { relationName: "teamMembers_memberId_fkey" }),
+	ownedTeams: many(teamMembers, { relationName: "teamMembers_ownerId" }),
+	memberOfTeams: many(teamMembers, { relationName: "teamMembers_memberId" }),
 	folders: many(folders),
 	guides: many(guides),
 }));
 
+export const sessionRelations = relations(session, ({ one }) => ({
+	user: one(user, {
+		fields: [session.userId],
+		references: [user.userId],
+	}),
+}));
+
+export const accountRelations = relations(account, ({ one }) => ({
+	user: one(user, {
+		fields: [account.userId],
+		references: [user.userId],
+	}),
+}));
+
+// App Relations
 export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
-	user: one(users, {
+	user: one(user, {
 		fields: [subscriptions.userId],
-		references: [users.userId],
+		references: [user.userId],
 	}),
 }));
 
 export const teamMembersRelations = relations(teamMembers, ({ one }) => ({
-	owner: one(users, {
+	owner: one(user, {
 		fields: [teamMembers.ownerId],
-		references: [users.userId],
-		relationName: "teamMembers_ownerId_fkey",
+		references: [user.userId],
+		relationName: "teamMembers_ownerId",
 	}),
-	member: one(users, {
+	member: one(user, {
 		fields: [teamMembers.memberId],
-		references: [users.userId],
-		relationName: "teamMembers_memberId_fkey",
+		references: [user.userId],
+		relationName: "teamMembers_memberId",
 	}),
 }));
 
 export const foldersRelations = relations(folders, ({ one, many }) => ({
-	user: one(users, {
+	user: one(user, {
 		fields: [folders.userId],
-		references: [users.userId],
+		references: [user.userId],
 	}),
 	guides: many(guides),
 }));
 
 export const guidesRelations = relations(guides, ({ one, many }) => ({
-	user: one(users, {
+	user: one(user, {
 		fields: [guides.userId],
-		references: [users.userId],
+		references: [user.userId],
 	}),
 	folder: one(folders, {
 		fields: [guides.folderId],
-		references: [folders.id],
+		references: [folders.folderId],
 	}),
 	exports: many(exports),
 }));
@@ -52,6 +71,6 @@ export const guidesRelations = relations(guides, ({ one, many }) => ({
 export const exportsRelations = relations(exports, ({ one }) => ({
 	guide: one(guides, {
 		fields: [exports.guideId],
-		references: [guides.id],
+		references: [guides.guideId],
 	}),
 }));

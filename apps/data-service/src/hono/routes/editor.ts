@@ -1,6 +1,9 @@
 import { Hono } from 'hono';
 
-export const editorRouter = new Hono<{ Bindings: Env }>();
+export const editorRouter = new Hono<{
+	Bindings: Env;
+	Variables: { userId: string };
+}>();
 
 // GET /state - Get session state
 editorRouter.get('/:guideId/state', async (c) => {

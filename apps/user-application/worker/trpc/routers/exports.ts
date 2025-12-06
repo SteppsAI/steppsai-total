@@ -1,13 +1,16 @@
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc-instance";
-import { TRPCError } from "@trpc/server";
 import { getUserGuides } from "@repo/data-ops/queries";
 
+/**
+ * Guide Exports tRPC Router
+ * 
+ * Uses data-ops for direct DB queries.
+ * Uses BACKEND_SERVICE RPC for triggering exports.
+ */
 export const guideExportsRouter = router({
-    getAll: publicProcedure.query(async () => {
-        // TODO: Get userId from context (auth)
-        const userId = "f1d84914-ec7c-4b1a-9a89-eaeff6b2f366"; // Hardcoded for now
-        const guides = await getUserGuides(userId);
+    getAll: publicProcedure.query(async ({ ctx }) => {
+        const guides = await getUserGuides(ctx.userInfo.userId);
 
         // Transform guides with exported_docs into flat list of exports
         const exports = guides.flatMap(guide => {
@@ -20,8 +23,8 @@ export const guideExportsRouter = router({
             }>;
 
             return Object.entries(exportedDocs).map(([type, doc]) => ({
-                id: `${guide.id}-${type}`,
-                guideId: guide.id,
+                id: `${guide.guideId}-${type}`,
+                guideId: guide.guideId,
                 guideTitle: guide.title || "Untitled Guide",
                 type: type as "pdf" | "html" | "markdown",
                 fileUrl: doc.url || null,
@@ -40,38 +43,17 @@ export const guideExportsRouter = router({
         return exports;
     }),
 
+    // Trigger export via RPC (workflow)
     triggerExport: publicProcedure
         .input(z.object({
             guideId: z.string(),
             format: z.enum(["pdf", "html"]),
         }))
         .mutation(async ({ input, ctx }) => {
-            const { guideId, format } = input;
-
-            try {
-                // Call data-service Hono route - only send guideId and format
-                // The workflow will fetch guide data and generate HTML server-side
-                const response = await ctx.env.BACKEND_SERVICE.fetch(
-                    new Request('https://internal/exports/trigger', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ guideId, format }),
-                    })
-                );
-
-                if (!response.ok) {
-                    const error = await response.json() as { error?: string };
-                    throw new Error(error.error || 'Failed to trigger export');
-                }
-
-                const result = await response.json() as { success: boolean; status: string };
-                return result;
-            } catch (error) {
-                console.error("Failed to trigger export workflow:", error);
-                throw new TRPCError({
-                    code: 'INTERNAL_SERVER_ERROR',
-                    message: 'Failed to start export process',
-                });
-            }
+            const backend = ctx.env.BACKEND_SERVICE as any;
+            await backend.triggerExport(input.guideId, input.format);
+            return { success: true };
         }),
 });
+
+

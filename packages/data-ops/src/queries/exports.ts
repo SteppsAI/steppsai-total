@@ -6,17 +6,17 @@ import { v4 as uuidv4 } from "uuid";
 
 export async function createExport(data: CreateExportSchemaType): Promise<string> {
 	const db = getDb();
-	const id = uuidv4();
+	const exportId = uuidv4();
 
 	await db.insert(exportsTable).values({
-		id,
+		exportId,
 		guideId: data.guideId,
 		type: data.type,
 		fileUrl: data.fileUrl,
 		status: data.status || "processing",
 	});
 
-	return id;
+	return exportId;
 }
 
 export async function getExportsByGuide(guideId: string): Promise<ExportsSchemaType[]> {
@@ -37,7 +37,7 @@ export async function getExport(exportId: string): Promise<ExportsSchemaType | n
 	const result = await db
 		.select()
 		.from(exportsTable)
-		.where(eq(exportsTable.id, exportId))
+		.where(eq(exportsTable.exportId, exportId))
 		.limit(1);
 
 	if (!result.length) return null;
@@ -53,11 +53,11 @@ export async function updateExportStatus(exportId: string, status: ExportsSchema
 			status,
 			...(fileUrl && { fileUrl }),
 		})
-		.where(eq(exportsTable.id, exportId));
+		.where(eq(exportsTable.exportId, exportId));
 }
 
 export async function deleteExport(exportId: string): Promise<void> {
 	const db = getDb();
 
-	await db.delete(exportsTable).where(eq(exportsTable.id, exportId));
+	await db.delete(exportsTable).where(eq(exportsTable.exportId, exportId));
 }

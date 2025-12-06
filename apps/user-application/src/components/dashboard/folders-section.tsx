@@ -47,16 +47,16 @@ export function FoldersSection({ isLoading, folders = [], onRename, onDelete }: 
       {hasFolders ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {folders?.slice(0, 4).map((folder, index) => (
-            <div key={folder.id} className={index >= 2 ? "hidden lg:block" : ""}>
+            <div key={folder.folderId} className={index >= 2 ? "hidden lg:block" : ""}>
               <FolderCard
                 folder={{
-                  id: folder.id,
+                  folderId: folder.folderId,
                   name: folder.name,
                   guideCount: folder.guideCount || 0,
                 }}
                 onRename={onRename}
                 onDelete={onDelete}
-                onClick={() => navigate({ to: "/app/folder/$folderId", params: { folderId: folder.id } })}
+                onClick={() => navigate({ to: "/app/folder/$folderId", params: { folderId: folder.folderId } })}
               />
             </div>
           ))}

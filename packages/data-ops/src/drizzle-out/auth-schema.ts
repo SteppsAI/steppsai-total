@@ -1,6 +1,6 @@
 import { pgTable, text, timestamp, boolean, index, jsonb, uuid } from "drizzle-orm/pg-core";
 
-// Better-auth user table - renamed to "users" with userId as primary key
+// Better Auth - Users table with custom columns
 export const user = pgTable("users", {
   userId: uuid("user_id").defaultRandom().primaryKey(),
   name: text("name").notNull(),
@@ -15,16 +15,20 @@ export const user = pgTable("users", {
   // Custom app columns
   avatarUrl: text("avatar_url"),
   notificationPreferences: jsonb("notification_preferences").default({ newsletter: true }),
+  // Creem customer ID for payments
+  creemCustomerId: text("creem_customer_id"),
 });
 
+// Better Auth - Sessions table
 export const session = pgTable(
-  "session",
+  "sessions",
   {
-    id: text("id").primaryKey(),
+    sessionId: uuid("session_id").defaultRandom().primaryKey(),
     expiresAt: timestamp("expires_at").notNull(),
     token: text("token").notNull().unique(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
+      .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
     ipAddress: text("ip_address"),
@@ -33,14 +37,15 @@ export const session = pgTable(
       .notNull()
       .references(() => user.userId, { onDelete: "cascade" }),
   },
-  (table) => [index("session_userId_idx").on(table.userId)],
+  (table) => [index("sessions_userId_idx").on(table.userId)],
 );
 
+// Better Auth - Accounts table (OAuth providers)
 export const account = pgTable(
-  "account",
+  "accounts",
   {
-    id: text("id").primaryKey(),
-    accountId: text("account_id").notNull(),
+    accountId: uuid("account_id").defaultRandom().primaryKey(),
+    providerAccountId: text("provider_account_id").notNull(),
     providerId: text("provider_id").notNull(),
     userId: uuid("user_id")
       .notNull()
@@ -54,16 +59,18 @@ export const account = pgTable(
     password: text("password"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
+      .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
   },
-  (table) => [index("account_userId_idx").on(table.userId)],
+  (table) => [index("accounts_userId_idx").on(table.userId)],
 );
 
+// Better Auth - Verification tokens
 export const verification = pgTable(
-  "verification",
+  "verifications",
   {
-    id: text("id").primaryKey(),
+    verificationId: uuid("verification_id").defaultRandom().primaryKey(),
     identifier: text("identifier").notNull(),
     value: text("value").notNull(),
     expiresAt: timestamp("expires_at").notNull(),
@@ -73,5 +80,5 @@ export const verification = pgTable(
       .$onUpdate(() => new Date())
       .notNull(),
   },
-  (table) => [index("verification_identifier_idx").on(table.identifier)],
+  (table) => [index("verifications_identifier_idx").on(table.identifier)],
 );

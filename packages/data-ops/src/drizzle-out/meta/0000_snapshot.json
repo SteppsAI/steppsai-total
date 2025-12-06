@@ -1,21 +1,22 @@
 {
-  "id": "4484f9cc-599b-450e-ab90-8002c24ed0c9",
+  "id": "5011df3d-f8b5-4302-b24d-a6bd4159286e",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.account": {
-      "name": "account",
+    "public.accounts": {
+      "name": "accounts",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
         "account_id": {
           "name": "account_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "provider_account_id": {
+          "name": "provider_account_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -85,12 +86,13 @@
           "name": "updated_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {
-        "account_userId_idx": {
-          "name": "account_userId_idx",
+        "accounts_userId_idx": {
+          "name": "accounts_userId_idx",
           "columns": [
             {
               "expression": "user_id",
@@ -106,9 +108,9 @@
         }
       },
       "foreignKeys": {
-        "account_user_id_users_user_id_fk": {
-          "name": "account_user_id_users_user_id_fk",
-          "tableFrom": "account",
+        "accounts_user_id_users_user_id_fk": {
+          "name": "accounts_user_id_users_user_id_fk",
+          "tableFrom": "accounts",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
@@ -126,15 +128,16 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.session": {
-      "name": "session",
+    "public.sessions": {
+      "name": "sessions",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
+        "session_id": {
+          "name": "session_id",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "expires_at": {
           "name": "expires_at",
@@ -159,7 +162,8 @@
           "name": "updated_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "now()"
         },
         "ip_address": {
           "name": "ip_address",
@@ -181,8 +185,8 @@
         }
       },
       "indexes": {
-        "session_userId_idx": {
-          "name": "session_userId_idx",
+        "sessions_userId_idx": {
+          "name": "sessions_userId_idx",
           "columns": [
             {
               "expression": "user_id",
@@ -198,9 +202,9 @@
         }
       },
       "foreignKeys": {
-        "session_user_id_users_user_id_fk": {
-          "name": "session_user_id_users_user_id_fk",
-          "tableFrom": "session",
+        "sessions_user_id_users_user_id_fk": {
+          "name": "sessions_user_id_users_user_id_fk",
+          "tableFrom": "sessions",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
@@ -214,8 +218,8 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "session_token_unique": {
-          "name": "session_token_unique",
+        "sessions_token_unique": {
+          "name": "sessions_token_unique",
           "nullsNotDistinct": false,
           "columns": [
             "token"
@@ -288,6 +292,12 @@
           "primaryKey": false,
           "notNull": false,
           "default": "'{\"newsletter\":true}'::jsonb"
+        },
+        "creem_customer_id": {
+          "name": "creem_customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -306,15 +316,16 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.verification": {
-      "name": "verification",
+    "public.verifications": {
+      "name": "verifications",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
+        "verification_id": {
+          "name": "verification_id",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "identifier": {
           "name": "identifier",
@@ -350,8 +361,8 @@
         }
       },
       "indexes": {
-        "verification_identifier_idx": {
-          "name": "verification_identifier_idx",
+        "verifications_identifier_idx": {
+          "name": "verifications_identifier_idx",
           "columns": [
             {
               "expression": "identifier",
@@ -377,8 +388,8 @@
       "name": "exports",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "export_id": {
+          "name": "export_id",
           "type": "uuid",
           "primaryKey": true,
           "notNull": true,
@@ -416,17 +427,33 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "exports_guideId_idx": {
+          "name": "exports_guideId_idx",
+          "columns": [
+            {
+              "expression": "guide_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
-        "exports_guide_id_guides_id_fk": {
-          "name": "exports_guide_id_guides_id_fk",
+        "exports_guide_id_guides_guide_id_fk": {
+          "name": "exports_guide_id_guides_guide_id_fk",
           "tableFrom": "exports",
           "tableTo": "guides",
           "columnsFrom": [
             "guide_id"
           ],
           "columnsTo": [
-            "id"
+            "guide_id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -442,8 +469,8 @@
       "name": "folders",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "folder_id": {
+          "name": "folder_id",
           "type": "uuid",
           "primaryKey": true,
           "notNull": true,
@@ -469,7 +496,23 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "folders_userId_idx": {
+          "name": "folders_userId_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "folders_user_id_users_user_id_fk": {
           "name": "folders_user_id_users_user_id_fk",
@@ -495,8 +538,8 @@
       "name": "guides",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "guide_id": {
+          "name": "guide_id",
           "type": "uuid",
           "primaryKey": true,
           "notNull": true,
@@ -574,7 +617,53 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "guides_userId_idx": {
+          "name": "guides_userId_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "guides_folderId_idx": {
+          "name": "guides_folderId_idx",
+          "columns": [
+            {
+              "expression": "folder_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "guides_slug_idx": {
+          "name": "guides_slug_idx",
+          "columns": [
+            {
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "guides_user_id_users_user_id_fk": {
           "name": "guides_user_id_users_user_id_fk",
@@ -589,15 +678,15 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "guides_folder_id_folders_id_fk": {
-          "name": "guides_folder_id_folders_id_fk",
+        "guides_folder_id_folders_folder_id_fk": {
+          "name": "guides_folder_id_folders_folder_id_fk",
           "tableFrom": "guides",
           "tableTo": "folders",
           "columnsFrom": [
             "folder_id"
           ],
           "columnsTo": [
-            "id"
+            "folder_id"
           ],
           "onDelete": "set null",
           "onUpdate": "no action"
@@ -621,11 +710,12 @@
       "name": "subscriptions",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
+        "subscription_id": {
+          "name": "subscription_id",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "name": "user_id",
@@ -633,8 +723,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "stripe_customer_id": {
-          "name": "stripe_customer_id",
+        "creem_customer_id": {
+          "name": "creem_customer_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -664,7 +754,23 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "subscriptions_userId_idx": {
+          "name": "subscriptions_userId_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "subscriptions_user_id_users_user_id_fk": {
           "name": "subscriptions_user_id_users_user_id_fk",
@@ -690,8 +796,8 @@
       "name": "team_members",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "team_member_id": {
+          "name": "team_member_id",
           "type": "uuid",
           "primaryKey": true,
           "notNull": true,
@@ -729,7 +835,38 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "teamMembers_ownerId_idx": {
+          "name": "teamMembers_ownerId_idx",
+          "columns": [
+            {
+              "expression": "owner_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "teamMembers_memberId_idx": {
+          "name": "teamMembers_memberId_idx",
+          "columns": [
+            {
+              "expression": "member_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "team_members_owner_id_users_user_id_fk": {
           "name": "team_members_owner_id_users_user_id_fk",

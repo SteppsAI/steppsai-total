@@ -110,7 +110,7 @@ function Dashboard() {
   const confirmDeleteStepp = async () => {
     if (selectedSteppForAction) {
       try {
-        await deleteGuideMutation.mutateAsync({ id: selectedSteppForAction.id });
+        await deleteGuideMutation.mutateAsync({ id: selectedSteppForAction.guideId });
         setDeleteSteppOpen(false);
         toast.success(`Stepp "${selectedSteppForAction.title}" deleted`);
         setSelectedSteppForAction(null);
@@ -129,10 +129,10 @@ function Dashboard() {
     if (selectedSteppForAction) {
       try {
         await updateGuideMutation.mutateAsync({
-          id: selectedSteppForAction.id,
+          id: selectedSteppForAction.guideId,
           data: { folderId: folderId ?? undefined },
         });
-        const folderName = folderId ? folders?.find(f => f.id === folderId)?.name : undefined;
+        const folderName = folderId ? folders?.find(f => f.folderId === folderId)?.name : undefined;
         setMoveSteppOpen(false);
         toast.success(`Stepp moved to ${folderName || "Root"}`);
         setSelectedSteppForAction(null);

@@ -60,23 +60,23 @@ export function DashboardHeader() {
       // Check for single match redirect
       // Only redirect if we are not loading to ensure accurate count
       if (!isLoadingGuides && !isLoadingFolders) {
-         if (filteredFolders.length === 1 && filteredGuides.length === 0) {
-           navigate({ to: "/app/folder/$folderId", params: { folderId: filteredFolders[0].id } });
-           setIsMobileSearchOpen(false);
-           inputRef.current?.blur();
-           setSearchQuery("");
-           sessionStorage.removeItem('searchQuery');
-           return;
-         }
-         
-         if (filteredFolders.length === 0 && filteredGuides.length === 1) {
-           navigate({ to: "/app/stepps/$guideId", params: { guideId: filteredGuides[0].id } });
-           setIsMobileSearchOpen(false);
-           inputRef.current?.blur();
-           setSearchQuery("");
-           sessionStorage.removeItem('searchQuery');
-           return;
-         }
+        if (filteredFolders.length === 1 && filteredGuides.length === 0) {
+          navigate({ to: "/app/folder/$folderId", params: { folderId: filteredFolders[0].folderId } });
+          setIsMobileSearchOpen(false);
+          inputRef.current?.blur();
+          setSearchQuery("");
+          sessionStorage.removeItem('searchQuery');
+          return;
+        }
+
+        if (filteredFolders.length === 0 && filteredGuides.length === 1) {
+          navigate({ to: "/app/stepps/$guideId", params: { guideId: filteredGuides[0].guideId } });
+          setIsMobileSearchOpen(false);
+          inputRef.current?.blur();
+          setSearchQuery("");
+          sessionStorage.removeItem('searchQuery');
+          return;
+        }
       }
 
       // Always update session storage for page filtering
@@ -202,9 +202,9 @@ export function DashboardHeader() {
                               <CommandGroup heading="Folders">
                                 {filteredFolders.map((folder) => (
                                   <CommandItem
-                                    key={folder.id}
-                                    value={folder.id}
-                                    onSelect={() => handleSelectFolder(folder.id)}
+                                    key={folder.folderId}
+                                    value={folder.folderId}
+                                    onSelect={() => handleSelectFolder(folder.folderId)}
                                     className="cursor-pointer mx-1 my-0.5 rounded-md px-3 py-2.5 data-[selected=true]:bg-muted/80 hover:bg-muted/60 transition-colors"
                                   >
                                     <FolderIcon className="mr-3 size-4 text-muted-foreground shrink-0" />
@@ -217,9 +217,9 @@ export function DashboardHeader() {
                               <CommandGroup heading="Stepps">
                                 {filteredGuides.map((guide) => (
                                   <CommandItem
-                                    key={guide.id}
-                                    value={guide.id}
-                                    onSelect={() => handleSelectGuide(guide.id)}
+                                    key={guide.guideId}
+                                    value={guide.guideId}
+                                    onSelect={() => handleSelectGuide(guide.guideId)}
                                     className="cursor-pointer mx-1 my-0.5 rounded-md px-3 py-2.5 data-[selected=true]:bg-muted/80 hover:bg-muted/60 transition-colors"
                                   >
                                     <FileText className="mr-3 size-4 text-muted-foreground shrink-0" />

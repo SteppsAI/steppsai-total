@@ -63,7 +63,7 @@ export const guidesRelations = relations(guides, ({ one, many }) => ({
 	}),
 	folder: one(folders, {
 		fields: [guides.folderId],
-		references: [folders.id],
+		references: [folders.folderId],
 	}),
 	exports: many(exports),
 }));
@@ -71,6 +71,6 @@ export const guidesRelations = relations(guides, ({ one, many }) => ({
 export const exportsRelations = relations(exports, ({ one }) => ({
 	guide: one(guides, {
 		fields: [exports.guideId],
-		references: [guides.id],
+		references: [guides.guideId],
 	}),
 }));

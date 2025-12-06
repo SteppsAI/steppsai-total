@@ -22,7 +22,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 interface FolderOption {
-    id: string;
+    folderId: string;
     name: string;
 }
 
@@ -76,11 +76,11 @@ export function MoveSteppDialog({
 
             {folders.map((folder) => (
                 <button
-                    key={folder.id}
-                    onClick={() => setSelectedFolderId(folder.id)}
+                    key={folder.folderId}
+                    onClick={() => setSelectedFolderId(folder.folderId)}
                     className={cn(
                         "flex items-center justify-between w-full p-3 rounded-lg border transition-all text-sm",
-                        selectedFolderId === folder.id
+                        selectedFolderId === folder.folderId
                             ? "border-primary bg-primary/5 text-primary"
                             : "border-border hover:bg-muted/50"
                     )}
@@ -88,13 +88,13 @@ export function MoveSteppDialog({
                     <div className="flex items-center gap-3">
                         <div className={cn(
                             "p-2 rounded-md",
-                            selectedFolderId === folder.id ? "bg-primary/10" : "bg-muted"
+                            selectedFolderId === folder.folderId ? "bg-primary/10" : "bg-muted"
                         )}>
                             <FolderIcon className="size-4" />
                         </div>
                         <span className="font-medium truncate">{folder.name}</span>
                     </div>
-                    {selectedFolderId === folder.id && <Check className="size-4" />}
+                    {selectedFolderId === folder.folderId && <Check className="size-4" />}
                 </button>
             ))}
         </div>

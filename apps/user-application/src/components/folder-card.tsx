@@ -9,7 +9,7 @@ import {
 
 interface FolderCardProps {
     folder: {
-        id: string;
+        folderId: string;
         name: string;
         guideCount: number;
     };
@@ -42,7 +42,7 @@ export function FolderCard({ folder, onRename, onDelete, onClick }: FolderCardPr
                         <DropdownMenuItem
                             onClick={(e) => {
                                 e.stopPropagation();
-                                onRename?.(folder.id, folder.name);
+                                onRename?.(folder.folderId, folder.name);
                             }}
                             className="cursor-pointer"
                         >
@@ -52,7 +52,7 @@ export function FolderCard({ folder, onRename, onDelete, onClick }: FolderCardPr
                             className="text-destructive cursor-pointer"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                onDelete?.(folder.id, folder.name);
+                                onDelete?.(folder.folderId, folder.name);
                             }}
                         >
                             Delete

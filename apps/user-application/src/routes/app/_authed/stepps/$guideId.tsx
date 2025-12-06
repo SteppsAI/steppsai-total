@@ -65,7 +65,7 @@ function GuideViewPage() {
               <span className="hidden sm:inline">Share</span>
             </Button>
             <Button variant="ghost" size="sm" className="h-8 gap-2 text-muted-foreground hover:text-foreground" asChild>
-              <Link to="/app/editor/$guideId" params={{ guideId: guide.id }}>
+              <Link to="/app/editor/$guideId" params={{ guideId: guide.guideId }}>
                 <Pencil className="size-4" />
                 <span className="hidden sm:inline">Edit</span>
               </Link>
@@ -207,7 +207,7 @@ function GuideViewPage() {
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground border-2 border-dashed rounded-xl">
             <p className="text-lg">No steps in this guide.</p>
             <Button variant="link" asChild className="mt-2">
-              <Link to="/app/editor/$guideId" params={{ guideId: guide.id }}>Add steps in Editor</Link>
+              <Link to="/app/editor/$guideId" params={{ guideId: guide.guideId }}>Add steps in Editor</Link>
             </Button>
           </div>
         )}
@@ -217,14 +217,14 @@ function GuideViewPage() {
         open={isShareOpen}
         onOpenChange={setIsShareOpen}
         guideTitle={guide.title || ""}
-        guideId={guide.id}
+        guideId={guide.guideId}
       />
 
       <ExportDialog
         open={isExportOpen}
         onOpenChange={setIsExportOpen}
         guideTitle={guide.title || ""}
-        guideId={guide.id}
+        guideId={guide.guideId}
       />
     </div>
   );

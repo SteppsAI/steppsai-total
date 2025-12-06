@@ -7,7 +7,7 @@ export type Json =
     | Json[]
 
 export interface Folder {
-    id: string;
+    folderId: string;
     userId: string;
     name: string;
     createdAt?: string;
@@ -18,7 +18,7 @@ export interface FolderWithCount extends Folder {
 }
 
 export interface Guide {
-    id: string;
+    guideId: string;
     userId: string;
     folderId?: string | null;
     title?: string | null;
@@ -108,9 +108,9 @@ export interface User {
 }
 
 export interface Subscription {
-    id: string;
+    subscriptionId: string;
     userId: string;
-    stripeCustomerId: string | null;
+    creemCustomerId: string | null;
     planType: string | null;
     status: string | null;
     maxEditors: number | null;
@@ -118,7 +118,7 @@ export interface Subscription {
 }
 
 export interface TeamMember {
-    id: string;
+    teamMemberId: string;
     ownerId: string;
     memberId: string;
     role: string | null;
@@ -127,7 +127,7 @@ export interface TeamMember {
 }
 
 export interface Export {
-    id: string;
+    exportId: string;
     guideId: string;
     type: string | null;
     fileUrl: string | null;

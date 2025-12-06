@@ -15,9 +15,17 @@
       "types": "./dist/src/db/database.d.ts",
       "default": "./dist/src/db/database.js"
     },
+    "./queries": {
+      "types": "./dist/src/queries/index.d.ts",
+      "default": "./dist/src/queries/index.js"
+    },
     "./queries/*": {
       "types": "./dist/src/queries/*.d.ts",
       "default": "./dist/src/queries/*.js"
+    },
+    "./zod-schema": {
+      "types": "./dist/src/zod/index.d.ts",
+      "default": "./dist/src/zod/index.js"
     },
     "./zod-schema/*": {
       "types": "./dist/src/zod/*.d.ts",

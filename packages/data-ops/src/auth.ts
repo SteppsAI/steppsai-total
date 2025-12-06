@@ -30,7 +30,7 @@ export function createBetterAuth(
         database,
         secret: secret,
         emailAndPassword: {
-            enabled: false,
+            enabled: true,
         },
         socialProviders: {
             google: {
@@ -40,8 +40,8 @@ export function createBetterAuth(
         },
         plugins: [
             creem({
-                apiKey: creemConfig?.apiKey ?? process.env.CREEM_API_KEY!,
-                webhookSecret: creemConfig?.webhookSecret ?? process.env.CREEM_WEBHOOK_SECRET,
+                apiKey: creemConfig?.apiKey ?? "",
+                webhookSecret: creemConfig?.webhookSecret ?? "",
                 testMode: creemConfig?.testMode ?? true,
                 defaultSuccessUrl: creemConfig?.defaultSuccessUrl ?? "/success",
                 persistSubscriptions: creemConfig?.persistSubscriptions ?? true,

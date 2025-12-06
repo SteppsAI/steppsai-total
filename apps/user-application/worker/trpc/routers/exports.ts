@@ -23,8 +23,8 @@ export const guideExportsRouter = router({
             }>;
 
             return Object.entries(exportedDocs).map(([type, doc]) => ({
-                id: `${guide.id}-${type}`,
-                guideId: guide.id,
+                id: `${guide.guideId}-${type}`,
+                guideId: guide.guideId,
                 guideTitle: guide.title || "Untitled Guide",
                 type: type as "pdf" | "html" | "markdown",
                 fileUrl: doc.url || null,

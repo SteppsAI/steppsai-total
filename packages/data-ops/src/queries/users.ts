@@ -1,6 +1,6 @@
 import { getDb } from "@/db/database";
-import { users } from "@/drizzle-out/schema";
-import { eq, sql } from "drizzle-orm";
+import { user as users } from "@/drizzle-out/auth-schema";
+import { eq } from "drizzle-orm";
 import { User, UpdateUserInput, NotificationPreferences } from "@/zod/users";
 
 export async function getUser(userId: string): Promise<User | null> {
@@ -14,14 +14,15 @@ export async function getUser(userId: string): Promise<User | null> {
 
 	if (!result.length) return null;
 
-	const user = result[0];
+	const u = result[0];
 	return {
-		userId: user.userId,
-		name: user.name,
-		email: user.email,
-		avatarUrl: (user as any).avatarUrl ?? null,
-		notificationPreferences: parseNotificationPreferences((user as any).notificationPreferences),
-		createdAt: user.createdAt,
+		userId: u.userId,
+		name: u.name,
+		email: u.email,
+		emailVerified: u.emailVerified,
+		avatarUrl: u.avatarUrl ?? null,
+		notificationPreferences: parseNotificationPreferences(u.notificationPreferences),
+		createdAt: u.createdAt,
 	};
 }
 

@@ -7,10 +7,10 @@ import { v4 as uuidv4 } from "uuid";
 
 export async function createGuide(data: CreateGuideSchemaType): Promise<string> {
 	const db = getDb();
-	const id = uuidv4();
+	const guideId = uuidv4();
 
 	await db.insert(guides).values({
-		id,
+		guideId,
 		userId: data.userId,
 		folderId: data.folderId,
 		title: data.title,
@@ -20,7 +20,7 @@ export async function createGuide(data: CreateGuideSchemaType): Promise<string> 
 		visibility: data.visibility || "private",
 	});
 
-	return id;
+	return guideId;
 }
 
 export async function getGuide(guideId: string): Promise<Guide | null> {
@@ -29,7 +29,7 @@ export async function getGuide(guideId: string): Promise<Guide | null> {
 	const result = await db
 		.select()
 		.from(guides)
-		.where(eq(guides.id, guideId))
+		.where(eq(guides.guideId, guideId))
 		.limit(1);
 
 	if (!result.length) return null;
@@ -71,7 +71,7 @@ export async function updateGuide(guideId: string, data: Partial<Guide>): Promis
 			...data,
 			updatedAt: sql`now()`,
 		})
-		.where(eq(guides.id, guideId));
+		.where(eq(guides.guideId, guideId));
 }
 
 export async function updateGuideSteps(guideId: string, steps: Step[]): Promise<void> {
@@ -84,13 +84,13 @@ export async function updateGuideSteps(guideId: string, steps: Step[]): Promise<
 			steps: steps,
 			updatedAt: sql`now()`,
 		})
-		.where(eq(guides.id, guideId));
+		.where(eq(guides.guideId, guideId));
 }
 
 export async function deleteGuide(guideId: string): Promise<void> {
 	const db = getDb();
 
-	await db.delete(guides).where(eq(guides.id, guideId));
+	await db.delete(guides).where(eq(guides.guideId, guideId));
 }
 
 // Alias for backwards compatibility
@@ -138,7 +138,7 @@ export async function updateGuideExportStatus(
 		SET 
 			exported_docs = COALESCE(exported_docs, '{}'::jsonb) || jsonb_build_object(${type}::text, ${JSON.stringify(exportDoc)}::jsonb),
 			updated_at = NOW()
-		WHERE id = ${guideId}::uuid
+		WHERE guide_id = ${guideId}::uuid
 	`);
 }
 
@@ -168,5 +168,5 @@ export async function deleteStep(guideId: string, stepId: string): Promise<void>
 			steps: updatedSteps,
 			updatedAt: sql`now()`,
 		})
-		.where(eq(guides.id, guideId));
+		.where(eq(guides.guideId, guideId));
 }

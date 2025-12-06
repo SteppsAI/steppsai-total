@@ -10,15 +10,15 @@ export interface FolderWithCount extends FoldersSchemaType {
 
 export async function createFolder(data: CreateFolderSchemaType): Promise<string> {
 	const db = getDb();
-	const id = uuidv4();
+	const folderId = uuidv4();
 
 	await db.insert(folders).values({
-		id,
+		folderId,
 		userId: data.userId,
 		name: data.name,
 	});
 
-	return id;
+	return folderId;
 }
 
 export async function getFolder(folderId: string): Promise<FoldersSchemaType | null> {
@@ -27,14 +27,14 @@ export async function getFolder(folderId: string): Promise<FoldersSchemaType | n
 	const result = await db
 		.select()
 		.from(folders)
-		.where(eq(folders.id, folderId))
+		.where(eq(folders.folderId, folderId))
 		.limit(1);
 
 	if (!result.length) return null;
 
 	const folder = result[0];
 	return {
-		id: folder.id,
+		folderId: folder.folderId,
 		userId: folder.userId,
 		name: folder.name,
 		createdAt: folder.createdAt ?? undefined,
@@ -46,19 +46,19 @@ export async function getUserFolders(userId: string): Promise<FolderWithCount[]>
 
 	const result = await db
 		.select({
-			id: folders.id,
+			folderId: folders.folderId,
 			userId: folders.userId,
 			name: folders.name,
 			createdAt: folders.createdAt,
-			guideCount: sql<number>`count(${guides.id})::int`,
+			guideCount: sql<number>`count(${guides.guideId})::int`,
 		})
 		.from(folders)
-		.leftJoin(guides, eq(folders.id, guides.folderId))
+		.leftJoin(guides, eq(folders.folderId, guides.folderId))
 		.where(eq(folders.userId, userId))
-		.groupBy(folders.id);
+		.groupBy(folders.folderId);
 
 	return result.map((folder) => ({
-		id: folder.id,
+		folderId: folder.folderId,
 		userId: folder.userId,
 		name: folder.name,
 		createdAt: folder.createdAt ?? undefined,
@@ -72,7 +72,7 @@ export async function updateFolder(folderId: string, name: string): Promise<void
 	await db
 		.update(folders)
 		.set({ name })
-		.where(eq(folders.id, folderId));
+		.where(eq(folders.folderId, folderId));
 }
 
 export async function deleteFolder(folderId: string): Promise<void> {
@@ -85,12 +85,5 @@ export async function deleteFolder(folderId: string): Promise<void> {
 		.where(eq(guides.folderId, folderId));
 
 	// Then delete the folder
-	await db.delete(folders).where(eq(folders.id, folderId));
+	await db.delete(folders).where(eq(folders.folderId, folderId));
 }
-
-
-
-
-
-
-

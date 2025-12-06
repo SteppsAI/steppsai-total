@@ -15,17 +15,17 @@ export function Hero() {
 
     useGSAP(() => {
         const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
-        
+
         // Initial Hero Content Animation (On Load)
-        tl.fromTo(contentRef.current, 
+        tl.fromTo(contentRef.current,
             { opacity: 0, y: 20 },
             { opacity: 1, y: 0, duration: 0.8 }
         )
-        .fromTo(".hero-text-stagger", 
-            { opacity: 0, y: 20 }, 
-            { opacity: 1, y: 0, duration: 0.6, stagger: 0.15 }, 
-            "-=0.6"
-        )
+            .fromTo(".hero-text-stagger",
+                { opacity: 0, y: 20 },
+                { opacity: 1, y: 0, duration: 0.6, stagger: 0.15 },
+                "-=0.6"
+            )
 
         // ScrollTrigger for "Works on..." bar
         gsap.from(".hero-trust-bar", {
@@ -64,7 +64,7 @@ export function Hero() {
 
                     {/* Top Left: Hero Content */}
                     <div className="p-6 sm:p-16 flex flex-col justify-center items-center text-center w-full">
-                        <div 
+                        <div
                             ref={contentRef}
                             className="space-y-8 flex flex-col items-center opacity-0" // Start invisible to prevent flash
                         >
@@ -75,10 +75,10 @@ export function Hero() {
                             <p className="hero-text-stagger text-lg text-muted-foreground leading-relaxed max-w-2xl">
                                 Automatically capture any workflow and generate beautiful documentation in seconds, not hours.
                             </p>
-                            
+
                             <div className="hero-text-stagger flex flex-wrap gap-4 pt-2 justify-center">
                                 <a
-                                    href="/app"
+                                    href="/login"
                                     className="inline-flex h-12 items-center justify-center rounded-full bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                                 >
                                     Get Started
@@ -105,7 +105,7 @@ export function Hero() {
                     {/* Bottom Full Width: Demo */}
                     <div className="hero-demo col-span-full border-t border-border/50 relative">
                         <div className="pt-0 md:pt-8">
-                             <Demo />
+                            <Demo />
                         </div>
                     </div>
                 </div>

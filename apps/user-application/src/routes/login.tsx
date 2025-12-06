@@ -1,0 +1,281 @@
+import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
+import { useState } from 'react'
+import { authClient } from '@/components/auth/client'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
+import {
+    ProgressSlider,
+    SliderContent,
+    SliderWrapper,
+    SliderBtnGroup,
+    SliderBtn
+} from '@/components/ui/progressive-carousel'
+
+export const Route = createFileRoute('/login')({
+    component: LoginPage,
+})
+
+function LoginPage() {
+    const [isLogin, setIsLogin] = useState(true)
+    const [loading, setLoading] = useState(false)
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [name, setName] = useState('')
+    const navigate = useNavigate()
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setLoading(true)
+        try {
+            if (isLogin) {
+                await authClient.signIn.email({
+                    email,
+                    password,
+                }, {
+                    onSuccess: () => {
+                        navigate({ to: '/app' })
+                    },
+                    onError: (ctx) => {
+                        toast.error(ctx.error.message)
+                    }
+                })
+            } else {
+                await authClient.signUp.email({
+                    email,
+                    password,
+                    name,
+                }, {
+                    onSuccess: () => {
+                        navigate({ to: '/app' })
+                    },
+                    onError: (ctx) => {
+                        toast.error(ctx.error.message)
+                    }
+                })
+            }
+        } catch (error) {
+            toast.error('An error occurred')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleGoogleLogin = async () => {
+        await authClient.signIn.social({
+            provider: "google",
+            callbackURL: "/app"
+        })
+    }
+
+    return (
+        <div className="min-h-screen grid lg:grid-cols-2">
+            {/* Left Side - Marketing & Visuals */}
+            <div className="hidden lg:flex flex-col items-center justify-center bg-[#0B0F19] p-12 text-white relative overflow-hidden">
+                {/* Subtle Background Effects */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(99,102,241,0.08)_0%,transparent_50%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_100%,rgba(6,182,212,0.08)_0%,transparent_50%)]" />
+                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
+
+                <div className="absolute top-12 left-1/2 -translate-x-1/2 z-10">
+                    <img
+                        src="/brand/logo-light.svg"
+                        alt="Stepps Logo"
+                        className="h-7 w-auto"
+                    />
+                </div>
+
+                <div className="relative z-10 w-full max-w-sm text-center">
+                    <h1 className="text-2xl font-semibold tracking-tight mb-3 leading-snug text-white">
+                        Turn Actions into Instructions.
+                    </h1>
+                    <p className="text-zinc-400 text-sm leading-relaxed mb-6">
+                        Stepps captures your workflow and generates beautiful step-by-step guides automatically.
+                    </p>
+
+                    <ProgressSlider vertical={false} activeSlider="install" duration={2500}>
+                        <SliderContent>
+                            <SliderWrapper value="install" className="w-full">
+                                <div className="rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-white/5 aspect-video relative">
+                                    <img
+                                        src="/website/install-extension.webp"
+                                        alt="Install Extension"
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            </SliderWrapper>
+                            <SliderWrapper value="record" className="w-full">
+                                <div className="rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-white/5 aspect-video relative">
+                                    <img
+                                        src="/website/record-workflow.webp"
+                                        alt="Record Workflow"
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            </SliderWrapper>
+                            <SliderWrapper value="generate" className="w-full">
+                                <div className="rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-white/5 aspect-video relative">
+                                    <img
+                                        src="/website/generate-guide.webp"
+                                        alt="Generate Guide"
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            </SliderWrapper>
+                            <SliderWrapper value="share" className="w-full">
+                                <div className="rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-white/5 aspect-video relative">
+                                    <img
+                                        src="/website/share-export.webp"
+                                        alt="Share and Export"
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            </SliderWrapper>
+                        </SliderContent>
+
+                        <SliderBtnGroup className="grid grid-cols-4 gap-2 mt-4">
+                            <SliderBtn value="install" className="text-left p-2 rounded-lg transition-all" progressBarClass="bg-primary h-1 bottom-0">
+                                <h3 className="font-semibold text-white text-xs mb-1">Install</h3>
+                                <p className="text-[10px] text-zinc-400 leading-snug hidden xl:block">Get the browser extension</p>
+                            </SliderBtn>
+                            <SliderBtn value="record" className="text-left p-2 rounded-lg transition-all" progressBarClass="bg-primary h-1 bottom-0">
+                                <h3 className="font-semibold text-white text-xs mb-1">Record</h3>
+                                <p className="text-[10px] text-zinc-400 leading-snug hidden xl:block">Capture your workflow instantly</p>
+                            </SliderBtn>
+                            <SliderBtn value="generate" className="text-left p-2 rounded-lg transition-all" progressBarClass="bg-primary h-1 bottom-0">
+                                <h3 className="font-semibold text-white text-xs mb-1">Generate</h3>
+                                <p className="text-[10px] text-zinc-400 leading-snug hidden xl:block">Turn actions into guides</p>
+                            </SliderBtn>
+                            <SliderBtn value="share" className="text-left p-2 rounded-lg transition-all" progressBarClass="bg-primary h-1 bottom-0">
+                                <h3 className="font-semibold text-white text-xs mb-1">Share</h3>
+                                <p className="text-[10px] text-zinc-400 leading-snug hidden xl:block">Export as PDF or HTML</p>
+                            </SliderBtn>
+                        </SliderBtnGroup>
+                    </ProgressSlider>
+                </div>
+
+                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-10 text-xs text-zinc-500">
+                    © {new Date().getFullYear()} stepps.ai
+                </div>
+            </div>
+
+            {/* Right Side - Auth Form */}
+            <div className="flex items-center justify-center p-8 bg-background relative">
+                {/* Mobile Logo */}
+                <div className="absolute top-8 w-full flex justify-center lg:hidden">
+                    <img
+                        src="/brand/logo-symbol.svg"
+                        alt="Stepps Logo"
+                        className="h-10 w-10"
+                    />
+                </div>
+
+                <div className="w-full max-w-md space-y-8">
+                    <div className="text-center lg:text-left">
+                        <h2 className="text-2xl font-bold tracking-tight">
+                            {isLogin ? 'Welcome back' : 'Create your account'}
+                        </h2>
+                        <p className="text-muted-foreground mt-2 text-sm">
+                            {isLogin
+                                ? 'Enter your credentials to access your workspace'
+                                : 'Start creating beautiful documentation for free'}
+                        </p>
+                    </div>
+
+                    <div className="space-y-4">
+                        <Button
+                            variant="outline"
+                            className="w-full h-11 relative bg-background hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                            onClick={handleGoogleLogin}
+                        >
+                            {/* Simple Google Icon SVG */}
+                            <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
+                                <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
+                            </svg>
+                            Continue with Google
+                        </Button>
+
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t border-zinc-200 dark:border-zinc-800" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-background px-2 text-muted-foreground">
+                                    Or continue with email
+                                </span>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            {!isLogin && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="name">Full Name</Label>
+                                    <Input
+                                        id="name"
+                                        placeholder="John Doe"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        required
+                                        className="h-11"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="space-y-2">
+                                <Label htmlFor="email">Email</Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    placeholder="name@example.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    className="h-11"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="password">Password</Label>
+                                </div>
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    placeholder="••••••••"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    className="h-11"
+                                />
+                            </div>
+
+                            <Button type="submit" className="w-full h-11 font-medium" disabled={loading}>
+                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {isLogin ? 'Sign In' : 'Create Account'}
+                            </Button>
+                        </form>
+                    </div>
+
+                    <p className="text-center text-sm text-muted-foreground">
+                        {isLogin ? "Don't have an account? " : "Already have an account? "}
+                        <button
+                            onClick={() => setIsLogin(!isLogin)}
+                            className="font-medium text-primary hover:underline underline-offset-4 hover:text-primary/80 transition-colors"
+                        >
+                            {isLogin ? 'Sign up' : 'Log in'}
+                        </button>
+                    </p>
+                </div>
+
+                <Link
+                    to="/"
+                    className="absolute bottom-12 left-1/2 -translate-x-1/2 text-sm text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
+                >
+                    back to home
+                </Link>
+            </div>
+        </div>
+    )
+}

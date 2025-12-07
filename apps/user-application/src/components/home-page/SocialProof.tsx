@@ -58,7 +58,7 @@ export function SocialProof() {
     return (
         <section id="save-time" className="px-4 py-16 md:py-32" ref={containerRef}>
             <div className="mx-auto grid max-w-5xl border md:grid-cols-2 overflow-hidden shadow-sm">
-                <div className="sp-item-left">
+                <div className="sp-item-left flex flex-col">
                     <div className="p-6 sm:p-12 sp-item-left-content">
                         <span className="text-muted-foreground flex items-center gap-2">
                             <ScreenShare className="size-4" />
@@ -70,26 +70,14 @@ export function SocialProof() {
                         </p>
                     </div>
 
-                    <div aria-hidden className="relative p-6 sm:p-12 pt-0 sp-item-left-content">
-                        <div className="space-y-4">
-                            <div className="flex gap-4">
-                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm border border-primary/20">
-                                    1
-                                </div>
-                                <div className="space-y-2 flex-1">
-                                    <div className="h-4 w-3/4 bg-muted rounded" />
-                                    <div className="h-24 w-full bg-muted/50 rounded-lg border border-border" />
-                                </div>
-                            </div>
-                            <div className="flex gap-4">
-                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm border border-primary/20">
-                                    2
-                                </div>
-                                <div className="space-y-2 flex-1">
-                                    <div className="h-4 w-1/2 bg-muted rounded" />
-                                </div>
-                            </div>
-                        </div>
+                    <div aria-hidden className="relative mt-auto sp-item-left-content">
+                        <img
+                            src="/website/record-once.webp"
+                            alt="Record once and generate perfect guides automatically"
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-auto object-cover object-top"
+                        />
                     </div>
                 </div>
                 <div className="sp-item-right overflow-hidden border-t bg-zinc-50 p-6 sm:p-12 md:border-0 md:border-l dark:bg-transparent">

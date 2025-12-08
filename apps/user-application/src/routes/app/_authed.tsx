@@ -1,38 +1,24 @@
 import { AppSidebar } from "@/components/common/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { Outlet, createFileRoute, useLocation, Navigate } from "@tanstack/react-router";
+import { Outlet, createFileRoute, useLocation } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { DashboardHeader } from "@/components/dashboard-header";
-import { authClient } from "@/components/auth/client";
+// import { authClient } from "@/components/auth/client";
 
 export const Route = createFileRoute("/app/_authed")({
   component: RouteComponent,
-  // beforeLoad: async () => {
-  //   const session = await authClient.getSession();
-  //   if (!session.data?.session) {
-  //     throw redirect({ to: "/" })
-  //   }
-  // }
+  //beforeLoad: async () => {
+  //const session = await authClient.getSession();
+  //if (!session.data?.session) {
+  //throw redirect({ to: "/" })
+  //}
+  //}
 });
 
 function RouteComponent() {
   const location = useLocation();
   const pathname = location.pathname;
 
-  const { data: session, isPending } = authClient.useSession();
-  // Loading
-  if (isPending) {
-    return (
-      <div className="h-screen w-full flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    );
-  }
-
-  // Niet ingelogd → redirect via component
-  if (!session?.user) {
-    return <Navigate to="/" />;
-  }
   // Check if we're on an editor route or guide view route
   const isEditorRoute = pathname.startsWith('/app/editor');
   const isGuideViewRoute = /^\/app\/stepps\/[^/]+$/.test(pathname);

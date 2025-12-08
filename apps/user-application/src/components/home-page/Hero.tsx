@@ -102,16 +102,16 @@ export function Hero() {
                             <div className="hero-text-stagger flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 w-full sm:w-auto">
                                 <Link
                                     to="/login"
-                                    className="inline-flex h-11 sm:h-12 items-center justify-center rounded-full bg-primary px-6 sm:px-8 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    className="btn-glass-primary group inline-flex h-11 sm:h-12 items-center justify-center rounded-full px-6 sm:px-8 text-sm font-medium text-primary-foreground transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 >
                                     Get Started
-                                    <ArrowRight className="ml-2 size-4" />
+                                    <ArrowRight className="ml-2 size-4 transition-transform duration-200 group-hover:translate-x-1" />
                                 </Link>
                                 <a
                                     href="#demo"
-                                    className="inline-flex h-11 sm:h-12 items-center justify-center rounded-full border border-input bg-background/60 px-6 sm:px-8 text-sm font-medium shadow-sm transition-all hover:bg-primary/5 hover:border-primary/30 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    className="btn-glass-secondary group inline-flex h-11 sm:h-12 items-center justify-center rounded-full px-6 sm:px-8 text-sm font-medium text-muted-foreground transition-all duration-200 hover:-translate-y-0.5 hover:text-primary active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 >
-                                    <Play className="mr-2 size-4 fill-current" />
+                                    <Play className="mr-2 size-4 fill-current transition-transform duration-200 group-hover:scale-110" />
                                     View Demo
                                 </a>
                             </div>

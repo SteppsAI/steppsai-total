@@ -56,7 +56,7 @@ export function SocialProof() {
     }, { scope: containerRef })
 
     return (
-        <section id="save-time" className="px-4 py-16 md:py-32" ref={containerRef}>
+        <section id="save-time" className="px-4 py-16 md:py-32 mt-0 md:mt-12" ref={containerRef}>
             <div className="mx-auto grid max-w-5xl border md:grid-cols-2 overflow-hidden shadow-sm">
                 <div className="sp-item-left flex flex-col">
                     <div className="p-6 sm:p-12 sp-item-left-content">

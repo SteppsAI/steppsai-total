@@ -15,22 +15,28 @@
     "not_found_handling": "single-page-application",
     "run_worker_first": [
       "/api/auth/*",
-      "/trpc/*",
+      "/trpc/*"
     ]
   },
   "observability": {
-    "enabled": true,
+    "enabled": true
   },
   "env": {
     "stage": {
       "vars": {
         "ASSETS_URL": "https://stepps-assets-stage.stepps.ai"
       },
+      "routes": [
+        {
+          "pattern": "stage.stepps.ai",
+          "custom_domain": true
+        }
+      ],
       "services": [
         {
           "binding": "BACKEND_SERVICE",
           "service": "data-service-stage",
-          "remote": true,
+          "remote": false
         }
       ]
     },
@@ -42,7 +48,7 @@
         {
           "binding": "BACKEND_SERVICE",
           "service": "data-service-production",
-          "remote": true,
+          "remote": true
         }
       ]
     }

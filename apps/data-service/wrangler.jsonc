@@ -23,6 +23,12 @@
 				"CREEM_API_KEY": "",
 				"BETTER_AUTH_SECRET": ""
 			},
+			"routes": [
+				{
+					"pattern": "api.stage.stepps.ai",
+					"custom_domain": true
+				}
+			],
 			"r2_buckets": [
 				{
 					"binding": "BUCKET",
@@ -51,7 +57,7 @@
 					"name": "guide-pdf-export-workflow-stage",
 					"binding": "GUIDE_EXPORT_WORKFLOW",
 					"class_name": "GuidePdfExportWorkflow",
-					"remote": true
+					"remote": false
 				}
 			],
 			"durable_objects": {
@@ -76,6 +82,12 @@
 				"ASSETS_URL": "https://assets.stepps.ai",
 				"CLOUDFLARE_ACCOUNT_ID": "c2ed9b335ebebbe0fbfa7aa17935b3b5"
 			},
+			"routes": [
+				{
+					"pattern": "api.stepps.ai",
+					"custom_domain": true
+				}
+			],
 			"r2_buckets": [
 				{
 					"binding": "BUCKET",
@@ -104,7 +116,7 @@
 					"name": "guide-pdf-export-workflow",
 					"binding": "GUIDE_EXPORT_WORKFLOW",
 					"class_name": "GuidePdfExportWorkflow",
-					"remote": true
+					"remote": false
 				}
 			],
 			"durable_objects": {

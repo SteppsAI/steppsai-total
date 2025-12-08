@@ -118,6 +118,31 @@ export function Hero() {
                     {/* Decorative glow */}
                     <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-[100vw] bg-gradient-to-t from-primary/10 via-background to-transparent blur-[80px]" />
 
+                    {/* Handwritten Demo Indicator */}
+                    <div className="flex absolute -top-1 sm:-top-4 left-2 sm:left-4 lg:left-8 xl:left-12 items-end gap-1 z-30">
+                        <p
+                            className="text-primary text-sm sm:text-lg lg:text-xl font-light whitespace-nowrap mb-1"
+                            style={{ fontFamily: "'Kalam', cursive", transform: "rotate(-2deg)" }}
+                        >
+                            Watch how it works
+                        </p>
+                        <svg
+                            className="w-8 h-8 sm:w-12 sm:h-12 text-primary/80 translate-y-2 sm:translate-y-4"
+                            viewBox="0 0 60 60"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            {/* More elegant hand-drawn curve */}
+                            <path d="M10 10 C 25 12, 45 15, 45 45" />
+                            {/* Hand-drawn Arrowhead */}
+                            <path d="M45 45 L 36 36" />
+                            <path d="M45 45 L 55 38" />
+                        </svg>
+                    </div>
+
                     <Demo />
                 </div>
 

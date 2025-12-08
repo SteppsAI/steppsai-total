@@ -4,13 +4,14 @@ import { trpc } from "@/router";
 export function useCreateFolder() {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    const queryClient = useQueryClient();
-    ...trpc.folders.create.mutationOptions(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: trpc.folders.getAll.queryOptions().queryKey });
-    },
-  });
+  return useMutation(
+    {
+      ...trpc.folders.create.mutationOptions(),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: trpc.folders.getAll.queryOptions().queryKey });
+      },
+    }
+  );
 }
 
 export function useUpdateFolder() {

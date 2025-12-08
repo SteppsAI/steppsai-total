@@ -7,6 +7,7 @@ import type { AppRouter } from "@/worker/trpc/router";
 import Pending from "@/components/common/pending";
 import { ErrorComponent } from "@/components/common/error-boundary";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
+import { authClient } from "@/components/auth/client";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,6 +37,26 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
   client: trpcClient,
   queryClient,
 });
+
+// Session cache
+let sessionCache: { data: any; timestamp: number } | null = null;
+const SESSION_CACHE_TTL = 1000 * 60 * 5; // 5 minutes
+
+export async function getSessionCached() {
+  const now = Date.now();
+
+  if (sessionCache && (now - sessionCache.timestamp) < SESSION_CACHE_TTL) {
+    return sessionCache.data;
+  }
+
+  const session = await authClient.getSession();
+  sessionCache = { data: session, timestamp: now };
+  return session;
+}
+
+export function clearSessionCache() {
+  sessionCache = null;
+}
 
 export function createRouter() {
   const router = createTanStackRouter({

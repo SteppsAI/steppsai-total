@@ -13,6 +13,7 @@ import { trpc } from "@/router";
 import { useUploadAvatar } from "@/hooks/use-api";
 import { User } from "@/types/db";
 import { authClient } from "@/components/auth/client";
+import { clearSessionCache } from "@/router";
 
 export const Route = createFileRoute("/app/_authed/settings")({
     component: SettingsPage,
@@ -37,9 +38,10 @@ function SettingsPage() {
 
     const handleLogout = async () => {
         setLogoutLoading(true);
+        clearSessionCache();
         await authClient.signOut({
             fetchOptions: {
-                onSuccess: () => navigate({ to: "/" }),
+                onSuccess: () => navigate({ to: "/auth/login" }),
             },
         });
         setLogoutLoading(false);

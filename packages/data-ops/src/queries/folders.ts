@@ -87,3 +87,4 @@ export async function deleteFolder(folderId: string): Promise<void> {
 	// Then delete the folder
 	await db.delete(folders).where(eq(folders.folderId, folderId));
 }
+

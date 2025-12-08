@@ -5,8 +5,11 @@ import { usersRouter } from './routes/users';
 import { exportsRouter } from './routes/exports';
 import { editorRouter } from './routes/editor';
 import { authRouter } from './routes/auth';
+// import { cors } from 'hono/cors';
 
 export const App = new Hono<{ Bindings: Env }>();
+
+// App.use('*', cors());
 
 // Routes
 App.route('/images', imagesRouter);

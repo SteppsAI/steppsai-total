@@ -32,8 +32,14 @@ export function Hero() {
                 { opacity: 1, y: 0, duration: 0.6, stagger: 0.15 },
                 "-=0.4"
             )
+            // Demo animates on load (part of the sequence, not scroll-triggered)
+            .fromTo(".hero-demo-section",
+                { opacity: 0, y: 40, scale: 0.98 },
+                { opacity: 1, y: 0, scale: 1, duration: 1, ease: "power2.out" },
+                "-=0.3" // Slight overlap with CTAs for fluid feel
+            )
 
-        // ScrollTrigger for "Works on..." bar
+        // ScrollTrigger only for Trust Bar (below the fold)
         gsap.from(".hero-trust-bar", {
             scrollTrigger: {
                 trigger: ".hero-trust-bar",
@@ -45,19 +51,6 @@ export function Hero() {
             opacity: 0,
             duration: 0.8,
             ease: "back.out(1.7)"
-        });
-
-        // Demo animation
-        gsap.from(".hero-demo-section", {
-            scrollTrigger: {
-                trigger: ".hero-demo-section",
-                start: "top 90%",
-                toggleActions: "play none none reverse"
-            },
-            y: 60,
-            opacity: 0,
-            duration: 1.2,
-            ease: "power3.out"
         });
 
     }, { scope: containerRef })
@@ -118,26 +111,27 @@ export function Hero() {
                         </div>
                     </div>
 
-                    {/* Trust Bar - with visible horizontal dividers */}
-                    <div className="hero-trust-bar col-span-full py-8 md:py-10 pb-28 md:pb-40 text-center relative">
-                        {/* Top horizontal divider */}
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 sm:w-48 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"></div>
-
-                        <p className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight">
-                            Works on <span className="text-muted-foreground">any website</span>, captures <span className="text-muted-foreground">every detail</span>.
-                        </p>
-
-                        {/* Bottom horizontal divider */}
-                        <div className="absolute bottom-20 md:bottom-28 left-1/2 -translate-x-1/2 w-24 sm:w-32 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
-                    </div>
                 </div>
 
-                {/* Floating Demo Section */}
-                <div id="demo" className="hero-demo-section relative -mt-20 md:-mt-28 max-w-5xl mx-auto z-20 px-2 sm:px-4">
+                {/* Demo Section - moved up for visibility */}
+                <div id="demo" className="hero-demo-section relative max-w-5xl mx-auto z-20 px-2 sm:px-4 pt-8 md:pt-12">
                     {/* Decorative glow */}
                     <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-[100vw] bg-gradient-to-t from-primary/10 via-background to-transparent blur-[80px]" />
 
                     <Demo />
+                </div>
+
+                {/* Trust Bar - validates what was just seen in the demo */}
+                <div className="hero-trust-bar py-10 md:py-14 text-center relative">
+                    {/* Top horizontal divider */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 sm:w-48 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"></div>
+
+                    <p className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight">
+                        Works on <span className="text-muted-foreground">any website</span>, captures <span className="text-muted-foreground">every detail</span>.
+                    </p>
+
+                    {/* Bottom horizontal divider */}
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 sm:w-32 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
                 </div>
             </div>
         </section>

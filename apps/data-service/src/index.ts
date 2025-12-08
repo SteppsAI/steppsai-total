@@ -4,7 +4,6 @@ import { initDatabase } from '@repo/data-ops/database';
 import { queueMessageSchema } from "@repo/data-ops/zod-schema/queue";
 import { handleStepsInsert } from './queue-handlers/recording-ingest';
 import * as rpc from './rpc-methods';
-
 export { GuidePdfExportWorkflow } from './workflows/guide-pdf-export';
 export { GuideSession } from './durable-objects/GuideSession';
 

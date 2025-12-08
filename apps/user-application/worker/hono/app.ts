@@ -44,7 +44,7 @@ App.on(["POST", "GET"], "/api/auth/*", (c) => {
 
 // ========== PROTECTED ROUTES ==========
 
-// tRPC → data-ops (DB) + RPC bindings (R2, DOs, Queues)
+// tRPC → data-ops (DB) + RPC bindings (R2, DOs, Queues) + browser-extension
 App.all("/trpc/*", authMiddleware, (c) => {
     const userId = c.get("userId");
     return fetchRequestHandler({

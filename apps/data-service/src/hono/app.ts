@@ -18,6 +18,7 @@ export const App = new Hono<{
  * Trusts X-User-Id header from user-application (via Service Binding).
  * Auth is already validated by user-application before calling data-service.
  */
+// this code below is wrong!!!
 const userIdMiddleware = createMiddleware<{
     Bindings: Env;
     Variables: { userId: string };

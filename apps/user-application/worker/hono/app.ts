@@ -2,39 +2,20 @@ import { Hono } from "hono";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { appRouter } from "../trpc/router";
 import { createContext } from "../trpc/context";
-import { getAuth } from "@repo/data-ops/auth";
+import { getAuthInstance } from "./helpers/auth-instance";
+import { authRateLimiter, trpcRateLimiter } from "./helpers/rate-limiter";
 import { createMiddleware } from "hono/factory";
 
 export const App = new Hono<{
-    Bindings: ServiceBindings;
+    Bindings: ServiceBindings & {
+        AUTH_RATE_LIMITER: RateLimit;
+        TRPC_RATE_LIMITER: RateLimit;
+    };
     Variables: { userId: string };
 }>();
 
-const getAuthInstance = (env: ServiceBindings) => {
-    const backend = env.BACKEND_SERVICE as any;
-    return getAuth(
-        {
-            clientId: env.GOOGLE_CLIENT_ID,
-            clientSecret: env.GOOGLE_CLIENT_SECRET,
-        },
-        {
-            apiKey: env.CREEM_API_KEY,
-            webhookSecret: env.CREEM_WEBHOOK_SECRET,
-        },
-        env.BETTER_AUTH_SECRET,
-        {
-            sendResetPassword: async (email, name, url) => {
-                await backend.sendPasswordResetEmail(email, name, url);
-            },
-            sendVerificationEmail: async (email, name, url) => {
-                await backend.sendVerificationEmail(email, name, url);
-            },
-        },
-    );
-};
-
 const authMiddleware = createMiddleware(async (c, next) => {
-    const auth = getAuthInstance(c.env);
+    const auth = getAuthInstance(c.env, c.req.raw);
     const session = await auth.api.getSession({ headers: c.req.raw.headers });
     if (!session?.user) {
         return c.text("Unauthorized", 401);
@@ -45,16 +26,14 @@ const authMiddleware = createMiddleware(async (c, next) => {
 
 // ========== PUBLIC ROUTES ==========
 
-// Auth routes (Better Auth handler)
-App.on(["POST", "GET"], "/api/auth/*", (c) => {
-    const auth = getAuthInstance(c.env);
+App.on(["POST", "GET"], "/api/auth/*", authRateLimiter, (c) => {
+    const auth = getAuthInstance(c.env, c.req.raw);
     return auth.handler(c.req.raw);
 });
 
 // ========== PROTECTED ROUTES ==========
 
-// tRPC → data-ops (DB) + RPC bindings (R2, DOs, Queues) + browser-extension
-App.all("/trpc/*", authMiddleware, (c) => {
+App.all("/trpc/*", authMiddleware, trpcRateLimiter, (c) => {
     const userId = c.get("userId");
     return fetchRequestHandler({
         endpoint: "/trpc",
@@ -69,4 +48,3 @@ App.all("/trpc/*", authMiddleware, (c) => {
             }),
     });
 });
-

@@ -27,9 +27,16 @@ export function getAuth(
   creemConfig: CreemConfig,
   secret: string,
   emailSender?: EmailSender,
+  baseURL?: string,
 ): ReturnType<typeof betterAuth> {
   // Fresh instance per request - no caching!
   return betterAuth({
+    baseURL: baseURL || "https://stage.stepps.ai",
+    trustedOrigins: [
+      "https://stage.stepps.ai",
+      "https://stepps.ai",
+      "http://localhost:3000"
+    ],
     database: drizzleAdapter(getDb(), {
       provider: "pg",
       schema: { user, session, account, verification },
@@ -52,16 +59,16 @@ export function getAuth(
       enabled: true,
       sendResetPassword: emailSender?.sendResetPassword
         ? async ({ user, url }) => {
-            await emailSender.sendResetPassword!(user.email, user.name ?? "", url);
-          }
+          await emailSender.sendResetPassword!(user.email, user.name ?? "", url);
+        }
         : undefined,
     },
     emailVerification: emailSender?.sendVerificationEmail
       ? {
-          sendVerificationEmail: async ({ user, url }) => {
-            await emailSender.sendVerificationEmail!(user.email, user.name ?? "", url);
-          },
-        }
+        sendVerificationEmail: async ({ user, url }) => {
+          await emailSender.sendVerificationEmail!(user.email, user.name ?? "", url);
+        },
+      }
       : undefined,
     socialProviders: {
       google: {

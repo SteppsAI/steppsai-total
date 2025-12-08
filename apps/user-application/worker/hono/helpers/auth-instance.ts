@@ -1,8 +1,11 @@
 import { getAuth } from "@repo/data-ops/auth";
 
 
-export const getAuthInstance = (env: ServiceBindings) => {
+export const getAuthInstance = (env: ServiceBindings, req: Request) => {
     const backend = env.BACKEND_SERVICE as any;
+
+    const url = new URL(req.url);
+    const baseURL = `${url.protocol}//${url.host}`;
 
     try {
         if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) {
@@ -38,6 +41,7 @@ export const getAuthInstance = (env: ServiceBindings) => {
                     await backend.sendVerificationEmail(email, name, url);
                 },
             },
+            baseURL,
         );
 
         console.log("[AuthInstance] Better Auth instance created");

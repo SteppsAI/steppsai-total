@@ -22,7 +22,10 @@ export async function getUser(userId: string): Promise<User | null> {
 		emailVerified: u.emailVerified,
 		avatarUrl: u.avatarUrl ?? null,
 		notificationPreferences: parseNotificationPreferences(u.notificationPreferences),
-		createdAt: u.createdAt,
+		createdAt:
+			typeof u.createdAt === "string"
+				? u.createdAt
+				: u.createdAt?.toISOString() ?? "",
 	};
 }
 

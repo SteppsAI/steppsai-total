@@ -1,10 +1,10 @@
 import { pgTable, uuid, timestamp, text, jsonb, integer, index } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 
-// Subscriptions - references user.id (uuid)
+// Subscriptions - references user.id (text)
 export const subscriptions = pgTable("subscriptions", {
 	subscriptionId: uuid("subscription_id").defaultRandom().primaryKey().notNull(),
-	userId: uuid("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+	userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
 	creemCustomerId: text("creem_customer_id"),
 	planType: text("plan_type"),
 	status: text("status"),
@@ -14,11 +14,11 @@ export const subscriptions = pgTable("subscriptions", {
 	index("subscriptions_userId_idx").on(table.userId),
 ]);
 
-// Team members - references user.id (uuid)
+// Team members - references user.id (text)
 export const teamMembers = pgTable("team_members", {
 	teamMemberId: uuid("team_member_id").defaultRandom().primaryKey().notNull(),
-	ownerId: uuid("owner_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-	memberId: uuid("member_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+	ownerId: text("owner_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+	memberId: text("member_id").notNull().references(() => user.id, { onDelete: "cascade" }),
 	role: text("role"),
 	status: text("status"),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
@@ -27,20 +27,20 @@ export const teamMembers = pgTable("team_members", {
 	index("teamMembers_memberId_idx").on(table.memberId),
 ]);
 
-// Folders - references user.id (uuid)
+// Folders - references user.id (text)
 export const folders = pgTable("folders", {
 	folderId: uuid("folder_id").defaultRandom().primaryKey().notNull(),
-	userId: uuid("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+	userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
 	name: text("name").notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 }, (table) => [
 	index("folders_userId_idx").on(table.userId),
 ]);
 
-// Guides - references user.id (uuid) and folders.folderId (uuid)
+// Guides - references user.id (text) and folders.folderId (uuid)
 export const guides = pgTable("guides", {
 	guideId: uuid("guide_id").defaultRandom().primaryKey().notNull(),
-	userId: uuid("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+	userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
 	folderId: uuid("folder_id").references(() => folders.folderId, { onDelete: "set null" }),
 	title: text("title").default('Untitled Guide'),
 	description: text("description"),
@@ -58,7 +58,7 @@ export const guides = pgTable("guides", {
 ]);
 
 // Exports - references guides.guideId (uuid)
-export const exports = pgTable("exports", {
+export const exportsTable = pgTable("exports", {
 	exportId: uuid("export_id").defaultRandom().primaryKey().notNull(),
 	guideId: uuid("guide_id").notNull().references(() => guides.guideId, { onDelete: "cascade" }),
 	type: text("type"),

@@ -7,9 +7,9 @@ export const notificationPreferencesSchema = z.object({
 
 export type NotificationPreferences = z.infer<typeof notificationPreferencesSchema>;
 
-// User schema - matches users table with userId as UUID
+// User schema - matches users table with userId as Better Auth string ID
 export const userSchema = z.object({
-	userId: z.string().uuid(),
+	userId: z.string(),
 	name: z.string(),
 	email: z.string().email(),
 	emailVerified: z.boolean().default(false),

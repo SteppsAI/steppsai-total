@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const subscriptionsSchema = z.object({
 	id: z.string(),
-	userId: z.string().uuid(),
+	userId: z.string(),
 	stripeCustomerId: z.string().optional(),
 	planType: z.string().optional(),
 	status: z.string().optional(),

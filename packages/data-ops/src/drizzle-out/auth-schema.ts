@@ -1,8 +1,9 @@
-import { pgTable, text, timestamp, boolean, index, jsonb, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, index, jsonb } from "drizzle-orm/pg-core";
 
 // Better Auth - Users table with custom columns
 export const user = pgTable("users", {
-  id: uuid("user_id").defaultRandom().primaryKey(),
+  // Better Auth core schema: id is a string → store as text
+  id: text("id").primaryKey().notNull(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
@@ -23,7 +24,8 @@ export const user = pgTable("users", {
 export const session = pgTable(
   "sessions",
   {
-    id: uuid("session_id").defaultRandom().primaryKey(),
+    // Core schema: string id + string userId
+    id: text("id").primaryKey().notNull(),
     expiresAt: timestamp("expires_at").notNull(),
     token: text("token").notNull().unique(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -33,7 +35,7 @@ export const session = pgTable(
       .notNull(),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
-    userId: uuid("user_id")
+    userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
   },
@@ -44,10 +46,10 @@ export const session = pgTable(
 export const account = pgTable(
   "accounts",
   {
-    id: uuid("account_id").defaultRandom().primaryKey(),
+    id: text("id").primaryKey().notNull(),
     accountId: text("provider_account_id").notNull(),
     providerId: text("provider_id").notNull(),
-    userId: uuid("user_id")
+    userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     accessToken: text("access_token"),
@@ -66,11 +68,11 @@ export const account = pgTable(
   (table) => [index("accounts_userId_idx").on(table.userId)],
 );
 
-// Better Auth - Verification tokens
 export const verification = pgTable(
   "verifications",
   {
-    id: uuid("verification_id").defaultRandom().primaryKey(),
+    // Core schema: string id
+    id: text("id").primaryKey().notNull(),
     identifier: text("identifier").notNull(),
     value: text("value").notNull(),
     expiresAt: timestamp("expires_at").notNull(),

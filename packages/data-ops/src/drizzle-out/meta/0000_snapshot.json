@@ -1,5 +1,5 @@
 {
-  "id": "5011df3d-f8b5-4302-b24d-a6bd4159286e",
+  "id": "7011d115-cd4c-4af5-82a7-e4334264f25f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -8,12 +8,11 @@
       "name": "accounts",
       "schema": "",
       "columns": {
-        "account_id": {
-          "name": "account_id",
-          "type": "uuid",
+        "id": {
+          "name": "id",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "provider_account_id": {
           "name": "provider_account_id",
@@ -29,7 +28,7 @@
         },
         "user_id": {
           "name": "user_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -108,15 +107,15 @@
         }
       },
       "foreignKeys": {
-        "accounts_user_id_users_user_id_fk": {
-          "name": "accounts_user_id_users_user_id_fk",
+        "accounts_user_id_users_id_fk": {
+          "name": "accounts_user_id_users_id_fk",
           "tableFrom": "accounts",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
-            "user_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -132,12 +131,11 @@
       "name": "sessions",
       "schema": "",
       "columns": {
-        "session_id": {
-          "name": "session_id",
-          "type": "uuid",
+        "id": {
+          "name": "id",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "expires_at": {
           "name": "expires_at",
@@ -179,7 +177,7 @@
         },
         "user_id": {
           "name": "user_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         }
@@ -202,15 +200,15 @@
         }
       },
       "foreignKeys": {
-        "sessions_user_id_users_user_id_fk": {
-          "name": "sessions_user_id_users_user_id_fk",
+        "sessions_user_id_users_id_fk": {
+          "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
-            "user_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -234,12 +232,11 @@
       "name": "users",
       "schema": "",
       "columns": {
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
+        "id": {
+          "name": "id",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "name": {
           "name": "name",
@@ -320,12 +317,11 @@
       "name": "verifications",
       "schema": "",
       "columns": {
-        "verification_id": {
-          "name": "verification_id",
-          "type": "uuid",
+        "id": {
+          "name": "id",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "identifier": {
           "name": "identifier",
@@ -478,7 +474,7 @@
         },
         "user_id": {
           "name": "user_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -514,15 +510,15 @@
         }
       },
       "foreignKeys": {
-        "folders_user_id_users_user_id_fk": {
-          "name": "folders_user_id_users_user_id_fk",
+        "folders_user_id_users_id_fk": {
+          "name": "folders_user_id_users_id_fk",
           "tableFrom": "folders",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
-            "user_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -547,7 +543,7 @@
         },
         "user_id": {
           "name": "user_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -665,15 +661,15 @@
         }
       },
       "foreignKeys": {
-        "guides_user_id_users_user_id_fk": {
-          "name": "guides_user_id_users_user_id_fk",
+        "guides_user_id_users_id_fk": {
+          "name": "guides_user_id_users_id_fk",
           "tableFrom": "guides",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
-            "user_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -719,7 +715,7 @@
         },
         "user_id": {
           "name": "user_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -772,15 +768,15 @@
         }
       },
       "foreignKeys": {
-        "subscriptions_user_id_users_user_id_fk": {
-          "name": "subscriptions_user_id_users_user_id_fk",
+        "subscriptions_user_id_users_id_fk": {
+          "name": "subscriptions_user_id_users_id_fk",
           "tableFrom": "subscriptions",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
-            "user_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -805,13 +801,13 @@
         },
         "owner_id": {
           "name": "owner_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "member_id": {
           "name": "member_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -868,28 +864,28 @@
         }
       },
       "foreignKeys": {
-        "team_members_owner_id_users_user_id_fk": {
-          "name": "team_members_owner_id_users_user_id_fk",
+        "team_members_owner_id_users_id_fk": {
+          "name": "team_members_owner_id_users_id_fk",
           "tableFrom": "team_members",
           "tableTo": "users",
           "columnsFrom": [
             "owner_id"
           ],
           "columnsTo": [
-            "user_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "team_members_member_id_users_user_id_fk": {
-          "name": "team_members_member_id_users_user_id_fk",
+        "team_members_member_id_users_id_fk": {
+          "name": "team_members_member_id_users_id_fk",
           "tableFrom": "team_members",
           "tableTo": "users",
           "columnsFrom": [
             "member_id"
           ],
           "columnsTo": [
-            "user_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"

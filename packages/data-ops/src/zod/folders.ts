@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const foldersSchema = z.object({
 	folderId: z.string().uuid(),
-	userId: z.string().uuid(),
+	userId: z.string(),
 	name: z.string().min(1),
 	createdAt: z.string().optional(),
 });

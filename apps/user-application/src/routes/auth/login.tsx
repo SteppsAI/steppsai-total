@@ -14,12 +14,16 @@ import {
     SliderBtn
 } from '@/components/ui/progressive-carousel'
 
+type AuthPageProps = {
+    initialMode?: 'login' | 'signup'
+}
+
 export const Route = createFileRoute('/auth/login')({
-    component: LoginPage,
+    component: () => <AuthPage initialMode="login" />,
 })
 
-function LoginPage() {
-    const [isLogin, setIsLogin] = useState(true)
+export function AuthPage({ initialMode = 'login' }: AuthPageProps) {
+    const [isLogin, setIsLogin] = useState(initialMode === 'login')
     const [loading, setLoading] = useState(false)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -30,15 +34,18 @@ function LoginPage() {
         e.preventDefault()
         setLoading(true)
         try {
+            console.log('[Auth] submit', { mode: isLogin ? 'login' : 'signup', email })
             if (isLogin) {
                 await authClient.signIn.email({
                     email,
                     password,
                 }, {
                     onSuccess: () => {
+                        console.log('[Auth] signIn.email success')
                         navigate({ to: '/app' })
                     },
                     onError: (ctx) => {
+                        console.error('[Auth] signIn.email error', ctx)
                         toast.error(ctx.error.message)
                     }
                 })
@@ -49,14 +56,17 @@ function LoginPage() {
                     name,
                 }, {
                     onSuccess: () => {
+                        console.log('[Auth] signUp.email success')
                         navigate({ to: '/app' })
                     },
                     onError: (ctx) => {
+                        console.error('[Auth] signUp.email error', ctx)
                         toast.error(ctx.error.message)
                     }
                 })
             }
         } catch (error) {
+            console.error('[Auth] submit unexpected error', error)
             toast.error('An error occurred')
         } finally {
             setLoading(false)
@@ -64,10 +74,16 @@ function LoginPage() {
     }
 
     const handleGoogleLogin = async () => {
-        await authClient.signIn.social({
-            provider: "google",
-            callbackURL: "/app"
-        })
+        try {
+            console.log('[Auth] Google sign-in start')
+            await authClient.signIn.social({
+                provider: "google",
+                callbackURL: "/app"
+            })
+        } catch (error) {
+            console.error('[Auth] Google sign-in error', error)
+            toast.error('Google sign-in failed')
+        }
     }
 
     return (

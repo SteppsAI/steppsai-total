@@ -38,6 +38,12 @@ export function Hero() {
                 { opacity: 1, y: 0, scale: 1, duration: 1, ease: "power2.out" },
                 "-=0.3" // Slight overlap with CTAs for fluid feel
             )
+            // Handwritten indicator animates separately, slightly after the video
+            .fromTo(".hero-indicator",
+                { opacity: 0, rotate: -5, x: -10, scale: 0.9 },
+                { opacity: 1, rotate: 0, x: 0, scale: 1, duration: 0.8, ease: "back.out(1.5)" },
+                "-=0.2"
+            )
 
         // ScrollTrigger only for Trust Bar (below the fold)
         gsap.from(".hero-trust-bar", {
@@ -118,8 +124,8 @@ export function Hero() {
                     {/* Decorative glow */}
                     <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-[100vw] bg-gradient-to-t from-primary/10 via-background to-transparent blur-[80px]" />
 
-                    {/* Handwritten Demo Indicator */}
-                    <div className="flex absolute -top-1 sm:-top-4 left-2 sm:left-4 lg:left-8 xl:left-12 items-end gap-1 z-30">
+                    {/* Handwritten Demo Indicator - animated separately */}
+                    <div className="hero-indicator flex absolute -top-1 sm:-top-4 left-2 sm:left-4 lg:left-8 xl:left-12 items-end gap-1 z-30">
                         <p
                             className="text-primary text-sm sm:text-lg lg:text-xl font-light whitespace-nowrap mb-1"
                             style={{ fontFamily: "'Kalam', cursive", transform: "rotate(-2deg)" }}

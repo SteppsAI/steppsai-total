@@ -55,6 +55,14 @@ export default class DataService extends WorkerEntrypoint<Env> {
 	deleteImage(key: string) { return rpc.deleteImage(this.env, key); }
 	deleteImagesBatch(keys: string[]) { return rpc.deleteImagesBatch(this.env, keys); }
 
+	// ===== AUTH =====
+	sendPasswordResetEmail(email: string, name: string, url: string) {
+		return rpc.sendPasswordResetEmail(this.env, email, name, url);
+	}
+	sendVerificationEmail(email: string, name: string, url: string) {
+		return rpc.sendVerificationEmail(this.env, email, name, url);
+	}
+
 	// ===== QUEUE =====
 	async queue(batch: MessageBatch<unknown>) {
 		initDatabase(this.env.DATABASE_URL);

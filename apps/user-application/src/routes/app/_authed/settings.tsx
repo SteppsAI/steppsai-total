@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { trpc } from "@/router";
 import { useUploadAvatar } from "@/hooks/use-api";
 import { User } from "@/types/db";
+import { authClient } from "@/components/auth/client";
 
 export const Route = createFileRoute("/app/_authed/settings")({
     component: SettingsPage,
@@ -31,6 +32,18 @@ function SettingsPage() {
     const [newsletter, setNewsletter] = useState(
         user?.notificationPreferences?.newsletter ?? true
     );
+    const [logoutLoading, setLogoutLoading] = useState(false);
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        setLogoutLoading(true);
+        await authClient.signOut({
+            fetchOptions: {
+                onSuccess: () => navigate({ to: "/" }),
+            },
+        });
+        setLogoutLoading(false);
+    };
 
     const updateProfileMutation = useMutation({
         ...trpc.users.updateProfile.mutationOptions(),
@@ -220,9 +233,21 @@ function SettingsPage() {
                             </div>
 
                             <div className="flex items-center gap-4 pt-2">
-                                <Button variant="outline">Reset Password</Button>
-                                <Button variant="destructive" className="gap-2">
-                                    <LogOut className="w-4 h-4" /> Sign Out
+                                <Link to="/auth/forgot-password">
+                                    <Button variant="outline">Reset Password</Button>
+                                </Link>
+                                <Button
+                                    variant="destructive"
+                                    className="gap-2"
+                                    onClick={handleLogout}
+                                    disabled={logoutLoading}
+                                >
+                                    {logoutLoading ? (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                        <LogOut className="w-4 h-4" />
+                                    )}
+                                    Sign Out
                                 </Button>
                             </div>
                         </div>

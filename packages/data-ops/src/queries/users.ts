@@ -9,14 +9,14 @@ export async function getUser(userId: string): Promise<User | null> {
 	const result = await db
 		.select()
 		.from(users)
-		.where(eq(users.userId, userId))
+		.where(eq(users.id, userId))
 		.limit(1);
 
 	if (!result.length) return null;
 
 	const u = result[0];
 	return {
-		userId: u.userId,
+		userId: u.id,
 		name: u.name,
 		email: u.email,
 		emailVerified: u.emailVerified,
@@ -38,7 +38,7 @@ export async function updateUser(userId: string, data: UpdateUserInput): Promise
 	await db
 		.update(users)
 		.set(updateData as any)
-		.where(eq(users.userId, userId));
+		.where(eq(users.id, userId));
 }
 
 export async function updateNotificationPreferences(
@@ -62,7 +62,7 @@ export async function updateNotificationPreferences(
 		.set({
 			notificationPreferences: JSON.stringify(newPrefs),
 		} as any)
-		.where(eq(users.userId, userId));
+		.where(eq(users.id, userId));
 }
 
 // Helper to parse notification preferences JSONB
@@ -78,4 +78,5 @@ function parseNotificationPreferences(prefs: unknown): NotificationPreferences |
 	if (typeof prefs === "object") return prefs as NotificationPreferences;
 	return { newsletter: true };
 }
+
 

@@ -11,6 +11,7 @@ export const App = new Hono<{
 }>();
 
 const getAuthInstance = (env: ServiceBindings) => {
+    const backend = env.BACKEND_SERVICE as any;
     return getAuth(
         {
             clientId: env.GOOGLE_CLIENT_ID,
@@ -20,7 +21,15 @@ const getAuthInstance = (env: ServiceBindings) => {
             apiKey: env.CREEM_API_KEY,
             webhookSecret: env.CREEM_WEBHOOK_SECRET,
         },
-        env.BETTER_AUTH_SECRET
+        env.BETTER_AUTH_SECRET,
+        {
+            sendResetPassword: async (email, name, url) => {
+                await backend.sendPasswordResetEmail(email, name, url);
+            },
+            sendVerificationEmail: async (email, name, url) => {
+                await backend.sendVerificationEmail(email, name, url);
+            },
+        },
     );
 };
 

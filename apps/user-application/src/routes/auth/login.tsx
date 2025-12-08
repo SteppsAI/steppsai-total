@@ -14,7 +14,7 @@ import {
     SliderBtn
 } from '@/components/ui/progressive-carousel'
 
-export const Route = createFileRoute('/login')({
+export const Route = createFileRoute('/auth/login')({
     component: LoginPage,
 })
 
@@ -245,6 +245,14 @@ function LoginPage() {
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                     <Label htmlFor="password">Password</Label>
+                                    {isLogin && (
+                                        <Link
+                                            to="/auth/forgot-password"
+                                            className="text-xs text-primary hover:underline underline-offset-4"
+                                        >
+                                            Forgot password?
+                                        </Link>
+                                    )}
                                 </div>
                                 <Input
                                     id="password"

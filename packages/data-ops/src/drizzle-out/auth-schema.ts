@@ -2,7 +2,7 @@ import { pgTable, text, timestamp, boolean, index, jsonb, uuid } from "drizzle-o
 
 // Better Auth - Users table with custom columns
 export const user = pgTable("users", {
-  userId: uuid("user_id").defaultRandom().primaryKey(),
+  id: uuid("user_id").defaultRandom().primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
@@ -23,7 +23,7 @@ export const user = pgTable("users", {
 export const session = pgTable(
   "sessions",
   {
-    sessionId: uuid("session_id").defaultRandom().primaryKey(),
+    id: uuid("session_id").defaultRandom().primaryKey(),
     expiresAt: timestamp("expires_at").notNull(),
     token: text("token").notNull().unique(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -35,7 +35,7 @@ export const session = pgTable(
     userAgent: text("user_agent"),
     userId: uuid("user_id")
       .notNull()
-      .references(() => user.userId, { onDelete: "cascade" }),
+      .references(() => user.id, { onDelete: "cascade" }),
   },
   (table) => [index("sessions_userId_idx").on(table.userId)],
 );
@@ -44,12 +44,12 @@ export const session = pgTable(
 export const account = pgTable(
   "accounts",
   {
-    accountId: uuid("account_id").defaultRandom().primaryKey(),
-    providerAccountId: text("provider_account_id").notNull(),
+    id: uuid("account_id").defaultRandom().primaryKey(),
+    accountId: text("provider_account_id").notNull(),
     providerId: text("provider_id").notNull(),
     userId: uuid("user_id")
       .notNull()
-      .references(() => user.userId, { onDelete: "cascade" }),
+      .references(() => user.id, { onDelete: "cascade" }),
     accessToken: text("access_token"),
     refreshToken: text("refresh_token"),
     idToken: text("id_token"),
@@ -70,7 +70,7 @@ export const account = pgTable(
 export const verification = pgTable(
   "verifications",
   {
-    verificationId: uuid("verification_id").defaultRandom().primaryKey(),
+    id: uuid("verification_id").defaultRandom().primaryKey(),
     identifier: text("identifier").notNull(),
     value: text("value").notNull(),
     expiresAt: timestamp("expires_at").notNull(),
@@ -82,3 +82,4 @@ export const verification = pgTable(
   },
   (table) => [index("verifications_identifier_idx").on(table.identifier)],
 );
+

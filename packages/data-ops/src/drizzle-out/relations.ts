@@ -16,14 +16,14 @@ export const userRelations = relations(user, ({ many }) => ({
 export const sessionRelations = relations(session, ({ one }) => ({
 	user: one(user, {
 		fields: [session.userId],
-		references: [user.userId],
+		references: [user.id],
 	}),
 }));
 
 export const accountRelations = relations(account, ({ one }) => ({
 	user: one(user, {
 		fields: [account.userId],
-		references: [user.userId],
+		references: [user.id],
 	}),
 }));
 
@@ -31,19 +31,19 @@ export const accountRelations = relations(account, ({ one }) => ({
 export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
 	user: one(user, {
 		fields: [subscriptions.userId],
-		references: [user.userId],
+		references: [user.id],
 	}),
 }));
 
 export const teamMembersRelations = relations(teamMembers, ({ one }) => ({
 	owner: one(user, {
 		fields: [teamMembers.ownerId],
-		references: [user.userId],
+		references: [user.id],
 		relationName: "teamMembers_ownerId",
 	}),
 	member: one(user, {
 		fields: [teamMembers.memberId],
-		references: [user.userId],
+		references: [user.id],
 		relationName: "teamMembers_memberId",
 	}),
 }));
@@ -51,7 +51,7 @@ export const teamMembersRelations = relations(teamMembers, ({ one }) => ({
 export const foldersRelations = relations(folders, ({ one, many }) => ({
 	user: one(user, {
 		fields: [folders.userId],
-		references: [user.userId],
+		references: [user.id],
 	}),
 	guides: many(guides),
 }));
@@ -59,7 +59,7 @@ export const foldersRelations = relations(folders, ({ one, many }) => ({
 export const guidesRelations = relations(guides, ({ one, many }) => ({
 	user: one(user, {
 		fields: [guides.userId],
-		references: [user.userId],
+		references: [user.id],
 	}),
 	folder: one(folders, {
 		fields: [guides.folderId],
@@ -74,3 +74,4 @@ export const exportsRelations = relations(exports, ({ one }) => ({
 		references: [guides.guideId],
 	}),
 }));
+

@@ -20,18 +20,36 @@ type CreemConfig = {
     persistSubscriptions?: boolean;
 };
 
+type EmailSender = {
+    sendResetPassword?: (email: string, name: string, url: string) => Promise<void>;
+    sendVerificationEmail?: (email: string, name: string, url: string) => Promise<void>;
+};
+
 export function createBetterAuth(
     database: NonNullable<Parameters<typeof betterAuth>[0]>["database"],
     secret: string,
     creemConfig?: CreemConfig,
     google?: { clientId: string; clientSecret: string },
+    emailSender?: EmailSender,
 ): ReturnType<typeof betterAuth> {
     return betterAuth({
         database,
         secret: secret,
         emailAndPassword: {
             enabled: true,
+            sendResetPassword: emailSender?.sendResetPassword
+                ? async ({ user, url }) => {
+                    await emailSender.sendResetPassword!(user.email, user.name ?? '', url);
+                }
+                : undefined,
         },
+        emailVerification: emailSender?.sendVerificationEmail
+            ? {
+                sendVerificationEmail: async ({ user, url }) => {
+                    await emailSender.sendVerificationEmail!(user.email, user.name ?? '', url);
+                },
+            }
+            : undefined,
         socialProviders: {
             google: {
                 clientId: google?.clientId ?? "",
@@ -47,6 +65,10 @@ export function createBetterAuth(
                 persistSubscriptions: creemConfig?.persistSubscriptions ?? true,
             }),
         ],
+        // Generate UUIDs instead of default strings to match database schema
+        generateId: () => {
+            return crypto.randomUUID();
+        },
     });
 }
 
@@ -54,6 +76,7 @@ export function getAuth(
     google: { clientId: string; clientSecret: string },
     creem: CreemConfig,
     secret: string,
+    emailSender?: EmailSender,
 ): ReturnType<typeof betterAuth> {
     if (auth) return auth;
 
@@ -70,6 +93,7 @@ export function getAuth(
         secret,
         creem,
         google,
+        emailSender,
     );
     return auth;
 }

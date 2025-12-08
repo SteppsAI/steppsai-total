@@ -12,6 +12,9 @@ export function getAuth(
             provider: "pg",
             schema: { ...authSchema },
         }),
+        generateId: () => {
+            return crypto.randomUUID();
+        },
     }) as BetterAuthInstance;
 }
 

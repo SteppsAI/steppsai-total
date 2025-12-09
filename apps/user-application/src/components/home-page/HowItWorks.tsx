@@ -126,7 +126,7 @@ export function HowItWorks() {
                 </div>
 
                 <div className="relative">
-                    <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-6 mt-12 xl:border rounded-md dark:border-neutral-800 bg-background shadow-xl">
+                    <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-6 mt-12 xl:border rounded-md dark:border-neutral-800 bg-background/60 backdrop-blur-lg shadow-xl">
                         {features.map((feature) => (
                             <FeatureCard key={feature.title} className={cn(feature.className, "hiw-card")}>
                                 <FeatureTitle>{feature.title}</FeatureTitle>

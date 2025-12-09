@@ -1,5 +1,3 @@
-import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
 import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -99,7 +97,7 @@ export function BlackFridayDeal() {
                                     <div className="inline-flex items-center gap-2 bg-foreground text-background px-3 py-1 text-sm font-bold rounded-md mb-4">
                                         LIFETIME DEAL
                                     </div>
-                                    <div className="flex items-baseline gap-3 mb-2">
+                                    <div className="flex flex-wrap items-baseline gap-3 mb-2">
                                         <span className="text-6xl md:text-8xl font-bold tracking-tighter text-foreground">
                                             $199
                                         </span>
@@ -108,7 +106,7 @@ export function BlackFridayDeal() {
                                             alt="Crown"
                                             className="w-12 h-12 md:w-20 md:h-20 -rotate-12 ml-2 drop-shadow-lg hover:scale-110 transition-transform duration-300"
                                         />
-                                        <div className="flex flex-col items-start">
+                                        <div className="flex flex-col items-start w-full md:w-auto">
                                             <span className="text-sm font-medium text-primary uppercase tracking-wide">One-time payment</span>
                                         </div>
                                     </div>
@@ -132,16 +130,23 @@ export function BlackFridayDeal() {
                                         </p>
                                     </div>
 
-                                    <Button size="lg" className="cursor-pointer w-full h-14 md:h-16 text-lg md:text-xl font-bold rounded-xl shadow-lg hover:shadow-primary/20 transition-all group">
+                                    <button className="btn-glass-primary group cursor-pointer w-full h-14 md:h-16 text-lg md:text-xl font-bold rounded-full shadow-lg hover:shadow-primary/20 transition-all hover:-translate-y-0.5 active:translate-y-0.5">
                                         <span className="flex items-center justify-center gap-3">
-                                            Get Lifetime Access
+                                            <span className="relative block h-[1.2em] overflow-hidden text-primary-foreground">
+                                                <span className="block transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
+                                                    Get Lifetime Access
+                                                </span>
+                                                <span className="absolute top-full left-0 block transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
+                                                    Get Lifetime Access
+                                                </span>
+                                            </span>
                                             <img
                                                 src="/icons/3d/rocket.png"
                                                 alt="Rocket"
                                                 className="w-6 h-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"
                                             />
                                         </span>
-                                    </Button>
+                                    </button>
                                     <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs md:text-sm text-muted-foreground">
                                         <span>30-day money-back guarantee</span>
                                         <span className="hidden md:inline">•</span>
@@ -165,8 +170,12 @@ export function BlackFridayDeal() {
                                         "Future Updates Included"
                                     ].map((feature, i) => (
                                         <li key={i} className="bf-feature-item flex items-start gap-3 group">
-                                            <div className="mt-0.5 p-0.5 rounded-full bg-muted text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                                                <Check className="w-4 h-4" strokeWidth={3} />
+                                            <div className="mt-1 min-w-5">
+                                                <img 
+                                                    src="/icons/3d/tick.png" 
+                                                    alt="Check" 
+                                                    className="w-5 h-5 object-contain" 
+                                                />
                                             </div>
                                             <span className="text-sm md:text-base text-muted font-medium group-hover:text-foreground transition-colors">
                                                 {feature}

@@ -67,22 +67,22 @@ export function BlackFridayDeal() {
                     {/* Header */}
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12 gap-6">
                         <div>
-                            <div className="bf-badge inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4 ring-1 ring-primary/20">
+                            <div className="bf-badge inline-flex items-center gap-2 px-3 py-1 rounded-full bg-background/50 backdrop-blur-sm border border-foreground/5 text-foreground text-sm font-medium mb-4 shadow-sm">
                                 <span className="relative flex h-2 w-2">
                                     <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                                 </span>
                                 Limited Time Offer:
                             </div>
-                            <h2 className="bf-title text-4xl md:text-7xl font-bold tracking-tighter text-">
+                            <h2 className="bf-title text-4xl md:text-7xl font-bold tracking-tighter text-foreground leading-[0.9]">
                                 LAUNCH <br className="hidden md:block" />
-                                <span className="text-secondary bg-clip-text">
+                                <span className="text-primary">
                                     SPECIAL
                                 </span>
                             </h2>
                         </div>
                         <div className="md:text-right max-w-md">
-                            <p className="bf-desc text-lg md:text-xl text-secondary font-medium">
+                            <p className="bf-desc text-lg md:text-xl text-muted-foreground font-medium leading-relaxed">
                                 Stop paying monthly fees. Get lifetime access to the intuitive documentation tool that grows with your team.
                             </p>
                         </div>
@@ -93,7 +93,7 @@ export function BlackFridayDeal() {
                         <div className="grid md:grid-cols-5 min-h-auto md:min-h-[500px]">
 
                             {/* Left: Pricing & Action */}
-                            <div className="md:col-span-3 p-6 md:p-12 flex flex-col justify-between border-b border-secondary md:border-r md:border-b-0 md:border-r bg-gradient-to-b from-background to-muted/20">
+                            <div className="md:col-span-3 p-6 md:p-12 flex flex-col justify-between border-b border-secondary md:border-r md:border-b-0 bg-background">
                                 <div className="bf-price-content">
                                     <div className="inline-block bg-foreground text-background px-3 py-1 text-sm font-bold rounded-md mb-4">
                                         LIFETIME DEAL

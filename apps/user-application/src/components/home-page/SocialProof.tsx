@@ -121,19 +121,19 @@ export function SocialProof() {
                         </div>
                     </div>
                 </div>
-                <div className="sp-item-bottom col-span-full border-y border-primary/20 p-12">
-                    <p className="text-center text-4xl font-semibold lg:text-7xl">
+                <div className="sp-item-bottom col-span-full border-y border-foreground/5 p-12">
+                    <p className="text-center text-4xl font-bold tracking-tight lg:text-7xl text-foreground">
                         Save 10+ hours per week
                     </p>
                 </div>
                 <div className="sp-item-bottom relative col-span-full p-6 sm:p-12">
                     <div className="max-w-lg mx-auto text-center md:text-left">
-                        <span className="text-muted-foreground flex items-center justify-center md:justify-start gap-2">
+                        <span className="text-muted-foreground font-medium uppercase tracking-wider text-sm flex items-center justify-center md:justify-start gap-2">
                             <Zap className="size-4" />
                             Save Hours Weekly
                         </span>
 
-                        <p className="my-8 text-2xl font-semibold">
+                        <p className="my-8 text-2xl font-semibold text-foreground leading-tight">
                             Stop writing documentation manually.{' '}
                             <span className="text-muted-foreground">
                                 Your team will thank you for the time saved.

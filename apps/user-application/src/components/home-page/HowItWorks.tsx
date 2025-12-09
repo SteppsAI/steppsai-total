@@ -116,11 +116,11 @@ export function HowItWorks() {
         <section id="how-it-works" ref={containerRef} className="py-16 md:py-32 px-4 md:px-6 bg-[var(--bg-how-it-works)] transition-colors duration-500 relative">
                 <div className="relative z-20 max-w-7xl mx-auto">
                 <div className="px-8 hiw-header">
-                    <h4 className="text-3xl lg:text-5xl lg:leading-tight max-w-5xl mx-auto text-center tracking-tight font-medium text-black dark:text-white">
+                    <h4 className="text-3xl lg:text-5xl lg:leading-tight max-w-5xl mx-auto text-center tracking-tight font-bold text-foreground dark:text-white">
                         From recording to sharing in 4 simple steps
                     </h4>
 
-                    <p className="text-sm lg:text-base max-w-2xl my-4 mx-auto text-neutral-500 text-center font-normal dark:text-neutral-300">
+                    <p className="text-sm lg:text-base max-w-2xl my-4 mx-auto text-muted-foreground text-center font-medium dark:text-neutral-300">
                         Create beautiful guides in minutes, not hours. Your team will thank you.
                     </p>
                 </div>

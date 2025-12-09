@@ -5,7 +5,7 @@ import { Link } from "@tanstack/react-router";
 
 export function Footer() {
   return (
-    <footer className="relative w-full bg-brand-dark overflow-hidden pt-20 pb-0 rounded-t-4xl">
+    <footer className="relative w-full bg-secondary overflow-hidden pt-20 pb-0 rounded-t-4xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 mb-24">
 
@@ -22,10 +22,10 @@ export function Footer() {
 
           {/* Contact */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider">Contact</h3>
+            <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider">Contact</h3>
             <ul className="space-y-3">
               <li>
-                <a href="mailto:support@stepps.ai" className="text-base text-white hover:text-primary transition-colors">
+                <a href="mailto:support@stepps.ai" className="text-base font-medium text-white hover:text-white/80 transition-colors">
                   support@stepps.ai
                 </a>
               </li>
@@ -34,15 +34,15 @@ export function Footer() {
 
           {/* Legal */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider">Legal</h3>
+            <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider">Legal</h3>
             <ul className="space-y-3">
               <li>
-                <Link to="/privacy" className="text-base text-white hover:text-primary transition-colors">
+                <Link to="/privacy" className="text-base font-medium text-white hover:text-white/80 transition-colors">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/terms" className="text-base text-white hover:text-primary transition-colors">
+                <Link to="/terms" className="text-base font-medium text-white hover:text-white/80 transition-colors">
                   Terms of Service
                 </Link>
               </li>
@@ -55,8 +55,8 @@ export function Footer() {
            */}
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-end md:items-center pb-8 pt-8 border-t border-white/5">
-          <p className="text-sm text-white/40">
+        <div className="flex flex-col md:flex-row justify-between items-end md:items-center pb-8 pt-8 border-t border-white/20">
+          <p className="text-sm font-medium text-white/80">
             © 2025 stepps.ai All rights reserved.
           </p>
         </div>
@@ -68,7 +68,7 @@ export function Footer() {
           className="text-[22vw] font-bold text-center text-white whitespace-nowrap leading-[0.8] tracking-tighter opacity-100"
           style={{
             fontFamily: '"Space Grotesk", sans-serif',
-            background: 'linear-gradient(to bottom, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)',
+            background: 'linear-gradient(to bottom, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             maskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)',

@@ -98,10 +98,10 @@ export function FAQ() {
         <section id="faq" ref={containerRef} className="py-24 bg-[var(--bg-faq)] transition-colors duration-500">
             <div className="container mx-auto px-4 md:px-6 max-w-3xl">
                 <div className="faq-header text-center mb-16">
-                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-foreground">
                         Frequently Asked Questions
                     </h2>
-                    <p className="text-lg text-muted-foreground">
+                    <p className="text-lg text-muted-foreground font-medium">
                         Have a question? We're here to help.
                     </p>
                 </div>

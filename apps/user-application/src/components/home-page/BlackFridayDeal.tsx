@@ -93,15 +93,21 @@ export function BlackFridayDeal() {
                         <div className="grid md:grid-cols-5 min-h-auto md:min-h-[500px]">
 
                             {/* Left: Pricing & Action */}
-                            <div className="md:col-span-3 p-6 md:p-12 flex flex-col justify-between border-b border-secondary md:border-r md:border-b-0 bg-background">
-                                <div className="bf-price-content">
-                                    <div className="inline-block bg-foreground text-background px-3 py-1 text-sm font-bold rounded-md mb-4">
+                            <div className="md:col-span-3 p-6 md:p-12 flex flex-col justify-between border-b border-secondary md:border-r md:border-b-0 bg-background relative overflow-hidden">
+
+                                <div className="bf-price-content relative z-10">
+                                    <div className="inline-flex items-center gap-2 bg-foreground text-background px-3 py-1 text-sm font-bold rounded-md mb-4">
                                         LIFETIME DEAL
                                     </div>
                                     <div className="flex items-baseline gap-3 mb-2">
                                         <span className="text-6xl md:text-8xl font-bold tracking-tighter text-foreground">
                                             $199
                                         </span>
+                                        <img
+                                            src="/icons/3d/crown.png"
+                                            alt="Crown"
+                                            className="w-12 h-12 md:w-20 md:h-20 -rotate-12 ml-2 drop-shadow-lg hover:scale-110 transition-transform duration-300"
+                                        />
                                         <div className="flex flex-col items-start">
                                             <span className="text-sm font-medium text-primary uppercase tracking-wide">One-time payment</span>
                                         </div>
@@ -126,8 +132,15 @@ export function BlackFridayDeal() {
                                         </p>
                                     </div>
 
-                                    <Button size="lg" className="w-full h-14 md:h-16 text-lg md:text-xl font-bold rounded-xl shadow-lg hover:shadow-primary/20 transition-all">
-                                        Get Lifetime Access
+                                    <Button size="lg" className="cursor-pointer w-full h-14 md:h-16 text-lg md:text-xl font-bold rounded-xl shadow-lg hover:shadow-primary/20 transition-all group">
+                                        <span className="flex items-center justify-center gap-3">
+                                            Get Lifetime Access
+                                            <img
+                                                src="/icons/3d/rocket.png"
+                                                alt="Rocket"
+                                                className="w-6 h-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"
+                                            />
+                                        </span>
                                     </Button>
                                     <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs md:text-sm text-muted-foreground">
                                         <span>30-day money-back guarantee</span>

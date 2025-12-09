@@ -1,5 +1,4 @@
 'use client'
-import { ScreenShare, FolderOpen, Zap, } from 'lucide-react'
 import { useRef } from 'react'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
@@ -60,12 +59,14 @@ export function SocialProof() {
             <div className="mx-auto grid max-w-5xl border-2 border-primary/20 md:grid-cols-2 overflow-hidden shadow-xl rounded-3xl bg-background">
                 <div className="sp-item-left flex flex-col">
                     <div className="p-6 sm:p-12 sp-item-left-content">
-                        <span className="text-muted-foreground flex items-center gap-2">
-                            <ScreenShare className="size-4" />
-                            Record Once
-                        </span>
+                        <div className="flex items-center gap-3 mb-6">
+                            <img src="/icons/3d/record.png" alt="Record" className="w-10 h-10 object-contain drop-shadow-md" />
+                            <span className="text-muted-foreground font-medium uppercase tracking-wider text-sm">
+                                Record Once
+                            </span>
+                        </div>
 
-                        <p className="mt-8 text-2xl font-semibold">
+                        <p className="text-2xl font-semibold">
                             Capture any workflow and generate perfect guides automatically
                         </p>
                     </div>
@@ -82,10 +83,12 @@ export function SocialProof() {
                 </div>
                 <div className="sp-item-right overflow-hidden border-t bg-zinc-50 p-6 sm:p-12 md:border-0 md:border-l border-primary/20 dark:bg-transparent">
                     <div className="relative z-10 sp-item-right-content">
-                        <span className="text-muted-foreground flex items-center gap-2">
-                            <FolderOpen className="size-4" />
-                            Share Everywhere
-                        </span>
+                        <div className="flex items-center gap-3 mb-6">
+                            <img src="/icons/3d/folder.png" alt="Folder" className="w-10 h-10 object-contain drop-shadow-md" />
+                            <span className="text-muted-foreground font-medium uppercase tracking-wider text-sm">
+                                Share Everywhere
+                            </span>
+                        </div>
 
                         <p className="my-8 text-2xl font-semibold">
                             Organize guides into folders and share with your team. Export to PDF, HTML, or share via link.
@@ -128,12 +131,14 @@ export function SocialProof() {
                 </div>
                 <div className="sp-item-bottom relative col-span-full p-6 sm:p-12">
                     <div className="max-w-lg mx-auto text-center md:text-left">
-                        <span className="text-muted-foreground font-medium uppercase tracking-wider text-sm flex items-center justify-center md:justify-start gap-2">
-                            <Zap className="size-4" />
-                            Save Hours Weekly
-                        </span>
+                        <div className="flex items-center justify-center md:justify-start gap-3 mb-6">
+                            <img src="/icons/3d/like.png" alt="Like" className="w-10 h-10 object-contain drop-shadow-md" />
+                            <span className="text-muted-foreground font-medium uppercase tracking-wider text-sm">
+                                Save Hours Weekly
+                            </span>
+                        </div>
 
-                        <p className="my-8 text-2xl font-semibold text-foreground leading-tight">
+                        <p className="text-2xl font-semibold text-foreground leading-tight">
                             Stop writing documentation manually.{' '}
                             <span className="text-muted-foreground">
                                 Your team will thank you for the time saved.

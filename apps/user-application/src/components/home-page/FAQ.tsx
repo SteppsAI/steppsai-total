@@ -97,8 +97,13 @@ export function FAQ() {
     return (
         <section id="faq" ref={containerRef} className="py-24 bg-[var(--bg-faq)] transition-colors duration-500">
             <div className="container mx-auto px-4 md:px-6 max-w-3xl">
-                <div className="faq-header text-center mb-16">
-                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-foreground">
+                <div className="faq-header text-center mb-16 relative">
+                    <img
+                        src="/icons/3d/chat-bubble.png"
+                        alt="Question"
+                        className="w-16 h-16 md:w-20 md:h-20 absolute -top-12 left-1/2 -translate-x-1/2 -rotate-12 drop-shadow-lg animate-float"
+                    />
+                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-foreground mt-8">
                         Frequently Asked Questions
                     </h2>
                     <p className="text-lg text-muted-foreground font-medium">

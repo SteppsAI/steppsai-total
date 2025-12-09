@@ -1219,3 +1219,30 @@
 .custom-shape-divider-bottom-1765301543 .shape-fill {
   fill: #CFF7FE;
 }
+
+/* Custom animations for 3D icons */
+@keyframes float {
+  0%, 100% {
+    transform: rotate(-45deg) translateY(0px);
+  }
+  50% {
+    transform: rotate(-45deg) translateY(-20px);
+  }
+}
+
+/* Rocket launch animation */
+@keyframes rocket-launch {
+  0% {
+    transform: translateY(0px) rotate(-45deg);
+  }
+  100% {
+    transform: translateY(-10px) rotate(-45deg);
+  }
+}
+
+/* Apply rocket animation */
+.rocket-float {
+  animation: float 3s ease-in-out infinite;
+  filter: drop-shadow(0 10px 20px rgba(99, 102, 241, 0.3));
+  transform: rotate(-45deg);
+}

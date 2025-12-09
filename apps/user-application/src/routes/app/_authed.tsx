@@ -3,14 +3,14 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Outlet, createFileRoute, useLocation, redirect } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { DashboardHeader } from "@/components/dashboard-header";
-import { authClient } from "@/components/auth/client";
+import { getSessionCached } from "@/router";
 
 export const Route = createFileRoute("/app/_authed")({
   component: RouteComponent,
   beforeLoad: async () => {
-    const session = await authClient.getSession();
+    const session = await getSessionCached();
     if (!session.data?.session) {
-      throw redirect({ to: "/" })
+      throw redirect({ to: "/auth/login" })
     }
   }
 });

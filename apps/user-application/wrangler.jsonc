@@ -24,12 +24,32 @@
   "env": {
     "stage": {
       "vars": {
-        "ASSETS_URL": "https://stepps-assets-stage.stepps.ai"
+        "ASSETS_URL": "https://stepps-assets-stage.stepps.ai",
+        "GOOGLE_CLIENT_ID": "354170279226-thlv63iksq8o6sikimt68jkpcdc9dn4e.apps.googleusercontent.com",
+        "VITE_AUTH_URL": "https://stage.stepps.ai"
       },
       "routes": [
         {
           "pattern": "stage.stepps.ai",
           "custom_domain": true
+        }
+      ],
+      "ratelimits": [
+        {
+          "name": "AUTH_RATE_LIMITER",
+          "namespace_id": "2001",
+          "simple": {
+            "limit": 200,
+            "period": 60
+          }
+        },
+        {
+          "name": "TRPC_RATE_LIMITER",
+          "namespace_id": "2002",
+          "simple": {
+            "limit": 20,
+            "period": 60
+          }
         }
       ],
       "services": [
@@ -42,8 +62,28 @@
     },
     "production": {
       "vars": {
-        "ASSETS_URL": "https://assets.stepps.ai"
+        "ASSETS_URL": "https://assets.stepps.ai",
+        "GOOGLE_CLIENT_ID": "354170279226-thlv63iksq8o6sikimt68jkpcdc9dn4e.apps.googleusercontent.com",
+        "VITE_AUTH_URL": "https://stepps.ai"
       },
+      "ratelimits": [
+        {
+          "name": "AUTH_RATE_LIMITER",
+          "namespace_id": "2001",
+          "simple": {
+            "limit": 20,
+            "period": 60
+          }
+        },
+        {
+          "name": "TRPC_RATE_LIMITER",
+          "namespace_id": "2002",
+          "simple": {
+            "limit": 20,
+            "period": 60
+          }
+        }
+      ],
       "services": [
         {
           "binding": "BACKEND_SERVICE",

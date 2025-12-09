@@ -2,8 +2,8 @@ import { z } from "zod";
 
 export const teamMembersSchema = z.object({
 	id: z.string().uuid(),
-	ownerId: z.string().uuid(),
-	memberId: z.string().uuid(),
+	ownerId: z.string(),
+	memberId: z.string(),
 	role: z.enum(["editor", "admin"]).optional(),
 	status: z.enum(["pending", "accepted"]).optional(),
 	createdAt: z.string().optional(),

@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { useState } from 'react'
+import { z } from 'zod'
 import { authClient } from '@/components/auth/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,12 +15,25 @@ import {
     SliderBtn
 } from '@/components/ui/progressive-carousel'
 
-export const Route = createFileRoute('/login')({
-    component: LoginPage,
+type AuthPageProps = {
+    initialMode?: 'login' | 'signup'
+}
+
+const loginSchema = z.object({
+    email: z.string().email('Please enter a valid email address'),
+    password: z.string().min(8, 'Password must be at least 8 characters long'),
 })
 
-function LoginPage() {
-    const [isLogin, setIsLogin] = useState(true)
+const signupSchema = loginSchema.extend({
+    name: z.string().min(2, 'Please enter your full name'),
+})
+
+export const Route = createFileRoute('/auth/login')({
+    component: () => <AuthPage initialMode="login" />,
+})
+
+export function AuthPage({ initialMode = 'login' }: AuthPageProps) {
+    const [isLogin, setIsLogin] = useState(initialMode === 'login')
     const [loading, setLoading] = useState(false)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -30,15 +44,27 @@ function LoginPage() {
         e.preventDefault()
         setLoading(true)
         try {
+            const schema = isLogin ? loginSchema : signupSchema
+            const parsed = schema.safeParse({ email, password, name })
+
+            if (!parsed.success) {
+                const firstError = parsed.error.issues[0]
+                toast.error(firstError?.message ?? 'Please check your input')
+                return
+            }
+
+            console.log('[Auth] submit', { mode: isLogin ? 'login' : 'signup', email })
             if (isLogin) {
                 await authClient.signIn.email({
                     email,
                     password,
                 }, {
                     onSuccess: () => {
+                        console.log('[Auth] signIn.email success')
                         navigate({ to: '/app' })
                     },
                     onError: (ctx) => {
+                        console.error('[Auth] signIn.email error', ctx)
                         toast.error(ctx.error.message)
                     }
                 })
@@ -49,14 +75,17 @@ function LoginPage() {
                     name,
                 }, {
                     onSuccess: () => {
+                        console.log('[Auth] signUp.email success')
                         navigate({ to: '/app' })
                     },
                     onError: (ctx) => {
+                        console.error('[Auth] signUp.email error', ctx)
                         toast.error(ctx.error.message)
                     }
                 })
             }
         } catch (error) {
+            console.error('[Auth] submit unexpected error', error)
             toast.error('An error occurred')
         } finally {
             setLoading(false)
@@ -64,10 +93,16 @@ function LoginPage() {
     }
 
     const handleGoogleLogin = async () => {
-        await authClient.signIn.social({
-            provider: "google",
-            callbackURL: "/app"
-        })
+        try {
+            console.log('[Auth] Google sign-in start')
+            await authClient.signIn.social({
+                provider: "google",
+                callbackURL: "/app"
+            })
+        } catch (error) {
+            console.error('[Auth] Google sign-in error', error)
+            toast.error('Google sign-in failed')
+        }
     }
 
     return (
@@ -168,7 +203,7 @@ function LoginPage() {
 
             {/* Right Side - Auth Form */}
             <div className="flex items-center justify-center p-8 bg-background relative overflow-hidden">
-                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
+                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02] pointer-events-none" />
                 {/* Mobile Logo */}
                 <div className="absolute top-8 w-full flex justify-center lg:hidden">
                     <img
@@ -245,6 +280,14 @@ function LoginPage() {
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                     <Label htmlFor="password">Password</Label>
+                                    {isLogin && (
+                                        <Link
+                                            to="/auth/forgot-password"
+                                            className="text-xs text-primary hover:underline underline-offset-4"
+                                        >
+                                            Forgot password?
+                                        </Link>
+                                    )}
                                 </div>
                                 <Input
                                     id="password"

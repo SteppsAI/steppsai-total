@@ -1,5 +1,5 @@
 import { getDb } from "@/db/database";
-import { exports as exportsTable } from "@/drizzle-out/schema";
+import { exportsTable } from "@/drizzle-out/schema";
 import { desc, eq } from "drizzle-orm";
 import { CreateExportSchemaType, ExportsSchemaType } from "@/zod/exports";
 import { v4 as uuidv4 } from "uuid";

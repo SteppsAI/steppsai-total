@@ -1,21 +1,21 @@
-import { pgTable, text, timestamp, boolean, index, jsonb, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, index, jsonb } from "drizzle-orm/pg-core";
 
-// Better Auth - Users table with custom columns
+// Better Auth - Users table
 export const user = pgTable("users", {
-  userId: uuid("user_id").defaultRandom().primaryKey(),
+  id: text("id").primaryKey().notNull(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
-  createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' })
+  // GEEN mode: 'string' - laat Drizzle het converteren
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
-    .$onUpdate(() => new Date().toISOString())
+    .$onUpdate(() => new Date())
     .notNull(),
-  // Custom app columns
+  // Custom columns
   avatarUrl: text("avatar_url"),
   notificationPreferences: jsonb("notification_preferences").default({ newsletter: true }),
-  // Creem customer ID for payments
   creemCustomerId: text("creem_customer_id"),
 });
 
@@ -23,42 +23,42 @@ export const user = pgTable("users", {
 export const session = pgTable(
   "sessions",
   {
-    sessionId: uuid("session_id").defaultRandom().primaryKey(),
-    expiresAt: timestamp("expires_at").notNull(),
+    id: text("id").primaryKey().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     token: text("token").notNull().unique(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
-    userId: uuid("user_id")
+    userId: text("user_id")
       .notNull()
-      .references(() => user.userId, { onDelete: "cascade" }),
+      .references(() => user.id, { onDelete: "cascade" }),
   },
   (table) => [index("sessions_userId_idx").on(table.userId)],
 );
 
-// Better Auth - Accounts table (OAuth providers)
+// Better Auth - Accounts table
 export const account = pgTable(
   "accounts",
   {
-    accountId: uuid("account_id").defaultRandom().primaryKey(),
-    providerAccountId: text("provider_account_id").notNull(),
+    id: text("id").primaryKey().notNull(),
+    accountId: text("provider_account_id").notNull(),
     providerId: text("provider_id").notNull(),
-    userId: uuid("user_id")
+    userId: text("user_id")
       .notNull()
-      .references(() => user.userId, { onDelete: "cascade" }),
+      .references(() => user.id, { onDelete: "cascade" }),
     accessToken: text("access_token"),
     refreshToken: text("refresh_token"),
     idToken: text("id_token"),
-    accessTokenExpiresAt: timestamp("access_token_expires_at"),
-    refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
+    accessTokenExpiresAt: timestamp("access_token_expires_at", { withTimezone: true }),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { withTimezone: true }),
     scope: text("scope"),
     password: text("password"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
@@ -66,16 +66,15 @@ export const account = pgTable(
   (table) => [index("accounts_userId_idx").on(table.userId)],
 );
 
-// Better Auth - Verification tokens
 export const verification = pgTable(
   "verifications",
   {
-    verificationId: uuid("verification_id").defaultRandom().primaryKey(),
+    id: text("id").primaryKey().notNull(),
     identifier: text("identifier").notNull(),
     value: text("value").notNull(),
-    expiresAt: timestamp("expires_at").notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),

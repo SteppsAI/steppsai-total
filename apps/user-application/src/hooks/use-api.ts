@@ -1,17 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { trpc } from '@/router';
 
-const queryClient = useQueryClient();
-
-/**
- * Hooks for operations that require RPC (R2, DOs, Queues).
- * These use tRPC which internally calls BACKEND_SERVICE RPC methods.
- */
-
-/**
- * Delete a guide (calls backend.deleteGuideWithImages via RPC)
- */
 export function useDeleteGuide() {
+    const queryClient = useQueryClient(); // ✅ Binnen de hook
+
     return useMutation({
         ...trpc.guides.delete.mutationOptions(),
         onSuccess: () => {
@@ -20,10 +12,9 @@ export function useDeleteGuide() {
     });
 }
 
-/**
- * Delete a step from a guide (calls backend.deleteStepWithImage via RPC)
- */
 export function useDeleteStep() {
+    const queryClient = useQueryClient();
+
     return useMutation({
         ...trpc.guides.deleteStep.mutationOptions(),
         onSuccess: () => {
@@ -32,10 +23,9 @@ export function useDeleteStep() {
     });
 }
 
-/**
- * Upload user avatar (calls backend.uploadAvatar via RPC)
- */
 export function useUploadAvatar() {
+    const queryClient = useQueryClient();
+
     return useMutation({
         ...trpc.users.uploadAvatar.mutationOptions(),
         onSuccess: () => {
@@ -44,10 +34,9 @@ export function useUploadAvatar() {
     });
 }
 
-/**
- * Delete user avatar (calls backend.deleteAvatar via RPC)
- */
 export function useDeleteAvatar() {
+    const queryClient = useQueryClient();
+
     return useMutation({
         ...trpc.users.deleteAvatar.mutationOptions(),
         onSuccess: () => {
@@ -55,4 +44,3 @@ export function useDeleteAvatar() {
         },
     });
 }
-

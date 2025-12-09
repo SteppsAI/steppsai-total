@@ -4,7 +4,7 @@ import { stepSchema, stepFromExtensionSchema, type Step } from './steps';
 // Guide schema
 export const guidesSchema = z.object({
 	guideId: z.string().uuid(),
-	userId: z.string().uuid(),
+	userId: z.string(),
 	folderId: z.string().uuid().nullable().optional(),
 	title: z.string().nullable().optional(),
 	description: z.string().nullable().optional(),
@@ -18,7 +18,7 @@ export const guidesSchema = z.object({
 });
 
 export const createGuideSchema = z.object({
-	userId: z.string().uuid(),
+	userId: z.string(),
 	folderId: z.string().uuid().optional(),
 	title: z.string().optional(),
 	description: z.string().optional(),

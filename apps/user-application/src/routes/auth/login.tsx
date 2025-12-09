@@ -2,10 +2,11 @@ import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { z } from 'zod'
 import { authClient } from '@/components/auth/client'
+import { showAuthError } from '@/lib/auth-errors'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
 import {
     ProgressSlider,
@@ -38,6 +39,7 @@ export function AuthPage({ initialMode = 'login' }: AuthPageProps) {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [name, setName] = useState('')
+    const [showPassword, setShowPassword] = useState(false)
     const navigate = useNavigate()
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -55,34 +57,35 @@ export function AuthPage({ initialMode = 'login' }: AuthPageProps) {
 
             console.log('[Auth] submit', { mode: isLogin ? 'login' : 'signup', email })
             if (isLogin) {
-                await authClient.signIn.email({
+                const result = await authClient.signIn.email({
                     email,
                     password,
-                }, {
-                    onSuccess: () => {
-                        console.log('[Auth] signIn.email success')
-                        navigate({ to: '/app' })
-                    },
-                    onError: (ctx) => {
-                        console.error('[Auth] signIn.email error', ctx)
-                        toast.error(ctx.error.message)
-                    }
                 })
+
+                if ((result as any)?.error) {
+                    console.error('[Auth] signIn.email error', result)
+                    showAuthError({ error: (result as any).error } as any, 'login')
+                    return
+                }
+
+                console.log('[Auth] signIn.email success', result)
+                navigate({ to: '/app' })
             } else {
-                await authClient.signUp.email({
+                const result = await authClient.signUp.email({
                     email,
                     password,
                     name,
-                }, {
-                    onSuccess: () => {
-                        console.log('[Auth] signUp.email success')
-                        navigate({ to: '/app' })
-                    },
-                    onError: (ctx) => {
-                        console.error('[Auth] signUp.email error', ctx)
-                        toast.error(ctx.error.message)
-                    }
+                    callbackURL: "/auth/verify-email"
                 })
+
+                if ((result as any)?.error) {
+                    console.error('[Auth] signUp.email error', result)
+                    showAuthError({ error: (result as any).error } as any, 'signup')
+                    return
+                }
+
+                console.log('[Auth] signUp.email success', result)
+                toast.success('Please check your email for verification')
             }
         } catch (error) {
             console.error('[Auth] submit unexpected error', error)
@@ -289,15 +292,29 @@ export function AuthPage({ initialMode = 'login' }: AuthPageProps) {
                                         </Link>
                                     )}
                                 </div>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    placeholder="••••••••"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    className="h-11"
-                                />
+                                <div className="relative">
+                                    <Input
+                                        id="password"
+                                        type={showPassword ? 'text' : 'password'}
+                                        placeholder="••••••••"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                        className="h-11 pr-10"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword((prev) => !prev)}
+                                        className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground"
+                                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                    >
+                                        {showPassword ? (
+                                            <EyeOff className="h-4 w-4" />
+                                        ) : (
+                                            <Eye className="h-4 w-4" />
+                                        )}
+                                    </button>
+                                </div>
                             </div>
 
                             <Button type="submit" className="w-full h-11 font-medium" disabled={loading}>

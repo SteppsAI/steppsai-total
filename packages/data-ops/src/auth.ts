@@ -65,6 +65,8 @@ export function getAuth(
     },
     emailVerification: emailSender?.sendVerificationEmail
       ? {
+        sendOnSignUp: true,
+        autoSignInAfterVerification: true,
         sendVerificationEmail: async ({ user, url }) => {
           await emailSender.sendVerificationEmail!(user.email, user.name ?? "", url);
         },

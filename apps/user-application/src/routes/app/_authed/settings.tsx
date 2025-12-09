@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +45,10 @@ function SettingsPage() {
             },
         });
         setLogoutLoading(false);
+    };
+
+    const handleResetPassword = () => {
+        navigate({ to: "/auth/reset-password" });
     };
 
     const updateProfileMutation = useMutation({
@@ -235,9 +239,12 @@ function SettingsPage() {
                             </div>
 
                             <div className="flex items-center gap-4 pt-2">
-                                <Link to="/auth/forgot-password">
-                                    <Button variant="outline">Reset Password</Button>
-                                </Link>
+                                <Button
+                                    variant="outline"
+                                    onClick={handleResetPassword}
+                                >
+                                    Reset Password
+                                </Button>
                                 <Button
                                     variant="destructive"
                                     className="gap-2"

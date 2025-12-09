@@ -6,6 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, ArrowLeft, Mail } from "lucide-react";
 import { toast } from "sonner";
+import { z } from "zod";
+
+const forgotPasswordSchema = z.object({
+    email: z.string().email("Please enter a valid email address"),
+});
 
 export function ForgotPasswordForm() {
     const [email, setEmail] = useState("");
@@ -14,11 +19,16 @@ export function ForgotPasswordForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!email.trim()) return;
+        const parsed = forgotPasswordSchema.safeParse({ email });
+        if (!parsed.success) {
+            const firstError = parsed.error.issues[0];
+            toast.error(firstError?.message ?? "Please enter a valid email");
+            return;
+        }
 
         setLoading(true);
         try {
-            await authClient.forgetPassword({
+            await authClient.requestPasswordReset({
                 email,
                 redirectTo: "/auth/reset-password",
             });

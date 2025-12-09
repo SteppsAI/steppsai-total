@@ -4,6 +4,7 @@ import { Outlet, createRootRouteWithContext } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type { TRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import type { AppRouter } from "@/worker/trpc/router";
+import { Toaster } from "@/components/ui/sonner";
 
 export interface RouterAppContext {
   trpc: TRPCOptionsProxy<AppRouter>;
@@ -15,6 +16,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
     <>
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <Outlet />
+        <Toaster position="top-right" richColors/>
         <TanStackRouterDevtools />
       </ThemeProvider>
     </>

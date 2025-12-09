@@ -30,7 +30,7 @@ export function Navbar() {
         {/* Spacer to balance the logo on the left, or just the buttons */}
         <div className="flex items-center gap-2">
           <Link
-            to="/login"
+            to="/auth/login"
             className="relative z-20 text-base font-semibold font-sans leading-6 text-zinc-700 hover:text-black dark:text-neutral-200 dark:hover:text-white transition-colors whitespace-nowrap px-5 py-2.5"
           >
             Log in
@@ -64,7 +64,7 @@ export function Navbar() {
           ))}
           <div className="my-2 h-px bg-gray-200 w-full dark:bg-zinc-800" />
           <Link
-            to="/login"
+            to="/auth/login"
             className="block w-full rounded-md px-4 py-2.5 text-base font-semibold text-zinc-700 hover:bg-gray-50 dark:text-zinc-200 dark:hover:bg-zinc-800"
           >
             Log in

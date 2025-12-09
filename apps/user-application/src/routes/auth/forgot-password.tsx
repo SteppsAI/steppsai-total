@@ -8,7 +8,7 @@ export const Route = createFileRoute("/auth/forgot-password")({
 function ForgotPasswordPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-background p-8">
-            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
+            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02] pointer-events-none" />
 
             {/* Logo */}
             <div className="absolute top-8 left-1/2 -translate-x-1/2">

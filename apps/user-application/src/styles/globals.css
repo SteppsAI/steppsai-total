@@ -11,10 +11,12 @@
 
   /* Brand Colors */
   --primary: #6366F1;
+  --primary-light: #e0e1ff;
   --primary-rgb: 99, 102, 241;
   --primary-foreground: #FFFFFF;
 
   --secondary: #06B6D4;
+  --secondary-light: #cff7fe;
   --secondary-foreground: #FFFFFF;
 
   --accent: #F43F5E;

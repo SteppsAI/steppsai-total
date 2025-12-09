@@ -15,10 +15,15 @@ import {
     SliderBtnGroup,
     SliderBtn
 } from '@/components/ui/progressive-carousel'
+import { notifyExtensionAuthChanged, triggerExtensionSidePanel } from '@/lib/extension'
 
 type AuthPageProps = {
     initialMode?: 'login' | 'signup'
 }
+
+const loginSearchSchema = z.object({
+    from: z.string().optional(),
+})
 
 const loginSchema = z.object({
     email: z.string().email('Please enter a valid email address'),
@@ -30,6 +35,7 @@ const signupSchema = loginSchema.extend({
 })
 
 export const Route = createFileRoute('/auth/login')({
+    validateSearch: (search) => loginSearchSchema.parse(search),
     component: () => <AuthPage initialMode="login" />,
 })
 
@@ -41,6 +47,7 @@ export function AuthPage({ initialMode = 'login' }: AuthPageProps) {
     const [name, setName] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const navigate = useNavigate()
+    const { from } = Route.useSearch()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -69,6 +76,16 @@ export function AuthPage({ initialMode = 'login' }: AuthPageProps) {
                 }
 
                 console.log('[Auth] signIn.email success', result)
+                if (from === 'extension') {
+                    try {
+                        await notifyExtensionAuthChanged()
+                        await triggerExtensionSidePanel()
+                        setTimeout(() => window.close(), 500)
+                        return
+                    } catch (err) {
+                        console.error('[Auth] Extension notification error', err)
+                    }
+                }
                 navigate({ to: '/app' })
             } else {
                 const result = await authClient.signUp.email({

@@ -6,9 +6,11 @@ export const authClient = createAuthClient({
     baseURL: WEB_APP_URL, // Points to user-application worker
     plugins: [creemClient()],
     session: {
-        refetchOnWindowFocus: false,
-        refetchInterval: false,
-        refetchOnReconnect: false,
+        // In the extension we want the session to refresh automatically
+        // after the user logs in from a separate tab.
+        refetchOnWindowFocus: true,
+        refetchInterval: 10_000, // re-check every 10s while side panel is open
+        refetchOnReconnect: true,
     },
     logger: {
         disabled: false,

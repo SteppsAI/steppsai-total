@@ -1,13 +1,19 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import SidePanelApp from './SidePanelApp.tsx';
-import { AuthWrapper } from '../components/AuthWrapper';
-import '../styles/globals.css';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
-        <AuthWrapper>
-            <SidePanelApp />
-        </AuthWrapper>
-    </React.StrictMode>
+import SidePanelApp from "./SidePanelApp.tsx";
+import { AuthWrapper } from "../components/AuthWrapper";
+import "../styles/globals.css";
+
+const queryClient = new QueryClient();
+
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <AuthWrapper>
+        <SidePanelApp />
+      </AuthWrapper>
+    </QueryClientProvider>
+  </React.StrictMode>
 );

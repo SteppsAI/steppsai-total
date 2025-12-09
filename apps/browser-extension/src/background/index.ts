@@ -288,7 +288,6 @@ chrome.action.onClicked.addListener((tab) => {
         chrome.sidePanel.open({ windowId: tab.windowId });
     }
 });
-
 chrome.runtime.onMessageExternal.addListener((message, _sender, sendResponse) => {
     if (message.type === 'OPEN_SIDE_PANEL') {
         chrome.tabs.create({ url: 'https://google.com' }, (tab) => {
@@ -298,6 +297,10 @@ chrome.runtime.onMessageExternal.addListener((message, _sender, sendResponse) =>
                     .catch((error) => console.error('Failed to open side panel:', error));
             }
         });
+        sendResponse({ success: true });
+    } else if (message.type === 'AUTH_STATE_CHANGED') {
+        // Broadcast to side panel via storage event (reliable cross-context communication)
+        chrome.storage.local.set({ authStateVersion: Date.now() });
         sendResponse({ success: true });
     }
 });

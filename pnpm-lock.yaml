@@ -20,6 +20,9 @@ importers:
       '@creem_io/better-auth':
         specifier: ^0.0.12
         version: 0.0.12(better-auth@1.4.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(solid-js@1.9.7))(creem@0.4.0)(zod@4.1.13)
+      '@tanstack/react-query':
+        specifier: ^5.81.2
+        version: 5.81.2(react@19.1.0)
       '@tanstack/react-router':
         specifier: ^1.121.40
         version: 1.121.40(react-dom@19.1.0(react@19.1.0))(react@19.1.0)

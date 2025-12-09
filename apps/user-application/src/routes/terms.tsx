@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Footer } from '@/components/home-page/footer'
+import { Navbar } from '@/components/home-page/Navbar'
 
 export const Route = createFileRoute('/terms')({
   component: Terms,
@@ -8,7 +9,8 @@ export const Route = createFileRoute('/terms')({
 function Terms() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+      <Navbar />
+      <div className="max-w-4xl mx-auto px-4 pt-24 pb-12 sm:px-6 lg:px-8">
         <div className="prose prose-gray max-w-none">
           <h1 className="text-4xl font-bold text-gray-900 mb-8">Terms of Service</h1>
 

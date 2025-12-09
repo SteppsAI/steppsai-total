@@ -113,8 +113,8 @@ export function HowItWorks() {
         },
     ];
     return (
-        <section id="how-it-works" ref={containerRef} className="py-24 bg-white dark:bg-neutral-950">
-            <div className="relative z-20 py-10 lg:py-40 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="how-it-works" ref={containerRef} className="py-16 md:py-32 px-4 md:px-6 bg-[var(--bg-how-it-works)] transition-colors duration-500 relative">
+                <div className="relative z-20 max-w-7xl mx-auto">
                 <div className="px-8 hiw-header">
                     <h4 className="text-3xl lg:text-5xl lg:leading-tight max-w-5xl mx-auto text-center tracking-tight font-medium text-black dark:text-white">
                         From recording to sharing in 4 simple steps
@@ -126,7 +126,7 @@ export function HowItWorks() {
                 </div>
 
                 <div className="relative">
-                    <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-6 mt-12 xl:border rounded-md dark:border-neutral-800">
+                    <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-6 mt-12 xl:border rounded-md dark:border-neutral-800 bg-background shadow-xl">
                         {features.map((feature) => (
                             <FeatureCard key={feature.title} className={cn(feature.className, "hiw-card")}>
                                 <FeatureTitle>{feature.title}</FeatureTitle>
@@ -136,6 +136,12 @@ export function HowItWorks() {
                         ))}
                     </div>
                 </div>
+            </div>
+
+            <div className="custom-shape-divider-bottom-1765301413">
+                <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                    <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" className="shape-fill"></path>
+                </svg>
             </div>
         </section>
     );

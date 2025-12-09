@@ -84,18 +84,18 @@ export function FAQ() {
             duration: 0.8,
             ease: "power3.out"
         })
-        .from(".faq-item", {
-            y: 20,
-            opacity: 0,
-            duration: 0.5,
-            stagger: 0.1,
-            ease: "power3.out"
-        }, "-=0.4")
+            .from(".faq-item", {
+                y: 20,
+                opacity: 0,
+                duration: 0.5,
+                stagger: 0.1,
+                ease: "power3.out"
+            }, "-=0.4")
 
     }, { scope: containerRef })
 
     return (
-        <section id="faq" ref={containerRef} className="py-24 bg-background">
+        <section id="faq" ref={containerRef} className="py-24 bg-[var(--bg-faq)] transition-colors duration-500">
             <div className="container mx-auto px-4 md:px-6 max-w-3xl">
                 <div className="faq-header text-center mb-16">
                     <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
@@ -106,10 +106,10 @@ export function FAQ() {
                     </p>
                 </div>
 
-                <Accordion type="single" collapsible className="w-full">
+                <Accordion type="single" collapsible className="w-full space-y-4">
                     {faqs.map((faq, index) => (
-                        <AccordionItem key={index} value={`item-${index}`} className="faq-item">
-                            <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
+                        <AccordionItem key={index} value={`item-${index}`} className="faq-item px-6 py-2 bg-background rounded-xl border border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200">
+                            <AccordionTrigger className="text-left font-medium hover:no-underline">{faq.question}</AccordionTrigger>
                             <AccordionContent className="text-muted-foreground">
                                 {faq.answer}
                             </AccordionContent>

@@ -9,7 +9,7 @@ import {
   MobileNavMenu,
   MobileNavToggle,
   NavbarLogo,
-  NavbarButton,
+
 } from "@/components/ui/resizable-navbar";
 import { Link } from '@tanstack/react-router'
 
@@ -35,9 +35,22 @@ export function Navbar() {
           >
             Log in
           </Link>
-          <NavbarButton href="#black-friday" className="rounded-full font-sans relative z-20">
-            Launch Special Offer
-          </NavbarButton>
+          <a
+            href="#black-friday"
+            className="btn-glass-primary group inline-flex h-10 items-center justify-center rounded-full px-6 text-sm font-medium text-primary-foreground transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative z-20"
+          >
+            <span className="flex items-center justify-center gap-2">
+              <span className="relative block h-[1.2em] overflow-hidden">
+                <span className="block transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
+                  Launch Offer
+                </span>
+                <span className="absolute top-full left-0 block transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
+                  Launch Offer
+                </span>
+              </span>
+              <img src="/icons/3d/rocket.png" alt="Rocket" className="w-5 h-5 object-contain group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+            </span>
+          </a>
         </div>
       </NavBody>
       <MobileNav>
@@ -69,12 +82,22 @@ export function Navbar() {
           >
             Log in
           </Link>
-          <NavbarButton
+          <a
             href="#black-friday"
-            className="w-full rounded-full font-sans mt-2 text-base py-2.5"
+            className="btn-glass-primary w-full group inline-flex h-12 items-center justify-center rounded-full mt-2 text-base font-medium text-primary-foreground transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            Launch Special Offer
-          </NavbarButton>
+            <span className="flex items-center justify-center gap-2">
+              <span className="relative block h-[1.2em] overflow-hidden">
+                <span className="block transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
+                  Launch Offer
+                </span>
+                <span className="absolute top-full left-0 block transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
+                  Launch Offer
+                </span>
+              </span>
+              <img src="/icons/3d/rocket.png" alt="Rocket" className="w-5 h-5 object-contain group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+            </span>
+          </a>
         </MobileNavMenu>
       </MobileNav>
     </NavbarComponent>

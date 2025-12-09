@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { useState } from 'react'
+import { z } from 'zod'
 import { authClient } from '@/components/auth/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,6 +19,15 @@ type AuthPageProps = {
     initialMode?: 'login' | 'signup'
 }
 
+const loginSchema = z.object({
+    email: z.string().email('Please enter a valid email address'),
+    password: z.string().min(8, 'Password must be at least 8 characters long'),
+})
+
+const signupSchema = loginSchema.extend({
+    name: z.string().min(2, 'Please enter your full name'),
+})
+
 export const Route = createFileRoute('/auth/login')({
     component: () => <AuthPage initialMode="login" />,
 })
@@ -34,6 +44,15 @@ export function AuthPage({ initialMode = 'login' }: AuthPageProps) {
         e.preventDefault()
         setLoading(true)
         try {
+            const schema = isLogin ? loginSchema : signupSchema
+            const parsed = schema.safeParse({ email, password, name })
+
+            if (!parsed.success) {
+                const firstError = parsed.error.issues[0]
+                toast.error(firstError?.message ?? 'Please check your input')
+                return
+            }
+
             console.log('[Auth] submit', { mode: isLogin ? 'login' : 'signup', email })
             if (isLogin) {
                 await authClient.signIn.email({
@@ -184,7 +203,7 @@ export function AuthPage({ initialMode = 'login' }: AuthPageProps) {
 
             {/* Right Side - Auth Form */}
             <div className="flex items-center justify-center p-8 bg-background relative overflow-hidden">
-                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
+                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02] pointer-events-none" />
                 {/* Mobile Logo */}
                 <div className="absolute top-8 w-full flex justify-center lg:hidden">
                     <img

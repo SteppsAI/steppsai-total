@@ -37,13 +37,13 @@ export function Footer() {
             <h3 className="text-sm font-medium text-white/40 uppercase tracking-wider">Legal</h3>
             <ul className="space-y-3">
               <li>
-                <Link to="/" className="text-base text-white hover:text-primary transition-colors">
+                <Link to="/privacy" className="text-base text-white hover:text-primary transition-colors">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/" className="text-base text-white hover:text-primary transition-colors">
-                  Terms & Conditions
+                <Link to="/terms" className="text-base text-white hover:text-primary transition-colors">
+                  Terms of Service
                 </Link>
               </li>
             </ul>

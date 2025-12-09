@@ -99,7 +99,7 @@ export function BlackFridayDeal() {
                                     </div>
                                     <div className="flex flex-wrap items-baseline gap-3 mb-2">
                                         <span className="text-6xl md:text-8xl font-bold tracking-tighter text-foreground">
-                                            $199
+                                            $149
                                         </span>
                                         <img
                                             src="/icons/3d/crown.png"
@@ -177,7 +177,7 @@ export function BlackFridayDeal() {
                                                     className="w-5 h-5 object-contain" 
                                                 />
                                             </div>
-                                            <span className="text-sm md:text-base text-muted font-medium group-hover:text-foreground transition-colors">
+                                            <span className="text-sm md:text-base text-muted font-medium group-hover:text-background transition-colors">
                                                 {feature}
                                             </span>
                                         </li>

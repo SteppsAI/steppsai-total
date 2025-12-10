@@ -162,7 +162,7 @@ export function DashboardHeader() {
           {shouldShowSearch && (
             <>
               {/* Desktop Search */}
-              <div className="relative w-full max-w-[400px] lg:max-w-[480px] hidden md:block">
+              <div className="relative w-full max-w-[300px] lg:max-w-[360px] hidden md:block">
                 <Popover open={open && searchQuery.length > 0} onOpenChange={setOpen}>
                   <PopoverTrigger asChild>
                     <div className="relative">

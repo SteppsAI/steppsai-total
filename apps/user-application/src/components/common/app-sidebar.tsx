@@ -126,8 +126,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <button
-              className={`mb-2 w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-md flex items-center justify-center transition-all duration-200 overflow-hidden cursor-pointer ${state === "collapsed" ? "px-0" : "px-4 gap-2"
-                }`}
+              className={`mb-2 btn-glass-primary shadow-lg hover:shadow-primary/20 font-medium rounded-full flex items-center justify-center transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative z-20 cursor-pointer hover:scale-105 active:scale-95 ${
+                isMobile
+                  ? "w-full h-10 px-6 gap-2"
+                  : state === "collapsed"
+                  ? "w-8 h-8"
+                  : "w-full h-10 px-6 gap-2 min-w-0"
+              }`}
               aria-label={state === "collapsed" ? "Create Stepps" : undefined}
               onClick={() => {
                 if (isMobile) {
@@ -137,8 +142,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 }
               }}
             >
-              <Plus className="size-4 flex-shrink-0" />
-              <span className={`whitespace-nowrap transition-all duration-200 ${state === "collapsed" ? "w-0 opacity-0" : "w-auto opacity-100"}`}>
+              <Plus className={`size-4 flex-shrink-0 transition-all duration-300 ${
+                isMobile || state === "expanded" ? "mr-0" : ""
+              }`} />
+              <span
+                className={`whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden ${
+                  isMobile
+                    ? "w-auto opacity-100"
+                    : state === "collapsed"
+                    ? "w-0 opacity-0"
+                    : "w-auto opacity-100"
+                }`}
+              >
                 Create Stepps
               </span>
             </button>

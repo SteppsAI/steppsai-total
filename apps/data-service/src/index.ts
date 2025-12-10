@@ -62,6 +62,9 @@ export default class DataService extends WorkerEntrypoint<Env> {
 	sendVerificationEmail(email: string, name: string, url: string) {
 		return rpc.sendVerificationEmail(this.env, email, name, url);
 	}
+	authHealthCheck() {
+		return rpc.authHealthCheck(this.env);
+	}
 
 	// ===== QUEUE =====
 	async queue(batch: MessageBatch<unknown>) {

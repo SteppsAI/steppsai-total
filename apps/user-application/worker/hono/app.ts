@@ -15,7 +15,7 @@ export const App = new Hono<{
 }>();
 
 const authMiddleware = createMiddleware(async (c, next) => {
-    const auth = getAuthInstance(c.env, c.req.raw);
+    const auth = await getAuthInstance(c.env, c.req.raw);
     const session = await auth.api.getSession({ headers: c.req.raw.headers });
     if (!session?.user) {
         return c.text("Unauthorized", 401);
@@ -26,9 +26,20 @@ const authMiddleware = createMiddleware(async (c, next) => {
 
 // ========== PUBLIC ROUTES ==========
 
-App.on(["POST", "GET"], "/api/auth/*", authRateLimiter, (c) => {
-    const auth = getAuthInstance(c.env, c.req.raw);
-    return auth.handler(c.req.raw);
+App.on(["POST", "GET"], "/api/auth/*", authRateLimiter, async (c) => {
+    try {
+        const auth = await getAuthInstance(c.env, c.req.raw);
+        return auth.handler(c.req.raw);
+    } catch (error) {
+        console.error("[AuthRoute] Failed to handle /api/auth/* request", error);
+        return c.json(
+            {
+                error: "auth_unavailable",
+                message: "Authentication is temporarily unavailable. Please try again later.",
+            },
+            503,
+        );
+    }
 });
 
 // ========== PROTECTED ROUTES ==========

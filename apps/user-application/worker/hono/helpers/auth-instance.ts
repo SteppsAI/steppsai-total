@@ -1,7 +1,7 @@
 import { getAuth } from "@repo/data-ops/auth";
 
 
-export const getAuthInstance = (env: ServiceBindings, req: Request) => {
+export const getAuthInstance = async (env: ServiceBindings, req: Request) => {
     const backend = env.BACKEND_SERVICE as any;
 
     const url = new URL(req.url);
@@ -17,6 +17,18 @@ export const getAuthInstance = (env: ServiceBindings, req: Request) => {
 
         if (!env.BETTER_AUTH_SECRET) {
             console.error("[AuthInstance] Missing BETTER_AUTH_SECRET");
+        }
+
+        // Hard guard: if auth/email infra is not healthy, block auth flows (no account creation)
+        try {
+            const health = await backend.authHealthCheck();
+            if (!health?.ok) {
+                console.error("[AuthInstance] Auth/email healthcheck failed", { health });
+                throw new Error("Auth/email infrastructure unavailable");
+            }
+        } catch (error) {
+            console.error("[AuthInstance] Failed to run auth/email healthcheck", error);
+            throw new Error("Auth/email infrastructure unavailable");
         }
 
         console.log("[AuthInstance] Creating Better Auth instance");

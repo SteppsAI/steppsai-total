@@ -113,7 +113,7 @@ export function HowItWorks() {
         },
     ];
     return (
-        <section id="how-it-works" ref={containerRef} className="py-16 md:py-32 px-4 md:px-6 bg-foggy transition-colors duration-500 relative">
+        <section id="how-it-works" ref={containerRef} className="py-16 md:py-32 px-4 md:px-6 bg-transparent transition-colors duration-500 relative">
                 <div className="relative z-20 max-w-7xl mx-auto">
                 <div className="px-8 hiw-header">
                     <h4 className="section-heading">

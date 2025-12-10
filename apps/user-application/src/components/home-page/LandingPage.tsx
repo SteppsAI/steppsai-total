@@ -13,9 +13,11 @@ export function LandingPage() {
 
             <main className="flex-grow">
                 <Hero />
-                <SocialProof />
-                <HowItWorks />
-                <BlackFridayDeal />
+                <div className="bg-foggy">
+                    <SocialProof />
+                    <HowItWorks />
+                    <BlackFridayDeal />
+                </div>
                 <FAQ />
             </main>
 

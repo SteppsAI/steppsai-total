@@ -95,7 +95,7 @@ export function FAQ() {
     }, { scope: containerRef })
 
     return (
-        <section id="faq" ref={containerRef} className="py-24 bg-[var(--bg-faq)] transition-colors duration-500">
+        <section id="faq" ref={containerRef} className="py-24 bg-[var(--color-100)] transition-colors duration-500">
             <div className="container mx-auto px-4 md:px-6 max-w-3xl">
                 <div className="faq-header text-center mb-16 relative">
                     <div className="flex justify-center mb-6">

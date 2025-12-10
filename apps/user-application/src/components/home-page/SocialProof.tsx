@@ -55,7 +55,7 @@ export function SocialProof() {
     }, { scope: containerRef })
 
     return (
-        <section id="save-time" className="px-4 py-16 md:py-32 mt-0 bg-foggy transition-colors duration-500 relative" ref={containerRef}>
+        <section id="save-time" className="px-4 py-16 md:py-32 mt-0 bg-transparent transition-colors duration-500 relative" ref={containerRef}>
             <div className="mx-auto grid max-w-5xl border-2 border-primary/20 md:grid-cols-2 overflow-hidden shadow-xl rounded-3xl bg-background">
                 <div className="sp-item-left flex flex-col">
                     <div className="p-6 sm:p-12 sp-item-left-content">

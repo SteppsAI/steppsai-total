@@ -59,7 +59,7 @@ export function BlackFridayDeal() {
     }, { scope: containerRef });
 
     return (
-        <section id="black-friday" ref={containerRef} className="py-16 md:py-24 relative overflow-hidden font-sans bg-foggy duration-500">
+        <section id="black-friday" ref={containerRef} className="py-16 md:py-24 relative overflow-hidden font-sans bg-transparent duration-500">
             <div className="container mx-auto px-4 md:px-6 relative z-10">
                 <div className="max-w-5xl mx-auto">
 

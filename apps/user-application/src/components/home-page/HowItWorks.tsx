@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { cn } from "@/lib/utils";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -16,7 +16,7 @@ interface ResponsiveImageProps {
  * ResponsiveImage component for optimal performance.
  * - Uses lazy loading to defer loading until the image is near the viewport
  * - Uses async decoding to prevent blocking the main thread
- * - Uses object-contain to prevent image deformation on different screen sizes
+ * - Uses object-cover to ensure the image fills the space
  */
 const ResponsiveImage = ({ src, alt, className }: ResponsiveImageProps) => {
     return (
@@ -25,7 +25,7 @@ const ResponsiveImage = ({ src, alt, className }: ResponsiveImageProps) => {
             alt={alt}
             loading="lazy"
             decoding="async"
-            className={cn("w-full h-full object-contain rounded-lg", className)}
+            className={cn("w-full h-full object-cover object-top", className)}
         />
     );
 };
@@ -60,48 +60,52 @@ export function HowItWorks() {
 
     const features = [
         {
+            step: "Step 1",
             title: "Install Extension",
             description:
-                "Add our browser extension in 30 seconds and start creating guides instantly.",
+                "Add our browser extension in 30 seconds. Start creating guides instantly with one click.",
             skeleton: (
                 <ResponsiveImage
                     src="/website/install-extension.webp"
                     alt="Install our browser extension in 30 seconds and start creating guides instantly"
                 />
             ),
-            className: "col-span-1 md:col-span-4 lg:col-span-4 md:border-b md:border-r border-r-0 border-b-0 dark:border-neutral-800",
+            className: "col-span-1 md:col-span-3 lg:col-span-3 md:border-b md:border-r border-r-0 border-b-0",
             containerClassName: "aspect-video"
         },
         {
+            step: "Step 2",
             title: "Record Your Workflow",
             description:
-                "Click record and go through your process. We capture every step automatically.",
+                "Click record and walk through your process. We capture every click automatically.",
             skeleton: (
                 <ResponsiveImage
                     src="/website/record-workflow.webp"
                     alt="Record your workflow using our browser extension and capture every click"
                 />
             ),
-            className: "col-span-1 md:col-span-2 lg:col-span-2 md:border-b border-b-0 dark:border-neutral-800",
-            containerClassName: "h-full flex-1 min-h-[200px]"
+            className: "col-span-1 md:col-span-3 lg:col-span-3 md:border-b border-b-0",
+            containerClassName: "aspect-video"
         },
         {
+            step: "Step 3",
             title: "Generate Perfect Guide",
             description:
-                "Watch as we turn your recording into a beautiful step-by-step guide instantly. Tweak if needed in our editor.",
+                "Watch us transform your recording into a beautiful step-by-step guide with screenshots and text.",
             skeleton: (
                 <ResponsiveImage
                     src="/website/generate-guide.webp"
                     alt="Generate step-by-step guide and edit it in our editor"
                 />
             ),
-            className: "col-span-1 md:col-span-3 lg:col-span-3 md:border-r border-r-0 dark:border-neutral-800",
+            className: "col-span-1 md:col-span-3 lg:col-span-3 md:border-r border-r-0",
             containerClassName: "aspect-video"
         },
         {
+            step: "Step 4",
             title: "Edit & Share",
             description:
-                "Share with your team and users via link or export to PDF or HTML.",
+                "Tweak your guide in our editor. Share via link or export to PDF, HTML, and embed anywhere.",
             skeleton: (
                 <ResponsiveImage
                     src="/website/share-export.webp"
@@ -113,9 +117,9 @@ export function HowItWorks() {
         },
     ];
     return (
-        <section id="how-it-works" ref={containerRef} className="py-16 md:py-32 px-4 md:px-6 bg-transparent transition-colors duration-500 relative">
-                <div className="relative z-20 max-w-7xl mx-auto">
-                <div className="px-8 hiw-header">
+        <section id="how-it-works" ref={containerRef} className="px-4 py-16 md:py-32 mt-0 bg-transparent transition-colors duration-500 relative">
+            <div className="mx-auto max-w-5xl">
+                <div className="px-8 hiw-header mb-12">
                     <h4 className="section-heading">
                         From recording to sharing in 4 simple steps
                     </h4>
@@ -125,51 +129,41 @@ export function HowItWorks() {
                     </p>
                 </div>
 
-                <div className="relative">
-                    <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-6 mt-12 xl:border rounded-md dark:border-neutral-800 bg-background backdrop-blur-lg shadow-xl">
-                        {features.map((feature) => (
-                            <FeatureCard key={feature.title} className={cn(feature.className, "hiw-card")}>
-                                <FeatureTitle>{feature.title}</FeatureTitle>
-                                <FeatureDescription>{feature.description}</FeatureDescription>
-                                <div className={cn("w-full mt-8", feature.containerClassName)}>{feature.skeleton}</div>
-                            </FeatureCard>
-                        ))}
-                    </div>
+                <div className="grid mt-16 md:mt-24 md:grid-cols-2 border-2 border-primary/20 overflow-hidden shadow-xl rounded-3xl bg-background">
+                    {features.map((feature, index) => (
+                        <div
+                            key={feature.title}
+                            className={cn(
+                                "flex flex-col border-primary/20 hiw-card bg-background",
+                                index < 2 ? 'border-b' : '',
+                                index % 2 === 0 ? 'md:border-r' : ''
+                            )}
+                        >
+                            <div className="p-8 sm:p-12">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <span className="text-muted-foreground font-medium uppercase tracking-wider text-sm">
+                                        {feature.step}
+                                    </span>
+                                </div>
+                                <h3 className="text-2xl font-semibold text-left mx-0 max-w-none mb-4">
+                                    {feature.title}
+                                </h3>
+                                <p className="text-muted-foreground text-base md:text-lg text-left max-w-md">
+                                    {feature.description}
+                                </p>
+                            </div>
+                            <div className="mt-auto">
+                                <div className={cn("w-full overflow-hidden", feature.containerClassName)}>
+                                    {feature.skeleton}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </section>
     );
 }
-
-const FeatureCard = ({
-    children,
-    className,
-}: {
-    children?: React.ReactNode;
-    className?: string;
-}) => {
-    return (
-        <div className={cn(`p-4 sm:p-8 relative overflow-hidden flex flex-col`, className)}>
-            {children}
-        </div>
-    );
-};
-
-const FeatureTitle = ({ children }: { children?: React.ReactNode }) => {
-    return (
-        <p className="text-2xl font-semibold text-left mx-0 max-w-none">
-            {children}
-        </p>
-    );
-};
-
-const FeatureDescription = ({ children }: { children?: React.ReactNode }) => {
-    return (
-        <p className="text-sm md:text-base text-neutral-500 font-normal dark:text-neutral-300 my-2 text-left">
-            {children}
-        </p>
-    );
-};
 
 export const PlaceholderImage = () => {
     return (

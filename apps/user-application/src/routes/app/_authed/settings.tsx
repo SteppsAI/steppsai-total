@@ -279,7 +279,7 @@ function SettingsPage() {
                                         <p className="font-medium">Subscription</p>
                                         <p className="text-sm text-muted-foreground">Pro Plan</p>
                                     </div>
-                                    <Button variant="outline" className="gap-2">
+                                    <Button variant="outline" className="gap-2" onClick={async () => { const res = await authClient.creem.createPortal(); const url = (res as any)?.data?.url; if (url) window.location.href = url; }}>
                                         <CreditCard className="h-4 w-4" />
                                         View Billing Info
                                     </Button>

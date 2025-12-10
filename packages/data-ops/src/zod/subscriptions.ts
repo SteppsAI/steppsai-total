@@ -1,13 +1,18 @@
 import { z } from "zod";
 
+// Subscriptions are now backed by BetterAuth + Creem (`creem_subscription` table)
+
 export const subscriptionsSchema = z.object({
 	id: z.string(),
-	userId: z.string(),
-	stripeCustomerId: z.string().optional(),
-	planType: z.string().optional(),
+	productId: z.string(),
+	referenceId: z.string(),
+	creemCustomerId: z.string().nullable().optional(),
+	creemSubscriptionId: z.string().nullable().optional(),
+	creemOrderId: z.string().nullable().optional(),
 	status: z.string().optional(),
-	maxEditors: z.number().int().optional(),
-	currentPeriodEnd: z.string().optional(),
+	periodStart: z.string().nullable().optional(),
+	periodEnd: z.string().nullable().optional(),
+	cancelAtPeriodEnd: z.boolean().optional(),
 });
 
 export const createSubscriptionSchema = subscriptionsSchema.omit({ id: true });

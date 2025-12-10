@@ -1,5 +1,7 @@
-https://www.creem.io/test/payment/prod_6KA7T37qW1NqzrdIzY4KPC
-prod_6KA7T37qW1NqzrdIzY4KPC
+https://www.creem.io/test/payment/prod_6KA7T37qW1NqzrdIzY4KPC lifetime US
+prod_4vYeqb4GliF45ShZtj5v4zlifetime EU
+webhook secret test_key: whsec_7AaUhQwsxMhfELBA7tJgGH
+
 # Creem
 
 Better Auth Plugin for Payment and Subscriptions using Creem

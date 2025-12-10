@@ -58,6 +58,31 @@ export function clearSessionCache() {
   sessionCache = null;
 }
 
+// Access status cache
+let accessCache: { data: any; timestamp: number } | null = null;
+const ACCESS_CACHE_TTL = 1000 * 60 * 2; // 2 minutes
+
+export async function getAccessStatusCached() {
+  const now = Date.now();
+
+  if (accessCache && (now - accessCache.timestamp) < ACCESS_CACHE_TTL) {
+    return accessCache.data;
+  }
+
+  const accessStatus = await authClient.creem.hasAccessGranted();
+  accessCache = { data: accessStatus, timestamp: now };
+  return accessStatus;
+}
+
+export function clearAccessCache() {
+  accessCache = null;
+}
+
+export function clearAllCaches() {
+  clearSessionCache();
+  clearAccessCache();
+}
+
 export function createRouter() {
   const router = createTanStackRouter({
     routeTree,

@@ -20,10 +20,10 @@ const authMiddleware = createMiddleware(async (c, next) => {
     if (!session?.user) {
         return c.text("Unauthorized", 401);
     }
-    c.set("userId", session.user.id);
+    const userId = session.user.id;
+    c.set("userId", userId);
     await next();
 });
-
 // ========== PUBLIC ROUTES ==========
 
 App.on(["POST", "GET"], "/api/auth/*", authRateLimiter, async (c) => {

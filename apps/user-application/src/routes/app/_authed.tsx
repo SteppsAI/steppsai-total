@@ -3,7 +3,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Outlet, createFileRoute, useLocation, redirect } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { DashboardHeader } from "@/components/dashboard-header";
-import { getSessionCached } from "@/router";
+import { getSessionCached  } from "@/router";
 
 export const Route = createFileRoute("/app/_authed")({
   component: RouteComponent,

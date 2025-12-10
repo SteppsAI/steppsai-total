@@ -15,6 +15,19 @@
   --primary-rgb: 99, 102, 241;
   --primary-foreground: #FFFFFF;
 
+  /* Brand Palette */
+  --color-50: #EEEEFF;
+  --color-100: #E0E1FF;
+  --color-200: #C7C8FE;
+  --color-300: #A5A7FC;
+  --color-400: #8184F8;
+  --color-500: #6366F1;
+  --color-600: #4649E5;
+  --color-700: #383BCA;
+  --color-800: #3032A3;
+  --color-900: #2E3081;
+  --color-950: #1B1C4B;
+
   --secondary: #06B6D4;
   --secondary-light: #cff7fe;
   --secondary-foreground: #FFFFFF;
@@ -69,9 +82,9 @@
 
   /* Aesthetic Minimalist Section Backgrounds */
   --bg-social-proof: #e0e1ff;
-  --bg-how-it-works: #cff7fe;
+  --bg-how-it-works: #e0e1ff;
   --bg-black-friday: #e0e1ff;
-  --bg-faq: #cff7fe;
+  --bg-faq: #e0e1ff;
 }
 
 @theme inline {
@@ -703,6 +716,25 @@
 
   }
 
+  /* Consistent section headings */
+  .section-heading {
+    @apply text-3xl lg:text-5xl lg:leading-tight max-w-5xl mx-auto text-center tracking-tight font-bold;
+  }
+
+  .section-subheading {
+    @apply text-sm lg:text-base max-w-2xl my-4 mx-auto text-muted-foreground text-center font-medium;
+  }
+
+  /* Feature card title */
+  .feature-title {
+    @apply max-w-5xl text-left tracking-tight text-black dark:text-white text-xl md:text-2xl md:leading-snug;
+  }
+
+  /* Feature card description */
+  .feature-description {
+    @apply text-sm md:text-base max-w-4xl text-left mx-auto text-neutral-500 text-center font-normal dark:text-neutral-300 text-left max-w-sm mx-0 md:text-sm my-2;
+  }
+
 
 }
 
@@ -823,17 +855,27 @@
   .bg-hero-clouds {
     background-color: var(--background);
     background-image:
-      /* Primary top glow - slightly stronger for glass effect */
+      /* Primary top glow - slightly stronger for glass effect (using 500) */
       radial-gradient(circle at 50% -10%, rgba(99, 102, 241, 0.25) 0%, transparent 50%),
-      /* Side glows */
-      radial-gradient(circle at 0% 20%, rgba(6, 182, 212, 0.20) 0%, transparent 40%),
-      radial-gradient(circle at 100% 20%, rgba(244, 63, 94, 0.20) 0%, transparent 40%),
-      /* Scattered puffy clouds */
-      radial-gradient(circle at 20% 40%, rgba(99, 102, 241, 0.15) 0%, transparent 30%),
-      radial-gradient(circle at 80% 40%, rgba(6, 182, 212, 0.15) 0%, transparent 30%),
-      radial-gradient(circle at 40% 60%, rgba(244, 63, 94, 0.15) 0%, transparent 35%),
+      /* Side glows (using 300 and 700) */
+      radial-gradient(circle at 0% 20%, rgba(165, 167, 252, 0.20) 0%, transparent 40%),
+      radial-gradient(circle at 100% 20%, rgba(56, 59, 202, 0.20) 0%, transparent 40%),
+      /* Scattered puffy clouds (using 400, 600, 300) */
+      radial-gradient(circle at 20% 40%, rgba(129, 132, 248, 0.15) 0%, transparent 30%),
+      radial-gradient(circle at 80% 40%, rgba(70, 73, 229, 0.15) 0%, transparent 30%),
+      radial-gradient(circle at 40% 60%, rgba(165, 167, 252, 0.15) 0%, transparent 35%),
       radial-gradient(circle at 60% 55%, rgba(99, 102, 241, 0.15) 0%, transparent 35%);
 
+  }
+
+  .bg-foggy {
+    background-color: var(--color-50);
+    background-image:
+      radial-gradient(circle at 0% 0%, var(--color-100) 0%, transparent 50%),
+      radial-gradient(circle at 100% 0%, var(--color-200) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, var(--color-100) 0%, transparent 50%),
+      radial-gradient(circle at 0% 100%, var(--color-200) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, #ffffff 0%, transparent 60%);
   }
 
   .bg-hero-trust {
@@ -1128,98 +1170,6 @@
   }
 
 
-}
-
-/* Custom Shape Dividers */
-
-/* Hero */
-.custom-shape-divider-bottom-1765301243 {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  overflow: hidden;
-  line-height: 0;
-  transform: rotate(180deg);
-}
-
-.custom-shape-divider-bottom-1765301243 svg {
-  position: relative;
-  display: block;
-  width: calc(100% + 1.3px);
-  height: 40px;
-}
-
-.custom-shape-divider-bottom-1765301243 .shape-fill {
-  fill: #E0E1FF;
-}
-
-/* Social Proof */
-.custom-shape-divider-bottom-1765301352 {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  overflow: hidden;
-  line-height: 0;
-  transform: rotate(180deg);
-}
-
-.custom-shape-divider-bottom-1765301352 svg {
-  position: relative;
-  display: block;
-  width: calc(100% + 1.3px);
-  height: 42px;
-  transform: rotateY(180deg);
-}
-
-.custom-shape-divider-bottom-1765301352 .shape-fill {
-  fill: #CFF7FE;
-}
-
-/* How It Works */
-.custom-shape-divider-bottom-1765301413 {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  overflow: hidden;
-  line-height: 0;
-}
-
-.custom-shape-divider-bottom-1765301413 svg {
-  position: relative;
-  display: block;
-  width: calc(100% + 1.3px);
-  height: 63px;
-  transform: rotateY(180deg);
-}
-
-.custom-shape-divider-bottom-1765301413 .shape-fill {
-  fill: #E0E1FF;
-}
-
-/* Black Friday Deal */
-.custom-shape-divider-bottom-1765301543 {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  overflow: hidden;
-  line-height: 0;
-  transform: rotate(180deg);
-}
-
-.custom-shape-divider-bottom-1765301543 svg {
-  position: relative;
-  display: block;
-  width: calc(100% + 1.3px);
-  height: 51px;
-  transform: rotateY(180deg);
-}
-
-.custom-shape-divider-bottom-1765301543 .shape-fill {
-  fill: #CFF7FE;
 }
 
 /* Custom animations for 3D icons */

@@ -2,6 +2,7 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { Check } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -58,7 +59,7 @@ export function BlackFridayDeal() {
     }, { scope: containerRef });
 
     return (
-        <section id="black-friday" ref={containerRef} className="py-16 md:py-24 relative overflow-hidden font-sans bg-[var(--bg-black-friday)] duration-500">
+        <section id="black-friday" ref={containerRef} className="py-16 md:py-24 relative overflow-hidden font-sans bg-foggy duration-500">
             <div className="container mx-auto px-4 md:px-6 relative z-10">
                 <div className="max-w-5xl mx-auto">
 
@@ -87,11 +88,11 @@ export function BlackFridayDeal() {
                     </div>
 
                     {/* Minimal Card (Cell Layout) */}
-                    <div className="bf-card mx-auto grid max-w-5xl border-2 border-secondary shadow-2xl overflow-hidden rounded-3xl bg-background">
+                    <div className="bf-card mx-auto grid max-w-5xl border-2 border-primary shadow-2xl overflow-hidden rounded-3xl bg-background">
                         <div className="grid md:grid-cols-5 min-h-auto md:min-h-[500px]">
 
                             {/* Left: Pricing & Action */}
-                            <div className="md:col-span-3 p-6 md:p-12 flex flex-col justify-between border-b border-secondary md:border-r md:border-b-0 bg-background relative overflow-hidden">
+                            <div className="md:col-span-3 p-6 md:p-12 flex flex-col justify-between border-b border-primary md:border-r md:border-b-0 bg-background relative overflow-hidden">
 
                                 <div className="bf-price-content relative z-10">
                                     <div className="inline-flex items-center gap-2 bg-foreground text-background px-3 py-1 text-sm font-bold rounded-md mb-4">
@@ -101,11 +102,6 @@ export function BlackFridayDeal() {
                                         <span className="text-6xl md:text-8xl font-bold tracking-tighter text-foreground">
                                             $149
                                         </span>
-                                        <img
-                                            src="/icons/3d/crown.png"
-                                            alt="Crown"
-                                            className="w-12 h-12 md:w-20 md:h-20 -rotate-12 ml-2 drop-shadow-lg hover:scale-110 transition-transform duration-300"
-                                        />
                                         <div className="flex flex-col items-start w-full md:w-auto">
                                             <span className="text-sm font-medium text-primary uppercase tracking-wide">One-time payment</span>
                                         </div>
@@ -156,7 +152,7 @@ export function BlackFridayDeal() {
                             </div>
 
                             {/* Right: Features */}
-                            <div className="md:col-span-2 p-6 md:p-12 bg-secondary flex flex-col justify-center">
+                            <div className="md:col-span-2 p-6 md:p-12 bg-primary flex flex-col justify-center">
                                 <h3 className="bf-feature-item text-lg md:text-xl font-bold mb-6 md:mb-8 text-background">What's included:</h3>
                                 <ul className="space-y-4 md:space-y-5">
                                     {[
@@ -170,12 +166,8 @@ export function BlackFridayDeal() {
                                         "Future Updates Included"
                                     ].map((feature, i) => (
                                         <li key={i} className="bf-feature-item flex items-start gap-3 group">
-                                            <div className="mt-1 min-w-5">
-                                                <img 
-                                                    src="/icons/3d/tick.png" 
-                                                    alt="Check" 
-                                                    className="w-5 h-5 object-contain" 
-                                                />
+                                            <div className="min-w-5">
+                                                <Check className="w-5 h-5 text-muted" />
                                             </div>
                                             <span className="text-sm md:text-base text-muted font-medium group-hover:text-background transition-colors">
                                                 {feature}
@@ -188,12 +180,6 @@ export function BlackFridayDeal() {
                     </div>
 
                 </div>
-            </div>
-
-            <div className="custom-shape-divider-bottom-1765301543">
-                <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-                    <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="shape-fill"></path>
-                </svg>
             </div>
         </section>
     );

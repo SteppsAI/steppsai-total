@@ -847,35 +847,70 @@
 
 @layer utilities {
   .bg-hero-clouds {
-    background-color: var(--background);
+    background-color: var(--color-50);
+    /* Scale up to prevent blurred edges from pulling in background color */
+    transform: scale(1.1);
+    filter: blur(80px);
+    opacity: 0.9;
     background-image:
-      /* Primary top glow */
-      radial-gradient(circle at 50% -10%, rgba(99, 102, 241, 0.25) 0%, transparent 50%),
-      /* Side glows - Cyan and Rose */
-      radial-gradient(circle at 0% 20%, rgba(6, 182, 212, 0.20) 0%, transparent 40%),
-      radial-gradient(circle at 100% 20%, rgba(244, 63, 94, 0.20) 0%, transparent 40%),
-      /* Scattered puffy clouds - Mixed Brand Colors */
-      radial-gradient(circle at 20% 40%, rgba(99, 102, 241, 0.15) 0%, transparent 30%),
-      radial-gradient(circle at 80% 40%, rgba(6, 182, 212, 0.15) 0%, transparent 30%),
-      radial-gradient(circle at 40% 60%, rgba(244, 63, 94, 0.15) 0%, transparent 35%),
-      radial-gradient(circle at 60% 55%, rgba(99, 102, 241, 0.15) 0%, transparent 35%);
+      /* Strong white fade at bottom for seamless connection */
+      linear-gradient(to bottom, transparent 70%, white 90%, white 100%),
+      
+      /* White Puffy Clouds (High Opacity) - Added more */
+      radial-gradient(circle at 20% 40%, rgba(255, 255, 255, 0.8) 0%, transparent 35%),
+      radial-gradient(circle at 80% 30%, rgba(255, 255, 255, 0.8) 0%, transparent 30%),
+      radial-gradient(ellipse at 50% 60%, rgba(255, 255, 255, 0.9) 0%, transparent 40%),
+      radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.7) 0%, transparent 25%),
+      radial-gradient(ellipse at 90% 70%, rgba(255, 255, 255, 0.75) 0%, transparent 30%),
+      
+      /* Deep base fog using primary scale */
+      radial-gradient(circle at 50% 50%, var(--color-100) 0%, transparent 100%),
+      
+      /* Vibrant irregular splashes (Primary Scale Only) */
+      radial-gradient(circle at 15% 15%, var(--color-300) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 20%, var(--color-200) 0%, transparent 50%),
+      radial-gradient(circle at 50% 40%, var(--color-100) 0%, transparent 60%),
+      
+      /* Darker accents for contrast (Primary Scale) */
+      radial-gradient(ellipse at 25% 65%, var(--color-400) 0%, transparent 45%),
+      radial-gradient(circle at 80% 80%, var(--color-300) 0%, transparent 45%),
+      
+      /* Misty overlays (Primary Scale) */
+      radial-gradient(ellipse at 60% 20%, var(--color-100) 0%, transparent 40%),
+      radial-gradient(circle at 10% 80%, var(--color-200) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 50%, var(--color-300) 0%, transparent 45% 0%);
   }
 
   .bg-foggy {
-    background-color: #FFFFFF;
+    background-color: white;
     background-image:
-      /* Top white fade for smooth connection */
-      linear-gradient(to bottom, #FFFFFF 0%, rgba(255,255,255,0) 30%),
-      /* Bottom color-100 fade as requested */
-      linear-gradient(to top, var(--color-100) 0%, rgba(224, 225, 255, 0) 40%),
-      /* Lively splashes using brand colors (Indigo scale) */
-      radial-gradient(circle at 15% 25%, rgba(99, 102, 241, 0.15) 0%, transparent 50%), /* color-500 */
-      radial-gradient(circle at 85% 30%, rgba(165, 167, 252, 0.15) 0%, transparent 50%), /* color-300 */
-      radial-gradient(circle at 50% 60%, rgba(129, 132, 248, 0.10) 0%, transparent 50%), /* color-400 */
-      /* Soft white fog layers to create depth */
-      radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-      radial-gradient(circle at 30% 45%, rgba(255, 255, 255, 0.9) 0%, transparent 60%),
-      radial-gradient(circle at 70% 55%, rgba(255, 255, 255, 0.9) 0%, transparent 60%);
+      /* Top connection: White */
+      linear-gradient(to bottom, white 0%, white 5%, transparent 25%),
+      
+      /* Bottom connection: Fade to var(--color-100) */
+      linear-gradient(to bottom, transparent 80%, var(--color-100) 100%),
+      
+      /* White Puffy Clouds scattered across - Added more */
+      radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.9) 0%, transparent 40%),
+      radial-gradient(ellipse at 70% 50%, rgba(255, 255, 255, 0.8) 0%, transparent 45%),
+      radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.85) 0%, transparent 35%),
+      radial-gradient(ellipse at 90% 10%, rgba(255, 255, 255, 0.8) 0%, transparent 30%),
+      radial-gradient(circle at 15% 60%, rgba(255, 255, 255, 0.7) 0%, transparent 30%),
+      radial-gradient(ellipse at 60% 90%, rgba(255, 255, 255, 0.8) 0%, transparent 40%),
+      
+      /* Soft transitions */
+      linear-gradient(to bottom, var(--color-50) 0%, rgba(255,255,255,0) 20%),
+      /* Removed the previous bottom gradient that was fading to white */
+      
+      /* Richer, denser fog layers (Primary Scale Only) */
+      radial-gradient(circle at 20% 30%, var(--color-200) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 45%, var(--color-300) 0%, transparent 50%),
+      
+      /* Varied color spots (Primary Scale Only) */
+      radial-gradient(circle at 45% 65%, var(--color-100) 0%, transparent 45%),
+      radial-gradient(ellipse at 65% 15%, var(--color-400) 0%, transparent 45%),
+      radial-gradient(circle at 75% 85%, var(--color-200) 0%, transparent 45%),
+      radial-gradient(ellipse at 5% 55%, var(--color-300) 0%, transparent 45%);
   }
 
   .bg-hero-trust {

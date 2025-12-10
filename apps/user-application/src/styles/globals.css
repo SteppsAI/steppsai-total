@@ -864,11 +864,15 @@
   .bg-foggy {
     background-color: #FFFFFF;
     background-image:
-      /* Lively splashes of color - Indigo, Cyan, Rose */
-      radial-gradient(circle at 15% 25%, rgba(99, 102, 241, 0.20) 0%, transparent 50%),
-      radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.20) 0%, transparent 50%),
-      radial-gradient(circle at 50% 80%, rgba(244, 63, 94, 0.15) 0%, transparent 50%),
-      /* Soft white fog layers to create depth and cloudy feel */
+      /* Top white fade for smooth connection */
+      linear-gradient(to bottom, #FFFFFF 0%, rgba(255,255,255,0) 30%),
+      /* Bottom color-100 fade as requested */
+      linear-gradient(to top, var(--color-100) 0%, rgba(224, 225, 255, 0) 40%),
+      /* Lively splashes using brand colors (Indigo scale) */
+      radial-gradient(circle at 15% 25%, rgba(99, 102, 241, 0.15) 0%, transparent 50%), /* color-500 */
+      radial-gradient(circle at 85% 30%, rgba(165, 167, 252, 0.15) 0%, transparent 50%), /* color-300 */
+      radial-gradient(circle at 50% 60%, rgba(129, 132, 248, 0.10) 0%, transparent 50%), /* color-400 */
+      /* Soft white fog layers to create depth */
       radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
       radial-gradient(circle at 30% 45%, rgba(255, 255, 255, 0.9) 0%, transparent 60%),
       radial-gradient(circle at 70% 55%, rgba(255, 255, 255, 0.9) 0%, transparent 60%);

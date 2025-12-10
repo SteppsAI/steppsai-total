@@ -849,30 +849,29 @@
   .bg-hero-clouds {
     background-color: var(--background);
     background-image:
-      /* Primary top glow - slightly stronger for glass effect (using 500) */
+      /* Primary top glow */
       radial-gradient(circle at 50% -10%, rgba(99, 102, 241, 0.25) 0%, transparent 50%),
-      /* Side glows (using 300 and 700) */
-      radial-gradient(circle at 0% 20%, rgba(165, 167, 252, 0.20) 0%, transparent 40%),
-      radial-gradient(circle at 100% 20%, rgba(56, 59, 202, 0.20) 0%, transparent 40%),
-      /* Scattered puffy clouds (using 400, 600, 300) */
-      radial-gradient(circle at 20% 40%, rgba(129, 132, 248, 0.15) 0%, transparent 30%),
-      radial-gradient(circle at 80% 40%, rgba(70, 73, 229, 0.15) 0%, transparent 30%),
-      radial-gradient(circle at 40% 60%, rgba(165, 167, 252, 0.15) 0%, transparent 35%),
+      /* Side glows - Cyan and Rose */
+      radial-gradient(circle at 0% 20%, rgba(6, 182, 212, 0.20) 0%, transparent 40%),
+      radial-gradient(circle at 100% 20%, rgba(244, 63, 94, 0.20) 0%, transparent 40%),
+      /* Scattered puffy clouds - Mixed Brand Colors */
+      radial-gradient(circle at 20% 40%, rgba(99, 102, 241, 0.15) 0%, transparent 30%),
+      radial-gradient(circle at 80% 40%, rgba(6, 182, 212, 0.15) 0%, transparent 30%),
+      radial-gradient(circle at 40% 60%, rgba(244, 63, 94, 0.15) 0%, transparent 35%),
       radial-gradient(circle at 60% 55%, rgba(99, 102, 241, 0.15) 0%, transparent 35%);
-
   }
 
   .bg-foggy {
     background-color: #FFFFFF;
     background-image:
-      /* Soft white fog base */
-      radial-gradient(circle at 50% 50%, #FFFFFF 40%, transparent 80%),
-      /* Very subtle color hints */
-      radial-gradient(circle at 10% 20%, var(--color-50) 0%, transparent 40%),
-      radial-gradient(circle at 90% 80%, var(--color-50) 0%, transparent 40%),
-      /* Puffy cloud accents */
-      radial-gradient(circle at 30% 40%, #FFFFFF 0%, transparent 50%),
-      radial-gradient(circle at 70% 60%, var(--color-50) 0%, transparent 50%);
+      /* Lively splashes of color - Indigo, Cyan, Rose */
+      radial-gradient(circle at 15% 25%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 50% 80%, rgba(244, 63, 94, 0.08) 0%, transparent 50%),
+      /* Soft white fog layers to create depth and cloudy feel */
+      radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
+      radial-gradient(circle at 30% 45%, rgba(255, 255, 255, 0.9) 0%, transparent 60%),
+      radial-gradient(circle at 70% 55%, rgba(255, 255, 255, 0.9) 0%, transparent 60%);
   }
 
   .bg-hero-trust {

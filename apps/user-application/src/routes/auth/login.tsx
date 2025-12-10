@@ -139,8 +139,8 @@ export function AuthPage({ initialMode = 'login' }: AuthPageProps) {
             </div>
 
             {/* Right Side - Auth Form */}
-            <div className="flex items-center justify-center p-8 bg-[var(--secondary-light)] relative overflow-hidden">
-                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02] pointer-events-none" />
+            <div className="flex items-center justify-center p-8 bg-primary relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.1] pointer-events-none" />
                 
                 {/* Mobile Logo */}
                 <div className="absolute top-8 w-full flex justify-center lg:hidden">
@@ -153,7 +153,7 @@ export function AuthPage({ initialMode = 'login' }: AuthPageProps) {
 
                 <div className="w-full max-w-md relative z-10">
                     {/* Glass Container */}
-                    <div className="bg-white/40 backdrop-blur-xl border border-white/60 shadow-xl rounded-3xl p-8 md:p-10">
+                    <div className="bg-white border border-white/60 shadow-2xl rounded-3xl p-8 md:p-10">
                         <div className="text-center mb-8">
                             <h2 className="text-2xl font-bold tracking-tight text-zinc-900">
                                 {isLogin ? 'Welcome back' : 'Create account'}

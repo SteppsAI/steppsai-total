@@ -32,7 +32,7 @@ export function InputWithIcon({ label, labelRight, iconSrc, iconAlt, id, classNa
                 <Input
                     id={id}
                     className={cn(
-                        "pl-11 h-11 bg-white/60 border-zinc-200/80 focus:bg-white focus:border-primary/30 focus:ring-4 focus:ring-primary/10 transition-all duration-300 rounded-xl shadow-sm",
+                        "pl-11 h-11 bg-white/60 border-zinc-200/80 focus:bg-white focus:border-primary/30 transition-all duration-300 rounded-xl shadow-sm focus-visible:ring-0 focus-visible:ring-offset-0",
                         className
                     )}
                     {...props}

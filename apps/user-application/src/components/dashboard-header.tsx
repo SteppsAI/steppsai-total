@@ -45,7 +45,7 @@ export function DashboardHeader() {
   // Note: This logic was in _authed.tsx, but now we might not need it if we only render this component in _authed.tsx
   // and _authed.tsx handles the conditional rendering of the header.
   // checking shouldShowSearch logic
-  const shouldShowSearch = pathname === '/app' || pathname === '/app/stepps' || pathname.startsWith('/app/folder') || pathname.startsWith('/app/exports');
+  const shouldShowSearch = pathname === '/app' || pathname === '/app/stepps' || pathname === '/app/settings' || pathname.startsWith('/app/folder') || pathname.startsWith('/app/exports');
 
   // Filter results for preview - moved up so handleSearch can use them
   const filteredGuides = guides?.filter(g => g.title?.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5) || [];
@@ -124,7 +124,7 @@ export function DashboardHeader() {
   };
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 sticky top-0 bg-background z-10 relative">
+    <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 relative z-40">
       {isMobileSearchOpen ? (
         <div className="flex w-full items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
           <Search className="size-4 text-muted-foreground" />

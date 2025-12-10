@@ -15,6 +15,18 @@ export const App = new Hono<{
 }>();
 
 const authMiddleware = createMiddleware(async (c, next) => {
+    // REMEMBER: reset before pushing (just for getting into the app locally)
+    // Check for local development bypass
+    const isLocalDev = c.req.header("x-local-dev-bypass") === "true";
+
+    if (isLocalDev) {
+        // Mock user for local development
+        console.log("⚠️ Using mock user for local development");
+        c.set("userId", "mock-user-id");
+        await next();
+        return;
+    }
+
     const auth = getAuthInstance(c.env, c.req.raw);
     const session = await auth.api.getSession({ headers: c.req.raw.headers });
     if (!session?.user) {

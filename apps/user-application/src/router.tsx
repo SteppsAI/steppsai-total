@@ -29,6 +29,16 @@ export const trpcClient = createTRPCClient<AppRouter>({
   links: [
     httpBatchLink({
       url: "/trpc",
+      // REMEMBER: reset before pushing (just for getting into the app locally)
+      headers: () => {
+        // Add bypass header for local development
+        if (import.meta.env.DEV) {
+          return {
+            "x-local-dev-bypass": "true",
+          };
+        }
+        return {};
+      },
     }),
   ],
 });

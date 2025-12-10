@@ -20,6 +20,23 @@ import { prependAssetsUrl } from "../helpers/transform-assets";
 export const usersRouter = router({
     // Get current user profile
     getMe: publicProcedure.query(async ({ ctx }) => {
+        // REMEMBER: reset before pushing (just for getting into the app locally)
+        // For local development with mock user
+        if (ctx.userInfo.userId === "mock-user-id") {
+            return {
+                userId: "mock-user-id",
+                name: "Dev User",
+                email: "dev@example.com",
+                emailVerified: true,
+                avatarUrl: null,
+                notificationPreferences: {
+                    newsletter: true,
+                    updates: true,
+                },
+                createdAt: new Date().toISOString(),
+            };
+        }
+
         const user = await getUser(ctx.userInfo.userId);
 
         if (!user) return null;

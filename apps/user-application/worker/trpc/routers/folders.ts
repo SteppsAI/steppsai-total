@@ -11,6 +11,12 @@ import {
 export const foldersRouter = router({
 	getAll: publicProcedure.query(async ({ ctx }) => {
 		if (!ctx.userInfo?.userId) throw new Error("Unauthorized");
+		// REMEMBER: reset before pushing (just for getting into the app locally)
+		// For local development with mock user
+		if (ctx.userInfo.userId === "mock-user-id") {
+			return []; // Return empty array for now
+		}
+
 		return await getUserFolders(ctx.userInfo.userId);
 	}),
 

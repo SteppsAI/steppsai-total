@@ -23,7 +23,6 @@ import { Route as AppAuthedRouteImport } from './routes/app/_authed'
 import { Route as AppAuthedIndexRouteImport } from './routes/app/_authed/index'
 import { Route as AppAuthedSteppsRouteImport } from './routes/app/_authed/stepps'
 import { Route as AppAuthedSettingsRouteImport } from './routes/app/_authed/settings'
-import { Route as AppAuthedFeedbackRouteImport } from './routes/app/_authed/feedback'
 import { Route as AppAuthedSteppsIndexRouteImport } from './routes/app/_authed/stepps/index'
 import { Route as AppAuthedEditorIndexRouteImport } from './routes/app/_authed/editor/index'
 import { Route as AppAuthedSteppsGuideIdRouteImport } from './routes/app/_authed/stepps/$guideId'
@@ -96,11 +95,6 @@ const AppAuthedSettingsRoute = AppAuthedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppAuthedRoute,
 } as any)
-const AppAuthedFeedbackRoute = AppAuthedFeedbackRouteImport.update({
-  id: '/feedback',
-  path: '/feedback',
-  getParentRoute: () => AppAuthedRoute,
-} as any)
 const AppAuthedSteppsIndexRoute = AppAuthedSteppsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -137,7 +131,6 @@ export interface FileRoutesByFullPath {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/verify-email': typeof AuthVerifyEmailRoute
-  '/app/feedback': typeof AppAuthedFeedbackRoute
   '/app/settings': typeof AppAuthedSettingsRoute
   '/app/stepps': typeof AppAuthedSteppsRouteWithChildren
   '/app/': typeof AppAuthedIndexRoute
@@ -157,7 +150,6 @@ export interface FileRoutesByTo {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/verify-email': typeof AuthVerifyEmailRoute
-  '/app/feedback': typeof AppAuthedFeedbackRoute
   '/app/settings': typeof AppAuthedSettingsRoute
   '/app/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
   '/app/folder/$folderId': typeof AppAuthedFolderFolderIdRoute
@@ -177,7 +169,6 @@ export interface FileRoutesById {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/verify-email': typeof AuthVerifyEmailRoute
-  '/app/_authed/feedback': typeof AppAuthedFeedbackRoute
   '/app/_authed/settings': typeof AppAuthedSettingsRoute
   '/app/_authed/stepps': typeof AppAuthedSteppsRouteWithChildren
   '/app/_authed/': typeof AppAuthedIndexRoute
@@ -199,7 +190,6 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/signup'
     | '/auth/verify-email'
-    | '/app/feedback'
     | '/app/settings'
     | '/app/stepps'
     | '/app/'
@@ -219,7 +209,6 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/signup'
     | '/auth/verify-email'
-    | '/app/feedback'
     | '/app/settings'
     | '/app/editor/$guideId'
     | '/app/folder/$folderId'
@@ -238,7 +227,6 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/signup'
     | '/auth/verify-email'
-    | '/app/_authed/feedback'
     | '/app/_authed/settings'
     | '/app/_authed/stepps'
     | '/app/_authed/'
@@ -354,13 +342,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthedSettingsRouteImport
       parentRoute: typeof AppAuthedRoute
     }
-    '/app/_authed/feedback': {
-      id: '/app/_authed/feedback'
-      path: '/feedback'
-      fullPath: '/app/feedback'
-      preLoaderRoute: typeof AppAuthedFeedbackRouteImport
-      parentRoute: typeof AppAuthedRoute
-    }
     '/app/_authed/stepps/': {
       id: '/app/_authed/stepps/'
       path: '/'
@@ -414,7 +395,6 @@ const AppAuthedSteppsRouteWithChildren = AppAuthedSteppsRoute._addFileChildren(
 )
 
 interface AppAuthedRouteChildren {
-  AppAuthedFeedbackRoute: typeof AppAuthedFeedbackRoute
   AppAuthedSettingsRoute: typeof AppAuthedSettingsRoute
   AppAuthedSteppsRoute: typeof AppAuthedSteppsRouteWithChildren
   AppAuthedIndexRoute: typeof AppAuthedIndexRoute
@@ -424,7 +404,6 @@ interface AppAuthedRouteChildren {
 }
 
 const AppAuthedRouteChildren: AppAuthedRouteChildren = {
-  AppAuthedFeedbackRoute: AppAuthedFeedbackRoute,
   AppAuthedSettingsRoute: AppAuthedSettingsRoute,
   AppAuthedSteppsRoute: AppAuthedSteppsRouteWithChildren,
   AppAuthedIndexRoute: AppAuthedIndexRoute,

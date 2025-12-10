@@ -2,10 +2,8 @@ import * as React from "react";
 import {
   Home,
   Library,
-  Settings,
   Edit,
   Plus,
-  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useLocation } from "@tanstack/react-router";
@@ -23,12 +21,6 @@ import {
   SidebarGroupContent,
   useSidebar,
 } from "@/components/ui/sidebar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { triggerExtensionSidePanel } from "@/lib/extension";
 import { MobileCreationDialog } from "@/components/mobile-creation-dialog";
@@ -160,47 +152,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              <Avatar className="size-8">
-                <AvatarImage src={user?.avatarUrl || undefined} alt="Profile" />
-                <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-xs">
-                  {getInitials(user?.name)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user?.name || "User"}</span>
-                <span className="truncate text-xs">Pro Plan</span>
-              </div>
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            side={isMobile ? "bottom" : "right"}
-            align="end"
-            sideOffset={6}
-            className="w-56"
-          >
-            <DropdownMenuItem asChild>
-              <Link to="/app/settings" className="flex w-full items-center">
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild size="lg">
               <Link
-                to="/app/feedback"
-                className="flex w-full items-center cursor-pointer"
+                to="/app/settings"
+                className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                onClick={handleLinkClick}
               >
-                <MessageSquare className="mr-2 h-4 w-4" />
-                <span>Send feedback</span>
+                <Avatar className="size-8">
+                  <AvatarImage src={user?.avatarUrl || undefined} alt="Profile" />
+                  <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-xs">
+                    {getInitials(user?.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">{user?.name || "User"}</span>
+                  <span className="truncate text-xs">Pro Plan</span>
+                </div>
               </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
       <MobileCreationDialog open={isMobileDialogOpen} onOpenChange={setIsMobileDialogOpen} />
     </Sidebar>

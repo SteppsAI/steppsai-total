@@ -17,6 +17,12 @@ import { transformStepsWithUrls } from "../helpers/transform-assets";
  */
 export const guidesRouter = router({
     getAll: publicProcedure.query(async ({ ctx }) => {
+        // REMEMBER: reset before pushing (just for getting into the app locally)
+        // For local development with mock user
+        if (ctx.userInfo.userId === "mock-user-id") {
+            return []; // Return empty array for now
+        }
+
         const guides = await getUserGuides(ctx.userInfo.userId);
         const assetsUrl = ctx.env.ASSETS_URL;
 

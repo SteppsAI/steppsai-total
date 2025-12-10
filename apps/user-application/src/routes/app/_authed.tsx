@@ -8,7 +8,17 @@ import { getSessionCached } from "@/router";
 export const Route = createFileRoute("/app/_authed")({
   component: RouteComponent,
   beforeLoad: async () => {
+    // REMEMBER: reset before pushing (just for getting into the app locally)
+    // TODO: Temporarily bypass authentication for local development
     const session = await getSessionCached();
+
+    // In development, if no real session, create a mock one
+    if (!session.data?.session && import.meta.env.DEV) {
+      console.log("⚠️ Authentication bypassed for local development");
+      // No redirect - allow access
+      return;
+    }
+
     if (!session.data?.session) {
       throw redirect({ to: "/auth/login" })
     }

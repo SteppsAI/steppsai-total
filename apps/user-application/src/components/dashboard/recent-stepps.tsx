@@ -2,6 +2,7 @@ import { DashboardCard } from "./dashboard-card";
 import { Plus } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { CreateButton } from "@/components/ui/create-button";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Guide } from "@/types/db";
@@ -75,15 +76,13 @@ export function RecentStepps({ isLoading, stepps = [], onDelete, onMove }: Recen
           >
             View all
           </Link>
-          <Button
+          <CreateButton
             size="sm"
-            variant="default"
-            className="h-8 px-4 text-xs font-medium"
+            variant="outline"
             onClick={handleCreateStepp}
           >
-            <Plus className="mr-1.5 size-3.5" />
             New
-          </Button>
+          </CreateButton>
         </div>
       </div>
 
@@ -132,9 +131,9 @@ export function RecentStepps({ isLoading, stepps = [], onDelete, onMove }: Recen
             </p>
             <button
               onClick={handleCreateStepp}
-              className="btn-glass-dashboard group inline-flex h-12 w-[180px] items-center justify-center rounded-full text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:bg-primary/5 px-2 py-1.5 rounded-md transition-all duration-200 group"
             >
-              <Plus className="mr-2 size-4 transition-transform duration-200 group-hover:scale-110" />
+              <Plus className="size-3.5 transition-transform duration-200 group-hover:scale-110" />
               Create Stepp
             </button>
           </div>

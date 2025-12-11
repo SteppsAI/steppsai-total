@@ -26,7 +26,7 @@ export function MobileTutorialsSection() {
             <div className="grid grid-cols-1 gap-3">
                 {steps.map((step, index) => (
                     <div key={index} className="flex gap-3">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold">
                             {index + 1}
                         </div>
                         <div className="flex-1 min-w-0">

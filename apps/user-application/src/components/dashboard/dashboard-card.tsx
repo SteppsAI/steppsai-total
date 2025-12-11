@@ -1,4 +1,4 @@
-import { Pencil, Share2, Trash, Download, FolderInput, MoreVertical } from "lucide-react";
+import { Pencil, Share2, Trash, Download, FolderInput, MoreHorizontal } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   DropdownMenu,
@@ -29,76 +29,79 @@ export function DashboardCard({ title, image, viewUrl, onEdit, onShare, onMove, 
   };
 
   return (
-    <div className="flex flex-col gap-2 group">
-      {/* Card Wrapper */}
-      <div className="relative">
-        <div
-          onClick={handleCardClick}
-          className={`aspect-video w-full rounded-xl border border-border overflow-hidden bg-card relative transition-all duration-200 ${viewUrl ? 'cursor-pointer' : ''} group-hover:shadow-sm`}
-        >
-          <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-          {/* Overlay on hover */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-200" />
-
-          {/* Dropdown Menu - Top Right */}
-          <div className="absolute top-2 right-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="h-8 w-8 rounded-full bg-white text-slate-900 shadow-md hover:bg-slate-100 border-none outline-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreVertical className="h-4 w-4" />
-                  <span className="sr-only">Open menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                {onEdit && (
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(e); }}>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Edit
-                  </DropdownMenuItem>
-                )}
-                {onShare && (
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onShare(e); }}>
-                    <Share2 className="mr-2 h-4 w-4" />
-                    Share
-                  </DropdownMenuItem>
-                )}
-                {onMove && (
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onMove(e); }}>
-                    <FolderInput className="mr-2 h-4 w-4" />
-                    Move to folder
-                  </DropdownMenuItem>
-                )}
-                {onExport && (
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onExport(e); }}>
-                    <Download className="mr-2 h-4 w-4" />
-                    Export
-                  </DropdownMenuItem>
-                )}
-                {onDelete && (
-                  <DropdownMenuItem
-                    onClick={(e) => { e.stopPropagation(); onDelete(e); }}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <Trash className="mr-2 h-4 w-4" />
-                    Delete
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
+    <div className="group flex flex-col rounded-lg border border-border bg-card transition-all hover:shadow-md overflow-hidden">
+      {/* Card Image */}
+      <div 
+        className={`aspect-video w-full overflow-hidden bg-muted relative border-b border-border ${viewUrl ? 'cursor-pointer' : ''}`}
+        onClick={handleCardClick}
+      >
+        <img 
+          src={image} 
+          alt={title} 
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+        />
+        {/* Overlay on hover */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors duration-200" />
       </div>
 
-      {/* Card Footer - Title only */}
-      <div className="flex items-center justify-between px-0.5 h-8">
-        <span className="font-medium text-card-foreground truncate text-sm flex-1" title={title}>
+      {/* Card Footer */}
+      <div className="flex items-center justify-between p-3 gap-2">
+        <span 
+          className="font-medium text-card-foreground truncate text-sm flex-1 cursor-pointer hover:underline underline-offset-4" 
+          title={title}
+          onClick={handleCardClick}
+        >
           {title}
         </span>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-muted-foreground hover:text-foreground"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreHorizontal className="h-4 w-4" />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            {onEdit && (
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(e); }}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </DropdownMenuItem>
+            )}
+            {onShare && (
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onShare(e); }}>
+                <Share2 className="mr-2 h-4 w-4" />
+                Share
+              </DropdownMenuItem>
+            )}
+            {onMove && (
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onMove(e); }}>
+                <FolderInput className="mr-2 h-4 w-4" />
+                Move to folder
+              </DropdownMenuItem>
+            )}
+            {onExport && (
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onExport(e); }}>
+                <Download className="mr-2 h-4 w-4" />
+                Export
+              </DropdownMenuItem>
+            )}
+            {onDelete && (
+              <DropdownMenuItem
+                onClick={(e) => { e.stopPropagation(); onDelete(e); }}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

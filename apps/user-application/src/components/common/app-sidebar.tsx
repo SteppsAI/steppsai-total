@@ -3,7 +3,6 @@ import {
   Home,
   Library,
   Edit,
-  Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useLocation } from "@tanstack/react-router";
@@ -22,6 +21,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CreateButton } from "@/components/ui/create-button";
 import { triggerExtensionSidePanel } from "@/lib/extension";
 import { MobileCreationDialog } from "@/components/mobile-creation-dialog";
 import { useState } from "react";
@@ -127,16 +127,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarFooter className={state === "collapsed" ? "p-1.5" : "p-4"}>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <button
-              className={`mb-2 btn-glass-primary shadow-lg text-white hover:shadow-primary/20 font-medium rounded-full flex items-center justify-center transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative z-20 cursor-pointer active:scale-95 ${
-                isMobile
-                  ? "w-full h-11 px-6 gap-2"
-                  : state === "collapsed"
-                  ? "w-11 h-11 p-0 mx-auto"
-                  : "w-full h-11 px-6 gap-2 min-w-0"
-              }`}
-              aria-label={state === "collapsed" ? "Create Stepps" : undefined}
+          <SidebarMenuItem className={state === "collapsed" ? "flex justify-center" : ""}>
+            <CreateButton
+              fullWidth={isMobile || state === "expanded"}
+              size="lg"
               onClick={() => {
                 if (isMobile) {
                   setIsMobileDialogOpen(true);
@@ -144,29 +138,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   triggerExtensionSidePanel().catch((e) => toast.error(e.message));
                 }
               }}
+              className={state === "collapsed" ? "w-12 h-12 p-0" : ""}
             >
-              <Plus className={`size-6 flex-shrink-0 transition-all duration-300 ${
-                isMobile || state === "expanded" ? "mr-0" : ""
-              }`} />
-              <span
-                className={`whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden text-base ${
-                  isMobile
-                    ? "w-auto opacity-100"
-                    : state === "collapsed"
-                    ? "w-0 opacity-0"
-                    : "w-auto opacity-100"
-                }`}
-              >
-                Create Stepps
-              </span>
-            </button>
+              {state !== "collapsed" && "Create Stepps"}
+            </CreateButton>
           </SidebarMenuItem>
         </SidebarMenu>
 
         <SidebarMenu className="mt-2">
           <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
+            <SidebarMenuButton
+              asChild
               size="lg"
               className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:[&>div]:hidden group-data-[collapsible=icon]:!p-0"
             >

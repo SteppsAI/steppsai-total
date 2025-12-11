@@ -132,7 +132,7 @@ export function HowItWorks() {
                     </h4>
 
                     <p className="section-subheading text-white/90 text-lg md:text-xl font-medium max-w-3xl mx-auto drop-shadow-sm">
-                        Create beautiful guides in minutes, not hours. <span className="text-white font-bold underline decoration-wavy decoration-white/50 underline-offset-4">Your team will thank you.</span>
+                        Create beautiful guides in minutes, not hours.
                     </p>
                 </div>
 

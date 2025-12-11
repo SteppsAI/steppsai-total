@@ -115,7 +115,7 @@ export function RecentStepps({ isLoading, stepps = [], onDelete, onMove }: Recen
             style={{ maskImage: "radial-gradient(circle, transparent 20%, black 100%)", WebkitMaskImage: "radial-gradient(circle, transparent 20%, black 100%)" }}
           >
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="flex flex-col gap-2">
+              <div key={i} className={`flex flex-col gap-2 ${i > 2 ? "hidden sm:flex" : ""}`}>
                 <div className="aspect-video w-full rounded-xl bg-muted/50 border border-border/50" />
                 <div className="flex items-center justify-between px-0.5 h-8">
                   <div className="h-4 w-2/3 bg-muted/50 rounded" />

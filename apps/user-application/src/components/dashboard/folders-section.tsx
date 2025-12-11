@@ -79,7 +79,7 @@ export function FoldersSection({ isLoading, folders = [], onRename, onDelete }: 
             style={{ maskImage: "radial-gradient(circle, transparent 20%, black 100%)", WebkitMaskImage: "radial-gradient(circle, transparent 20%, black 100%)" }}
           >
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-28 rounded-lg border border-border/50 bg-muted/50" />
+              <div key={i} className={`h-28 rounded-lg border border-border/50 bg-muted/50 ${i > 2 ? "hidden sm:block" : ""}`} />
             ))}
           </div>
 

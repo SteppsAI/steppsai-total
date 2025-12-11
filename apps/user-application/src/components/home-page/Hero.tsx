@@ -83,17 +83,17 @@ export function Hero() {
                                 <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-background/80 hover:bg-background/60 backdrop-blur-3xl px-3 py-1.5 sm:px-4 text-xs sm:text-sm font-medium transition-all group-hover:bg-background/50">
                                     <span className="font-bold tracking-widest text-primary text-[10px] sm:text-xs uppercase">Early Access</span>
                                     <span className="w-px h-3 sm:h-4 bg-primary/50 mx-2 sm:mx-3"></span>
-                                    <span className="text-muted-foreground font-medium text-xs sm:text-sm">Launch pricing available</span>
+                                    <span className="text-[var(--color-800)] font-medium text-xs sm:text-sm">Launch pricing available</span>
                                 </span>
                             </a>
 
                             {/* Headline */}
-                            <h1 className="hero-text-stagger text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.15] max-w-3xl">
+                            <h1 className="hero-text-stagger text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[var(--color-950)] leading-[1.15] max-w-3xl">
                                 Turn <span className="text-primary">Actions</span> into <span className="text-primary">Instructions</span>.
                             </h1>
 
                             {/* Subheadline */}
-                            <p className="hero-text-stagger text-base sm:text-lg text-muted-foreground leading-relaxed max-w-xl">
+                            <p className="hero-text-stagger text-base sm:text-lg text-[var(--color-800)] leading-relaxed max-w-xl">
                                 Capture any workflow and generate beautiful documentation in seconds, not hours.
                             </p>
 
@@ -108,7 +108,7 @@ export function Hero() {
                                 </Link>
                                 <a
                                     href="#demo"
-                                    className="btn-glass-secondary group inline-flex h-11 sm:h-12 items-center justify-center rounded-full px-6 sm:px-8 text-sm font-medium text-muted-foreground transition-all duration-200 hover:-translate-y-0.5 hover:text-primary active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                    className="btn-glass-secondary group inline-flex h-11 sm:h-12 items-center justify-center rounded-full px-6 sm:px-8 text-sm font-medium text-[var(--color-800)] transition-all duration-200 hover:-translate-y-0.5 hover:text-primary active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 >
                                     <Play className="mr-2 size-4 fill-current transition-transform duration-200 group-hover:scale-110" />
                                     View Demo
@@ -157,8 +157,8 @@ export function Hero() {
                     {/* Top horizontal divider */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 sm:w-48 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"></div>
 
-                    <p className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight">
-                        Works on <span className="text-muted-foreground">any website</span>, captures <span className="text-muted-foreground">every detail</span>.
+                    <p className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight text-[var(--color-950)]">
+                        Works on <span className="text-[var(--color-700)]">any website</span>, captures <span className="text-[var(--color-700)]">every detail</span>.
                     </p>
 
                     {/* Bottom horizontal divider */}

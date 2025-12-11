@@ -716,17 +716,17 @@
   }
 
   .section-subheading {
-    @apply text-sm lg:text-base max-w-2xl my-4 mx-auto text-muted-foreground text-center font-medium;
+    @apply text-sm lg:text-base max-w-2xl my-4 mx-auto text-[var(--color-800)] text-center font-medium;
   }
 
   /* Feature card title */
   .feature-title {
-    @apply max-w-5xl text-left tracking-tight text-black dark:text-white text-xl md:text-2xl md:leading-snug;
+    @apply max-w-5xl text-left tracking-tight text-[var(--color-950)] dark:text-white text-xl md:text-2xl md:leading-snug;
   }
 
   /* Feature card description */
   .feature-description {
-    @apply text-sm md:text-base max-w-4xl text-left mx-auto text-neutral-500 text-center font-normal dark:text-neutral-300 text-left max-w-sm mx-0 md:text-sm my-2;
+    @apply text-sm md:text-base max-w-4xl text-left mx-auto text-[var(--color-800)] text-center font-normal dark:text-neutral-300 text-left max-w-sm mx-0 md:text-sm my-2;
   }
 
 
@@ -1232,4 +1232,51 @@
   animation: float 3s ease-in-out infinite;
   filter: drop-shadow(0 10px 20px rgba(99, 102, 241, 0.3));
   transform: rotate(-45deg);
+}
+
+/* How It Works Section Divider */
+
+/* Top Divider */
+
+.custom-shape-divider-top-1765440536 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.custom-shape-divider-top-1765440536 svg {
+  position: relative;
+  display: block;
+  width: calc(100% + 1.3px);
+  height: 77px;
+}
+
+.custom-shape-divider-top-1765440536 .shape-fill {
+  fill: var(--color-100);
+}
+
+/* Bottom Divider */
+
+.custom-shape-divider-bottom-1765440885 {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+  transform: rotate(180deg);
+}
+
+.custom-shape-divider-bottom-1765440885 svg {
+  position: relative;
+  display: block;
+  width: calc(100% + 1.3px);
+  height: 77px;
+}
+
+.custom-shape-divider-bottom-1765440885 .shape-fill {
+  fill: var(--color-100);
 }

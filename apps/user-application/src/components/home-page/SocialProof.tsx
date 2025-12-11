@@ -55,18 +55,18 @@ export function SocialProof() {
     }, { scope: containerRef })
 
     return (
-        <section id="save-time" className="px-4 py-16 md:py-32 mt-0 bg-transparent transition-colors duration-500 relative" ref={containerRef}>
+        <section id="save-time" className="px-4 py-16 md:py-32 mt-0 bg-gradient-to-b from-transparent via-[var(--color-50)]/30 to-[var(--color-100)] transition-colors duration-500 relative" ref={containerRef}>
             <div className="mx-auto grid max-w-5xl border-2 border-primary/20 md:grid-cols-2 overflow-hidden shadow-xl rounded-3xl bg-background">
                 <div className="sp-item-left flex flex-col">
                     <div className="p-6 sm:p-12 sp-item-left-content">
                         <div className="flex items-center gap-3 mb-6">
                             <img src="/icons/3d/record.png" alt="Record" className="w-10 h-10 object-contain drop-shadow-md" />
-                            <span className="text-muted-foreground font-medium uppercase tracking-wider text-sm">
+                            <span className="text-[var(--color-600)] font-bold uppercase tracking-wider text-sm">
                                 Record Once
                             </span>
                         </div>
 
-                        <p className="text-2xl font-semibold section-heading text-left mx-0 max-w-none">
+                        <p className="text-2xl font-semibold section-heading text-left mx-0 max-w-none text-[var(--color-900)]">
                             Capture any workflow and generate perfect guides automatically
                         </p>
                     </div>
@@ -85,12 +85,12 @@ export function SocialProof() {
                     <div className="relative z-10 sp-item-right-content">
                         <div className="flex items-center gap-3 mb-6">
                             <img src="/icons/3d/folder.png" alt="Folder" className="w-10 h-10 object-contain drop-shadow-md" />
-                            <span className="text-muted-foreground font-medium uppercase tracking-wider text-sm">
+                            <span className="text-[var(--color-600)] font-bold uppercase tracking-wider text-sm">
                                 Share Everywhere
                             </span>
                         </div>
 
-                        <p className="my-8 text-2xl font-semibold section-heading text-left mx-0 max-w-none">
+                        <p className="my-8 text-2xl font-semibold section-heading text-left mx-0 max-w-none text-[var(--color-900)]">
                             Organize guides into folders and share with your team. Export to PDF, HTML, or share via link.
                         </p>
                     </div>
@@ -125,7 +125,7 @@ export function SocialProof() {
                     </div>
                 </div>
                 <div className="sp-item-bottom col-span-full border-y border-foreground/5 p-12">
-                    <p className="text-center text-4xl font-bold tracking-tight lg:text-7xl text-foreground section-heading">
+                    <p className="text-center text-4xl font-bold tracking-tight lg:text-7xl text-[var(--color-900)] section-heading">
                         Save 10+ hours per week
                     </p>
                 </div>
@@ -133,14 +133,14 @@ export function SocialProof() {
                     <div className="max-w-lg mx-auto text-center md:text-left">
                         <div className="flex items-center justify-center md:justify-start gap-3 mb-6">
                             <img src="/icons/3d/like.png" alt="Like" className="w-10 h-10 object-contain drop-shadow-md" />
-                            <span className="text-muted-foreground font-medium uppercase tracking-wider text-sm">
+                            <span className="text-[var(--color-600)] font-bold uppercase tracking-wider text-sm">
                                 Save Hours Weekly
                             </span>
                         </div>
 
-                        <p className="text-2xl font-semibold text-foreground leading-tight section-heading text-left mx-0 max-w-none">
+                        <p className="text-2xl font-semibold text-[var(--color-900)] leading-tight section-heading text-left mx-0 max-w-none">
                             Stop writing documentation manually.{' '}
-                            <span className="text-muted-foreground">
+                            <span className="text-[var(--color-600)]">
                                 Your team will thank you for the time saved.
                             </span>
                         </p>

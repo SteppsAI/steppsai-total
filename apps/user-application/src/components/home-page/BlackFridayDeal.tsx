@@ -59,21 +59,21 @@ export function BlackFridayDeal() {
     }, { scope: containerRef });
 
     return (
-        <section id="black-friday" ref={containerRef} className="py-16 md:py-24 relative overflow-hidden font-sans bg-transparent duration-500">
+        <section id="black-friday" ref={containerRef} className="py-16 md:py-24 relative overflow-hidden font-sans bg-gradient-to-b from-[var(--color-100)] via-[var(--color-50)]/30 to-transparent duration-500">
             <div className="container mx-auto px-4 md:px-6 relative z-10">
                 <div className="max-w-5xl mx-auto">
 
                     {/* Header */}
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12 gap-6">
                         <div>
-                            <div className="bf-badge inline-flex items-center gap-2 px-3 py-1 rounded-full bg-background/50 backdrop-blur-sm border border-foreground/5 text-foreground text-sm font-medium mb-4 shadow-sm">
+                            <div className="bf-badge inline-flex items-center gap-2 px-3 py-1 rounded-full bg-background/50 backdrop-blur-sm border border-[var(--color-900)]/10 text-[var(--color-900)] text-sm font-medium mb-4 shadow-sm">
                                 <span className="relative flex h-2 w-2">
                                     <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                                 </span>
                                 Limited Time Offer:
                             </div>
-                            <h2 className="bf-title text-4xl md:text-7xl font-bold tracking-tighter text-foreground leading-[0.9]">
+                            <h2 className="bf-title text-4xl md:text-7xl font-bold tracking-tighter text-[var(--color-950)] leading-[0.9]">
                                 LAUNCH <br className="hidden md:block" />
                                 <span className="text-primary">
                                     SPECIAL
@@ -81,7 +81,7 @@ export function BlackFridayDeal() {
                             </h2>
                         </div>
                         <div className="md:text-right max-w-md">
-                            <p className="bf-desc text-lg md:text-xl text-muted-foreground font-medium leading-relaxed">
+                            <p className="bf-desc text-lg md:text-xl text-[var(--color-800)] font-medium leading-relaxed">
                                 Stop paying monthly fees. Get lifetime access to the intuitive documentation tool that grows with your team.
                             </p>
                         </div>
@@ -95,18 +95,18 @@ export function BlackFridayDeal() {
                             <div className="md:col-span-3 p-6 md:p-12 flex flex-col justify-between border-b border-primary md:border-r md:border-b-0 bg-background relative overflow-hidden">
 
                                 <div className="bf-price-content relative z-10">
-                                    <div className="inline-flex items-center gap-2 bg-foreground text-background px-3 py-1 text-sm font-bold rounded-md mb-4">
+                                    <div className="inline-flex items-center gap-2 bg-[var(--color-950)] text-white px-3 py-1 text-sm font-bold rounded-md mb-4">
                                         LIFETIME DEAL
                                     </div>
                                     <div className="flex flex-wrap items-baseline gap-3 mb-2">
-                                        <span className="text-6xl md:text-8xl font-bold tracking-tighter text-foreground">
+                                        <span className="text-6xl md:text-8xl font-bold tracking-tighter text-[var(--color-950)]">
                                             $149
                                         </span>
                                         <div className="flex flex-col items-start w-full md:w-auto">
                                             <span className="text-sm font-medium text-primary uppercase tracking-wide">One-time payment</span>
                                         </div>
                                     </div>
-                                    <p className="text-muted-foreground mt-4 max-w-sm text-sm md:text-base">
+                                    <p className="text-[var(--color-800)] mt-4 max-w-sm text-sm md:text-base">
                                         Pay once, own it forever. Includes all future Pro plan updates.
                                     </p>
                                 </div>
@@ -121,7 +121,7 @@ export function BlackFridayDeal() {
                                             </span>
                                             Limited spots available for this batch
                                         </div>
-                                        <p className="text-sm text-muted-foreground pl-6">
+                                        <p className="text-sm text-[var(--color-800)] pl-6">
                                             Price increases once the batch is full.
                                         </p>
                                     </div>
@@ -143,7 +143,7 @@ export function BlackFridayDeal() {
                                             />
                                         </span>
                                     </button>
-                                    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs md:text-sm text-muted-foreground">
+                                    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs md:text-sm text-[var(--color-800)]">
                                         <span>30-day money-back guarantee</span>
                                         <span className="hidden md:inline">•</span>
                                         <span>Instant access</span>

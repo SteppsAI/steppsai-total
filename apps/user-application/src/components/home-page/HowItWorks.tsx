@@ -117,15 +117,22 @@ export function HowItWorks() {
         },
     ];
     return (
-        <section id="how-it-works" ref={containerRef} className="px-4 py-16 md:py-32 mt-0 bg-transparent transition-colors duration-500 relative">
-            <div className="mx-auto max-w-5xl">
+        <section id="how-it-works" ref={containerRef} className="px-4 py-16 md:py-32 -mt-1 bg-[var(--color-300)] transition-colors duration-500 relative">
+            
+            <div className="custom-shape-divider-top-1765440536">
+                <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                    <path d="M1200 120L0 16.48 0 0 1200 0 1200 120z" className="shape-fill"></path>
+                </svg>
+            </div>
+            
+            <div className="mx-auto max-w-5xl relative z-10">
                 <div className="px-8 hiw-header mb-12">
-                    <h4 className="section-heading">
+                    <h4 className="section-heading text-white drop-shadow-md">
                         From recording to sharing in 4 simple steps
                     </h4>
 
-                    <p className="section-subheading">
-                        Create beautiful guides in minutes, not hours. Your team will thank you.
+                    <p className="section-subheading text-white/90 text-lg md:text-xl font-medium max-w-3xl mx-auto drop-shadow-sm">
+                        Create beautiful guides in minutes, not hours. <span className="text-white font-bold underline decoration-wavy decoration-white/50 underline-offset-4">Your team will thank you.</span>
                     </p>
                 </div>
 
@@ -141,14 +148,14 @@ export function HowItWorks() {
                         >
                             <div className="p-8 sm:p-12">
                                 <div className="flex items-center gap-3 mb-6">
-                                    <span className="text-muted-foreground font-medium uppercase tracking-wider text-sm">
+                                    <span className="text-[var(--color-500)] font-bold uppercase tracking-wider text-sm">
                                         {feature.step}
                                     </span>
                                 </div>
-                                <h3 className="text-2xl font-semibold text-left mx-0 max-w-none mb-4">
+                                <h3 className="text-2xl font-semibold text-left mx-0 max-w-none mb-4 text-[var(--color-900)]">
                                     {feature.title}
                                 </h3>
-                                <p className="text-muted-foreground text-base md:text-lg text-left max-w-md">
+                                <p className="text-[var(--color-700)] text-base md:text-lg text-left max-w-md font-medium">
                                     {feature.description}
                                 </p>
                             </div>
@@ -161,6 +168,13 @@ export function HowItWorks() {
                     ))}
                 </div>
             </div>
+
+            <div className="custom-shape-divider-bottom-1765440885">
+                <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                    <path d="M1200 120L0 16.48 0 0 1200 0 1200 120z" className="shape-fill"></path>
+                </svg>
+            </div>
+
         </section>
     );
 }

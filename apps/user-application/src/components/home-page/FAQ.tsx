@@ -105,10 +105,10 @@ export function FAQ() {
                             className="w-16 h-16 md:w-20 md:h-20 -rotate-12 drop-shadow-lg animate-float relative z-10"
                         />
                     </div>
-                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-foreground">
+                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-[var(--color-950)]">
                         Frequently Asked Questions
                     </h2>
-                    <p className="text-lg text-muted-foreground font-medium">
+                    <p className="text-lg text-[var(--color-800)] font-medium">
                         Have a question? We're here to help.
                     </p>
                 </div>
@@ -116,8 +116,8 @@ export function FAQ() {
                 <Accordion type="single" collapsible className="w-full space-y-4">
                     {faqs.map((faq, index) => (
                         <AccordionItem key={index} value={`item-${index}`} className="faq-item px-6 py-2 bg-background rounded-xl border border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200">
-                            <AccordionTrigger className="text-left font-medium hover:no-underline">{faq.question}</AccordionTrigger>
-                            <AccordionContent className="text-muted-foreground">
+                            <AccordionTrigger className="text-left font-medium hover:no-underline text-[var(--color-900)]">{faq.question}</AccordionTrigger>
+                            <AccordionContent className="text-[var(--color-800)]">
                                 {faq.answer}
                             </AccordionContent>
                         </AccordionItem>

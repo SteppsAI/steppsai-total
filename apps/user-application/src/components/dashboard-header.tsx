@@ -124,7 +124,7 @@ export function DashboardHeader() {
   };
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 relative z-40">
+    <header className="flex h-16 shrink-0 items-center shadow-sm gap-2 border-b border-sidebar-border px-4 sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 relative z-40">
       {isMobileSearchOpen ? (
         <div className="flex w-full items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
           <Search className="size-4 text-muted-foreground" />

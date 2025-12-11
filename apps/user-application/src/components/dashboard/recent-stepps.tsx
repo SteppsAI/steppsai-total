@@ -110,12 +110,12 @@ export function RecentStepps({ isLoading, stepps = [], onDelete, onMove }: Recen
       ) : (
         <div className="relative">
           {/* Background Skeletons - Faded */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4 opacity-30 select-none pointer-events-none filter blur-[1px]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4 select-none pointer-events-none filter blur-[1px]">
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="flex flex-col gap-2">
-                <div className="aspect-video w-full rounded-xl bg-muted/30 border border-border/50" />
+                <div className="aspect-video w-full rounded-xl bg-muted/50 border border-border/50" />
                 <div className="flex items-center justify-between px-0.5 h-8">
-                  <div className="h-4 w-2/3 bg-muted/30 rounded" />
+                  <div className="h-4 w-2/3 bg-muted/50 rounded" />
                 </div>
               </div>
             ))}

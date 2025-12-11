@@ -74,9 +74,9 @@ export function FoldersSection({ isLoading, folders = [], onRename, onDelete }: 
       ) : (
         <div className="relative">
           {/* Background Skeletons - Faded */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4 opacity-30 select-none pointer-events-none filter blur-[1px]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4 select-none pointer-events-none filter blur-[1px]">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-28 rounded-lg border border-border/50 bg-muted/30" />
+              <div key={i} className="h-28 rounded-lg border border-border/50 bg-muted/50" />
             ))}
           </div>
 

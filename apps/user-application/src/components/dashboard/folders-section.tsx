@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ChevronRight } from "lucide-react";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { FolderCard } from "@/components/folder-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FolderWithCount } from "@/types/db";
@@ -17,12 +18,12 @@ export function FoldersSection({ isLoading, folders = [], onRename, onDelete }: 
     return (
       <section className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Skeleton className="h-8 w-32" />
-          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-8 w-32 bg-muted/50" />
+          <Skeleton className="h-4 w-16 bg-muted/50" />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {[1, 2, 3, 4].map((i, index) => (
-            <Skeleton key={i} className={`h-24 w-full rounded-xl ${index >= 2 ? "hidden lg:block" : ""}`} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-28 w-full rounded-lg bg-muted/50" />
           ))}
         </div>
       </section>
@@ -34,51 +35,67 @@ export function FoldersSection({ isLoading, folders = [], onRename, onDelete }: 
   return (
     <section className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold text-foreground">Your folders</h2>
-        <Link
-          to="/app/stepps"
-          className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80"
-        >
-          View all
-          <ChevronRight className="size-4" />
-        </Link>
+        <h2 className="text-xl font-semibold text-foreground tracking-tight">Your folders</h2>
+        <div className="flex items-center gap-3">
+          <Link
+            to="/app/stepps"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            View all
+          </Link>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 px-4 text-xs font-medium"
+            onClick={() => console.log("Create first folder")} // TODO: Add create folder dialog trigger
+          >
+            <Plus className="mr-1.5 size-3.5" />
+            New
+          </Button>
+        </div>
       </div>
 
       {hasFolders ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {folders?.slice(0, 4).map((folder, index) => (
-            <div key={folder.folderId} className={index >= 2 ? "hidden lg:block" : ""}>
-              <FolderCard
-                folder={{
-                  folderId: folder.folderId,
-                  name: folder.name,
-                  guideCount: folder.guideCount || 0,
-                }}
-                onRename={onRename}
-                onDelete={onDelete}
-                onClick={() => navigate({ to: "/app/folder/$folderId", params: { folderId: folder.folderId } })}
-              />
-            </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4">
+          {folders?.slice(0, 5).map((folder) => (
+            <FolderCard
+              key={folder.folderId}
+              folder={{
+                folderId: folder.folderId,
+                name: folder.name,
+                guideCount: folder.guideCount || 0,
+              }}
+              onRename={onRename}
+              onDelete={onDelete}
+              onClick={() => navigate({ to: "/app/folder/$folderId", params: { folderId: folder.folderId } })}
+            />
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border/80 bg-muted/30 px-6 py-12 text-center">
-          <p className="max-w-sm text-base text-muted-foreground">
-            Start organizing your documentation with folders.
-          </p>
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted/80"
-            onClick={() => console.log("Create first folder")}
-          >
-            Create your first folder
-            <ChevronRight className="size-4" />
-          </button>
+        <div className="relative">
+          {/* Background Skeletons - Faded */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4 opacity-30 select-none pointer-events-none filter blur-[1px]">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-28 rounded-lg border border-border/50 bg-muted/30" />
+            ))}
+          </div>
+
+          {/* Foreground Message & CTA */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+            <h3 className="text-lg font-semibold text-foreground mb-1">No folders yet</h3>
+            <p className="text-sm text-muted-foreground mb-6 max-w-sm">
+              Create folders to keep your guides organized, accessible, and easy to find for your team.
+            </p>
+            <button
+              onClick={() => console.log("Create first folder")}
+              className="btn-glass-secondary group inline-flex h-9 items-center justify-center rounded-full px-6 text-sm font-medium text-[var(--color-800)] transition-all duration-200 hover:-translate-y-0.5 hover:text-primary active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <Plus className="mr-2 size-4 transition-transform duration-200 group-hover:scale-110" />
+              Create Folder
+            </button>
+          </div>
         </div>
       )}
     </section>
   );
 }
-
-
-

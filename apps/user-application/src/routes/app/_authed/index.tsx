@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { RecentStepps } from "@/components/dashboard/recent-stepps";
 import { TutorialsSection } from "@/components/dashboard/tutorials-section";
 import { MobileTutorialsSection } from "@/components/dashboard/mobile-tutorials-section";
@@ -27,10 +27,10 @@ export const Route = createFileRoute("/app/_authed/")({
 function Dashboard() {
   const queryClient = useQueryClient();
 
-  const { data: guides } = useSuspenseQuery(trpc.guides.getAll.queryOptions());
-  const { data: folders } = useSuspenseQuery(trpc.folders.getAll.queryOptions());
+  const { data: guides, isLoading: isGuidesLoading } = useQuery(trpc.guides.getAll.queryOptions());
+  const { data: folders, isLoading: isFoldersLoading } = useQuery(trpc.folders.getAll.queryOptions());
 
-  const recentStepps = (guides ?? []).slice(0, 4) as Guide[];
+  const recentStepps = (guides ?? []).slice(0, 5) as Guide[];
 
   // Mutations - invalidate using the same query options
   const deleteFolderMutation = useMutation({
@@ -143,15 +143,17 @@ function Dashboard() {
   };
 
   return (
-    <div className="flex flex-col gap-8 w-full max-w-[1400px] mx-auto pb-8">
+    <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto p-6 lg:p-8">
       <RecentStepps
         stepps={recentStepps}
+        isLoading={isGuidesLoading}
         onDelete={handleDeleteStepp}
         onMove={handleMoveStepp}
       />
 
       <FoldersSection
         folders={folders ?? []}
+        isLoading={isFoldersLoading}
         onRename={handleRenameFolder}
         onDelete={handleDeleteFolder}
       />

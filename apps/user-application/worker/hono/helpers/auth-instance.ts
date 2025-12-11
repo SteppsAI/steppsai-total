@@ -1,65 +1,78 @@
 import { getAuth } from "@repo/data-ops/auth";
+import { createMiddleware } from "hono/factory";
+import { checkSubscriptionAccess } from "@creem_io/better-auth/server";
 
-
+// ============ AUTH INSTANCE ============
 export const getAuthInstance = async (env: ServiceBindings, req: Request) => {
-    const backend = env.BACKEND_SERVICE as any;
+  const backend = env.BACKEND_SERVICE as any;
+  const url = new URL(req.url);
+  const baseURL = `${url.protocol}//${url.host}`;
 
-    const url = new URL(req.url);
-    const baseURL = `${url.protocol}//${url.host}`;
+  // Health check
+  const health = await backend.authHealthCheck();
+  if (!health?.ok) {
+    throw new Error("Auth infrastructure unavailable");
+  }
 
-    try {
-        if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) {
-            console.error("[AuthInstance] Missing Google client env vars", {
-                hasClientId: !!env.GOOGLE_CLIENT_ID,
-                hasClientSecret: !!env.GOOGLE_CLIENT_SECRET,
-            });
-        }
-
-        if (!env.BETTER_AUTH_SECRET) {
-            console.error("[AuthInstance] Missing BETTER_AUTH_SECRET");
-        }
-
-        // Hard guard: if auth/email infra is not healthy, block auth flows (no account creation)
-        try {
-            const health = await backend.authHealthCheck();
-            if (!health?.ok) {
-                console.error("[AuthInstance] Auth/email healthcheck failed", { health });
-                throw new Error("Auth/email infrastructure unavailable");
-            }
-        } catch (error) {
-            console.error("[AuthInstance] Failed to run auth/email healthcheck", error);
-            throw new Error("Auth/email infrastructure unavailable");
-        }
-
-        console.log("[AuthInstance] Creating Better Auth instance");
-
-        const instance = getAuth(
-            {
-                clientId: env.GOOGLE_CLIENT_ID,
-                clientSecret: env.GOOGLE_CLIENT_SECRET,
-            },
-            {
-                apiKey: env.CREEM_API_KEY,
-                webhookSecret: env.CREEM_WEBHOOK_SECRET,
-            },
-            env.BETTER_AUTH_SECRET,
-            {
-                sendResetPassword: async (email, name, url) => {
-                    console.log("[AuthInstance] sendResetPassword", { email });
-                    await backend.sendPasswordResetEmail(email, name, url);
-                },
-                sendVerificationEmail: async (email, name, url) => {
-                    console.log("[AuthInstance] sendVerificationEmail", { email });
-                    await backend.sendVerificationEmail(email, name, url);
-                },
-            },
-            baseURL,
-        );
-
-        console.log("[AuthInstance] Better Auth instance created");
-        return instance;
-    } catch (error) {
-        console.error("[AuthInstance] Failed to create auth instance", error);
-        throw error;
-    }
+  return getAuth(
+    {
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
+    },
+    {
+      apiKey: env.CREEM_API_KEY,
+      webhookSecret: env.CREEM_WEBHOOK_SECRET,
+    },
+    env.BETTER_AUTH_SECRET,
+    {
+      sendResetPassword: (email, name, url) =>
+        backend.sendPasswordResetEmail(email, name, url),
+      sendVerificationEmail: (email, name, url) =>
+        backend.sendVerificationEmail(email, name, url),
+    },
+    baseURL
+  );
 };
+
+// ============ AUTH MIDDLEWARE (session check) ============
+export const authMiddleware = createMiddleware<{
+  Bindings: ServiceBindings;
+  Variables: { userId: string; auth: ReturnType<typeof getAuth> };
+}>(async (c, next) => {
+  const auth = await getAuthInstance(c.env, c.req.raw);
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+
+  if (!session?.user) {
+    return c.text("Unauthorized", 401);
+  }
+
+  c.set("userId", session.user.id);
+  c.set("auth", auth);
+  await next();
+});
+
+// ============ ACCESS MIDDLEWARE (payment check) ============
+export const accessMiddleware = createMiddleware<{
+  Bindings: ServiceBindings;
+  Variables: { userId: string; auth: ReturnType<typeof getAuth> };
+}>(async (c, next) => {
+  const auth = c.get("auth");
+  const userId = c.get("userId");
+
+  const status = await checkSubscriptionAccess(
+    {
+      apiKey: c.env.CREEM_API_KEY,
+      testMode: c.env.CREEM_TEST_MODE === "true",
+    },
+    {
+      database: auth.options.database,
+      userId,
+    }
+  );
+
+  if (!status.hasAccess) {
+    return c.json({ error: "payment_required" }, 402);
+  }
+
+  await next();
+});

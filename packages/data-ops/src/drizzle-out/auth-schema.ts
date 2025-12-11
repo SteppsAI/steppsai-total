@@ -1,4 +1,3 @@
-import { relations } from "drizzle-orm";
 import { pgTable, text, timestamp, boolean, index, jsonb } from "drizzle-orm/pg-core";
 
 // Better Auth - Users table

@@ -6,6 +6,7 @@ import {
   session,
   user,
   verification,
+  creem_subscription,
 } from "./drizzle-out/auth-schema";
 import { creem } from "@creem_io/better-auth";
 
@@ -39,7 +40,7 @@ export function getAuth(
     ],
     database: drizzleAdapter(getDb(), {
       provider: "pg",
-      schema: { user, session, account, verification },
+      schema: { user, session, account, verification, creem_subscription },
     }),
     secret,
     logger: {

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { router, publicProcedure } from "../trpc-instance";
 import {
     getUser,
+    getUserPublic,
     updateUser,
     updateNotificationPreferences,
 } from "@repo/data-ops/queries";
@@ -18,6 +19,12 @@ import { prependAssetsUrl } from "../helpers/transform-assets";
  * Uses BACKEND_SERVICE RPC for R2 operations (avatar upload/delete).
  */
 export const usersRouter = router({
+    // Public user fetch (for upgrade page)
+    getMePublic: publicProcedure.query(async ({ ctx }) => {
+        const user = await getUserPublic(ctx.userInfo.userId);
+        return user;
+    }),
+
     // Get current user profile
     getMe: publicProcedure.query(async ({ ctx }) => {
         const user = await getUser(ctx.userInfo.userId);

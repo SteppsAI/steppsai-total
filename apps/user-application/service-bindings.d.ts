@@ -6,5 +6,6 @@ interface ServiceBindings extends Env {
     GOOGLE_CLIENT_SECRET: string;
     CREEM_API_KEY: string;
     CREEM_WEBHOOK_SECRET?: string;
+    CREEM_TEST_MODE?: string;
     BETTER_AUTH_SECRET: string;
 }

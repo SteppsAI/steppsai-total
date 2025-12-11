@@ -3,6 +3,34 @@ import { user as users } from "@/drizzle-out/auth-schema";
 import { eq } from "drizzle-orm";
 import { User, UpdateUserInput, NotificationPreferences } from "@/zod/users";
 
+
+
+export async function getUserPublic(userId: string): Promise<Pick<User, "userId" | "name" | "email" | "avatarUrl" | "emailVerified"> | null> {
+	const db = getDb();
+
+	const result = await db
+		.select({
+			id: users.id,
+			name: users.name,
+			email: users.email,
+			emailVerified: users.emailVerified,
+			avatarUrl: users.avatarUrl,
+		})
+		.from(users)
+		.where(eq(users.id, userId))
+		.limit(1);
+
+	if (!result.length) return null;
+
+	return {
+		userId: result[0].id,
+		name: result[0].name,
+		email: result[0].email,
+		emailVerified: result[0].emailVerified,
+		avatarUrl: result[0].avatarUrl ?? null,
+	};
+}
+
 export async function getUser(userId: string): Promise<User | null> {
 	const db = getDb();
 

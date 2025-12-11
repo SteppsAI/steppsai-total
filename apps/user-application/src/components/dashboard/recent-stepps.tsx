@@ -130,13 +130,14 @@ export function RecentStepps({ isLoading, stepps = [], onDelete, onMove }: Recen
             <p className="text-sm text-muted-foreground mb-6 max-w-sm">
               Record a workflow or create a guide manually to get started.
             </p>
-            <button
+            <Button
               onClick={handleCreateStepp}
-              className="btn-glass-secondary group inline-flex h-9 items-center justify-center rounded-full px-6 text-sm font-medium text-[var(--color-800)] transition-all duration-200 hover:-translate-y-0.5 hover:text-primary active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              size="lg"
+              className="rounded-full px-8 font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 active:translate-y-0"
             >
-              <Plus className="mr-2 size-4 transition-transform duration-200 group-hover:scale-110" />
+              <Plus className="mr-2 size-5" />
               Create Stepp
-            </button>
+            </Button>
           </div>
         </div>
       )}

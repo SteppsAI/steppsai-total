@@ -74,27 +74,28 @@ export function FoldersSection({ isLoading, folders = [], onRename, onDelete }: 
       ) : (
         <div className="relative">
           {/* Background Skeletons - Faded */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4 select-none pointer-events-none filter blur-[1px]">
+          <div 
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4 select-none pointer-events-none filter blur-[1px]"
+            style={{ maskImage: "radial-gradient(circle, transparent 20%, black 100%)", WebkitMaskImage: "radial-gradient(circle, transparent 20%, black 100%)" }}
+          >
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="h-28 rounded-lg border border-border/50 bg-muted/50" />
             ))}
           </div>
 
           {/* Foreground Message & CTA */}
-          <div className="absolute inset-0 flex items-center justify-center p-4">
-            <div className="flex flex-col items-center justify-center text-center p-6 bg-background/60 backdrop-blur-[2px] rounded-xl border border-border/40 shadow-sm max-w-md">
-              <h3 className="text-lg font-semibold text-foreground mb-1">No folders yet</h3>
-              <p className="text-sm text-muted-foreground mb-6">
-                Create folders to keep your guides organized, accessible, and easy to find for your team.
-              </p>
-              <button
-                onClick={() => console.log("Create first folder")}
-                className="btn-glass-secondary group inline-flex h-9 items-center justify-center rounded-full px-6 text-sm font-medium text-[var(--color-800)] transition-all duration-200 hover:-translate-y-0.5 hover:text-primary active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              >
-                <Plus className="mr-2 size-4 transition-transform duration-200 group-hover:scale-110" />
-                Create Folder
-              </button>
-            </div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+            <h3 className="text-lg font-semibold text-foreground mb-1">No folders yet</h3>
+            <p className="text-sm text-muted-foreground mb-6 max-w-sm">
+              Create folders to keep your guides organized, accessible, and easy to find for your team.
+            </p>
+            <button
+              onClick={() => console.log("Create first folder")}
+              className="btn-glass-secondary group inline-flex h-9 items-center justify-center rounded-full px-6 text-sm font-medium text-[var(--color-800)] transition-all duration-200 hover:-translate-y-0.5 hover:text-primary active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <Plus className="mr-2 size-4 transition-transform duration-200 group-hover:scale-110" />
+              Create Folder
+            </button>
           </div>
         </div>
       )}

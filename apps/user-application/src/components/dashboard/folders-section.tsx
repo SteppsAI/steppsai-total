@@ -91,7 +91,7 @@ export function FoldersSection({ isLoading, folders = [], onRename, onDelete }: 
             </p>
             <button
               onClick={() => console.log("Create first folder")}
-              className="btn-glass-dashboard group inline-flex h-11 items-center justify-center rounded-full px-8 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 whitespace-nowrap"
+              className="btn-glass-dashboard group inline-flex h-12 w-[180px] items-center justify-center rounded-full text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 whitespace-nowrap"
             >
               <Plus className="mr-2 size-4 transition-transform duration-200 group-hover:scale-110" />
               Create Folder

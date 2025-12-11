@@ -132,7 +132,7 @@ export function RecentStepps({ isLoading, stepps = [], onDelete, onMove }: Recen
             </p>
             <button
               onClick={handleCreateStepp}
-              className="btn-glass-secondary group inline-flex h-11 sm:h-12 items-center justify-center rounded-full px-6 sm:px-8 text-sm font-medium text-indigo-800 transition-all duration-200 hover:-translate-y-0.5 hover:text-primary active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="btn-glass-dashboard group inline-flex h-11 items-center justify-center rounded-full px-8 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 whitespace-nowrap"
             >
               <Plus className="mr-2 size-4 transition-transform duration-200 group-hover:scale-110" />
               Create Stepp

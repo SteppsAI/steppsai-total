@@ -28,8 +28,8 @@ function RouteComponent() {
   if (isFullscreenRoute) {
     return (
       <SidebarProvider>
-        {/* Editor needs overflow-hidden for its own layout, Guide View needs overflow-auto (or default) to scroll */}
-        <div className={`h-screen w-full bg-background ${isEditorRoute ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+        {/* Editor needs overflow-hidden for layout, Guide View needs auto scrolling */}
+        <div className={`h-screen w-full bg-background ${isEditorRoute ? 'overflow-hidden' : 'overflow-y-auto custom-scrollbar'}`}>
           <Outlet />
           <Toaster />
         </div>
@@ -37,16 +37,22 @@ function RouteComponent() {
     );
   }
 
-  // Normal dashboard layout with sidebar
+  // Normal dashboard layout with inset sidebar
   return (
-    <SidebarProvider>
+    <SidebarProvider 
+      defaultOpen={true} 
+      className="h-svh overflow-hidden bg-sidebar"
+    >
       <AppSidebar />
-      <SidebarInset>
+      
+      {/* SidebarInset creates the white 'card' effect on top of the sidebar background */}
+      {/* It needs to flex-1 to fill the remaining width, and h-full to fill the provider height */}
+      <SidebarInset className="flex flex-col h-full bg-background shadow-sm border-l border-t border-border/50 overflow-hidden">
         <DashboardHeader />
 
-        {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-8">
-          <div className="max-w-[1600px] mx-auto h-full">
+        {/* Scrollable Content Area - Fixed Header, Scrollable Body */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar w-full">
+          <div className="max-w-7xl mx-auto min-h-full">
             <Outlet />
           </div>
           <Toaster />

@@ -1,4 +1,4 @@
-import { Folder, MoreVertical } from "lucide-react";
+import { Folder, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -21,7 +21,7 @@ interface FolderCardProps {
 export function FolderCard({ folder, onRename, onDelete, onClick }: FolderCardProps) {
     return (
         <div
-            className="group relative flex flex-col justify-between p-4 h-28 rounded-lg border border-border bg-card hover:border-primary/50 hover:shadow-sm transition-all cursor-pointer"
+            className="group relative flex flex-col justify-between p-4 h-28 rounded-lg border border-border bg-card hover:shadow-md transition-all cursor-pointer"
             onClick={onClick}
         >
             <div className="flex justify-between items-start">
@@ -32,10 +32,10 @@ export function FolderCard({ folder, onRename, onDelete, onClick }: FolderCardPr
                     <DropdownMenuTrigger asChild>
                         <Button
                             variant="ghost"
-                            className="size-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="size-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
                         >
                             <span className="sr-only">Open menu</span>
-                            <MoreVertical className="size-3.5 text-muted-foreground" />
+                            <MoreHorizontal className="size-4" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">

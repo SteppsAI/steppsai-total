@@ -11,6 +11,7 @@ import { DeleteFolderDialog } from "@/components/delete-folder-dialog";
 import { RenameFolderDialog } from "@/components/rename-folder-dialog";
 import { DeleteSteppDialog } from "@/components/delete-stepp-dialog";
 import { MoveSteppDialog } from "@/components/move-stepp-dialog";
+import { CreateFolderDialog } from "@/components/create-folder-dialog";
 import { trpc } from "@/router";
 import { useDeleteGuide } from "@/hooks/use-api";
 
@@ -48,6 +49,13 @@ function Dashboard() {
     },
   });
 
+  const createFolderMutation = useMutation({
+    ...trpc.folders.create.mutationOptions(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: trpc.folders.getAll.queryOptions().queryKey });
+    },
+  });
+
   const deleteGuideMutation = useDeleteGuide();
 
   const updateGuideMutation = useMutation({
@@ -63,6 +71,7 @@ function Dashboard() {
   const [renameFolderOpen, setRenameFolderOpen] = useState(false);
   const [deleteSteppOpen, setDeleteSteppOpen] = useState(false);
   const [moveSteppOpen, setMoveSteppOpen] = useState(false);
+  const [createFolderOpen, setCreateFolderOpen] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState<{ id: string; name: string } | null>(null);
   const [selectedSteppForAction, setSelectedSteppForAction] = useState<Guide | null>(null);
 
@@ -87,6 +96,20 @@ function Dashboard() {
   const handleRenameFolder = (folderId: string, currentName: string) => {
     setSelectedFolder({ id: folderId, name: currentName });
     setRenameFolderOpen(true);
+  };
+
+  const handleCreateFolder = () => {
+    setCreateFolderOpen(true);
+  };
+
+  const confirmCreateFolder = async (name: string) => {
+    try {
+      await createFolderMutation.mutateAsync({ name });
+      setCreateFolderOpen(false);
+      toast.success(`Folder "${name}" created`);
+    } catch (error) {
+      toast.error("Failed to create folder");
+    }
   };
 
   const confirmRenameFolder = async (newName: string) => {
@@ -156,6 +179,7 @@ function Dashboard() {
         isLoading={isFoldersLoading}
         onRename={handleRenameFolder}
         onDelete={handleDeleteFolder}
+        onCreateFolder={handleCreateFolder}
       />
 
       <TutorialsSection />
@@ -179,6 +203,13 @@ function Dashboard() {
           />
         </>
       )}
+
+      <CreateFolderDialog
+        open={createFolderOpen}
+        onOpenChange={setCreateFolderOpen}
+        onCreate={confirmCreateFolder}
+        isLoading={createFolderMutation.isPending}
+      />
 
       {selectedSteppForAction && (
         <>

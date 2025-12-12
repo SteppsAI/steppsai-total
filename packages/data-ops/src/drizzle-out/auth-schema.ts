@@ -81,3 +81,20 @@ export const verification = pgTable(
   },
   (table) => [index("verifications_identifier_idx").on(table.identifier)],
 );
+
+export const creem_subscription = pgTable("creem_subscription", {
+  id: text("id").primaryKey(),
+  productId: text("product_id").notNull(),
+  referenceId: text("reference_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  creemCustomerId: text("creem_customer_id"),
+  creemSubscriptionId: text("creem_subscription_id"),
+  creemOrderId: text("creem_order_id"),
+  status: text("status").default("pending"), // lifetime | monthly | yearly etc
+  periodStart: timestamp("period_start"),
+  periodEnd: timestamp("period_end"),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),
+});
+
+

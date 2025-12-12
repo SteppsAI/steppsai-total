@@ -1,19 +1,6 @@
 import { pgTable, uuid, timestamp, text, jsonb, integer, index } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 
-// Subscriptions - references user.id (text)
-export const subscriptions = pgTable("subscriptions", {
-	subscriptionId: uuid("subscription_id").defaultRandom().primaryKey().notNull(),
-	userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-	creemCustomerId: text("creem_customer_id"),
-	planType: text("plan_type"),
-	status: text("status"),
-	maxEditors: integer("max_editors"),
-	currentPeriodEnd: timestamp("current_period_end", { withTimezone: true, mode: 'string' }),
-}, (table) => [
-	index("subscriptions_userId_idx").on(table.userId),
-]);
-
 // Team members - references user.id (text)
 export const teamMembers = pgTable("team_members", {
 	teamMemberId: uuid("team_member_id").defaultRandom().primaryKey().notNull(),

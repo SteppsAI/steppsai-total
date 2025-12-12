@@ -65,3 +65,15 @@ export async function sendVerificationEmail(
     return { success: true };
 }
 
+export async function authHealthCheck(env: Env) {
+    // Simple healthcheck to decide if we should allow signups/auth flows
+    // Right now we just ensure email infra is configured; you can extend this later.
+    const hasResendKey = !!env.RESEND_API_KEY;
+
+    if (!hasResendKey) {
+        console.error('[RPC] authHealthCheck failed: missing RESEND_API_KEY');
+        return { ok: false, reason: 'missing_resend_api_key' as const };
+    }
+
+    return { ok: true as const };
+}

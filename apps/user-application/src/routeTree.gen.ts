@@ -14,11 +14,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PaymentSuccessRouteImport } from './routes/payment/success'
+import { Route as PaymentCancelRouteImport } from './routes/payment/cancel'
 import { Route as AuthVerifyEmailRouteImport } from './routes/auth/verify-email'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
+import { Route as AppUpgradeRouteImport } from './routes/app/upgrade'
 import { Route as AppAuthedRouteImport } from './routes/app/_authed'
 import { Route as AppAuthedIndexRouteImport } from './routes/app/_authed/index'
 import { Route as AppAuthedSteppsRouteImport } from './routes/app/_authed/stepps'
@@ -51,6 +54,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PaymentSuccessRoute = PaymentSuccessRouteImport.update({
+  id: '/payment/success',
+  path: '/payment/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentCancelRoute = PaymentCancelRouteImport.update({
+  id: '/payment/cancel',
+  path: '/payment/cancel',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthVerifyEmailRoute = AuthVerifyEmailRouteImport.update({
   id: '/auth/verify-email',
   path: '/auth/verify-email',
@@ -75,6 +88,11 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
   id: '/auth/forgot-password',
   path: '/auth/forgot-password',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppUpgradeRoute = AppUpgradeRouteImport.update({
+  id: '/upgrade',
+  path: '/upgrade',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppAuthedRoute = AppAuthedRouteImport.update({
   id: '/_authed',
@@ -126,11 +144,14 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/app': typeof AppAuthedRouteWithChildren
+  '/app/upgrade': typeof AppUpgradeRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/verify-email': typeof AuthVerifyEmailRoute
+  '/payment/cancel': typeof PaymentCancelRoute
+  '/payment/success': typeof PaymentSuccessRoute
   '/app/settings': typeof AppAuthedSettingsRoute
   '/app/stepps': typeof AppAuthedSteppsRouteWithChildren
   '/app/': typeof AppAuthedIndexRoute
@@ -145,11 +166,14 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/app': typeof AppAuthedIndexRoute
+  '/app/upgrade': typeof AppUpgradeRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/verify-email': typeof AuthVerifyEmailRoute
+  '/payment/cancel': typeof PaymentCancelRoute
+  '/payment/success': typeof PaymentSuccessRoute
   '/app/settings': typeof AppAuthedSettingsRoute
   '/app/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
   '/app/folder/$folderId': typeof AppAuthedFolderFolderIdRoute
@@ -164,11 +188,14 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/app': typeof AppRouteWithChildren
   '/app/_authed': typeof AppAuthedRouteWithChildren
+  '/app/upgrade': typeof AppUpgradeRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/verify-email': typeof AuthVerifyEmailRoute
+  '/payment/cancel': typeof PaymentCancelRoute
+  '/payment/success': typeof PaymentSuccessRoute
   '/app/_authed/settings': typeof AppAuthedSettingsRoute
   '/app/_authed/stepps': typeof AppAuthedSteppsRouteWithChildren
   '/app/_authed/': typeof AppAuthedIndexRoute
@@ -185,11 +212,14 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/terms'
     | '/app'
+    | '/app/upgrade'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
     | '/auth/verify-email'
+    | '/payment/cancel'
+    | '/payment/success'
     | '/app/settings'
     | '/app/stepps'
     | '/app/'
@@ -204,11 +234,14 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/terms'
     | '/app'
+    | '/app/upgrade'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
     | '/auth/verify-email'
+    | '/payment/cancel'
+    | '/payment/success'
     | '/app/settings'
     | '/app/editor/$guideId'
     | '/app/folder/$folderId'
@@ -222,11 +255,14 @@ export interface FileRouteTypes {
     | '/terms'
     | '/app'
     | '/app/_authed'
+    | '/app/upgrade'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
     | '/auth/verify-email'
+    | '/payment/cancel'
+    | '/payment/success'
     | '/app/_authed/settings'
     | '/app/_authed/stepps'
     | '/app/_authed/'
@@ -247,6 +283,8 @@ export interface RootRouteChildren {
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthSignupRoute: typeof AuthSignupRoute
   AuthVerifyEmailRoute: typeof AuthVerifyEmailRoute
+  PaymentCancelRoute: typeof PaymentCancelRoute
+  PaymentSuccessRoute: typeof PaymentSuccessRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -277,6 +315,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment/success': {
+      id: '/payment/success'
+      path: '/payment/success'
+      fullPath: '/payment/success'
+      preLoaderRoute: typeof PaymentSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment/cancel': {
+      id: '/payment/cancel'
+      path: '/payment/cancel'
+      fullPath: '/payment/cancel'
+      preLoaderRoute: typeof PaymentCancelRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/verify-email': {
@@ -313,6 +365,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/forgot-password'
       preLoaderRoute: typeof AuthForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/app/upgrade': {
+      id: '/app/upgrade'
+      path: '/upgrade'
+      fullPath: '/app/upgrade'
+      preLoaderRoute: typeof AppUpgradeRouteImport
+      parentRoute: typeof AppRoute
     }
     '/app/_authed': {
       id: '/app/_authed'
@@ -418,10 +477,12 @@ const AppAuthedRouteWithChildren = AppAuthedRoute._addFileChildren(
 
 interface AppRouteChildren {
   AppAuthedRoute: typeof AppAuthedRouteWithChildren
+  AppUpgradeRoute: typeof AppUpgradeRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAuthedRoute: AppAuthedRouteWithChildren,
+  AppUpgradeRoute: AppUpgradeRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -436,6 +497,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthSignupRoute: AuthSignupRoute,
   AuthVerifyEmailRoute: AuthVerifyEmailRoute,
+  PaymentCancelRoute: PaymentCancelRoute,
+  PaymentSuccessRoute: PaymentSuccessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

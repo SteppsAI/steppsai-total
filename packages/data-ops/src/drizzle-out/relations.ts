@@ -1,16 +1,23 @@
 import { relations } from "drizzle-orm/relations";
-import { subscriptions, teamMembers, folders, guides, exportsTable } from "./schema";
-import { user, session, account } from "./auth-schema";
+import { teamMembers, folders, guides, exportsTable } from "./schema";
+import { user, session, account, creem_subscription } from "./auth-schema";
 
 // Better Auth Relations
 export const userRelations = relations(user, ({ many }) => ({
 	sessions: many(session),
 	accounts: many(account),
-	subscriptions: many(subscriptions),
 	ownedTeams: many(teamMembers, { relationName: "teamMembers_ownerId" }),
 	memberOfTeams: many(teamMembers, { relationName: "teamMembers_memberId" }),
 	folders: many(folders),
 	guides: many(guides),
+	subscriptions: many(creem_subscription),
+}));
+
+export const creemSubscriptionRelations = relations(creem_subscription, ({ one }) => ({
+	user: one(user, {
+		fields: [creem_subscription.referenceId],
+		references: [user.id],
+	}),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -23,14 +30,6 @@ export const sessionRelations = relations(session, ({ one }) => ({
 export const accountRelations = relations(account, ({ one }) => ({
 	user: one(user, {
 		fields: [account.userId],
-		references: [user.id],
-	}),
-}));
-
-// App Relations
-export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
-	user: one(user, {
-		fields: [subscriptions.userId],
 		references: [user.id],
 	}),
 }));

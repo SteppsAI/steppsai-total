@@ -1,36 +1,40 @@
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
+import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 
 import { routeTree } from "./routeTree.gen";
 import type { AppRouter } from "@/worker/trpc/router";
 import Pending from "@/components/common/pending";
 import { ErrorComponent } from "@/components/common/error-boundary";
-import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
-import { authClient } from "@/components/auth/client";
+
+// Re-export for convenience
+export {
+  getSessionCached,
+  getAccessCached,
+  clearSessionCache,
+  clearAccessCache,
+  clearAllAuthCaches,
+} from "@/lib/auth-helpers";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes - data considered fresh
-      gcTime: 1000 * 60 * 30, // 30 minutes - keep in cache
-      retry: 2, // Retry failed requests twice
-      refetchOnWindowFocus: false, // Don't refetch on tab focus
-      refetchOnReconnect: true, // Refetch when internet reconnects
-      refetchOnMount: true, // Refetch when component mounts (including window reload)
+      staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 30,
+      retry: 2,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
+      refetchOnMount: true,
     },
     mutations: {
-      retry: 1, // Retry failed mutations once
+      retry: 1,
     },
   },
 });
 
 export const trpcClient = createTRPCClient<AppRouter>({
-  links: [
-    httpBatchLink({
-      url: "/trpc",
-    }),
-  ],
+  links: [httpBatchLink({ url: "/trpc" })],
 });
 
 export const trpc = createTRPCOptionsProxy<AppRouter>({
@@ -38,47 +42,18 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
   queryClient,
 });
 
-// Session cache
-let sessionCache: { data: any; timestamp: number } | null = null;
-const SESSION_CACHE_TTL = 1000 * 60 * 5; // 5 minutes
-
-export async function getSessionCached() {
-  const now = Date.now();
-
-  if (sessionCache && (now - sessionCache.timestamp) < SESSION_CACHE_TTL) {
-    return sessionCache.data;
-  }
-
-  const session = await authClient.getSession();
-  sessionCache = { data: session, timestamp: now };
-  return session;
-}
-
-export function clearSessionCache() {
-  sessionCache = null;
-}
-
 export function createRouter() {
-  const router = createTanStackRouter({
+  return createTanStackRouter({
     routeTree,
     scrollRestoration: true,
     defaultPreload: "intent",
-    context: {
-      trpc,
-      queryClient,
-    },
+    context: { trpc, queryClient },
     defaultPendingComponent: () => <Pending />,
     defaultErrorComponent: ({ error }) => <ErrorComponent error={error} />,
-    Wrap: function WrapComponent({ children }) {
-      return (
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
-      );
-    },
+    Wrap: ({ children }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    ),
   });
-
-  return router;
 }
 
 // Register the router instance for type safety

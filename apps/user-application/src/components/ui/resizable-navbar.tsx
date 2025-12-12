@@ -120,7 +120,7 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
     <motion.div
       onMouseLeave={() => setHovered(null)}
       className={cn(
-        "absolute inset-0 hidden flex-1 flex-row items-center justify-center space-x-2 text-base font-semibold text-zinc-700 transition duration-200 hover:text-zinc-900 lg:flex lg:space-x-2",
+        "absolute inset-0 hidden flex-1 flex-row items-center justify-center space-x-2 text-base font-semibold text-[var(--color-900)] transition duration-200 hover:text-[var(--color-700)] lg:flex lg:space-x-2",
         className,
       )}
     >
@@ -128,7 +128,7 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
         <a
           onMouseEnter={() => setHovered(idx)}
           onClick={onItemClick}
-          className="relative px-5 py-2.5 text-neutral-700 dark:text-neutral-200 hover:text-black dark:hover:text-white transition-colors"
+          className="relative px-5 py-2.5 text-[var(--color-900)] hover:text-[var(--color-700)] transition-colors"
           key={`link-${idx}`}
           href={item.link}
         >

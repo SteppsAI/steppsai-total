@@ -69,7 +69,7 @@ export function Navbar() {
             <a
               key={item.name}
               href={item.link}
-              className="block w-full rounded-md px-3 py-2 text-base font-medium text-[var(--color-900)] hover:bg-gray-50 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              className="block w-full rounded-md px-3 py-2 text-base font-medium text-[var(--color-900)] hover:bg-gray-50"
               onClick={() => setMobileMenuOpen(false)}
             >
               {item.name}
@@ -78,7 +78,7 @@ export function Navbar() {
           <div className="my-2 h-px bg-gray-200 w-full dark:bg-zinc-800" />
           <Link
             to="/auth/login"
-            className="block w-full rounded-md px-4 py-2.5 text-base font-semibold text-[var(--color-900)] hover:bg-gray-50 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            className="block w-full rounded-md px-4 py-2.5 text-base font-semibold text-[var(--color-900)] hover:bg-gray-50"
           >
             Log in
           </Link>

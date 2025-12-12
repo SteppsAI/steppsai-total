@@ -1,20 +1,23 @@
 import { Hono } from "hono";
-import { initDatabase } from "@repo/data-ops/database";
+import {
+    creemWebhookEventSchema,
+} from "@repo/data-ops/zod-schema/subscriptions";
 import {
     ensureOneTimeOrder,
     ensureSubscription,
     updateSubscriptionStatus,
+    getSubscriptionByUserId,
 } from "@repo/data-ops/queries/subscriptions";
+import { getUser } from "@repo/data-ops/queries";
+import { sendWelcomeEmail } from "../../helpers/mail";
+
+export const webhooksRouter = new Hono<{ Bindings: Env }>();
 
 // ============================================================================
-// Route
+// Creem Webhook Route
 // ============================================================================
 
-export const subscriptionsRoute = new Hono<{
-    Bindings: ServiceBindings;
-}>();
-
-subscriptionsRoute.post("/webhooks/creem", async (c) => {
+webhooksRouter.post("/creem", async (c) => {
     const payload = await c.req.text();
     const signature = c.req.header("creem-signature") ?? "";
 
@@ -34,71 +37,28 @@ subscriptionsRoute.post("/webhooks/creem", async (c) => {
         return c.text("Invalid signature", 401);
     }
 
-    let event: CreemEvent;
+    // Parse with Zod
+    let event;
     try {
-        event = JSON.parse(payload);
+        const parsed = JSON.parse(payload);
+        const result = creemWebhookEventSchema.safeParse(parsed);
+        if (!result.success) {
+            console.error("[Webhook] Zod validation failed:", result.error.message);
+            return c.text("Invalid payload", 400);
+        }
+        event = result.data;
     } catch {
         console.error("[Webhook] Invalid JSON");
         return c.text("Invalid JSON", 400);
     }
 
-    if (!event.eventType || !event.object) {
-        console.error("[Webhook] Missing eventType or object");
-        return c.text("Invalid payload", 400);
-    }
-
     console.log(`[Webhook] Received: ${event.eventType}`);
 
-    c.executionCtx.waitUntil(processEvent(event, c.env.DATABASE_URL));
+    // Process event (no waitUntil needed in data-service since we're not in SPA worker)
+    await processEvent(event, c.env);
 
     return c.json({ received: true });
 });
-
-// ============================================================================
-// Types (matching Creem API docs)
-// ============================================================================
-
-interface CreemEvent {
-    id: string;
-    eventType: string;
-    created_at: number;
-    object: CreemCheckoutObject | CreemSubscriptionObject;
-}
-
-interface CreemCheckoutObject {
-    id: string;
-    object?: "checkout";
-    order?: { id: string };
-    product?: CreemProduct;
-    customer?: CreemCustomer;
-    subscription?: CreemSubscriptionObject;
-    metadata?: Record<string, unknown>;
-    status?: string;
-}
-
-interface CreemSubscriptionObject {
-    id: string;
-    object?: "subscription";
-    product?: CreemProduct | string;
-    customer?: CreemCustomer | string;
-    status?: string;
-    current_period_start_date?: string;
-    current_period_end_date?: string;
-    cancel_at_period_end?: boolean;
-    canceled_at?: string | null;
-    metadata?: Record<string, unknown>;
-}
-
-interface CreemProduct {
-    id: string;
-    name?: string;
-}
-
-interface CreemCustomer {
-    id: string;
-    email?: string;
-    name?: string;
-}
 
 // ============================================================================
 // Signature Verification (HMAC-SHA256)
@@ -150,28 +110,30 @@ function timingSafeEqual(a: string, b: string): boolean {
 // Event Processing
 // ============================================================================
 
-async function processEvent(event: CreemEvent, databaseUrl: string): Promise<void> {
-    await initDatabase(databaseUrl);
+type CreemWebhookEvent = ReturnType<typeof creemWebhookEventSchema.parse>;
 
+async function processEvent(event: CreemWebhookEvent, env: Env): Promise<void> {
     try {
         switch (event.eventType) {
             case "checkout.completed":
-                await handleCheckoutCompleted(event.object as CreemCheckoutObject);
+                await handleCheckoutCompleted(event.object, env);
                 break;
 
             case "subscription.active":
             case "subscription.paid":
             case "subscription.trialing":
             case "subscription.update":
-                await handleSubscriptionUpdate(event.object as CreemSubscriptionObject);
+                await handleSubscriptionUpdate(event.object);
                 break;
 
             case "subscription.canceled":
-                await handleSubscriptionCanceled(event.object.id);
+                await updateSubscriptionStatus(event.object.id, "canceled");
+                console.log(`[Webhook] Subscription ${event.object.id} canceled`);
                 break;
 
             case "subscription.expired":
-                await handleSubscriptionExpired(event.object.id);
+                await updateSubscriptionStatus(event.object.id, "expired");
+                console.log(`[Webhook] Subscription ${event.object.id} expired`);
                 break;
 
             default:
@@ -186,13 +148,13 @@ async function processEvent(event: CreemEvent, databaseUrl: string): Promise<voi
 // Event Handlers
 // ============================================================================
 
-function extractId(value: CreemProduct | CreemCustomer | string | undefined): string {
+function extractId(value: { id: string } | string | undefined): string {
     if (!value) return "";
     if (typeof value === "string") return value;
     return value.id;
 }
 
-async function handleCheckoutCompleted(obj: CreemCheckoutObject): Promise<void> {
+async function handleCheckoutCompleted(obj: any, env: Env): Promise<void> {
     const referenceId = obj.metadata?.referenceId;
     const orderId = obj.order?.id;
 
@@ -207,6 +169,10 @@ async function handleCheckoutCompleted(obj: CreemCheckoutObject): Promise<void> 
 
     console.log(`[Webhook] Processing checkout for user ${referenceId}, order ${orderId}`);
 
+    // Check if this is a new user (no existing subscription)
+    const existingSubscription = await getSubscriptionByUserId(String(referenceId));
+    const isNewUser = !existingSubscription;
+
     await ensureOneTimeOrder({
         orderId,
         productId: extractId(obj.product),
@@ -215,9 +181,23 @@ async function handleCheckoutCompleted(obj: CreemCheckoutObject): Promise<void> 
     });
 
     console.log(`[Webhook] Checkout completed for user ${referenceId}`);
+
+    // Send welcome email only for new users
+    if (isNewUser) {
+        try {
+            const user = await getUser(String(referenceId));
+            if (user?.email) {
+                await sendWelcomeEmail(env, user.email, user.name ?? "");
+                console.log(`[Webhook] Welcome email sent to ${user.email}`);
+            }
+        } catch (emailError) {
+            console.error("[Webhook] Failed to send welcome email:", emailError);
+            // Don't throw - email failure shouldn't fail the webhook
+        }
+    }
 }
 
-async function handleSubscriptionUpdate(obj: CreemSubscriptionObject): Promise<void> {
+async function handleSubscriptionUpdate(obj: any): Promise<void> {
     const referenceId = obj.metadata?.referenceId;
 
     if (!referenceId) {
@@ -244,14 +224,4 @@ async function handleSubscriptionUpdate(obj: CreemSubscriptionObject): Promise<v
     });
 
     console.log(`[Webhook] Subscription updated for user ${referenceId}`);
-}
-
-async function handleSubscriptionCanceled(subscriptionId: string): Promise<void> {
-    await updateSubscriptionStatus(subscriptionId, "canceled");
-    console.log(`[Webhook] Subscription ${subscriptionId} canceled`);
-}
-
-async function handleSubscriptionExpired(subscriptionId: string): Promise<void> {
-    await updateSubscriptionStatus(subscriptionId, "expired");
-    console.log(`[Webhook] Subscription ${subscriptionId} expired`);
 }

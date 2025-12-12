@@ -8,7 +8,6 @@ import {
   accessMiddleware,
 } from "./helpers/auth-instance";
 import { authRateLimiter, trpcRateLimiter } from "./helpers/rate-limiter";
-import { subscriptionsRoute } from "./routes/subscriptions";
 
 export const App = new Hono<{
   Bindings: ServiceBindings & {
@@ -18,8 +17,6 @@ export const App = new Hono<{
   Variables: { userId: string };
 }>();
 
-// ========== PUBLIC: Webhook routes (no auth) ==========
-App.route("/api", subscriptionsRoute);
 
 // ========== PUBLIC: Auth routes ==========
 App.on(["POST", "GET"], "/api/auth/*", authRateLimiter, async (c) => {

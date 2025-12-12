@@ -1,6 +1,5 @@
 import { Plus } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
 import { CreateButton } from "@/components/ui/create-button";
 import { FolderCard } from "@/components/folder-card";
 import { Skeleton } from "@/components/ui/skeleton";

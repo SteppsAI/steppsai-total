@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 interface CreateButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
-  variant?: "primary" | "secondary" | "glass";
+  variant?: "primary" | "secondary" | "glass" | "minimal" | "outline";
   size?: "sm" | "md" | "lg";
   fullWidth?: boolean;
   className?: string;

@@ -1,7 +1,6 @@
 import { DashboardCard } from "./dashboard-card";
 import { Plus } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
 import { CreateButton } from "@/components/ui/create-button";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";

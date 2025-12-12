@@ -91,10 +91,14 @@ export const creem_subscription = pgTable("creem_subscription", {
   creemCustomerId: text("creem_customer_id"),
   creemSubscriptionId: text("creem_subscription_id"),
   creemOrderId: text("creem_order_id"),
-  status: text("status").default("pending"), // lifetime | monthly | yearly etc
+  status: text("status").default("pending"),
   periodStart: timestamp("period_start"),
   periodEnd: timestamp("period_end"),
   cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
 });
 
 

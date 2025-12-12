@@ -1,4 +1,5 @@
 import { authClient } from "@/components/auth/client";
+import { trpcClient } from "@/lib/trpc-client";
 
 // ============ SESSION CACHE ============
 let sessionCache: { data: any; timestamp: number } | null = null;
@@ -29,9 +30,10 @@ export async function getAccessCached(): Promise<boolean> {
   }
 
   try {
-    // Use BetterAuth's creem plugin endpoint
-    const result = await authClient.creem.hasAccessGranted();
-    const hasAccess = (result as any)?.data?.hasAccess ?? false;
+    // Use tRPC client to call our endpoint that checks creem_subscription table
+    const result = await trpcClient.users.getMePublic.query();
+    const hasAccess = result?.hasAccess ?? false;
+    console.log("[AuthHelpers] Access check result:", { hasAccess, result });
     accessCache = { hasAccess, timestamp: now };
     return hasAccess;
   } catch (error) {

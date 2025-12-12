@@ -1,48 +1,7 @@
 import { getAuth } from "@repo/data-ops/auth";
 import { createMiddleware } from "hono/factory";
-
-// Inline helper to check user access - supports both subscriptions and one-time orders
-async function checkUserAccessLocal(auth: ReturnType<typeof getAuth>, userId: string): Promise<{
-  hasAccess: boolean;
-  status: string | null;
-}> {
-  try {
-    // Query the creem_subscription table directly using the auth database adapter
-    const db = auth.options.database;
-    
-    // Use adapter's findOne method to query
-    const subscription = await db.findOne({
-      model: "creemSubscription",
-      where: [{ field: "referenceId", value: userId }],
-    });
-    
-    if (!subscription) {
-      console.log(`[checkUserAccessLocal] No subscription/order found for user ${userId}`);
-      return { hasAccess: false, status: null };
-    }
-    
-    console.log(`[checkUserAccessLocal] Found record with status: ${subscription.status}`);
-    
-    // Active statuses that grant access
-    const activeStatuses = ["active", "trialing", "paid"];
-    const hasAccess = activeStatuses.includes(subscription.status ?? "");
-    
-    // For one-time orders (no periodEnd), access is permanent
-    // For subscriptions, check if within billing period
-    if (subscription.periodEnd) {
-      const expiresAt = new Date(subscription.periodEnd);
-      if (expiresAt < new Date() && !activeStatuses.includes(subscription.status ?? "")) {
-        console.log(`[checkUserAccessLocal] Subscription expired at ${expiresAt}`);
-        return { hasAccess: false, status: subscription.status };
-      }
-    }
-    
-    return { hasAccess, status: subscription.status };
-  } catch (error) {
-    console.error(`[checkUserAccessLocal] Error checking access:`, error);
-    return { hasAccess: false, status: null };
-  }
-}
+import { checkUserAccess } from "@repo/data-ops/queries/subscriptions";
+import { initDatabase } from "@repo/data-ops/database";
 
 // ============ AUTH INSTANCE ============
 export const getAuthInstance = async (env: ServiceBindings, req: Request) => {
@@ -84,7 +43,7 @@ export const getAuthInstance = async (env: ServiceBindings, req: Request) => {
 // ============ AUTH MIDDLEWARE (session check) ============
 export const authMiddleware = createMiddleware<{
   Bindings: ServiceBindings;
-  Variables: { userId: string; auth: ReturnType<typeof getAuth> };
+  Variables: { userId: string; auth: ReturnType<typeof getAuth>; databaseUrl: string };
 }>(async (c, next) => {
   const auth = await getAuthInstance(c.env, c.req.raw);
   const session = await auth.api.getSession({ headers: c.req.raw.headers });
@@ -95,22 +54,24 @@ export const authMiddleware = createMiddleware<{
 
   c.set("userId", session.user.id);
   c.set("auth", auth);
+  c.set("databaseUrl", c.env.DATABASE_URL);
   await next();
 });
 
 // ============ ACCESS MIDDLEWARE (payment check) ============
 export const accessMiddleware = createMiddleware<{
   Bindings: ServiceBindings;
-  Variables: { userId: string; auth: ReturnType<typeof getAuth> };
+  Variables: { userId: string; auth: ReturnType<typeof getAuth>; databaseUrl: string };
 }>(async (c, next) => {
-  const auth = c.get("auth");
   const userId = c.get("userId");
+  const databaseUrl = c.get("databaseUrl");
 
-  // Use our custom access check that supports both subscriptions and one-time orders
-  const status = await checkUserAccessLocal(auth, userId);
+  // Initialize database and use the same checkUserAccess as tRPC routes
+  await initDatabase(databaseUrl);
+  const accessResult = await checkUserAccess(userId);
 
-  if (!status.hasAccess) {
-    console.log(`[AccessMiddleware] Access denied for user ${userId}, status: ${status.status}`);
+  if (!accessResult.hasAccess) {
+    console.log(`[AccessMiddleware] Access denied for user ${userId}, status: ${accessResult.status}`);
     return c.json({ error: "payment_required" }, 402);
   }
 

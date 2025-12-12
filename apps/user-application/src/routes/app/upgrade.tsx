@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Loader2, Check } from "lucide-react";
@@ -6,9 +6,17 @@ import { toast } from "sonner";
 import { trpc } from "@/router";
 import { authClient } from "@/components/auth/client";
 import { Button } from "@/components/ui/button";
+import { getAccessCached } from "@/lib/auth-helpers";
 
 export const Route = createFileRoute("/app/upgrade")({
   component: UpgradePage,
+  beforeLoad: async () => {
+    // If user already has access, redirect to main app
+    const hasAccess = await getAccessCached();
+    if (hasAccess) {
+      throw redirect({ to: "/app" });
+    }
+  },
   loader: async ({ context }) => {
     await context.queryClient.prefetchQuery(
       context.trpc.users.getMePublic.queryOptions()

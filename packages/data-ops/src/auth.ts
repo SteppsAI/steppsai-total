@@ -107,5 +107,13 @@ export function getAuth(
         persistSubscriptions: false, // We handle persistence ourselves
       }),
     ],
+    user: {
+      additionalFields: {
+        creemCustomerId: {
+          type: "string",
+          required: false,
+        },
+      },
+    },
   });
 }

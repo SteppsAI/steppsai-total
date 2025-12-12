@@ -1,7 +1,17 @@
 import { getDb } from "../db/database";
-import { creem_subscription } from "../drizzle-out/auth-schema";
+import { creem_subscription, user as users } from "../drizzle-out/auth-schema";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
+
+// Helper to sync creemCustomerId to users table (required for BetterAuth portal)
+async function syncCustomerIdToUser(userId: string, customerId: string) {
+	const db = getDb();
+	await db
+		.update(users)
+		.set({ creemCustomerId: customerId })
+		.where(eq(users.id, userId));
+	console.log(`[syncCustomerIdToUser] Updated users.creem_customer_id for user ${userId}`);
+}
 
 export async function getSubscriptionByUserId(userId: string) {
 	// Since referenceId is the userId in our setup
@@ -49,6 +59,9 @@ export async function ensureOneTimeOrder(data: {
 			})
 			.where(eq(creem_subscription.referenceId, data.referenceId));
 		console.log(`[DB] Updated order for user ${data.referenceId}`);
+
+		// Sync customerId to users table for BetterAuth portal
+		await syncCustomerIdToUser(data.referenceId, data.customerId);
 		return;
 	}
 
@@ -66,6 +79,9 @@ export async function ensureOneTimeOrder(data: {
 		cancelAtPeriodEnd: false,
 	});
 	console.log(`[DB] Persisted one-time order ${data.orderId} for user ${data.referenceId}`);
+
+	// Sync customerId to users table for BetterAuth portal
+	await syncCustomerIdToUser(data.referenceId, data.customerId);
 }
 
 export async function ensureSubscription(data: {
@@ -115,6 +131,9 @@ export async function ensureSubscription(data: {
 			.where(eq(creem_subscription.creemSubscriptionId, data.subscriptionId));
 		console.log(`[DB] Updated subscription ${data.subscriptionId}`);
 	}
+
+	// Always sync customerId to users table for BetterAuth portal
+	await syncCustomerIdToUser(data.referenceId, data.customerId);
 }
 
 export async function updateSubscriptionStatus(

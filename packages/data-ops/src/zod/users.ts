@@ -16,6 +16,7 @@ export const userSchema = z.object({
 	image: z.string().nullable().optional(),
 	avatarUrl: z.string().nullable().optional(),
 	notificationPreferences: notificationPreferencesSchema.nullable().optional(),
+	creemCustomerId: z.string().nullable().optional(),
 	createdAt: z.string().nullable().optional(),
 	updatedAt: z.string().nullable().optional(),
 });

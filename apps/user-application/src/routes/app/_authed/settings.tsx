@@ -114,17 +114,25 @@ function SettingsPage() {
         navigate({ to: "/auth/reset-password" });
     };
 
+    const feedbackMutation = useMutation({
+        ...trpc.notifications.sendFeedback.mutationOptions(),
+        onSuccess: () => {
+            toast.success("Feedback sent successfully! We appreciate your input.");
+            resetFeedback();
+        },
+        onError: (error) => {
+            toast.error("Failed to send feedback. Please try again.");
+            console.error(error);
+        },
+    });
+
     async function onFeedbackSubmit(data: FeedbackFormValues) {
         setFeedbackSubmitting(true);
-
-        // TODO: Implement API call
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-
-        console.log("Feedback submitted:", data);
-
-        toast.success("Feedback sent successfully! We appreciate your input.");
-        resetFeedback();
-        setFeedbackSubmitting(false);
+        try {
+            await feedbackMutation.mutateAsync(data);
+        } finally {
+            setFeedbackSubmitting(false);
+        }
     }
 
     const updateProfileMutation = useMutation({

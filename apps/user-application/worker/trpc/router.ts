@@ -6,12 +6,14 @@ import { usersRouter } from "@/worker/trpc/routers/users";
 import { guideExportsRouter } from "@/worker/trpc/routers/exports";
 import { editorRouter } from "@/worker/trpc/routers/editor";
 import { recordingRouter } from "@/worker/trpc/routers/recording";
+import { notificationsRouter } from "@/worker/trpc/routers/notifications";
 
 /**
  * tRPC Router
  * 
  * All operations go through tRPC:
  * - DB operations use data-ops directly
+ * - R2/DO/Workflow operations use BACKEND_SERVICE RPC
  * - R2/DO/Workflow operations use BACKEND_SERVICE RPC
  */
 export const appRouter = t.router({
@@ -22,6 +24,7 @@ export const appRouter = t.router({
   guideExports: guideExportsRouter,
   editor: editorRouter,
   recording: recordingRouter,
+  notifications: notificationsRouter,
 });
 
 export type AppRouter = typeof appRouter;

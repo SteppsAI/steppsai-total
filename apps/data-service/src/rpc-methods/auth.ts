@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+// import { passwordResetHTML, verificationHTML } from './email-html/templates';
 
 /**
  * Auth RPC Methods

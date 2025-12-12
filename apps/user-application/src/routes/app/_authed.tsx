@@ -49,12 +49,12 @@ function RouteComponent() {
 
   // Normal dashboard layout with inset sidebar
   return (
-    <SidebarProvider 
-      defaultOpen={true} 
+    <SidebarProvider
+      defaultOpen={true}
       className="h-svh overflow-hidden bg-sidebar"
     >
       <AppSidebar />
-      
+
       {/* SidebarInset creates the white 'card' effect on top of the sidebar background */}
       {/* It needs to flex-1 to fill the remaining width, and h-full to fill the provider height */}
       <SidebarInset className="flex flex-col h-full bg-background shadow-sm border-l border-t border-border/50 overflow-hidden">

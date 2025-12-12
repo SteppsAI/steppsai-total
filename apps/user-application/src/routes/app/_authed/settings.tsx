@@ -10,11 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, Mail, CreditCard, Loader2, Send } from "lucide-react";
@@ -27,11 +27,11 @@ import { authClient } from "@/components/auth/client";
 import { clearSessionCache } from "@/router";
 
 const feedbackSchema = z.object({
-  subject: z.string().min(5, "Subject must be at least 5 characters"),
-  type: z.enum(["bug", "feature", "general"], {
-    required_error: "Please select a feedback type",
-  }),
-  message: z.string().min(10, "Message must be at least 10 characters"),
+    subject: z.string().min(5, "Subject must be at least 5 characters"),
+    type: z.enum(["bug", "feature", "general"], {
+        required_error: "Please select a feedback type",
+    }),
+    message: z.string().min(10, "Message must be at least 10 characters"),
 });
 
 type FeedbackFormValues = z.infer<typeof feedbackSchema>;
@@ -164,7 +164,7 @@ function SettingsPage() {
         }
     };
 
-    
+
     const getInitials = (name: string | null | undefined) => {
         if (!name) return "U";
         return name

@@ -50,6 +50,7 @@ export async function getUser(userId: string): Promise<User | null> {
 		emailVerified: u.emailVerified,
 		avatarUrl: u.avatarUrl ?? null,
 		notificationPreferences: parseNotificationPreferences(u.notificationPreferences),
+		creemCustomerId: u.creemCustomerId ?? null,
 		createdAt:
 			typeof u.createdAt === "string"
 				? u.createdAt

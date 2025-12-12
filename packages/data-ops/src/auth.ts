@@ -19,8 +19,16 @@ type CreemConfig = {
 };
 
 type EmailSender = {
-  sendResetPassword?: (email: string, name: string, url: string) => Promise<void>;
-  sendVerificationEmail?: (email: string, name: string, url: string) => Promise<void>;
+  sendResetPassword?: (
+    email: string,
+    name: string,
+    url: string,
+  ) => Promise<void>;
+  sendVerificationEmail?: (
+    email: string,
+    name: string,
+    url: string,
+  ) => Promise<void>;
 };
 
 export function getAuth(
@@ -36,7 +44,7 @@ export function getAuth(
     trustedOrigins: [
       "https://stage.stepps.ai",
       "https://stepps.ai",
-      "http://localhost:3000"
+      "http://localhost:3000",
     ],
     database: drizzleAdapter(getDb(), {
       provider: "pg",
@@ -60,7 +68,11 @@ export function getAuth(
       enabled: true,
       sendResetPassword: emailSender?.sendResetPassword
         ? async ({ user, url }) => {
-          await emailSender.sendResetPassword!(user.email, user.name ?? "", url);
+          await emailSender.sendResetPassword!(
+            user.email,
+            user.name ?? "",
+            url,
+          );
         }
         : undefined,
     },
@@ -69,7 +81,11 @@ export function getAuth(
         sendOnSignUp: true,
         autoSignInAfterVerification: true,
         sendVerificationEmail: async ({ user, url }) => {
-          await emailSender.sendVerificationEmail!(user.email, user.name ?? "", url);
+          await emailSender.sendVerificationEmail!(
+            user.email,
+            user.name ?? "",
+            url,
+          );
         },
       }
       : undefined,
@@ -80,13 +96,15 @@ export function getAuth(
         clientSecret: google.clientSecret,
       },
     },
+    // Creem plugin - only used for checkout URL generation
+    // Webhook handling is done in worker/hono/routes/subscriptions.ts
     plugins: [
       creem({
         apiKey: creemConfig.apiKey ?? "",
         webhookSecret: creemConfig.webhookSecret ?? "",
         testMode: creemConfig.testMode ?? true,
         defaultSuccessUrl: creemConfig.defaultSuccessUrl ?? "/success",
-        persistSubscriptions: creemConfig.persistSubscriptions ?? true,
+        persistSubscriptions: false, // We handle persistence ourselves
       }),
     ],
   });

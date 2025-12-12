@@ -1,6 +1,48 @@
 import { getAuth } from "@repo/data-ops/auth";
 import { createMiddleware } from "hono/factory";
-import { checkSubscriptionAccess } from "@creem_io/better-auth/server";
+
+// Inline helper to check user access - supports both subscriptions and one-time orders
+async function checkUserAccessLocal(auth: ReturnType<typeof getAuth>, userId: string): Promise<{
+  hasAccess: boolean;
+  status: string | null;
+}> {
+  try {
+    // Query the creem_subscription table directly using the auth database adapter
+    const db = auth.options.database;
+    
+    // Use adapter's findOne method to query
+    const subscription = await db.findOne({
+      model: "creemSubscription",
+      where: [{ field: "referenceId", value: userId }],
+    });
+    
+    if (!subscription) {
+      console.log(`[checkUserAccessLocal] No subscription/order found for user ${userId}`);
+      return { hasAccess: false, status: null };
+    }
+    
+    console.log(`[checkUserAccessLocal] Found record with status: ${subscription.status}`);
+    
+    // Active statuses that grant access
+    const activeStatuses = ["active", "trialing", "paid"];
+    const hasAccess = activeStatuses.includes(subscription.status ?? "");
+    
+    // For one-time orders (no periodEnd), access is permanent
+    // For subscriptions, check if within billing period
+    if (subscription.periodEnd) {
+      const expiresAt = new Date(subscription.periodEnd);
+      if (expiresAt < new Date() && !activeStatuses.includes(subscription.status ?? "")) {
+        console.log(`[checkUserAccessLocal] Subscription expired at ${expiresAt}`);
+        return { hasAccess: false, status: subscription.status };
+      }
+    }
+    
+    return { hasAccess, status: subscription.status };
+  } catch (error) {
+    console.error(`[checkUserAccessLocal] Error checking access:`, error);
+    return { hasAccess: false, status: null };
+  }
+}
 
 // ============ AUTH INSTANCE ============
 export const getAuthInstance = async (env: ServiceBindings, req: Request) => {
@@ -12,6 +54,11 @@ export const getAuthInstance = async (env: ServiceBindings, req: Request) => {
   const health = await backend.authHealthCheck();
   if (!health?.ok) {
     throw new Error("Auth infrastructure unavailable");
+  }
+
+  // Check for critical variables
+  if (!env.CREEM_WEBHOOK_SECRET) {
+    console.warn("[AuthInstance] WARNING: CREEM_WEBHOOK_SECRET is not set! Webhooks will fail.");
   }
 
   return getAuth(
@@ -59,20 +106,14 @@ export const accessMiddleware = createMiddleware<{
   const auth = c.get("auth");
   const userId = c.get("userId");
 
-  const status = await checkSubscriptionAccess(
-    {
-      apiKey: c.env.CREEM_API_KEY,
-      testMode: c.env.CREEM_TEST_MODE === "true",
-    },
-    {
-      database: auth.options.database,
-      userId,
-    }
-  );
+  // Use our custom access check that supports both subscriptions and one-time orders
+  const status = await checkUserAccessLocal(auth, userId);
 
   if (!status.hasAccess) {
+    console.log(`[AccessMiddleware] Access denied for user ${userId}, status: ${status.status}`);
     return c.json({ error: "payment_required" }, 402);
   }
 
+  console.log(`[AccessMiddleware] Access granted for user ${userId}`);
   await next();
 });

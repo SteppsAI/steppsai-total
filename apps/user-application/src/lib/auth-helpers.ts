@@ -29,6 +29,7 @@ export async function getAccessCached(): Promise<boolean> {
   }
 
   try {
+    // Use BetterAuth's creem plugin endpoint
     const result = await authClient.creem.hasAccessGranted();
     const hasAccess = (result as any)?.data?.hasAccess ?? false;
     accessCache = { hasAccess, timestamp: now };

@@ -56,9 +56,13 @@ function UpgradePage() {
     setIsLoading(true);
     try {
       if (!productId) throw new Error("Detecting region...");
+
       const result = await authClient.creem.createCheckout({
         productId,
         successUrl: "/payment/success",
+        metadata: {
+          referenceId: user?.userId || "",
+        },
       });
 
       const url = (result as any)?.data?.url;
@@ -119,7 +123,7 @@ function UpgradePage() {
           className="w-full h-14 text-lg font-bold"
           size="lg"
           onClick={handleCheckout}
-          disabled={isLoading}
+          disabled={isLoading || !productId}
         >
           {isLoading && <Loader2 className="h-5 w-5 mr-2 animate-spin" />}
           Get Lifetime Access

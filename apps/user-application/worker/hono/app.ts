@@ -8,6 +8,7 @@ import {
   accessMiddleware,
 } from "./helpers/auth-instance";
 import { authRateLimiter, trpcRateLimiter } from "./helpers/rate-limiter";
+import { subscriptionsRoute } from "./routes/subscriptions";
 
 export const App = new Hono<{
   Bindings: ServiceBindings & {
@@ -17,14 +18,27 @@ export const App = new Hono<{
   Variables: { userId: string };
 }>();
 
+// ========== PUBLIC: Webhook routes (no auth) ==========
+App.route("/api", subscriptionsRoute);
+
 // ========== PUBLIC: Auth routes ==========
 App.on(["POST", "GET"], "/api/auth/*", authRateLimiter, async (c) => {
   try {
+    console.log(`[AuthRoute] Handling request: ${c.req.url}`);
     const auth = await getAuthInstance(c.env, c.req.raw);
     return auth.handler(c.req.raw);
   } catch (error) {
-    console.error("[AuthRoute] Error:", error);
-    return c.json({ error: "auth_unavailable" }, 503);
+    console.error("[AuthRoute] CRITICAL ERROR IN AUTH HANDLER:", error);
+    if (error instanceof Error) {
+      console.error("Stack:", error.stack);
+      console.error("Cause:", error.cause);
+    }
+    // Return detailed error in non-prod environments or generic in prod
+    return c.json({
+      error: "auth_unavailable",
+      details: error instanceof Error ? error.message : "Unknown error",
+      timestamp: new Date().toISOString()
+    }, 503);
   }
 });
 

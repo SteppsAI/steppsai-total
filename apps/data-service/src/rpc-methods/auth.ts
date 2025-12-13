@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-// import { passwordResetHTML, verificationHTML } from './email-html/templates';
+import { getPasswordResetHTML, getVerificationHTML } from './email-html/templates';
 
 /**
  * Auth RPC Methods
@@ -18,13 +18,7 @@ export async function sendPasswordResetEmail(
         from: 'SteppsAI <noreply@stepps.ai>',
         to: [email],
         subject: 'Reset your password - SteppsAI',
-        html: `
-            <h2>Reset your password</h2>
-            <p>Hi ${name || 'there'},</p>
-            <p>We received a request to reset your password. Click the button below to choose a new password:</p>
-            <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px;">Reset Password</a>
-            <p>If you didn't request this, you can safely ignore this email.</p>
-        `,
+        html: getPasswordResetHTML({ name, url }),
     });
 
     if (error) {
@@ -48,13 +42,7 @@ export async function sendVerificationEmail(
         from: 'SteppsAI <noreply@stepps.ai>',
         to: [email],
         subject: 'Verify your email - SteppsAI',
-        html: `
-            <h2>Verify your email</h2>
-            <p>Hi ${name || 'there'},</p>
-            <p>Thanks for signing up for SteppsAI! Please verify your email by clicking the button below:</p>
-            <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px;">Verify Email</a>
-            <p>If you didn't create an account, you can safely ignore this email.</p>
-        `,
+        html: getVerificationHTML({ name, url }),
     });
 
     if (error) {

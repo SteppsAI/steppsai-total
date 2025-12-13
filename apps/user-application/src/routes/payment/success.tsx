@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Check, Loader2, AlertCircle, RefreshCcw } from "lucide-react";
+import { Check, Loader2, AlertCircle, RefreshCcw, ArrowRight, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { clearAccessCache } from "@/lib/auth-helpers";
 import { trpc } from "@/router";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import confetti from "canvas-confetti";
 
 export const Route = createFileRoute("/payment/success")({
   component: PaymentSuccessPage,
@@ -42,10 +43,16 @@ function PaymentSuccessPage() {
 
     if (hasAccess) {
       setStatus("success");
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#4f46e5', '#0ea5e9', '#ec4899']
+      });
       // Small delay to show success message before redirect
       setTimeout(() => {
         navigate({ to: "/app" });
-      }, 2500);
+      }, 3500); // Increased slightly so user can enjoy the success state
       return;
     }
 
@@ -71,114 +78,147 @@ function PaymentSuccessPage() {
   useGSAP(() => {
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-    tl.fromTo(".success-modal",
-      { opacity: 0, scale: 0.96, y: 20 },
-      { opacity: 1, scale: 1, y: 0, duration: 0.5 }
+    tl.fromTo(".success-card",
+      { opacity: 0, y: 20, scale: 0.98 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.6 }
     );
+
+    tl.fromTo(".success-item",
+      { opacity: 0, y: 10 },
+      { opacity: 1, y: 0, stagger: 0.1, duration: 0.4 },
+      "-=0.2"
+    );
+
   }, { scope: containerRef });
 
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 overflow-y-auto overflow-x-hidden min-h-[100dvh] flex items-center justify-center p-4"
+      className="fixed inset-0 min-h-[100dvh] flex items-center justify-center p-4 bg-background overflow-hidden"
     >
-      {/* Background - Radial cloudy/foggy gradient */}
-      <div className="fixed inset-0 bg-foggy -z-10" />
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_center,_var(--color-100)_0%,_transparent_70%)] -z-10" />
+      {/* Premium Background */}
+      <div className="absolute inset-0 bg-foggy opacity-60 z-0" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.1),rgba(255,255,255,0))]" />
 
-      {/* Decorative blurs */}
-      <div className="fixed top-1/4 left-1/4 w-64 h-64 bg-primary/15 rounded-full blur-[100px] -z-10" />
-      <div className="fixed bottom-1/4 right-1/4 w-56 h-56 bg-secondary/10 rounded-full blur-[80px] -z-10" />
+      {/* Decorative Orbs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-indigo-500/10 rounded-full blur-[120px] mix-blend-multiply animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40rem] h-[40rem] bg-blue-500/10 rounded-full blur-[120px] mix-blend-multiply animate-pulse" style={{ animationDelay: "2s" }} />
 
-      {/* Modal - Max width slightly reduced for tighter feel */}
-      <div className="success-modal relative z-10 w-full max-w-lg my-auto">
-        <div className="bg-background/95 backdrop-blur-2xl border-2 border-primary/20 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden p-8 sm:p-10 text-center">
+      {/* Main Card */}
+      <div className="success-card relative z-10 w-full max-w-md">
+        <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/70 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:bg-slate-900/60 dark:border-white/10 p-8 sm:p-10">
 
-          <div className="flex justify-center mb-6">
-            <img src="/brand/logo-symbol.svg" alt="SteppsAI" className="w-12 h-12 object-contain" />
-          </div>
+          {/* Top decorative gradient line */}
+          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-50" />
 
           {status === "polling" && (
-            <div className="space-y-6">
-              <div className="relative mx-auto w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
-                <span className="absolute inset-0 rounded-full border-4 border-primary/20"></span>
-                <span className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin"></span>
-                <Loader2 className="w-8 h-8 sm:w-10 sm:h-10 text-primary animate-pulse" />
+            <div className="flex flex-col items-center text-center space-y-6">
+              <div className="success-item relative">
+                <div className="absolute inset-0 bg-indigo-100 rounded-full blur-xl opacity-50 animate-pulse dark:bg-indigo-900/40" />
+                <div className="relative w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center dark:bg-slate-800 dark:border-slate-700">
+                  <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-950)]">
-                  Confirming Payment
+              <div className="success-item space-y-2">
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-display">
+                  Finalizing Access
                 </h1>
-                <p className="text-sm sm:text-base text-[var(--color-600)] max-w-xs mx-auto">
-                  Please wait while we activate your lifetime license...
+                <p className="text-slate-500 dark:text-slate-400">
+                  Please wait a moment while we activate your lifetime license.
                 </p>
               </div>
 
-              {/* Progress Bar */}
-              <div className="w-full bg-[var(--color-100)] rounded-full h-1.5 max-w-xs mx-auto overflow-hidden">
-                <div
-                  className="bg-primary h-full rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${Math.min((attempts / MAX_POLL_ATTEMPTS) * 100, 100)}%` }}
-                />
+              {/* Enhanced Progress Bar */}
+              <div className="success-item w-full space-y-2">
+                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden dark:bg-slate-800">
+                  <div
+                    className="h-full bg-indigo-600 rounded-full transition-all duration-300 ease-out relative"
+                    style={{ width: `${Math.min((attempts / MAX_POLL_ATTEMPTS) * 100, 100)}%` }}
+                  >
+                    <div className="absolute inset-0 bg-white/30 animate-[shimmer_2s_infinite]" />
+                  </div>
+                </div>
+                <p className="text-xs text-slate-400 text-center font-medium">
+                  Constructing your dashboard...
+                </p>
               </div>
             </div>
           )}
 
           {status === "success" && (
-            <div className="space-y-6">
-              <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
-                <Check className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" />
+            <div className="flex flex-col items-center text-center space-y-8">
+              <div className="success-item relative">
+                <div className="absolute inset-0 bg-green-100 rounded-full blur-xl opacity-60 dark:bg-green-900/40" />
+                <div className="relative w-20 h-20 bg-gradient-to-b from-green-400 to-green-500 rounded-full shadow-lg shadow-green-500/20 flex items-center justify-center">
+                  <Check className="w-10 h-10 text-white" strokeWidth={3} />
+                </div>
+                <div className="absolute -top-1 -right-1 bg-white rounded-full p-1.5 shadow-sm dark:bg-slate-800">
+                  <Sparkles className="w-4 h-4 text-amber-400 fill-amber-400" />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-950)]">
-                  Payment Successful!
+              <div className="success-item space-y-2">
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-display">
+                  Welcome Aboard!
                 </h1>
-                <p className="text-sm sm:text-base text-[var(--color-600)]">
-                  Thank you for your purchase! You're all set. Redirecting to your dashboard...
+                <p className="text-slate-500 dark:text-slate-400 text-lg">
+                  Your lifetime license is active.
+                </p>
+              </div>
+
+              <div className="success-item bg-slate-50 rounded-2xl p-4 w-full dark:bg-slate-800/50">
+                <p className="text-sm text-slate-600 dark:text-slate-300 flex items-center justify-center gap-2">
+                  <Loader2 className="w-3 h-3 animate-spin text-slate-400" />
+                  Redirecting to dashboard...
                 </p>
               </div>
             </div>
           )}
 
           {status === "timeout" && (
-            <div className="space-y-6">
-              <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-amber-100 rounded-full flex items-center justify-center mb-6">
-                <AlertCircle className="w-8 h-8 sm:w-10 sm:h-10 text-amber-600" />
+            <div className="flex flex-col items-center text-center space-y-6">
+              <div className="success-item relative">
+                <div className="absolute inset-0 bg-amber-100 rounded-full blur-xl opacity-60 dark:bg-amber-900/40" />
+                <div className="relative w-16 h-16 bg-amber-50 rounded-2xl border border-amber-100 flex items-center justify-center dark:bg-amber-900/20 dark:border-amber-800">
+                  <AlertCircle className="w-8 h-8 text-amber-600 dark:text-amber-500" />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-950)]">
-                  Still Processing
+              <div className="success-item space-y-2">
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-display">
+                  Taking Longer Than Usual
                 </h1>
-                <p className="text-sm sm:text-base text-[var(--color-600)]">
-                  We received your payment, but activation is taking longer than usual.
+                <p className="text-slate-500 dark:text-slate-400">
+                  We received your payment, but activation is delayed. Don't worry, your funds are safe.
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 pt-4 justify-center">
+              <div className="success-item flex flex-col w-full gap-3 pt-2">
                 <button
                   onClick={handleRetry}
-                  className="btn-glass-primary px-6 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow-md shadow-indigo-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group"
                 >
-                  <RefreshCcw className="w-4 h-4" />
-                  Check Again
+                  <RefreshCcw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
+                  Try Checking Again
                 </button>
+
                 <button
                   onClick={() => navigate({ to: "/app" })}
-                  className="px-6 py-2.5 rounded-xl font-semibold text-sm text-[var(--color-600)] hover:bg-[var(--color-50)] transition-colors"
+                  className="w-full py-3 px-4 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl font-medium transition-colors dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 flex items-center justify-center gap-2"
                 >
-                  Continue to App
+                  Continue to Dashboard
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
-
-              <p className="text-xs text-[var(--color-500)] pt-2">
-                If access isn't granted shortly, please contact support.
-              </p>
             </div>
           )}
         </div>
+
+        {/* Footer info */}
+        <p className="mt-8 text-center text-xs text-slate-400 dark:text-slate-500 font-medium">
+          Order ID: {new URLSearchParams(window.location.search).get("session_id")?.slice(-8) || "Processing..."}
+        </p>
       </div>
     </div>
   );

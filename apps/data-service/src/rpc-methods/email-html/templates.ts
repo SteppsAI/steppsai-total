@@ -168,7 +168,7 @@ const getBaseLayout = (content: string) => {
             ${content}
         </div>
         <div style="${styles.footer}">
-            <p style="${styles.footerText}">© ${new Date().getFullYear()} SteppsAI</p>
+            <p style="${styles.footerText}">© ${new Date().getFullYear()} stepps.ai</p>
         </div>
     </div>
 </body>

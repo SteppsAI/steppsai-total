@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import { stepSchema, stepFromExtensionSchema, type Step } from './steps';
 
+// Guide status enum
+export const guideStatusEnum = z.enum(['draft', 'recording', 'processing', 'published']);
+export type GuideStatus = z.infer<typeof guideStatusEnum>;
+
 // Guide schema
 export const guidesSchema = z.object({
 	guideId: z.string().uuid(),

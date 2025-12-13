@@ -14,6 +14,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SharedGuideIdRouteImport } from './routes/shared/$guideId'
 import { Route as PaymentSuccessRouteImport } from './routes/payment/success'
 import { Route as PaymentCancelRouteImport } from './routes/payment/cancel'
 import { Route as AuthVerifyEmailRouteImport } from './routes/auth/verify-email'
@@ -52,6 +53,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SharedGuideIdRoute = SharedGuideIdRouteImport.update({
+  id: '/shared/$guideId',
+  path: '/shared/$guideId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PaymentSuccessRoute = PaymentSuccessRouteImport.update({
@@ -152,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/payment/cancel': typeof PaymentCancelRoute
   '/payment/success': typeof PaymentSuccessRoute
+  '/shared/$guideId': typeof SharedGuideIdRoute
   '/app/settings': typeof AppAuthedSettingsRoute
   '/app/stepps': typeof AppAuthedSteppsRouteWithChildren
   '/app/': typeof AppAuthedIndexRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/payment/cancel': typeof PaymentCancelRoute
   '/payment/success': typeof PaymentSuccessRoute
+  '/shared/$guideId': typeof SharedGuideIdRoute
   '/app/settings': typeof AppAuthedSettingsRoute
   '/app/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
   '/app/folder/$folderId': typeof AppAuthedFolderFolderIdRoute
@@ -196,6 +204,7 @@ export interface FileRoutesById {
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/payment/cancel': typeof PaymentCancelRoute
   '/payment/success': typeof PaymentSuccessRoute
+  '/shared/$guideId': typeof SharedGuideIdRoute
   '/app/_authed/settings': typeof AppAuthedSettingsRoute
   '/app/_authed/stepps': typeof AppAuthedSteppsRouteWithChildren
   '/app/_authed/': typeof AppAuthedIndexRoute
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
     | '/auth/verify-email'
     | '/payment/cancel'
     | '/payment/success'
+    | '/shared/$guideId'
     | '/app/settings'
     | '/app/stepps'
     | '/app/'
@@ -242,6 +252,7 @@ export interface FileRouteTypes {
     | '/auth/verify-email'
     | '/payment/cancel'
     | '/payment/success'
+    | '/shared/$guideId'
     | '/app/settings'
     | '/app/editor/$guideId'
     | '/app/folder/$folderId'
@@ -263,6 +274,7 @@ export interface FileRouteTypes {
     | '/auth/verify-email'
     | '/payment/cancel'
     | '/payment/success'
+    | '/shared/$guideId'
     | '/app/_authed/settings'
     | '/app/_authed/stepps'
     | '/app/_authed/'
@@ -285,6 +297,7 @@ export interface RootRouteChildren {
   AuthVerifyEmailRoute: typeof AuthVerifyEmailRoute
   PaymentCancelRoute: typeof PaymentCancelRoute
   PaymentSuccessRoute: typeof PaymentSuccessRoute
+  SharedGuideIdRoute: typeof SharedGuideIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -315,6 +328,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shared/$guideId': {
+      id: '/shared/$guideId'
+      path: '/shared/$guideId'
+      fullPath: '/shared/$guideId'
+      preLoaderRoute: typeof SharedGuideIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/payment/success': {
@@ -499,6 +519,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthVerifyEmailRoute: AuthVerifyEmailRoute,
   PaymentCancelRoute: PaymentCancelRoute,
   PaymentSuccessRoute: PaymentSuccessRoute,
+  SharedGuideIdRoute: SharedGuideIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

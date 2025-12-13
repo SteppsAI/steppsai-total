@@ -38,3 +38,14 @@ export const trpcRateLimiter: MiddlewareHandler<{
     },
     handler: (c) => c.text("Too many requests", 429),
 });
+
+// Public rate limiter - IP-based only (for public guide viewing)
+export const publicRateLimiter: MiddlewareHandler<{
+    Bindings: Bindings;
+}> = cloudflareRateLimiter<{
+    Bindings: Bindings;
+}>({
+    rateLimitBinding: (c) => c.env.TRPC_RATE_LIMITER,
+    keyGenerator: (c) => c.req.header("cf-connecting-ip") ?? "",
+    handler: (c) => c.text("Too many requests", 429),
+});

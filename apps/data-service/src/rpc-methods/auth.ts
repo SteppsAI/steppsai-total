@@ -15,7 +15,7 @@ export async function sendPasswordResetEmail(
     const resend = new Resend(env.RESEND_API_KEY);
 
     const { error } = await resend.emails.send({
-        from: 'SteppsAI <info@stepps.ai>',
+        from: 'SteppsAI <support@stepps.ai>',
         to: [email],
         subject: 'Reset your password - SteppsAI',
         html: getPasswordResetHTML({ name, url }),
@@ -39,7 +39,7 @@ export async function sendVerificationEmail(
     const resend = new Resend(env.RESEND_API_KEY);
 
     const { error } = await resend.emails.send({
-        from: 'SteppsAI <info@stepps.ai>',
+        from: 'SteppsAI <support@stepps.ai>',
         to: [email],
         subject: 'Verify your email - SteppsAI',
         html: getVerificationHTML({ name, url }),

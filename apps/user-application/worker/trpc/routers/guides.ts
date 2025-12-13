@@ -73,6 +73,22 @@ export const guidesRouter = router({
             await backend.deleteStepWithImage(input.guideId, input.stepId, input.imageKey);
             return { success: true };
         }),
+
+    // Publish guide - sets status to 'published'
+    publish: publicProcedure
+        .input(z.object({ id: z.string() }))
+        .mutation(async ({ input }) => {
+            await updateGuide(input.id, { status: 'published' });
+            return { success: true };
+        }),
+
+    // Unpublish guide - sets status to 'draft'
+    unpublish: publicProcedure
+        .input(z.object({ id: z.string() }))
+        .mutation(async ({ input }) => {
+            await updateGuide(input.id, { status: 'draft' });
+            return { success: true };
+        }),
 });
 
 

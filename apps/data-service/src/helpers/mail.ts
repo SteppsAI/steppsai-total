@@ -12,7 +12,7 @@ export async function sendWelcomeEmail(
     const resend = new Resend(env.RESEND_API_KEY);
 
     const { error } = await resend.emails.send({
-        from: 'SteppsAI <info@stepps.ai>',
+        from: 'SteppsAI <support@stepps.ai>',
         to: [email],
         subject: 'Welcome to SteppsAI! 🎉',
         html: getWelcomeEmailHTML({ name }),
@@ -43,7 +43,7 @@ export async function sendFeedbackEmail(
     const resend = new Resend(env.RESEND_API_KEY);
 
     const { error } = await resend.emails.send({
-        from: 'SteppsAI App <info@stepps.ai>',
+        from: 'SteppsAI App <support@stepps.ai>',
         to: ['support@stepps.ai'],
         replyTo: data.email,
         subject: `[${data.type.toUpperCase()}] ${data.subject}`,

@@ -143,6 +143,28 @@ export async function updateGuideExportStatus(
 }
 
 /**
+ * Get a published guide by ID (for public access)
+ * Only returns guides with status = 'published'
+ */
+export async function getPublishedGuide(guideId: string): Promise<Guide | null> {
+	const db = getDb();
+
+	const result = await db
+		.select()
+		.from(guides)
+		.where(and(eq(guides.guideId, guideId), eq(guides.status, 'published')))
+		.limit(1);
+
+	if (!result.length) return null;
+
+	const guide = result[0];
+	return {
+		...guide,
+		steps: parseSteps(guide.steps),
+	} as Guide;
+}
+
+/**
  * Delete a step from a guide
  * Removes the step from the guide's steps array and reindexes remaining steps
  */

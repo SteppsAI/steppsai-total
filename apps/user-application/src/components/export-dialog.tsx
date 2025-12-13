@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Download, Loader2, FileText } from "lucide-react";
+import { Download, Loader2, FileText, Link2, Copy, Check } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -33,7 +33,7 @@ interface ExportDialogProps {
     guideId: string;
 }
 
-type ExportFormat = "pdf" | "html" | "word";
+type ExportFormat = "pdf" | "html" | "word" | "url";
 
 export const PdfIcon = (props: React.ComponentProps<"img">) => (
     <img src="/icons/pdf-icon.svg" alt="PDF" {...props} />
@@ -45,6 +45,10 @@ export const HtmlIcon = (props: React.ComponentProps<"img">) => (
 
 export const WordIcon = (props: React.ComponentProps<"img">) => (
     <img src="/icons/word-icon.svg" alt="Word" {...props} />
+);
+
+export const UrlIcon = ({ className }: { className?: string }) => (
+    <Link2 className={className} />
 );
 
 const FormatOption = ({
@@ -98,8 +102,15 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
     const isMobile = useIsMobile();
     const [fileName, setFileName] = useState(guideTitle);
     const [format, setFormat] = useState<ExportFormat>("pdf");
+    const [showUrlCopy, setShowUrlCopy] = useState(false);
+    const [copied, setCopied] = useState(false);
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+
+    // Generate the public share URL
+    const shareUrl = typeof window !== 'undefined'
+        ? `${window.location.origin}/shared/${guideId}`
+        : `/shared/${guideId}`;
 
     // Mutation to trigger export via tRPC (internally calls BACKEND_SERVICE RPC)
     const triggerExportMutation = useMutation({
@@ -122,9 +133,40 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
         }
     });
 
+    // Mutation to publish guide
+    const publishMutation = useMutation({
+        ...trpc.guides.publish.mutationOptions(),
+        onSuccess: () => {
+            setShowUrlCopy(true);
+            queryClient.invalidateQueries({
+                queryKey: trpc.guides.getById.queryOptions({ id: guideId }).queryKey
+            });
+            toast.success("Guide published! Copy the URL to share.");
+        },
+        onError: () => {
+            toast.error("Failed to publish guide");
+        }
+    });
+
+    const handleCopyUrl = async () => {
+        try {
+            await navigator.clipboard.writeText(shareUrl);
+            setCopied(true);
+            toast.success("URL copied to clipboard!");
+            setTimeout(() => setCopied(false), 2000);
+        } catch {
+            toast.error("Failed to copy URL");
+        }
+    };
+
     const handleExport = async () => {
         if (format === 'word') {
             toast.info("Word export is coming soon!");
+            return;
+        }
+
+        if (format === 'url') {
+            publishMutation.mutate({ id: guideId });
             return;
         }
 
@@ -134,44 +176,83 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
         });
     };
 
-    const isExporting = triggerExportMutation.isPending;
+    const isExporting = triggerExportMutation.isPending || publishMutation.isPending;
 
     const renderExportForm = () => (
         <div className="space-y-6">
-            {/* File Name */}
-            <div className="space-y-2">
-                <Label htmlFor="filename" className="text-sm font-medium">
-                    File Name
-                </Label>
-                <div className="relative">
-                    <FileText className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
-                    <Input
-                        id="filename"
-                        value={fileName}
-                        onChange={(e) => setFileName(e.target.value)}
-                        placeholder="Enter file name"
-                        className="pl-9"
-                    />
+            {/* File Name - only show for non-URL formats */}
+            {format !== 'url' && (
+                <div className="space-y-2">
+                    <Label htmlFor="filename" className="text-sm font-medium">
+                        File Name
+                    </Label>
+                    <div className="relative">
+                        <FileText className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+                        <Input
+                            id="filename"
+                            value={fileName}
+                            onChange={(e) => setFileName(e.target.value)}
+                            placeholder="Enter file name"
+                            className="pl-9"
+                        />
+                    </div>
                 </div>
-            </div>
+            )}
+
+            {/* URL Copy Section - show after publish */}
+            {format === 'url' && showUrlCopy && (
+                <div className="space-y-2">
+                    <Label className="text-sm font-medium">Share URL</Label>
+                    <div className="flex gap-2">
+                        <Input
+                            value={shareUrl}
+                            readOnly
+                            className="flex-1 text-sm"
+                        />
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={handleCopyUrl}
+                            className="shrink-0"
+                        >
+                            {copied ? (
+                                <Check className="size-4 text-green-500" />
+                            ) : (
+                                <Copy className="size-4" />
+                            )}
+                        </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                        Anyone with this link can view your guide.
+                    </p>
+                </div>
+            )}
 
             {/* Formats */}
             <div className="space-y-3">
                 <Label className="text-sm font-medium">Export Format</Label>
                 <div className="space-y-2">
                     <FormatOption
+                        id="url"
+                        label="Shareable URL"
+                        icon={UrlIcon}
+                        selectedFormat={format}
+                        onSelect={(f) => { setFormat(f); setShowUrlCopy(false); }}
+                    />
+                    <FormatOption
                         id="pdf"
                         label="PDF Document"
                         icon={PdfIcon}
                         selectedFormat={format}
-                        onSelect={setFormat}
+                        onSelect={(f) => { setFormat(f); setShowUrlCopy(false); }}
                     />
                     <FormatOption
                         id="html"
                         label="HTML Document"
                         icon={HtmlIcon}
                         selectedFormat={format}
-                        onSelect={setFormat}
+                        onSelect={(f) => { setFormat(f); setShowUrlCopy(false); }}
                     />
                     <FormatOption
                         id="word"
@@ -180,7 +261,7 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
                         disabled
                         badge="Soon"
                         selectedFormat={format}
-                        onSelect={setFormat}
+                        onSelect={(f) => { setFormat(f); setShowUrlCopy(false); }}
                     />
                 </div>
             </div>
@@ -201,12 +282,24 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
                         {renderExportForm()}
                     </div>
                     <DrawerFooter className="pt-2">
-                        <Button onClick={handleExport} disabled={isExporting} className="gap-2">
+                        <Button onClick={handleExport} disabled={isExporting || (format === 'url' && showUrlCopy)} className="gap-2">
                             {isExporting ? (
                                 <>
                                     <Loader2 className="size-4 animate-spin" />
-                                    Starting export...
+                                    {format === 'url' ? 'Publishing...' : 'Starting export...'}
                                 </>
+                            ) : format === 'url' ? (
+                                showUrlCopy ? (
+                                    <>
+                                        <Check className="size-4 text-green-500" />
+                                        Published
+                                    </>
+                                ) : (
+                                    <>
+                                        <Link2 className="size-4" />
+                                        Create URL
+                                    </>
+                                )
                             ) : (
                                 <>
                                     <Download className="size-4" />
@@ -233,12 +326,24 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
                     {renderExportForm()}
                 </div>
                 <DialogFooter>
-                    <Button onClick={handleExport} disabled={isExporting} className="gap-2">
+                    <Button onClick={handleExport} disabled={isExporting || (format === 'url' && showUrlCopy)} className="gap-2">
                         {isExporting ? (
                             <>
                                 <Loader2 className="size-4 animate-spin" />
-                                Starting export...
+                                {format === 'url' ? 'Publishing...' : 'Starting export...'}
                             </>
+                        ) : format === 'url' ? (
+                            showUrlCopy ? (
+                                <>
+                                    <Check className="size-4 text-green-500" />
+                                    Published
+                                </>
+                            ) : (
+                                <>
+                                    <Link2 className="size-4" />
+                                    Create URL
+                                </>
+                            )
                         ) : (
                             <>
                                 <Download className="size-4" />

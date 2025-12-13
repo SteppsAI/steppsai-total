@@ -7,7 +7,7 @@ import {
   authMiddleware,
   accessMiddleware,
 } from "./helpers/auth-instance";
-import { authRateLimiter, trpcRateLimiter } from "./helpers/rate-limiter";
+import { authRateLimiter, trpcRateLimiter, publicRateLimiter } from "./helpers/rate-limiter";
 
 export const App = new Hono<{
   Bindings: ServiceBindings & {
@@ -54,6 +54,26 @@ App.all(
           env: c.env,
           workerCtx: c.executionCtx,
           userId: c.get("userId"),
+        }),
+    });
+  }
+);
+
+// ========== PUBLIC: Published guides (no auth, IP rate limited) ==========
+App.all(
+  "/trpc/publicGuides.*",
+  publicRateLimiter,
+  (c) => {
+    return fetchRequestHandler({
+      endpoint: "/trpc",
+      req: c.req.raw,
+      router: appRouter,
+      createContext: () =>
+        createContext({
+          req: c.req.raw,
+          env: c.env,
+          workerCtx: c.executionCtx,
+          userId: "anonymous",
         }),
     });
   }

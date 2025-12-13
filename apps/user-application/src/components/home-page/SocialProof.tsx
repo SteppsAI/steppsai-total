@@ -57,7 +57,7 @@ export function SocialProof() {
     return (
         <section id="save-time" className="px-4 py-16 md:py-32 mt-0 bg-gradient-to-b from-transparent via-[var(--color-50)]/30 to-[var(--color-100)] transition-colors duration-500 relative" ref={containerRef}>
             <div className="mx-auto grid max-w-5xl border-2 border-primary/20 md:grid-cols-2 overflow-hidden shadow-xl rounded-3xl bg-background">
-                <div className="sp-item-left flex flex-col">
+                <div className="sp-item-left flex flex-col md:border-r md:border-b border-sidebar-border">
                     <div className="p-6 sm:p-12 sp-item-left-content">
                         <div className="flex items-center gap-3 mb-6">
                             <img src="/icons/3d/record.png" alt="Record" className="w-10 h-10 object-contain drop-shadow-md" />
@@ -81,8 +81,8 @@ export function SocialProof() {
                         />
                     </div>
                 </div>
-                <div className="sp-item-right overflow-hidden border-t bg-zinc-50 p-6 sm:p-12 md:border-0 md:border-l border-primary/20 dark:bg-transparent">
-                    <div className="relative z-10 sp-item-right-content">
+                <div className="sp-item-right flex flex-col md:border-l md:border-b border-sidebar-border">
+                    <div className="p-6 sm:p-12 sp-item-left-content">
                         <div className="flex items-center gap-3 mb-6">
                             <img src="/icons/3d/folder.png" alt="Folder" className="w-10 h-10 object-contain drop-shadow-md" />
                             <span className="text-[var(--color-600)] font-bold uppercase tracking-wider text-sm">
@@ -94,34 +94,15 @@ export function SocialProof() {
                             Organize guides into folders and share with your team. Export to PDF, HTML, or share via link.
                         </p>
                     </div>
-                    <div aria-hidden className="flex flex-col gap-6 mt-8 sp-item-right-content">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-sm font-bold text-primary">
-                                S
-                            </div>
-                            <div className="flex-1">
-                                <div className="h-3 w-1/3 bg-muted rounded mb-1" />
-                                <div className="h-2 w-1/2 bg-muted/50 rounded" />
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-sm font-bold text-primary">
-                                M
-                            </div>
-                            <div className="flex-1">
-                                <div className="h-3 w-1/4 bg-muted rounded mb-1" />
-                                <div className="h-2 w-2/3 bg-muted/50 rounded" />
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-sm font-bold text-primary">
-                                J
-                            </div>
-                            <div className="flex-1">
-                                <div className="h-3 w-1/3 bg-muted rounded mb-1" />
-                                <div className="h-2 w-1/2 bg-muted/50 rounded" />
-                            </div>
-                        </div>
+                    
+                    <div aria-hidden className="relative mt-auto sp-item-right-content">
+                        <img
+                            src="/website/share-everywhere.webp"
+                            alt="Share guides with your team and export to PDF, HTML, or share via link"
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-auto object-cover object-top"
+                        />
                     </div>
                 </div>
                 <div className="sp-item-bottom col-span-full border-y border-foreground/5 p-12">

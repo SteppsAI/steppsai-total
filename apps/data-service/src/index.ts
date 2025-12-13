@@ -66,6 +66,11 @@ export default class DataService extends WorkerEntrypoint<Env> {
 		return rpc.authHealthCheck(this.env);
 	}
 
+	// ===== NOTIFICATIONS =====
+	sendFeedback(data: { email: string; name: string; subject: string; type: string; message: string }) {
+		return rpc.sendFeedback(this.env, data);
+	}
+
 	// ===== QUEUE =====
 	async queue(batch: MessageBatch<unknown>) {
 		initDatabase(this.env.DATABASE_URL);

@@ -5,4 +5,6 @@ export * from './exports';
 export * from './editor';
 export * from './images';
 export * from './auth';
+export * from './notifications';
+
 

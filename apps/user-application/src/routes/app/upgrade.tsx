@@ -48,13 +48,32 @@ function UpgradePage() {
         const res = await fetch("https://ipapi.co/json/");
         const data: any = await res.json();
         const isEU = data?.continent_code === "EU";
-        setProductId(
-          isEU
-            ? import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_EU
-            : import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US
-        );
+
+        // Select Environment Variables based on Mode
+        // Fallback to legacy VITE_CREEM_LIFETIME_PRODUCT_* if DEVELOPMENT var is missing
+        const isProd = import.meta.env.MODE === "production";
+
+        if (isProd) {
+          setProductId(
+            isEU
+              ? import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_EU_PRODUCTION
+              : import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US_PRODUCTION
+          );
+        } else {
+          setProductId(
+            isEU
+              ? (import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_EU_DEVELOPMENT || import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_EU)
+              : (import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US_DEVELOPMENT || import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US)
+          );
+        }
       } catch {
-        setProductId(import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US);
+        // Default to US (Development/Legacy) on error
+        const isProd = import.meta.env.MODE === "production";
+        setProductId(
+          isProd
+            ? import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US_PRODUCTION
+            : (import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US_DEVELOPMENT || import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US)
+        );
       }
     }
     detectRegion();

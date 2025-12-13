@@ -7,6 +7,7 @@ import { Share2, Pencil, ChevronLeft, Download, MoreVertical, ExternalLink, Chec
 import { ShareDialog } from "@/components/share-dialog";
 import { ExportDialog, PdfIcon, HtmlIcon } from "@/components/export-dialog";
 import { formatRelativeTime, cn } from "@/lib/utils";
+import { ViewerCanvas } from "@/components/viewer-canvas";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -325,12 +326,10 @@ function GuideViewPage() {
 
                 {/* Screenshot */}
                 {step.imageKey && (
-                  <div className="rounded-xl border overflow-hidden shadow-sm bg-muted/10 ring-1 ring-black/5">
-                    <img
-                      src={step.imageKey}
-                      alt={`Step ${index + 1}`}
-                      className="w-full h-auto object-contain bg-white"
-                      loading="lazy"
+                  <div className="flex justify-center w-full">
+                    <ViewerCanvas
+                      screenshotUrl={step.imageKey}
+                      overlays={step.overlays as any[]}
                     />
                   </div>
                 )}

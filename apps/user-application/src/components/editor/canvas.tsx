@@ -283,7 +283,7 @@ export function Canvas({
   // Convert pixel-based annotations to percentage-based for storage
   useEffect(() => {
     if (!isSyncingRef.current && dimensions.width > 0 && dimensions.height > 0) {
-      const percentAnnotations = annotations.map(a => 
+      const percentAnnotations = annotations.map(a =>
         annotationToPercent(a, dimensions.width, dimensions.height)
       );
       onAnnotationsChangeRef.current?.(percentAnnotations);

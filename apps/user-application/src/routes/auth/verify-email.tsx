@@ -109,7 +109,7 @@ function VerifyEmailPage() {
 
             <button
               onClick={() => navigate({ to: "/app" })}
-              className="btn-glass-primary group w-full sm:w-auto mx-auto inline-flex h-12 items-center justify-center rounded-full px-8 text-base font-semibold shadow-lg hover:shadow-primary/25 transition-all hover:-translate-y-0.5 active:translate-y-0"
+              className="btn-glass-primary text-primary-foreground group w-full sm:w-auto mx-auto inline-flex h-12 items-center justify-center rounded-full px-8 text-base font-semibold shadow-lg hover:shadow-primary/25 transition-all hover:-translate-y-0.5 active:translate-y-0"
             >
               <span>Go to Dashboard</span>
               <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />

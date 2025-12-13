@@ -139,7 +139,7 @@ export function AuthPage({ initialMode = 'login' }: AuthPageProps) {
             </div>
 
             {/* Right Side - Auth Form */}
-            <div className="flex items-center justify-center p-8 bg-primary relative overflow-hidden">
+            <div className="flex items-center justify-center p-8 bg-[var(--color-200)] relative overflow-hidden">
                 <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.1] pointer-events-none" />
                 
                 {/* Mobile Logo */}

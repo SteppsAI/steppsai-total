@@ -136,6 +136,11 @@ function UpgradePage() {
 
           {/* Header */}
           <div className="upgrade-header text-center px-6 pt-5 pb-3 sm:px-8 sm:pt-8 sm:pb-5">
+            {/* Logo */}
+            <div className="flex justify-center mb-4">
+              <img src="/brand/logo-symbol.svg" alt="SteppsAI" className="w-12 h-12 object-contain" />
+            </div>
+
             {/* Badge - Clean solid style */}
             <div className="inline-flex items-center gap-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-[var(--color-950)] text-white text-[10px] sm:text-xs font-bold tracking-wide mb-3">
               <span className="relative flex h-2 w-2">

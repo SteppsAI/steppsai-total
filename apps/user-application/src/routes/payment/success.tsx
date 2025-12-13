@@ -115,8 +115,14 @@ function PaymentSuccessPage() {
             <div className="flex flex-col items-center text-center space-y-6">
               <div className="success-item relative">
                 <div className="absolute inset-0 bg-indigo-100 rounded-full blur-xl opacity-50 animate-pulse dark:bg-indigo-900/40" />
-                <div className="relative w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center dark:bg-slate-800 dark:border-slate-700">
-                  <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+                <div className="relative w-20 h-20 flex items-center justify-center">
+                  {/* Animated pulse rings */}
+                  <div className="absolute inset-0 rounded-full border-2 border-indigo-400/30 animate-ping" style={{ animationDuration: '2s' }} />
+                  <div className="absolute inset-2 rounded-full border-2 border-indigo-500/40 animate-ping" style={{ animationDuration: '2s', animationDelay: '0.5s' }} />
+                  {/* Center orb */}
+                  <div className="relative w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full shadow-lg shadow-indigo-500/30 flex items-center justify-center">
+                    <div className="w-6 h-6 bg-white/20 rounded-full animate-pulse" />
+                  </div>
                 </div>
               </div>
 
@@ -149,12 +155,20 @@ function PaymentSuccessPage() {
           {status === "success" && (
             <div className="flex flex-col items-center text-center space-y-8">
               <div className="success-item relative">
-                <div className="absolute inset-0 bg-green-100 rounded-full blur-xl opacity-60 dark:bg-green-900/40" />
-                <div className="relative w-20 h-20 bg-gradient-to-b from-green-400 to-green-500 rounded-full shadow-lg shadow-green-500/20 flex items-center justify-center">
-                  <Check className="w-10 h-10 text-white" strokeWidth={3} />
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-200 via-green-100 to-emerald-200 rounded-full blur-2xl opacity-60 dark:from-indigo-900/40 dark:via-green-900/40 dark:to-emerald-900/40" />
+                {/* Animated celebration rings */}
+                <div className="absolute inset-[-8px] rounded-full border border-green-400/20 animate-ping" style={{ animationDuration: '3s' }} />
+                <div className="absolute inset-[-4px] rounded-full border border-emerald-400/30 animate-ping" style={{ animationDuration: '2.5s', animationDelay: '0.3s' }} />
+                {/* Main success circle */}
+                <div className="relative w-24 h-24 bg-gradient-to-br from-emerald-400 via-green-500 to-teal-500 rounded-full shadow-xl shadow-green-500/30 flex items-center justify-center">
+                  <Check className="w-12 h-12 text-white" strokeWidth={2.5} />
                 </div>
-                <div className="absolute -top-1 -right-1 bg-white rounded-full p-1.5 shadow-sm dark:bg-slate-800">
-                  <Sparkles className="w-4 h-4 text-amber-400 fill-amber-400" />
+                {/* Sparkle accents */}
+                <div className="absolute -top-2 -right-2 bg-white rounded-full p-2 shadow-lg dark:bg-slate-800 border border-white/50">
+                  <Sparkles className="w-5 h-5 text-amber-400 fill-amber-400 animate-pulse" />
+                </div>
+                <div className="absolute -bottom-1 -left-1 bg-white rounded-full p-1.5 shadow-md dark:bg-slate-800 border border-white/50">
+                  <Sparkles className="w-3 h-3 text-indigo-400 fill-indigo-400" />
                 </div>
               </div>
 

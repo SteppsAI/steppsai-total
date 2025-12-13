@@ -7,7 +7,7 @@ interface TemplateOptions {
 const styles = {
     body: `
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background-color: #eef2ff;
+        background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #f1f5f9 100%);
         margin: 0;
         padding: 0;
         width: 100%;
@@ -15,64 +15,72 @@ const styles = {
         color: #1e1b4b;
     `,
     container: `
-        max-width: 600px;
+        max-width: 560px;
         margin: 0 auto;
-        padding: 40px 20px;
+        padding: 48px 24px;
         text-align: left;
     `,
     card: `
         background-color: #ffffff;
-        border-radius: 16px;
-        padding: 48px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        border: 1px solid #e0e7ff;
-        border-top: 4px solid #4f46e5;
+        border-radius: 20px;
+        padding: 44px 40px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(79, 70, 229, 0.06);
     `,
     h1: `
         color: #1e1b4b;
-        font-size: 28px;
-        font-weight: 800;
-        margin: 0 0 24px;
-        letter-spacing: -0.025em;
-        line-height: 1.25;
+        font-size: 26px;
+        font-weight: 700;
+        margin: 0 0 20px;
+        letter-spacing: -0.02em;
+        line-height: 1.3;
     `,
     text: `
-        color: #3730a3;
-        font-size: 16px;
-        line-height: 1.625;
-        margin: 0 0 20px;
+        color: #4b5563;
+        font-size: 15px;
+        line-height: 1.7;
+        margin: 0 0 16px;
     `,
     list: `
-        color: #3730a3;
-        font-size: 16px;
-        line-height: 1.8;
-        margin: 24px 0 32px;
-        padding-left: 24px;
+        color: #4b5563;
+        font-size: 15px;
+        line-height: 1.9;
+        margin: 20px 0 28px;
+        padding-left: 0;
+        list-style: none;
+    `,
+    listItem: `
+        padding: 6px 0 6px 28px;
+        position: relative;
     `,
     button: `
         display: inline-block;
-        background-color: #4f46e5;
+        background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
         color: #ffffff;
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 600;
         text-decoration: none;
-        padding: 14px 32px;
-        border-radius: 12px;
+        padding: 14px 28px;
+        border-radius: 10px;
         margin-top: 8px;
-        margin-bottom: 24px;
+        margin-bottom: 20px;
         text-align: center;
         transition: all 0.2s ease;
-        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2), 0 2px 4px -1px rgba(79, 70, 229, 0.1);
     `,
     footer: `
         text-align: center;
-        margin-top: 40px;
-        color: #818cf8;
-        font-size: 13px;
+        margin-top: 32px;
+        color: #9ca3af;
+        font-size: 12px;
+        letter-spacing: 0.01em;
     `,
     divider: `
-        border-top: 1px solid #e0e7ff;
-        margin: 32px 0;
+        border: none;
+        border-top: 1px solid #f1f5f9;
+        margin: 28px 0;
+    `,
+    accent: `
+        color: #4f46e5;
+        font-weight: 500;
     `
 };
 
@@ -83,27 +91,35 @@ const getBaseLayout = (content: string) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <title>SteppsAI Notification</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>SteppsAI</title>
     <style>
         .button:hover {
-            background-color: #4338ca !important;
+            opacity: 0.92 !important;
             transform: translateY(-1px);
-            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3), 0 4px 6px -2px rgba(79, 70, 229, 0.15) !important;
         }
         .footer-link {
-            color: #4f46e5 !important;
+            color: #6366f1 !important;
             text-decoration: none;
         }
         .footer-link:hover {
             text-decoration: underline;
         }
+        .list-check::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #4f46e5;
+            font-weight: 600;
+            font-size: 14px;
+        }
         @media only screen and (max-width: 600px) {
             .container {
-                padding: 20px 16px !important;
+                padding: 32px 16px !important;
             }
             .card {
                 padding: 32px 24px !important;
+                border-radius: 16px !important;
             }
             .button {
                 display: block !important;
@@ -120,7 +136,7 @@ const getBaseLayout = (content: string) => {
             ${content}
         </div>
         <div class="footer" style="${styles.footer}">
-            <p style="margin: 0;">© ${new Date().getFullYear()} SteppsAI. All rights reserved.</p>
+            <p style="margin: 0; color: #9ca3af;">© ${new Date().getFullYear()} SteppsAI</p>
         </div>
     </div>
 </body>

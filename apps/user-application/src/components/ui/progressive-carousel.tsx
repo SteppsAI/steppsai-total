@@ -7,7 +7,7 @@ import React, {
   ReactNode,
   FC,
 } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 // Define the type for the context value
@@ -160,7 +160,7 @@ export const SliderContent: FC<SliderContentProps> = ({
   children,
   className,
 }) => {
-  return <div className={cn('', className)}>{children}</div>;
+  return <div className={cn('grid grid-cols-1 grid-rows-1', className)}>{children}</div>;
 };
 
 export const SliderWrapper: FC<SliderWrapperProps> = ({
@@ -171,19 +171,18 @@ export const SliderWrapper: FC<SliderWrapperProps> = ({
   const { active } = useProgressSliderContext();
 
   return (
-    <AnimatePresence mode='popLayout'>
-      {active === value && (
-        <motion.div
-          key={value}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className={cn('', className)}
-        >
-          {children}
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <motion.div
+      key={value}
+      initial={{ opacity: 0, zIndex: 0 }}
+      animate={{
+        opacity: active === value ? 1 : 0,
+        zIndex: active === value ? 10 : 0
+      }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
+      className={cn('col-start-1 row-start-1 w-full', className)}
+    >
+      {children}
+    </motion.div>
   );
 };
 

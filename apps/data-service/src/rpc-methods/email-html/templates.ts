@@ -222,11 +222,11 @@ export const getWelcomeEmailHTML = ({ name }: TemplateOptions) => {
         </p>
         
         <ul style="${styles.list}">
-            <li class="list-check" style="${styles.listItem}">Unlimited Guides & Stepps</li>
-            <li class="list-check" style="${styles.listItem}">Smart AI Screenshot Capture</li>
-            <li class="list-check" style="${styles.listItem}">Advanced Image Editor</li>
-            <li class="list-check" style="${styles.listItem}">PDF & Markdown Export</li>
-            <li class="list-check" style="${styles.listItem}">All future updates included</li>
+            <li class="list-check" style="${styles.listItem}">• Unlimited Guides & Stepps</li>
+            <li class="list-check" style="${styles.listItem}">• Smart AI Screenshot Capture</li>
+            <li class="list-check" style="${styles.listItem}">• Advanced Image Editor</li>
+            <li class="list-check" style="${styles.listItem}">• PDF & Markdown Export</li>
+            <li class="list-check" style="${styles.listItem}">• All future updates included</li>
         </ul>
         
         <p style="${styles.text}">

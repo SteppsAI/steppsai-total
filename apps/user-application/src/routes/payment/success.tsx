@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Check, Loader2, AlertCircle, RefreshCcw, ArrowRight, Sparkles } from "lucide-react";
+import { Check, Loader2, AlertCircle, RefreshCcw, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { clearAccessCache } from "@/lib/auth-helpers";
 import { trpc } from "@/router";
@@ -94,96 +94,77 @@ function PaymentSuccessPage() {
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 min-h-[100dvh] flex items-center justify-center p-4 bg-background overflow-hidden"
+      className="fixed inset-0 overflow-y-auto overflow-x-hidden min-h-[100dvh] flex items-center justify-center p-4"
     >
-      {/* Premium Background */}
-      <div className="absolute inset-0 bg-foggy opacity-60 z-0" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.1),rgba(255,255,255,0))]" />
+      {/* Background - Radial cloudy/foggy gradient */}
+      <div className="fixed inset-0 bg-foggy -z-10" />
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_center,_var(--color-100)_0%,_transparent_70%)] -z-10" />
 
-      {/* Decorative Orbs */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-indigo-500/10 rounded-full blur-[120px] mix-blend-multiply animate-pulse" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40rem] h-[40rem] bg-blue-500/10 rounded-full blur-[120px] mix-blend-multiply animate-pulse" style={{ animationDelay: "2s" }} />
+      {/* Decorative blurs */}
+      <div className="fixed top-1/4 left-1/4 w-64 h-64 bg-primary/15 rounded-full blur-[100px] -z-10" />
+      <div className="fixed bottom-1/4 right-1/4 w-56 h-56 bg-secondary/10 rounded-full blur-[80px] -z-10" />
 
       {/* Main Card */}
-      <div className="success-card relative z-10 w-full max-w-md">
-        <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/70 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:bg-slate-900/60 dark:border-white/10 p-8 sm:p-10">
+      <div className="success-card relative z-10 w-full max-w-lg my-auto">
+        <div className="bg-background/95 backdrop-blur-2xl border-2 border-primary/20 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden p-8 sm:p-10">
 
-          {/* Top decorative gradient line */}
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-50" />
+          {/* Logo */}
+          <div className="flex justify-center mb-6">
+            <img src="/brand/logo-symbol.svg" alt="SteppsAI" className="w-12 h-12 object-contain" />
+          </div>
 
           {status === "polling" && (
             <div className="flex flex-col items-center text-center space-y-6">
-              <div className="success-item relative">
-                <div className="absolute inset-0 bg-indigo-100 rounded-full blur-xl opacity-50 animate-pulse dark:bg-indigo-900/40" />
-                <div className="relative w-20 h-20 flex items-center justify-center">
-                  {/* Animated pulse rings */}
-                  <div className="absolute inset-0 rounded-full border-2 border-indigo-400/30 animate-ping" style={{ animationDuration: '2s' }} />
-                  <div className="absolute inset-2 rounded-full border-2 border-indigo-500/40 animate-ping" style={{ animationDuration: '2s', animationDelay: '0.5s' }} />
-                  {/* Center orb */}
-                  <div className="relative w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full shadow-lg shadow-indigo-500/30 flex items-center justify-center">
-                    <div className="w-6 h-6 bg-white/20 rounded-full animate-pulse" />
-                  </div>
+              <div className="success-item">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 sm:w-10 sm:h-10 text-primary animate-spin" />
                 </div>
               </div>
 
-              <div className="success-item space-y-2">
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-display">
+              <div className="success-item space-y-3">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-950)]">
                   Finalizing Access
                 </h1>
-                <p className="text-slate-500 dark:text-slate-400">
-                  Please wait a moment while we activate your lifetime license.
+                <p className="text-sm sm:text-base text-[var(--color-600)] max-w-sm">
+                  Please wait while we activate your lifetime license.
                 </p>
               </div>
 
-              {/* Enhanced Progress Bar */}
-              <div className="success-item w-full space-y-2">
-                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden dark:bg-slate-800">
+              {/* Progress Bar */}
+              <div className="success-item w-full max-w-xs space-y-2">
+                <div className="h-1.5 w-full bg-[var(--color-100)] rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-indigo-600 rounded-full transition-all duration-300 ease-out relative"
+                    className="h-full bg-primary rounded-full transition-all duration-500 ease-out"
                     style={{ width: `${Math.min((attempts / MAX_POLL_ATTEMPTS) * 100, 100)}%` }}
-                  >
-                    <div className="absolute inset-0 bg-white/30 animate-[shimmer_2s_infinite]" />
-                  </div>
+                  />
                 </div>
-                <p className="text-xs text-slate-400 text-center font-medium">
-                  Constructing your dashboard...
+                <p className="text-xs text-[var(--color-500)] text-center">
+                  Setting up your dashboard...
                 </p>
               </div>
             </div>
           )}
 
           {status === "success" && (
-            <div className="flex flex-col items-center text-center space-y-8">
-              <div className="success-item relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-200 via-green-100 to-emerald-200 rounded-full blur-2xl opacity-60 dark:from-indigo-900/40 dark:via-green-900/40 dark:to-emerald-900/40" />
-                {/* Animated celebration rings */}
-                <div className="absolute inset-[-8px] rounded-full border border-green-400/20 animate-ping" style={{ animationDuration: '3s' }} />
-                <div className="absolute inset-[-4px] rounded-full border border-emerald-400/30 animate-ping" style={{ animationDuration: '2.5s', animationDelay: '0.3s' }} />
-                {/* Main success circle */}
-                <div className="relative w-24 h-24 bg-gradient-to-br from-emerald-400 via-green-500 to-teal-500 rounded-full shadow-xl shadow-green-500/30 flex items-center justify-center">
-                  <Check className="w-12 h-12 text-white" strokeWidth={2.5} />
-                </div>
-                {/* Sparkle accents */}
-                <div className="absolute -top-2 -right-2 bg-white rounded-full p-2 shadow-lg dark:bg-slate-800 border border-white/50">
-                  <Sparkles className="w-5 h-5 text-amber-400 fill-amber-400 animate-pulse" />
-                </div>
-                <div className="absolute -bottom-1 -left-1 bg-white rounded-full p-1.5 shadow-md dark:bg-slate-800 border border-white/50">
-                  <Sparkles className="w-3 h-3 text-indigo-400 fill-indigo-400" />
+            <div className="flex flex-col items-center text-center space-y-6">
+              <div className="success-item">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <Check className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-600" strokeWidth={2.5} />
                 </div>
               </div>
 
-              <div className="success-item space-y-2">
-                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-display">
+              <div className="success-item space-y-3">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-950)]">
                   Welcome Aboard!
                 </h1>
-                <p className="text-slate-500 dark:text-slate-400 text-lg">
-                  Your lifetime license is active.
+                <p className="text-sm sm:text-base text-[var(--color-600)]">
+                  Your lifetime license is now active.
                 </p>
               </div>
 
-              <div className="success-item bg-slate-50 rounded-2xl p-4 w-full dark:bg-slate-800/50">
-                <p className="text-sm text-slate-600 dark:text-slate-300 flex items-center justify-center gap-2">
-                  <Loader2 className="w-3 h-3 animate-spin text-slate-400" />
+              <div className="success-item bg-[var(--color-50)] border border-[var(--color-200)] rounded-xl px-4 py-3 w-full max-w-xs">
+                <p className="text-sm text-[var(--color-700)] flex items-center justify-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-primary" />
                   Redirecting to dashboard...
                 </p>
               </div>
@@ -192,26 +173,25 @@ function PaymentSuccessPage() {
 
           {status === "timeout" && (
             <div className="flex flex-col items-center text-center space-y-6">
-              <div className="success-item relative">
-                <div className="absolute inset-0 bg-amber-100 rounded-full blur-xl opacity-60 dark:bg-amber-900/40" />
-                <div className="relative w-16 h-16 bg-amber-50 rounded-2xl border border-amber-100 flex items-center justify-center dark:bg-amber-900/20 dark:border-amber-800">
-                  <AlertCircle className="w-8 h-8 text-amber-600 dark:text-amber-500" />
+              <div className="success-item">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-amber-100 rounded-full flex items-center justify-center">
+                  <AlertCircle className="w-8 h-8 sm:w-10 sm:h-10 text-amber-600" />
                 </div>
               </div>
 
-              <div className="success-item space-y-2">
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-display">
+              <div className="success-item space-y-3">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-950)]">
                   Taking Longer Than Usual
                 </h1>
-                <p className="text-slate-500 dark:text-slate-400">
+                <p className="text-sm sm:text-base text-[var(--color-600)] max-w-sm">
                   We received your payment, but activation is delayed. Don't worry, your funds are safe.
                 </p>
               </div>
 
-              <div className="success-item flex flex-col w-full gap-3 pt-2">
+              <div className="success-item flex flex-col w-full max-w-xs gap-3">
                 <button
                   onClick={handleRetry}
-                  className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow-md shadow-indigo-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group"
+                  className="btn-glass-primary w-full py-3 px-4 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2 group"
                 >
                   <RefreshCcw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
                   Try Checking Again
@@ -219,7 +199,7 @@ function PaymentSuccessPage() {
 
                 <button
                   onClick={() => navigate({ to: "/app" })}
-                  className="w-full py-3 px-4 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl font-medium transition-colors dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 bg-white hover:bg-[var(--color-50)] text-[var(--color-700)] border border-[var(--color-200)] rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
                 >
                   Continue to Dashboard
                   <ArrowRight className="w-4 h-4" />
@@ -230,9 +210,14 @@ function PaymentSuccessPage() {
         </div>
 
         {/* Footer info */}
-        <p className="mt-8 text-center text-xs text-slate-400 dark:text-slate-500 font-medium">
-          Order ID: {new URLSearchParams(window.location.search).get("session_id")?.slice(-8) || "Processing..."}
-        </p>
+        <div className="mt-6 pt-4 text-center">
+          <p className="text-xs text-[var(--color-500)]">
+            Order ID: {new URLSearchParams(window.location.search).get("session_id")?.slice(-8) || "Processing..."}
+          </p>
+          <p className="text-xs text-[var(--color-500)] mt-2">
+            Questions? <a href="mailto:support@stepps.ai" className="text-primary hover:underline font-medium">Contact support</a>
+          </p>
+        </div>
       </div>
     </div>
   );

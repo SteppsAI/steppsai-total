@@ -27,7 +27,10 @@
       "vars": {
         "ASSETS_URL": "https://stepps-assets-stage.stepps.ai",
         "GOOGLE_CLIENT_ID": "354170279226-thlv63iksq8o6sikimt68jkpcdc9dn4e.apps.googleusercontent.com",
-        "VITE_AUTH_URL": "https://stage.stepps.ai"
+        "VITE_AUTH_URL": "https://stage.stepps.ai",
+        "VITE_EXTENSION_ID_DEVELOPMENT": "hohppdhekklnpcddflglcdogkfnpohec",
+        "VITE_CREEM_LIFETIME_PRODUCT_EU_DEVELOPMENT": "prod_4vYeqb4GliF45ShZtj5v4z",
+        "VITE_CREEM_LIFETIME_PRODUCT_US_DEVELOPMENT": "prod_6KA7T37qW1NqzrdIzY4KPC"
       },
       "routes": [
         {
@@ -65,7 +68,10 @@
       "vars": {
         "ASSETS_URL": "https://assets.stepps.ai",
         "GOOGLE_CLIENT_ID": "354170279226-thlv63iksq8o6sikimt68jkpcdc9dn4e.apps.googleusercontent.com",
-        "VITE_AUTH_URL": "https://stepps.ai"
+        "VITE_AUTH_URL": "https://stepps.ai",
+        "VITE_EXTENSION_ID_PRODUCTION": "",
+        "VITE_CREEM_LIFETIME_PRODUCT_EU_PRODUCTION": "",
+        "VITE_CREEM_LIFETIME_PRODUCT_US_PRODUCTION": ""
       },
       "ratelimits": [
         {

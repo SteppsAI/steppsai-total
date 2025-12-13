@@ -15,6 +15,7 @@ interface EditorHeaderProps {
     onSave?: () => void;
     onShare?: () => void;
     onExport?: () => void;
+    onBack?: () => void;
 }
 
 export function EditorHeader({
@@ -27,7 +28,8 @@ export function EditorHeader({
     onTitleChange,
     onSave,
     onShare,
-    onExport
+    onExport,
+    onBack
 }: EditorHeaderProps) {
     const router = useRouter();
 
@@ -47,7 +49,7 @@ export function EditorHeader({
     return (
         <header className="h-14 border-b bg-background flex items-center justify-between px-4 shrink-0 z-10">
             <div className="flex items-center flex-1">
-                <Button variant="ghost" size="icon" className="mr-2" onClick={() => router.history.back()}>
+                <Button variant="ghost" size="icon" className="mr-2" onClick={onBack ? onBack : () => router.history.back()}>
                     <ArrowLeft className="w-4 h-4" />
                 </Button>
             </div>

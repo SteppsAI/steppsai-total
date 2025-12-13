@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 import { EditorHeader } from "@/components/editor/editor-header";
 import { EditorToolbar, EditorTool } from "@/components/editor/editor-toolbar";
 import { Canvas } from "@/components/editor/canvas";
@@ -31,16 +32,16 @@ function EditorPage() {
 
   const { data: fetchedGuide, refetch } = useSuspenseQuery(trpc.guides.getById.queryOptions({ id: guideId }));
 
-  // Poll for data if guide is still processing (queue hasn't finished yet)
+  // Poll for data if guide is still processing (queue hasn't finished yet) or if not found yet (race condition)
   useEffect(() => {
-    if (fetchedGuide?.status === 'processing' || fetchedGuide?.status === 'recording') {
+    if (!fetchedGuide || fetchedGuide.status === 'processing' || fetchedGuide.status === 'recording') {
       const interval = setInterval(() => {
         refetch();
-      }, 2000); // Poll every 2 seconds
+      }, 1000); // Poll every 1 second for faster response
 
       return () => clearInterval(interval);
     }
-  }, [fetchedGuide?.status, refetch]);
+  }, [fetchedGuide, refetch]);
 
   useEffect(() => {
     if (isMobile) {
@@ -202,8 +203,10 @@ function EditorPage() {
 
   if (!session.guide) {
     return (
-      <div className="h-screen flex items-center justify-center bg-background">
+      <div className="h-screen flex flex-col items-center justify-center bg-background gap-4">
         <div className="text-muted-foreground">Guide not found</div>
+        <div className="text-sm text-muted-foreground">Waiting for processing to complete...</div>
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
       </div>
     );
   }
@@ -229,6 +232,7 @@ function EditorPage() {
         onSave={handleSave}
         onShare={() => setIsShareOpen(true)}
         onExport={() => setIsExportOpen(true)}
+        onBack={() => navigate({ to: "/app" })}
       />
 
       <div className="flex-1 flex overflow-hidden relative">

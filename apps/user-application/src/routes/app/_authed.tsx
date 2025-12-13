@@ -1,7 +1,6 @@
 import { AppSidebar } from "@/components/common/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Outlet, createFileRoute, useLocation, redirect } from "@tanstack/react-router";
-import { Toaster } from "@/components/ui/sonner";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { getSessionCached, getAccessCached } from "@/lib/auth-helpers";
 
@@ -41,7 +40,6 @@ function RouteComponent() {
         {/* Editor needs overflow-hidden for layout, Guide View needs auto scrolling */}
         <div className={`h-screen w-full bg-background ${isEditorRoute ? 'overflow-hidden' : 'overflow-y-auto custom-scrollbar'}`}>
           <Outlet />
-          <Toaster />
         </div>
       </SidebarProvider>
     );
@@ -65,7 +63,6 @@ function RouteComponent() {
           <div className="max-w-7xl mx-auto min-h-full">
             <Outlet />
           </div>
-          <Toaster />
         </div>
       </SidebarInset>
     </SidebarProvider>

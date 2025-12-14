@@ -27,6 +27,7 @@ interface ModalGuide {
     status?: string | null;
     updatedAt?: string | null;
     steps?: { id: string }[];
+    brandImageKey?: string | null;
 }
 
 interface ModalFolder {
@@ -297,8 +298,19 @@ function GuideItem({ guide, folderName, onClick, showDate, compact }: GuideItemP
             onClick={onClick}
         >
             <div className="flex items-center gap-3 overflow-hidden">
-                <div className={`flex-shrink-0 ${compact ? "size-8" : "size-10"} rounded-lg ${compact ? "bg-primary/5" : "bg-muted"} flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors`}>
-                    <FileText className={compact ? "size-4" : "size-5"} />
+                <div className={`flex-shrink-0 ${compact ? "size-8" : "size-10"} rounded-lg ${guide.brandImageKey
+                        ? "bg-white/95 shadow-sm ring-1 ring-black/5"
+                        : (compact ? "bg-primary/5" : "bg-muted")
+                    } flex items-center justify-center text-muted-foreground ${(!guide.brandImageKey) && "group-hover:bg-primary/10 group-hover:text-primary"} transition-colors overflow-hidden`}>
+                    {guide.brandImageKey ? (
+                        <img
+                            src={guide.brandImageKey}
+                            alt=""
+                            className={`${compact ? "size-5" : "size-6"} object-contain`}
+                        />
+                    ) : (
+                        <FileText className={compact ? "size-4" : "size-5"} />
+                    )}
                 </div>
                 <div className="flex flex-col overflow-hidden">
                     <span className={`font-medium truncate ${compact ? "text-sm" : ""}`}>{guide.title || "Untitled"}</span>

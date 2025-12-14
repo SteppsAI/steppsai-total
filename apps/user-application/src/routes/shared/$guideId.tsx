@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Badge } from "@/components/ui/badge";
 import { ViewerCanvas } from "@/components/viewer-canvas";
 import { trpc } from "@/router";
 import { Step } from "@/types/db";
@@ -63,9 +62,6 @@ function PublicGuideViewPage() {
         {/* Guide Header */}
         <div className="space-y-6 text-center border-b pb-12">
           <div className="space-y-4">
-            <Badge variant="default" className="uppercase tracking-wider text-[10px]">
-              Published
-            </Badge>
             <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground">
               {guide.title}
             </h1>

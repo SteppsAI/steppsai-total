@@ -15,6 +15,7 @@ export const guidesSchema = z.object({
 	slug: z.string(),
 	status: z.string().nullable().optional(),
 	visibility: z.string().nullable().optional(),
+	brandImageKey: z.string().nullable().optional(),
 	steps: z.array(stepSchema).optional(),
 	exportedDocs: z.any().optional(), // TODO: Define strict schema for exported docs
 	createdAt: z.string().nullable().optional(),
@@ -29,11 +30,13 @@ export const createGuideSchema = z.object({
 	slug: z.string(),
 	status: z.string().optional(),
 	visibility: z.string().optional(),
+	brandImageKey: z.string().optional(),
 });
 
 // For completing a recording (extension sends steps)
 export const completeRecordingSchema = z.object({
 	title: z.string(),
+	brandImageKey: z.string().optional(),
 	steps: z.array(stepFromExtensionSchema),
 });
 

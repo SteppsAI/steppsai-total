@@ -3,6 +3,75 @@
 import { trpc } from '../lib/trpc';
 import { convertToWebP } from '../lib/helpers';
 
+type BrandLogoContext = {
+    guideId: string;
+    userId: string;
+};
+
+async function fetchAsDataUrl(url: string): Promise<string> {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch favicon: ${response.status}`);
+    }
+    const blob = await response.blob();
+    return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error('Failed to read blob'));
+        reader.readAsDataURL(blob);
+    });
+}
+
+async function getFaviconUrlForActiveTab(): Promise<string | null> {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab?.id || !tab.url || tab.url.startsWith('chrome://')) return null;
+
+    if (tab.favIconUrl && (tab.favIconUrl.startsWith('http://') || tab.favIconUrl.startsWith('https://'))) {
+        return tab.favIconUrl;
+    }
+
+    // Ask content script for DOM-discovered icon URLs (best effort)
+    try {
+        const response = await chrome.tabs.sendMessage(tab.id, { type: 'GET_FAVICON_URL' });
+        const url = response?.url as string | undefined;
+        if (url && (url.startsWith('http://') || url.startsWith('https://'))) return url;
+    } catch {
+        // content script might not be ready / not injected on some pages
+    }
+
+    // Fallback to /favicon.ico
+    try {
+        return new URL('/favicon.ico', tab.url).toString();
+    } catch {
+        return null;
+    }
+}
+
+async function captureAndPersistBrandLogo(ctx: BrandLogoContext): Promise<void> {
+    try {
+        const faviconUrl = await getFaviconUrlForActiveTab();
+        if (!faviconUrl) return;
+
+        const dataUrl = await fetchAsDataUrl(faviconUrl);
+        const webpDataUrl = await convertToWebP(dataUrl, 0.9);
+
+        const key = `brands/${ctx.guideId}/logo.webp`;
+
+        await trpc.images.upload.mutate({
+            key,
+            dataUrl: webpDataUrl,
+        });
+
+        // Persist on the guide (best effort)
+        await trpc.guides.update.mutate({
+            id: ctx.guideId,
+            data: { brandImageKey: key },
+        });
+    } catch (error) {
+        console.warn('Brand logo capture failed:', error);
+    }
+}
+
 // Listen for messages from SidePanel or Content Script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'START_RECORDING') {
@@ -39,6 +108,9 @@ async function handleStartRecording() {
         }
 
         const { guideId, userId } = result;
+
+        // 1b. Capture + persist brand logo (best effort)
+        await captureAndPersistBrandLogo({ guideId, userId });
 
         // 2. Clear previous data and store new recording state
         await chrome.storage.local.remove(['steps', 'recordingStartTime', 'guideId', 'userId']);
@@ -88,6 +160,10 @@ async function handleStopRecording() {
             await chrome.action.setBadgeText({ text: '' });
             return { success: false, error: 'No active recording' };
         }
+
+        // Try to capture brand logo again (best effort)
+        const { userId } = await chrome.storage.local.get(['userId']);
+        await captureAndPersistBrandLogo({ guideId, userId: userId || 'unknown' });
 
         // Complete guide via tRPC
         await trpc.recording.complete.mutate({

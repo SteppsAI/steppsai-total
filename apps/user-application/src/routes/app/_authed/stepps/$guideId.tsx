@@ -292,7 +292,17 @@ function GuideViewPage() {
             <Badge variant={guide.status === 'published' ? 'default' : 'secondary'} className="uppercase tracking-wider text-[10px]">
               {guide.status || 'Draft'}
             </Badge>
-            <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground">{guide.title}</h1>
+            <div className="flex items-center justify-center gap-3">
+              <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground">{guide.title}</h1>
+              {guide.brandImageKey && (
+                <img
+                  src={guide.brandImageKey}
+                  alt="Brand logo"
+                  className="w-9 h-9 object-contain"
+                  loading="lazy"
+                />
+              )}
+            </div>
             {guide.description && (
               <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
                 {guide.description}

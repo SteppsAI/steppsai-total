@@ -34,6 +34,7 @@ export const guides = pgTable("guides", {
 	slug: text("slug").notNull().unique(),
 	status: text("status").default('draft'), // 'draft' | 'recording' | 'processing' | 'published'
 	visibility: text("visibility"),
+	brandImageKey: text("brand_image_key"),
 	steps: jsonb("steps").default([]), // Step[] - embedded steps as JSONB
 	exportedDocs: jsonb("exported_docs"), // { pdf: { url, last_updated, status }, ... }
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),

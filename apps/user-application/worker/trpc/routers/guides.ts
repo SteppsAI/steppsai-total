@@ -7,7 +7,7 @@ import {
     updateGuide,
 } from "@repo/data-ops/queries";
 import { createGuideSchema } from "@repo/data-ops/zod-schema";
-import { transformStepsWithUrls } from "../helpers/transform-assets";
+import { transformGuideWithUrls } from "../helpers/transform-assets";
 
 /**
  * Guides tRPC Router
@@ -21,10 +21,7 @@ export const guidesRouter = router({
         const assetsUrl = ctx.env.ASSETS_URL;
 
         // Transform imageKeys to full URLs for all guides
-        return guides.map((guide) => ({
-            ...guide,
-            steps: transformStepsWithUrls(guide.steps as any[], assetsUrl),
-        }));
+        return guides.map((guide) => transformGuideWithUrls(guide as any, assetsUrl));
     }),
 
     getById: publicProcedure
@@ -34,10 +31,7 @@ export const guidesRouter = router({
             if (!guide) return null;
 
             const assetsUrl = ctx.env.ASSETS_URL;
-            return {
-                ...guide,
-                steps: transformStepsWithUrls(guide.steps as any[], assetsUrl),
-            };
+            return transformGuideWithUrls(guide as any, assetsUrl);
         }),
 
     create: publicProcedure

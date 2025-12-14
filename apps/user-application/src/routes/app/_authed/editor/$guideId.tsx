@@ -34,7 +34,7 @@ function EditorPage() {
 
   // Poll for data if guide is still processing (queue hasn't finished yet) or if not found yet (race condition)
   useEffect(() => {
-    if (!fetchedGuide || fetchedGuide.status === 'processing' || fetchedGuide.status === 'recording') {
+    if (!fetchedGuide || (fetchedGuide as any)?.status === 'processing' || (fetchedGuide as any)?.status === 'recording') {
       const interval = setInterval(() => {
         refetch();
       }, 1000); // Poll every 1 second for faster response
@@ -223,6 +223,7 @@ function EditorPage() {
     <div className="h-screen w-full flex flex-col overflow-hidden bg-background">
       <EditorHeader
         title={session.guide.title || "Untitled Stepps"}
+        brandLogoUrl={session.guide.brandImageKey}
         isDirty={session.isDirty}
         isSyncing={session.isSyncing}
         isSaving={session.isSaving}

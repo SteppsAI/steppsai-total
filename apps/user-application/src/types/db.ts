@@ -26,6 +26,7 @@ export interface Guide {
     slug: string;
     status?: string | null;
     visibility?: string | null;
+    brandImageKey?: string | null;
     steps?: Step[];
     createdAt?: string | null;
     updatedAt?: string | null;

@@ -7,7 +7,7 @@ import { nanoid } from "nanoid";
 const CLICK_INDICATOR_COLOR = '#ef4444'; // Red
 
 export async function handleStepsInsert(env: Env, event: StepsInsertMessage) {
-    const { guideId, steps: rawSteps } = event;
+    const { guideId, steps: rawSteps, brandImageKey } = event;
 
     console.log(`Processing ${rawSteps.length} steps for guide ${guideId}`);
 
@@ -49,8 +49,11 @@ export async function handleStepsInsert(env: Env, event: StepsInsertMessage) {
         // Update guide with steps JSONB
         await updateGuideSteps(guideId, steps);
 
-        // Update guide status to draft
-        await updateGuide(guideId, { status: 'draft' });
+        // Update guide status to draft and set brand image if present
+        await updateGuide(guideId, {
+            status: 'draft',
+            ...(brandImageKey ? { brandImageKey } : {})
+        });
 
         console.log(`Successfully inserted ${steps.length} steps for guide ${guideId}`);
     } catch (error) {

@@ -19,3 +19,12 @@ export function transformStepsWithUrls(steps: any[] | undefined, assetsUrl: stri
     }));
 }
 
+// Transform a guide object - prepend ASSETS_URL to any asset keys
+export function transformGuideWithUrls<T extends Record<string, any>>(guide: T, assetsUrl: string): T {
+    return {
+        ...guide,
+        brandImageKey: prependAssetsUrl((guide as any).brandImageKey, assetsUrl),
+        steps: transformStepsWithUrls((guide as any).steps, assetsUrl),
+    };
+}
+

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 interface DashboardCardProps {
   title: string;
   image: string;
+  brandLogoUrl?: string | null;
   viewUrl?: string;
   onEdit?: (e: React.MouseEvent) => void;
   onShare?: (e: React.MouseEvent) => void;
@@ -19,7 +20,7 @@ interface DashboardCardProps {
   onExport?: (e: React.MouseEvent) => void;
 }
 
-export function DashboardCard({ title, image, viewUrl, onEdit, onShare, onMove, onDelete, onExport }: DashboardCardProps) {
+export function DashboardCard({ title, image, brandLogoUrl, viewUrl, onEdit, onShare, onMove, onDelete, onExport }: DashboardCardProps) {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
@@ -40,6 +41,17 @@ export function DashboardCard({ title, image, viewUrl, onEdit, onShare, onMove, 
           alt={title} 
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
         />
+
+        {brandLogoUrl && (
+          <div className="absolute bottom-3 left-3 z-10 size-9 rounded-md bg-white/95 shadow-sm ring-1 ring-black/5 flex items-center justify-center overflow-hidden">
+            <img
+              src={brandLogoUrl}
+              alt="Brand logo"
+              className="w-6 h-6 object-contain"
+              loading="lazy"
+            />
+          </div>
+        )}
         {/* Overlay on hover */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors duration-200" />
       </div>

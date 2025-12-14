@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { ViewerCanvas } from "@/components/viewer-canvas";
@@ -15,23 +16,19 @@ export const Route = createFileRoute("/shared/$guideId")({
 });
 
 function PublicGuideViewPage() {
+  const navigate = useNavigate();
   const { guideId } = Route.useParams();
 
   const queryOptions = trpc.publicGuides.getPublished.queryOptions({ id: guideId });
   const { data: guide } = useSuspenseQuery(queryOptions);
 
-  if (!guide) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <h1 className="text-2xl font-bold text-foreground">Guide not found</h1>
-          <p className="text-muted-foreground">
-            This guide doesn't exist or hasn't been published yet.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!guide) {
+      navigate({ to: "/" });
+    }
+  }, [guide, navigate]);
+
+  if (!guide) return null;
 
   const steps = (guide.steps ?? []) as Step[];
 

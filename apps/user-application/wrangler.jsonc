@@ -70,8 +70,8 @@
         "GOOGLE_CLIENT_ID": "354170279226-thlv63iksq8o6sikimt68jkpcdc9dn4e.apps.googleusercontent.com",
         "VITE_AUTH_URL": "https://stepps.ai",
         "VITE_EXTENSION_ID_PRODUCTION": "",
-        "VITE_CREEM_LIFETIME_PRODUCT_EU_PRODUCTION": "",
-        "VITE_CREEM_LIFETIME_PRODUCT_US_PRODUCTION": ""
+        "VITE_CREEM_LIFETIME_PRODUCT_EU_PRODUCTION": "prod_7lYJ3I4faEQkaZuntOnV7E",
+        "VITE_CREEM_LIFETIME_PRODUCT_US_PRODUCTION": "prod_1f68HplUNotde3bINTGPiH"
       },
       "ratelimits": [
         {

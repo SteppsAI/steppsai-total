@@ -80,7 +80,7 @@ function SteppsPage() {
     const [deleteSteppOpen, setDeleteSteppOpen] = useState(false);
     const [moveSteppOpen, setMoveSteppOpen] = useState(false);
 
-    const [selectedGuide, setSelectedGuide] = useState<{ id: string, title: string } | null>(null);
+    const [selectedGuide, setSelectedGuide] = useState<{ id: string, title: string, status?: string } | null>(null);
     const [shareDialogOpen, setShareDialogOpen] = useState(false);
     const [exportDialogOpen, setExportDialogOpen] = useState(false);
 

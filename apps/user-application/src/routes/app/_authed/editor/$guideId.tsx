@@ -269,7 +269,7 @@ function EditorPage() {
         onOpenChange={setIsShareOpen}
         guideTitle={session.guide.title || "Untitled Stepps"}
         guideId={guideId}
-        guideStatus={fetchedGuide?.status as 'draft' | 'recording' | 'processing' | 'published'}
+        guideStatus={(fetchedGuide as Guide)?.status as 'draft' | 'recording' | 'processing' | 'published'}
       />
 
       <ExportDialog

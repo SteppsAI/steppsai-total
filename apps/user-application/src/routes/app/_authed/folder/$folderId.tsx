@@ -299,15 +299,19 @@ function FolderPage() {
                       onClick={() => navigate({ to: "/app/stepps/$guideId", params: { guideId: guide.guideId } })}
                     >
                       <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
                           {guide.brandImageKey ? (
-                            <img
-                              src={guide.brandImageKey}
-                              alt=""
-                              className="size-4 object-contain rounded-sm shrink-0"
-                            />
+                            <div className="size-8 rounded-md bg-white/95 shadow-sm ring-1 ring-black/5 flex items-center justify-center overflow-hidden shrink-0">
+                              <img
+                                src={guide.brandImageKey}
+                                alt=""
+                                className="size-5 object-contain"
+                              />
+                            </div>
                           ) : (
-                            <FileText className="size-4 text-muted-foreground shrink-0" />
+                            <div className="size-8 rounded-md bg-muted flex items-center justify-center shrink-0">
+                              <FileText className="size-4 text-muted-foreground" />
+                            </div>
                           )}
                           <Link
                             to="/app/stepps/$guideId"
@@ -457,6 +461,7 @@ function FolderPage() {
               key={guide.guideId}
               title={guide.title || "Untitled"}
               image={guide.steps?.[0]?.imageKey || "/default-preview.svg"}
+              brandLogoUrl={guide.brandImageKey}
               viewUrl={`/app/stepps/${guide.guideId}`}
               onEdit={() => navigate({ to: `/app/editor/${guide.guideId}` })}
               onShare={() => handleShare(guide)}

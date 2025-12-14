@@ -63,9 +63,6 @@ function PublicGuideViewPage() {
         {/* Guide Header */}
         <div className="space-y-6 text-center border-b pb-12">
           <div className="space-y-4">
-            <Badge variant="default" className="uppercase tracking-wider text-[10px]">
-              Published
-            </Badge>
             <div className="flex items-center justify-center gap-3">
               <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-[var(--color-950)]">
                 {guide.title}

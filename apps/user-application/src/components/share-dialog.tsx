@@ -8,30 +8,54 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Copy, Check, Link as LinkIcon } from "lucide-react";
+import { Copy, Check, Link as LinkIcon, Share, Loader2, Shield, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { trpc } from "@/router";
 
 interface ShareDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     guideTitle: string;
     guideId: string;
+    guideStatus?: 'draft' | 'recording' | 'processing' | 'published';
 }
 
-export function ShareDialog({ open, onOpenChange, guideTitle, guideId }: ShareDialogProps) {
+export function ShareDialog({ open, onOpenChange, guideTitle, guideId, guideStatus = 'draft' }: ShareDialogProps) {
     const [copied, setCopied] = useState(false);
     const [email, setEmail] = useState("");
+    const queryClient = useQueryClient();
+    const isPublished = guideStatus === 'published';
 
-    // In a real app, this would be the actual public URL
-    // For now, we share the internal app link which requires authentication (safer for internal use)
-    const shareUrl = `${window.location.origin}/app/stepps/${guideId}`;
+    // Generate the public share URL
+    const shareUrl = typeof window !== 'undefined'
+        ? `${window.location.origin}/shared/${guideId}`
+        : `/shared/${guideId}`;
 
-    const handleCopy = () => {
-        navigator.clipboard.writeText(shareUrl);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-        toast.success("Link copied to clipboard");
+    // Mutation to publish guide
+    const publishMutation = useMutation({
+        ...trpc.guides.publish.mutationOptions(),
+        onSuccess: () => {
+            toast.success("Guide published! The link is now ready to share.");
+            queryClient.invalidateQueries({
+                queryKey: trpc.guides.getById.queryOptions({ id: guideId }).queryKey
+            });
+        },
+        onError: () => {
+            toast.error("Failed to publish guide");
+        }
+    });
+
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(shareUrl);
+            setCopied(true);
+            toast.success("Link copied to clipboard!");
+            setTimeout(() => setCopied(false), 2000);
+        } catch {
+            toast.error("Failed to copy URL");
+        }
     };
 
     const handleInvite = (e: React.FormEvent) => {
@@ -43,39 +67,93 @@ export function ShareDialog({ open, onOpenChange, guideTitle, guideId }: ShareDi
         setEmail("");
     };
 
+    const handlePublish = async () => {
+        publishMutation.mutate({ id: guideId });
+    };
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>Share "{guideTitle}"</DialogTitle>
                     <DialogDescription>
-                        Share this guide with your team or anyone with the link.
+                        {isPublished
+                            ? "Share this guide with your team or anyone with the link."
+                            : "Publish this guide to make it shareable with anyone."
+                        }
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="flex flex-col gap-6 py-4">
+                    {/* Status Badge */}
+                    {!isPublished && (
+                        <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200">
+                            <Shield className="size-4 text-amber-600" />
+                            <span className="text-sm text-amber-800">
+                                This guide is private. Publish to make it shareable.
+                            </span>
+                        </div>
+                    )}
+
                     {/* Copy Link Section */}
                     <div className="space-y-2">
-                        <Label className="text-sm font-medium">Guide Link</Label>
+                        <div className="flex items-center justify-between">
+                            <Label className="text-sm font-medium">Guide Link</Label>
+                            {isPublished && (
+                                <span className="inline-flex items-center gap-1 text-xs text-green-600">
+                                    <ShieldCheck className="size-3" />
+                                    Published
+                                </span>
+                            )}
+                        </div>
                         <div className="flex items-center space-x-2">
                             <div className="relative flex-1">
                                 <LinkIcon className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
                                 <Input
                                     value={shareUrl}
                                     readOnly
-                                    className="pl-9 bg-muted/50"
+                                    className={isPublished ? "pl-9 bg-muted/50" : "pl-9 bg-muted/30"}
+                                    placeholder={isPublished ? shareUrl : "Publish to get shareable link"}
                                 />
                             </div>
                             <Button
                                 size="icon"
                                 variant="outline"
                                 onClick={handleCopy}
+                                disabled={!isPublished}
                                 className="shrink-0"
+                                title={isPublished ? "Copy link" : "Publish guide first"}
                             >
                                 {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
                             </Button>
                         </div>
+                        {!isPublished && (
+                            <p className="text-xs text-muted-foreground">
+                                The link will be available after publishing the guide.
+                            </p>
+                        )}
                     </div>
+
+                    {/* Publish Button - only show if not published */}
+                    {!isPublished && (
+                        <Button
+                            onClick={handlePublish}
+                            disabled={publishMutation.isPending}
+                            className="w-full gap-2"
+                        >
+                            {publishMutation.isPending ? (
+                                <>
+                                    <Loader2 className="size-4 animate-spin" />
+                                    Publishing...
+                                </>
+                            ) : (
+                                <>
+                                    <Share className="size-4" />
+                                    Publish Guide
+                                </>
+                            )}
+                        </Button>
+                    )}
 
                     <div className="relative">
                         <div className="absolute inset-0 flex items-center">
@@ -100,8 +178,19 @@ export function ShareDialog({ open, onOpenChange, guideTitle, guideId }: ShareDi
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="flex-1"
                             />
-                            <Button type="submit">Invite</Button>
+                            <Button
+                                type="submit"
+                                disabled={!isPublished || !email}
+                                variant="outline"
+                            >
+                                Invite
+                            </Button>
                         </div>
+                        {!isPublished && (
+                            <p className="text-xs text-muted-foreground">
+                                Email invites will be available after publishing.
+                            </p>
+                        )}
                     </form>
                 </div>
             </DialogContent>

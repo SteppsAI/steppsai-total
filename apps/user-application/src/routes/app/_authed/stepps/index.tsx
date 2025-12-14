@@ -586,6 +586,7 @@ function SteppsPage() {
                         onOpenChange={setShareDialogOpen}
                         guideTitle={selectedGuide.title}
                         guideId={selectedGuide.id}
+                        guideStatus={selectedGuide.status as 'draft' | 'recording' | 'processing' | 'published'}
                     />
                     <ExportDialog
                         open={exportDialogOpen}

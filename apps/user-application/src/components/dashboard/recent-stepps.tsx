@@ -147,6 +147,7 @@ export function RecentStepps({ isLoading, stepps = [], onDelete, onMove }: Recen
           onOpenChange={(open) => !open && setShareGuide(null)}
           guideTitle={shareGuide.title || "Untitled Stepp"}
           guideId={shareGuide.guideId}
+          guideStatus={shareGuide.status as 'draft' | 'recording' | 'processing' | 'published'}
         />
       )}
 

@@ -361,6 +361,7 @@ function GuideViewPage() {
         onOpenChange={setIsShareOpen}
         guideTitle={guide.title || ""}
         guideId={guide.guideId}
+        guideStatus={guide.status as 'draft' | 'recording' | 'processing' | 'published'}
       />
 
       <ExportDialog

@@ -123,7 +123,7 @@ function FolderPage() {
   // Share/Export Dialog State
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
-  const [selectedGuide, setSelectedGuide] = useState<{ id: string; title: string } | null>(null);
+  const [selectedGuide, setSelectedGuide] = useState<{ id: string; title: string; status?: 'draft' | 'recording' | 'processing' | 'published' } | null>(null);
 
   // Dialog States
   const [deleteSteppOpen, setDeleteSteppOpen] = useState(false);
@@ -183,12 +183,20 @@ function FolderPage() {
   };
 
   const handleShare = (guide: LocalGuideWithFolder) => {
-    setSelectedGuide({ id: guide.guideId, title: guide.title || "Untitled" });
+    setSelectedGuide({
+      id: guide.guideId,
+      title: guide.title || "Untitled",
+      status: guide.status as 'draft' | 'recording' | 'processing' | 'published'
+    });
     setShareDialogOpen(true);
   };
 
   const handleExport = (guide: LocalGuideWithFolder) => {
-    setSelectedGuide({ id: guide.guideId, title: guide.title || "Untitled" });
+    setSelectedGuide({
+      id: guide.guideId,
+      title: guide.title || "Untitled",
+      status: guide.status as 'draft' | 'recording' | 'processing' | 'published'
+    });
     setExportDialogOpen(true);
   };
 
@@ -485,6 +493,7 @@ function FolderPage() {
             onOpenChange={setShareDialogOpen}
             guideTitle={selectedGuide.title}
             guideId={selectedGuide.id}
+            guideStatus={selectedGuide.status}
           />
           <ExportDialog
             open={exportDialogOpen}

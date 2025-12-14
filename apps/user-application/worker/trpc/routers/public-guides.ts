@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc-instance";
 import { getPublishedGuide } from "@repo/data-ops/queries";
-import { transformStepsWithUrls } from "../helpers/transform-assets";
+import { transformGuideWithUrls } from "../helpers/transform-assets";
 
 /**
  * Public Guides tRPC Router
@@ -21,9 +21,6 @@ export const publicGuidesRouter = router({
             if (!guide) return null;
 
             const assetsUrl = ctx.env.ASSETS_URL;
-            return {
-                ...guide,
-                steps: transformStepsWithUrls(guide.steps as any[], assetsUrl),
-            };
+            return transformGuideWithUrls(guide as any, assetsUrl);
         }),
 });

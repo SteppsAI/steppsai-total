@@ -36,13 +36,22 @@ export async function completeRecording(env: Env, guideId: string, title: string
 }
 
 export async function deleteGuideWithImages(env: Env, guideId: string) {
-    // 1. Delete images from R2
-    const prefix = `screenshots/${guideId}/`;
-    const listed = await env.BUCKET.list({ prefix });
+    // 1. Delete screenshots from R2
+    const screenshotsPrefix = `screenshots/${guideId}/`;
+    const screenshotsListed = await env.BUCKET.list({ prefix: screenshotsPrefix });
 
-    if (listed.objects.length > 0) {
-        await Promise.all(listed.objects.map(obj => env.BUCKET.delete(obj.key)));
-        console.log(`[RPC] Deleted ${listed.objects.length} images from R2 for guide ${guideId}`);
+    if (screenshotsListed.objects.length > 0) {
+        await Promise.all(screenshotsListed.objects.map(obj => env.BUCKET.delete(obj.key)));
+        console.log(`[RPC] Deleted ${screenshotsListed.objects.length} screenshots from R2 for guide ${guideId}`);
+    }
+
+    // 1b. Delete brand assets from R2
+    const brandsPrefix = `brands/${guideId}/`;
+    const brandsListed = await env.BUCKET.list({ prefix: brandsPrefix });
+
+    if (brandsListed.objects.length > 0) {
+        await Promise.all(brandsListed.objects.map(obj => env.BUCKET.delete(obj.key)));
+        console.log(`[RPC] Deleted ${brandsListed.objects.length} brand assets from R2 for guide ${guideId}`);
     }
 
     // 2. Delete from DB

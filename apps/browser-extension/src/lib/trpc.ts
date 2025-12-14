@@ -6,10 +6,8 @@ export const trpc = createTRPCClient<AppRouter>({
     links: [
         httpBatchLink({
             url: TRPC_URL,
-            // Auth headers will be added here later
-            // headers: async () => ({
-            //     Authorization: `Bearer ${await getAuthToken()}`,
-            // }),
+            // Important: extension is cross-origin, so we must include cookies
+            fetch: (input: any, init: any) => fetch(input, { ...init, credentials: 'include' }),
         }),
     ],
 });

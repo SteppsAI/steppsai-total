@@ -308,6 +308,22 @@ export function useEditorSession(guideId: string, initialGuide: Guide | null): E
 		}
 	}, [guideId, initialGuide]);
 
+	// If the guide updates in the background (queue finished) hydrate steps once.
+	useEffect(() => {
+		if (!initialGuide) return;
+		if (isDirty) return;
+		if (!localState) return;
+
+		const nextSteps = initialGuide.steps || [];
+		const hasNewSteps = (localState.steps?.length || 0) === 0 && nextSteps.length > 0;
+		if (!hasNewSteps) return;
+
+		setLocalState({
+			title: initialGuide.title || localState.title,
+			steps: nextSteps,
+		});
+	}, [initialGuide?.updatedAt, initialGuide?.steps?.length, isDirty, localState]);
+
 	// Build guide object from local state
 	const guide: Guide | null = localState && initialGuide ? {
 		...initialGuide,

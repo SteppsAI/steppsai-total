@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 interface EditorHeaderProps {
     title: string;
+    brandLogoUrl?: string | null;
     isDirty?: boolean;
     isSyncing?: boolean;
     isSaving?: boolean;
@@ -20,6 +21,7 @@ interface EditorHeaderProps {
 
 export function EditorHeader({
     title,
+    brandLogoUrl,
     isDirty = false,
     isSyncing = false,
     isSaving = false,
@@ -60,6 +62,15 @@ export function EditorHeader({
                     onChange={(e) => onTitleChange(e.target.value)}
                     className="text-center font-medium text-lg border-transparent hover:border-input focus:border-input bg-transparent w-[400px] h-9 px-0 shadow-none focus-visible:ring-0"
                 />
+
+                {brandLogoUrl && (
+                    <img
+                        src={brandLogoUrl}
+                        alt="Brand logo"
+                        className="w-8 h-8 object-contain"
+                        loading="lazy"
+                    />
+                )}
 
                 {/* Status indicator */}
                 <div className="flex items-center gap-1.5 min-w-[140px]">

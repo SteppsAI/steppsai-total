@@ -18,6 +18,7 @@ export async function createGuide(data: CreateGuideSchemaType): Promise<string> 
 		slug: data.slug,
 		status: data.status || "recording",
 		visibility: data.visibility || "private",
+		brandImageKey: data.brandImageKey,
 	});
 
 	return guideId;

@@ -5,6 +5,7 @@ import { stepFromExtensionSchema } from "./steps";
 export const stepsInsertMessageSchema = z.object({
     type: z.literal("STEPS_INSERT"),
     guideId: z.string().uuid(),
+    brandImageKey: z.string().optional(),
     steps: z.array(stepFromExtensionSchema)
 });
 

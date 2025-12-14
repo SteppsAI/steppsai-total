@@ -95,6 +95,7 @@ export function RecentStepps({ isLoading, stepps = [], onDelete, onMove }: Recen
                 key={stepp.guideId}
                 title={stepp.title || "Untitled Stepp"}
                 image={firstStepImage || "/default-preview.svg"}
+                brandLogoUrl={stepp.brandImageKey}
                 viewUrl={`/app/stepps/${stepp.guideId}`}
                 onEdit={() => navigate({ to: `/app/editor/${stepp.guideId}` })}
                 onShare={() => setShareGuide(stepp)}

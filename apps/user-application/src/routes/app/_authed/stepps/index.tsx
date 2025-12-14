@@ -31,6 +31,7 @@ interface LocalGuideWithFolder {
     title?: string | null;
     status?: string | null;
     visibility?: string | null;
+    brandImageKey?: string | null;
     steps?: { id: string; imageKey?: string | null }[];
     updatedAt?: string | null;
     folderName?: string | null;
@@ -400,7 +401,15 @@ function SteppsPage() {
                                         >
                                             <TableCell className="font-medium">
                                                 <div className="flex items-center gap-2">
-                                                    <FileText className="size-4 text-muted-foreground" />
+                                                    {guide.brandImageKey ? (
+                                                        <img
+                                                            src={guide.brandImageKey}
+                                                            alt=""
+                                                            className="size-4 object-contain rounded-sm shrink-0"
+                                                        />
+                                                    ) : (
+                                                        <FileText className="size-4 text-muted-foreground shrink-0" />
+                                                    )}
                                                     <Link
                                                         to="/app/stepps/$guideId"
                                                         params={{ guideId: guide.guideId }}

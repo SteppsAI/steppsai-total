@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ViewerCanvas } from "@/components/viewer-canvas";
 import { trpc } from "@/router";
-import { Badge } from "@/components/ui/badge";
 import { Step } from "@/types/db";
 import { Footer } from "@/components/home-page/footer";
 import { ArrowRight } from "lucide-react";

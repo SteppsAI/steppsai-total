@@ -3,101 +3,113 @@
  * https://developers.cloudflare.com/workers/wrangler/configuration/
  */
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "user-application",
-  "main": "worker/index.ts",
-  "compatibility_date": "2025-06-17",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
-  "assets": {
-    "binding": "ASSETS",
-    "not_found_handling": "single-page-application",
-    "run_worker_first": [
-      "/api/auth/*",
-      "/api/webhooks/*",
-      "/trpc/*"
-    ]
-  },
-  "observability": {
-    "enabled": true
-  },
-  "env": {
-    "stage": {
-      "vars": {
-        "ASSETS_URL": "https://stepps-assets-stage.stepps.ai",
-        "GOOGLE_CLIENT_ID": "354170279226-thlv63iksq8o6sikimt68jkpcdc9dn4e.apps.googleusercontent.com",
-        "VITE_AUTH_URL": "https://stage.stepps.ai",
-        "VITE_EXTENSION_ID_DEVELOPMENT": "hohppdhekklnpcddflglcdogkfnpohec",
-        "VITE_CREEM_LIFETIME_PRODUCT_EU_DEVELOPMENT": "prod_4vYeqb4GliF45ShZtj5v4z",
-        "VITE_CREEM_LIFETIME_PRODUCT_US_DEVELOPMENT": "prod_6KA7T37qW1NqzrdIzY4KPC"
-      },
-      "routes": [
-        {
-          "pattern": "stage.stepps.ai",
-          "custom_domain": true
-        }
-      ],
-      "ratelimits": [
-        {
-          "name": "AUTH_RATE_LIMITER",
-          "namespace_id": "2001",
-          "simple": {
-            "limit": 200,
-            "period": 60
-          }
-        },
-        {
-          "name": "TRPC_RATE_LIMITER",
-          "namespace_id": "2002",
-          "simple": {
-            "limit": 20,
-            "period": 60
-          }
-        }
-      ],
-      "services": [
-        {
-          "binding": "BACKEND_SERVICE",
-          "service": "data-service-stage",
-          "remote": false
-        }
-      ]
-    },
-    "production": {
-      "vars": {
-        "ASSETS_URL": "https://assets.stepps.ai",
-        "GOOGLE_CLIENT_ID": "354170279226-thlv63iksq8o6sikimt68jkpcdc9dn4e.apps.googleusercontent.com",
-        "VITE_AUTH_URL": "https://stepps.ai",
-        "VITE_EXTENSION_ID_PRODUCTION": "",
-        "VITE_CREEM_LIFETIME_PRODUCT_EU_PRODUCTION": "prod_7lYJ3I4faEQkaZuntOnV7E",
-        "VITE_CREEM_LIFETIME_PRODUCT_US_PRODUCTION": "prod_1f68HplUNotde3bINTGPiH"
-      },
-      "ratelimits": [
-        {
-          "name": "AUTH_RATE_LIMITER",
-          "namespace_id": "2001",
-          "simple": {
-            "limit": 20,
-            "period": 60
-          }
-        },
-        {
-          "name": "TRPC_RATE_LIMITER",
-          "namespace_id": "2002",
-          "simple": {
-            "limit": 20,
-            "period": 60
-          }
-        }
-      ],
-      "services": [
-        {
-          "binding": "BACKEND_SERVICE",
-          "service": "data-service-production",
-          "remote": true
-        }
-      ]
-    }
-  }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "user-application",
+	"main": "worker/index.ts",
+	"compatibility_date": "2025-06-17",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"assets": {
+		"binding": "ASSETS",
+		"not_found_handling": "single-page-application",
+		"run_worker_first": [
+			"/api/auth/*",
+			"/api/webhooks/*",
+			"/trpc/*"
+		]
+	},
+	"observability": {
+		"enabled": true
+	},
+	"env": {
+		"stage": {
+			"vars": {
+				"ASSETS_URL": "https://stepps-assets-stage.stepps.ai",
+				"GOOGLE_CLIENT_ID": "354170279226-thlv63iksq8o6sikimt68jkpcdc9dn4e.apps.googleusercontent.com",
+				"VITE_AUTH_URL": "https://stage.stepps.ai",
+				"VITE_EXTENSION_ID_DEVELOPMENT": "hohppdhekklnpcddflglcdogkfnpohec",
+				"VITE_CREEM_LIFETIME_PRODUCT_EU_DEVELOPMENT": "prod_4vYeqb4GliF45ShZtj5v4z",
+				"VITE_CREEM_LIFETIME_PRODUCT_US_DEVELOPMENT": "prod_6KA7T37qW1NqzrdIzY4KPC"
+			},
+			"routes": [
+				{
+					"pattern": "stage.stepps.ai",
+					"custom_domain": true
+				}
+			],
+			"ratelimits": [
+				{
+					"name": "AUTH_RATE_LIMITER",
+					"namespace_id": "2001",
+					"simple": {
+						"limit": 200,
+						"period": 60
+					}
+				},
+				{
+					"name": "TRPC_RATE_LIMITER",
+					"namespace_id": "2002",
+					"simple": {
+						"limit": 20,
+						"period": 60
+					}
+				}
+			],
+			"services": [
+				{
+					"binding": "BACKEND_SERVICE",
+					"service": "data-service-stage",
+					"remote": false
+				}
+			]
+		},
+		"production": {
+			"vars": {
+				"ASSETS_URL": "https://assets.stepps.ai",
+				"GOOGLE_CLIENT_ID": "354170279226-thlv63iksq8o6sikimt68jkpcdc9dn4e.apps.googleusercontent.com",
+				"VITE_AUTH_URL": "https://stepps.ai",
+				"VITE_EXTENSION_ID_PRODUCTION": "",
+				"VITE_CREEM_LIFETIME_PRODUCT_EU_PRODUCTION": "prod_7lYJ3I4faEQkaZuntOnV7E",
+				"VITE_CREEM_LIFETIME_PRODUCT_US_PRODUCTION": "prod_1f68HplUNotde3bINTGPiH"
+			},
+			"routes": [
+				{
+					"pattern": "stepps.ai",
+					"custom_domain": true
+				}
+			],
+			"ratelimits": [
+				{
+					"name": "AUTH_RATE_LIMITER",
+					"namespace_id": "2001",
+					"simple": {
+						"limit": 20,
+						"period": 60
+					}
+				},
+				{
+					"name": "TRPC_RATE_LIMITER",
+					"namespace_id": "2002",
+					"simple": {
+						"limit": 20,
+						"period": 60
+					}
+				}
+			],
+			"services": [
+				{
+					"binding": "BACKEND_SERVICE",
+					"service": "data-service-production",
+					"remote": true
+				}
+			],
+			"observability": {
+				"enabled": false,
+				"logs": {
+					"enabled": false
+				}
+			}
+		}
+	}
 }

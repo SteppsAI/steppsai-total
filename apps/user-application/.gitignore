@@ -10,3 +10,4 @@ dist-ssr
 .env.*
 .dev.vars
 !.env.example
+.env.production

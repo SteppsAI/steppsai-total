@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Copy, Check, Link as LinkIcon, Share, Loader2, Shield, ShieldCheck } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { trpc } from "@/router";
@@ -25,8 +25,16 @@ interface ShareDialogProps {
 export function ShareDialog({ open, onOpenChange, guideTitle, guideId, guideStatus = 'draft' }: ShareDialogProps) {
     const [copied, setCopied] = useState(false);
     const [email, setEmail] = useState("");
+    const [internalStatus, setInternalStatus] = useState(guideStatus);
     const queryClient = useQueryClient();
-    const isPublished = guideStatus === 'published';
+    const isPublished = internalStatus === 'published';
+
+    // Update internal status when prop changes (dialog reopens)
+    useEffect(() => {
+        if (open) {
+            setInternalStatus(guideStatus);
+        }
+    }, [open, guideStatus]);
 
     // Generate the public share URL
     const shareUrl = typeof window !== 'undefined'
@@ -37,7 +45,10 @@ export function ShareDialog({ open, onOpenChange, guideTitle, guideId, guideStat
     const publishMutation = useMutation({
         ...trpc.guides.publish.mutationOptions(),
         onSuccess: () => {
+            // Update internal state immediately for better UX
+            setInternalStatus('published');
             toast.success("Guide published! The link is now ready to share.");
+            // Invalidate queries in background to sync state with server
             queryClient.invalidateQueries({
                 queryKey: trpc.guides.getById.queryOptions({ id: guideId }).queryKey
             });

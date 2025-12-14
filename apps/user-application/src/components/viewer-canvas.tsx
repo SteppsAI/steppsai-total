@@ -183,7 +183,7 @@ export function ViewerCanvas({ screenshotUrl, overlays }: ViewerCanvasProps) {
         <div ref={containerRef} className="w-full h-full flex justify-center items-center">
             {dimensions.width > 0 && dimensions.height > 0 && (
                 <div
-                    className="relative overflow-hidden rounded-md shadow-sm border bg-muted/10 ring-1 ring-black/5"
+                    className="relative overflow-hidden rounded-md shadow-sm border border-[var(--color-200)] bg-[var(--color-50)] ring-1 ring-black/5"
                     style={{ width: dimensions.width, height: dimensions.height }}
                 >
                     <Stage

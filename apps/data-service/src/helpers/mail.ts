@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { getWelcomeEmailHTML } from '../rpc-methods/email-html/templates';
+import { getWelcomeEmailHTML } from './templates';
 
 /**
  * Send welcome email to new subscribers

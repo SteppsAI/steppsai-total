@@ -3,9 +3,10 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, Share2, Download, Save, Loader2, Check, AlertCircle } from "lucide-react";
 import { useRouter } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
+import { useState, useEffect, useRef } from "react";
 
 interface EditorHeaderProps {
-    title: string;
+    title: string | null | undefined;
     brandLogoUrl?: string | null;
     isDirty?: boolean;
     isSyncing?: boolean;
@@ -34,6 +35,40 @@ export function EditorHeader({
     onBack
 }: EditorHeaderProps) {
     const router = useRouter();
+    const [localTitle, setLocalTitle] = useState(title || '');
+    const [isTitleFocused, setIsTitleFocused] = useState(false);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Sync local title with prop when it changes externally
+    useEffect(() => {
+        if (!isTitleFocused) {
+            setLocalTitle(title || '');
+        }
+    }, [title, isTitleFocused]);
+
+    // Handle title change with debounced update
+    const handleTitleChange = (newTitle: string) => {
+        setLocalTitle(newTitle);
+
+        // Clear existing timeout
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+
+        // Debounce the update to avoid excessive saves
+        timeoutRef.current = setTimeout(() => {
+            onTitleChange(newTitle);
+        }, 300);
+    };
+
+    // Handle blur to immediately commit changes
+    const handleTitleBlur = () => {
+        setIsTitleFocused(false);
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+        onTitleChange(localTitle);
+    };
 
     // Format last saved time
     const formatLastSaved = (date: Date) => {
@@ -48,6 +83,18 @@ export function EditorHeader({
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
+    // Determine display title - only show "Untitled Stepps" if the guide was never titled
+    const displayTitle = isTitleFocused ? localTitle : (localTitle || title || '');
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+        };
+    }, []);
+
     return (
         <header className="h-14 border-b bg-background flex items-center justify-between px-4 shrink-0 z-10">
             <div className="flex items-center flex-1">
@@ -58,8 +105,11 @@ export function EditorHeader({
 
             <div className="flex items-center justify-center flex-1 gap-3">
                 <Input
-                    value={title}
-                    onChange={(e) => onTitleChange(e.target.value)}
+                    value={displayTitle}
+                    onChange={(e) => handleTitleChange(e.target.value)}
+                    onFocus={() => setIsTitleFocused(true)}
+                    onBlur={handleTitleBlur}
+                    placeholder="Untitled Stepps"
                     className="text-center font-medium text-lg border-transparent hover:border-input focus:border-input bg-transparent w-[400px] h-9 px-0 shadow-none focus-visible:ring-0"
                 />
 

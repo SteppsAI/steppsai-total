@@ -98,6 +98,20 @@ chrome.webNavigation.onCommitted.addListener((details) => {
     }
 });
 
+async function injectContentScript(tabId: number) {
+    try {
+        await chrome.scripting.executeScript({
+            target: { tabId },
+            files: ['assets/content.js']
+        });
+        console.log(`Injected content script into tab ${tabId}`);
+    } catch (err) {
+        // Ignore errors about script already being loaded (handled by idempotency check in content script)
+        // or if we can't inject (e.g. restricted domains)
+        console.log('Content script injection note:', err);
+    }
+}
+
 async function handleStartRecording() {
     try {
         // 1. Create guide via tRPC
@@ -117,6 +131,12 @@ async function handleStartRecording() {
 
         // 3. Create initial "Navigate to" step for current tab
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+        // Inject content script into the starting tab
+        if (tab?.id) {
+            await injectContentScript(tab.id);
+        }
+
         const initialSteps = [];
 
         if (tab?.url && !tab.url.startsWith('chrome://')) {
@@ -229,10 +249,16 @@ async function handleDiscardRecording() {
 async function handleNavigation(details: chrome.webNavigation.WebNavigationCallbackDetails) {
     const { isRecording, isPaused, steps } = await chrome.storage.local.get(['isRecording', 'isPaused', 'steps']);
 
-    // @ts-ignore - url exists on WebNavigationCallbackDetails but TS might be outdated or strict
+    // @ts-ignore - url exists on WebNavigationCallbackDetails but TS might be outdated
     const url = details.url;
 
     if (!isRecording || isPaused || !url || url.startsWith('chrome://')) return;
+
+    // Inject content script on navigation
+    // details.tabId is available on WebNavigationCallbackDetails
+    if (details.tabId) {
+        await injectContentScript(details.tabId);
+    }
 
     // Avoid duplicate navigation steps if the last step was the same URL
     const lastStep = steps && steps.length > 0 ? steps[steps.length - 1] : null;

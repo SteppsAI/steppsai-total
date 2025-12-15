@@ -1,6 +1,12 @@
 // Content script to capture user interactions
 // Uses mousedown instead of click to capture screenshot BEFORE the action happens
 
+// Idempotency check: prevent re-execution if already injected
+if ((window as any).__STEPPS_CONTENT_SCRIPT_LOADED__) {
+    throw new Error('Stepps Content Script already loaded'); // Stop execution
+}
+(window as any).__STEPPS_CONTENT_SCRIPT_LOADED__ = true;
+
 function getBestFaviconUrl(): string | null {
     const candidates: string[] = [];
 

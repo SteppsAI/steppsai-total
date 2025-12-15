@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { Loader2, Check } from "lucide-react";
 import { toast } from "sonner";
 import gsap from "gsap";
@@ -18,9 +18,14 @@ export const Route = createFileRoute("/app/upgrade")({
     }
   },
   loader: async ({ context }) => {
-    await context.queryClient.prefetchQuery(
-      context.trpc.users.getMePublic.queryOptions()
-    );
+    await Promise.all([
+      context.queryClient.prefetchQuery(
+        context.trpc.users.getMePublic.queryOptions()
+      ),
+      context.queryClient.prefetchQuery(
+        context.trpc.config.getPublicConfig.queryOptions()
+      ),
+    ]);
   },
 });
 
@@ -39,44 +44,12 @@ function UpgradePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { data: user } = useSuspenseQuery(trpc.users.getMePublic.queryOptions());
 
-  const [productId, setProductId] = useState<string | null>(null);
+  // Use suspense query so we don't render until we know the region/product
+  const { data: config } = useSuspenseQuery(trpc.config.getPublicConfig.queryOptions());
+
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    async function detectRegion() {
-      try {
-        const res = await fetch("https://ipapi.co/json/");
-        const data: any = await res.json();
-        const isEU = data?.continent_code === "EU";
-
-        const isProdDomain = window.location.hostname === "stepps.ai";
-
-        if (isProdDomain) {
-          setProductId(
-            isEU
-              ? import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_EU_PRODUCTION
-              : import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US_PRODUCTION
-          );
-        } else {
-          setProductId(
-            isEU
-              ? (import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_EU_DEVELOPMENT || import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_EU)
-              : (import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US_DEVELOPMENT || import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US)
-          );
-        }
-      } catch {
-        // Default to US (Development/Legacy) on error or fallback
-        const isProdDomain = window.location.hostname === "stepps.ai";
-        setProductId(
-          isProdDomain
-            ? import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US_PRODUCTION
-            : (import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US_DEVELOPMENT || import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US)
-        );
-      }
-    }
-    detectRegion();
-  }, []);
-
+  // Animation effect
   useGSAP(() => {
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
@@ -110,10 +83,13 @@ function UpgradePage() {
   const handleCheckout = async () => {
     setIsLoading(true);
     try {
-      if (!productId) throw new Error("Detecting region...");
+      if (!config.productId) {
+        console.error("[Upgrade] Product ID missing from backend config", config);
+        throw new Error("Configuration unavailable");
+      }
 
       const result = await authClient.creem.createCheckout({
-        productId,
+        productId: config.productId,
         successUrl: "/payment/success",
         metadata: {
           referenceId: user?.userId || "",
@@ -242,7 +218,7 @@ function UpgradePage() {
           <div className="upgrade-cta px-6 py-5 sm:px-10 sm:py-6 border-t border-primary/10 bg-white/50">
             <button
               onClick={handleCheckout}
-              disabled={isLoading || !productId}
+              disabled={isLoading || !config.productId}
               className="btn-glass-primary group cursor-pointer w-full h-12 sm:h-13 text-base sm:text-lg font-bold rounded-xl sm:rounded-full shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="flex items-center justify-center gap-2 w-full h-full px-4">

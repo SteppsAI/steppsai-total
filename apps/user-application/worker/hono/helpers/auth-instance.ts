@@ -19,6 +19,9 @@ export const getAuthInstance = async (env: ServiceBindings, req: Request) => {
   if (!env.CREEM_WEBHOOK_SECRET) {
     console.warn("[AuthInstance] WARNING: CREEM_WEBHOOK_SECRET is not set! Webhooks will fail.");
   }
+  if (!env.CREEM_API_KEY) {
+    console.error("[AuthInstance] CRITICAL: CREEM_API_KEY is not set! Checkout will fail.");
+  }
 
   return getAuth(
     {
@@ -66,6 +69,21 @@ export const accessMiddleware = createMiddleware<{
 }>(async (c, next) => {
   const userId = c.get("userId");
   const databaseUrl = c.get("databaseUrl");
+
+  // Check if request is for whitelisted public procedures (even if batched)
+  const url = new URL(c.req.url);
+  // Remove /trpc/ prefix and split by comma for batching
+  const path = url.pathname.replace(/^\/trpc\//, "");
+  const procedures = path.split(",");
+
+  const publicProcedures = ["users.getMePublic", "config.getPublicConfig"];
+  const isPublic = procedures.every(p => publicProcedures.includes(p));
+
+  if (isPublic) {
+    console.log(`[AccessMiddleware] Allowing public procedures: ${procedures.join(", ")}`);
+    await next();
+    return;
+  }
 
   // Initialize database and use the same checkUserAccess as tRPC routes
   await initDatabase(databaseUrl);

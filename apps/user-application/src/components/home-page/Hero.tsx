@@ -141,7 +141,7 @@ export function Hero() {
                             className="text-primary text-sm sm:text-lg lg:text-xl font-light whitespace-nowrap mb-1"
                             style={{ fontFamily: "'Kalam', cursive", transform: "rotate(-2deg)" }}
                         >
-                            Don't miss out!
+                            Watch how it works
                         </p>
                         <svg
                             className="w-8 h-8 sm:w-12 sm:h-12 text-primary/80 translate-y-2 sm:translate-y-4"
@@ -178,7 +178,7 @@ export function Hero() {
                             </div>
 
                             {/* Content Area */}
-                            <div className="relative w-full py-16 px-6 md:px-12 bg-white/40 backdrop-blur-xl flex flex-col items-center justify-center text-center cursor-default">
+                            <div className="relative w-full py-16 px-6 md:px-12 bg-[var(--color-50)] backdrop-blur-xl flex flex-col items-center justify-center text-center cursor-default">
                                 {/* Background Effects */}
                                 <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
                                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px]" />

@@ -20,7 +20,7 @@ function WebinarPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background flex flex-col font-sans relative overflow-x-hidden">
+        <div className="min-h-screen bg-[var(--color-50)] flex flex-col font-sans relative overflow-x-hidden">
 
             {/* Background Elements from upgrade.tsx */}
             <div className="fixed inset-0 bg-foggy -z-10" />

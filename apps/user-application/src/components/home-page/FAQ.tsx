@@ -26,11 +26,11 @@ const faqs = [
     },
     {
         question: "How is this different from screen recording tools?",
-        answer: "Unlike video recorders, stepps.ai creates searchable, editable documentation with optimized screenshots. Readers can follow at their own pace, copy-paste text, and you can easily update individual steps without re-recording everything."
+        answer: "Unlike video recorders, stepps.ai creates searchable, editable documentation with optimized screenshots. Readers can follow at their own pace."
     },
     {
         question: "What editing features are available now?",
-        answer: "Our interactive editor lets you add arrows, highlights, or hide sensitive information. You can edit step descriptions, and rearrange the guide flow. Perfect for creating professional, polished documentation."
+        answer: "Our interactive editor lets you add arrows, highlights, text annotations, or hide sensitive information. You can edit step descriptions, add or remove steps. Perfect for creating professional, polished documentation."
     },
     {
         question: "Can I pause and resume recordings?",
@@ -38,7 +38,7 @@ const faqs = [
     },
     {
         question: "What features are coming next?",
-        answer: "We're rolling out exciting features: Team Collaboration (real-time editing, comments, permissions), Guide Templates (professional layouts for common workflows), Website Embedding (put guides directly on your site), Marketing Export (LinkedIn carousels, social media), Custom Branding (your colors, logos), and additional export formats (Markdown, Word,..)."
+        answer: "We're rolling out exciting features: Interactive Guides, Team Collaboration (real-time editing, comments, permissions), Guide Templates (professional layouts for common workflows), Smart Captions (context aware step descriptions), Website Embedding (put guides directly on your site), Marketing Export (LinkedIn carousels, social media), Custom Branding (your colors, logos), and additional export formats (Markdown, Word,..)."
     },
     {
         question: "When will team collaboration be available?",
@@ -49,21 +49,13 @@ const faqs = [
         answer: "Perfect for SOPs, user guides, training materials, bug reports, feature walkthroughs, onboarding docs, customer support guides, internal knowledge bases, and process documentation. Great for product teams, customer success, training departments, and agencies."
     },
     {
-        question: "How are screenshots handled and optimized?",
-        answer: "Screenshots are automatically captured at each interaction point, and optimized for web viewing. You can enhance them with annotations, blur sensitive data, or replace them entirely in the editor."
-    },
-    {
         question: "What's included in the lifetime deal?",
-        answer: "The one-time payment includes all current features (unlimited guides, SOP editor, sharing, organization) plus ALL upcoming features (team collaboration, templates, embedding, marketing exports, custom branding and more). No monthly fees or surprise charges - you get everything we build, forever."
+        answer: "The one-time payment includes all current features (unlimited guides, SOP editor, sharing, organization) plus ALL upcoming features (interactive guides, team collaboration, templates, smart captions, embedding, marketing exports, custom branding and more). No monthly fees or surprise charges - you get everything we build, forever."
     },
     {
         question: "How secure is my data and guides?",
         answer: "All data is stored securely in Cloudflare's infrastructure with enterprise-grade security. Your guides and screenshots are private until you share them. We use Better Auth for secure authentication and implement industry-standard security practices."
     },
-    {
-        question: "Do you offer refunds?",
-        answer: "Yes, we offer a 30-day money-back guarantee. If you're not completely satisfied with stepps.ai, contact our support team within 30 days of purchase for a full refund."
-    }
 ]
 
 export function FAQ() {

@@ -105,9 +105,9 @@
 				}
 			],
 			"observability": {
-				"enabled": false,
+				"enabled": true,
 				"logs": {
-					"enabled": false
+					"enabled": true
 				}
 			}
 		}

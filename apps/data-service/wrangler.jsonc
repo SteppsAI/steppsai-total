@@ -130,7 +130,13 @@
 						"GuideSession"
 					]
 				}
-			]
+			],
+			"observability": {
+				"enabled": false,
+				"logs": {
+					"enabled": false
+				}
+			}
 		}
 	}
 }

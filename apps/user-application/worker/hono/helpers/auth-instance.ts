@@ -19,6 +19,9 @@ export const getAuthInstance = async (env: ServiceBindings, req: Request) => {
   if (!env.CREEM_WEBHOOK_SECRET) {
     console.warn("[AuthInstance] WARNING: CREEM_WEBHOOK_SECRET is not set! Webhooks will fail.");
   }
+  if (!env.CREEM_API_KEY) {
+    console.error("[AuthInstance] CRITICAL: CREEM_API_KEY is not set! Checkout will fail.");
+  }
 
   return getAuth(
     {

@@ -52,26 +52,28 @@ function UpgradePage() {
         const isProdDomain = window.location.hostname === "stepps.ai";
 
         if (isProdDomain) {
-          setProductId(
-            isEU
-              ? import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_EU_PRODUCTION
-              : import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US_PRODUCTION
-          );
+          const prodId = isEU
+            ? import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_EU_PRODUCTION
+            : import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US_PRODUCTION;
+          console.log("[Upgrade] Production Domain detected. Region EU?", isEU, "Product ID:", prodId);
+          setProductId(prodId);
         } else {
-          setProductId(
-            isEU
-              ? (import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_EU_DEVELOPMENT || import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_EU)
-              : (import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US_DEVELOPMENT || import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US)
-          );
+          const prodId = isEU
+            ? (import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_EU_DEVELOPMENT || import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_EU)
+            : (import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US_DEVELOPMENT || import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US);
+          console.log("[Upgrade] Development Domain detected. Region EU?", isEU, "Product ID:", prodId);
+          setProductId(prodId);
         }
-      } catch {
+      } catch (err) {
+        console.error("[Upgrade] Region detection failed", err);
         // Default to US (Development/Legacy) on error or fallback
         const isProdDomain = window.location.hostname === "stepps.ai";
-        setProductId(
-          isProdDomain
-            ? import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US_PRODUCTION
-            : (import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US_DEVELOPMENT || import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US)
-        );
+        const fallbackId = isProdDomain
+          ? import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US_PRODUCTION
+          : (import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US_DEVELOPMENT || import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US);
+
+        console.log("[Upgrade] Fallback to US Product ID:", fallbackId);
+        setProductId(fallbackId);
       }
     }
     detectRegion();
@@ -110,7 +112,11 @@ function UpgradePage() {
   const handleCheckout = async () => {
     setIsLoading(true);
     try {
-      if (!productId) throw new Error("Detecting region...");
+      if (!productId) {
+        console.error("[Upgrade] No Product ID detected!");
+        throw new Error("Detecting region...");
+      }
+      console.log("[Upgrade] Starting checkout for product:", productId);
 
       const result = await authClient.creem.createCheckout({
         productId,

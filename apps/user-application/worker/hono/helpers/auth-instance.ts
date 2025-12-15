@@ -28,6 +28,7 @@ export const getAuthInstance = async (env: ServiceBindings, req: Request) => {
     {
       apiKey: env.CREEM_API_KEY,
       webhookSecret: env.CREEM_WEBHOOK_SECRET,
+      testMode: env.VITE_AUTH_URL !== "https://stepps.ai",
     },
     env.BETTER_AUTH_SECRET,
     {

@@ -49,11 +49,9 @@ function UpgradePage() {
         const data: any = await res.json();
         const isEU = data?.continent_code === "EU";
 
-        // Select Environment Variables based on Mode
-        // Fallback to legacy VITE_CREEM_LIFETIME_PRODUCT_* if DEVELOPMENT var is missing
-        const isProd = import.meta.env.MODE === "production";
+        const isProdDomain = window.location.hostname === "stepps.ai";
 
-        if (isProd) {
+        if (isProdDomain) {
           setProductId(
             isEU
               ? import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_EU_PRODUCTION
@@ -67,10 +65,10 @@ function UpgradePage() {
           );
         }
       } catch {
-        // Default to US (Development/Legacy) on error
-        const isProd = import.meta.env.MODE === "production";
+        // Default to US (Development/Legacy) on error or fallback
+        const isProdDomain = window.location.hostname === "stepps.ai";
         setProductId(
-          isProd
+          isProdDomain
             ? import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US_PRODUCTION
             : (import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US_DEVELOPMENT || import.meta.env.VITE_CREEM_LIFETIME_PRODUCT_US)
         );

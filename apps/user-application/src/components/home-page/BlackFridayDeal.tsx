@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -8,6 +9,11 @@ gsap.registerPlugin(ScrollTrigger);
 
 export function BlackFridayDeal() {
     const containerRef = useRef<HTMLElement>(null);
+    const navigate = useNavigate();
+
+    const handleGetLifetimeAccess = () => {
+        navigate({ to: '/auth/login' });
+    };
 
     useGSAP(() => {
         const tl = gsap.timeline({
@@ -126,7 +132,10 @@ export function BlackFridayDeal() {
                                         </p>
                                     </div>
 
-                                    <button className="btn-glass-primary group cursor-pointer w-full h-14 md:h-16 text-lg md:text-xl font-bold rounded-full shadow-lg hover:shadow-primary/20 transition-all hover:-translate-y-0.5 active:translate-y-0.5">
+                                    <button
+                                        onClick={handleGetLifetimeAccess}
+                                        className="btn-glass-primary group cursor-pointer w-full h-14 md:h-16 text-lg md:text-xl font-bold rounded-full shadow-lg hover:shadow-primary/20 transition-all hover:-translate-y-0.5 active:translate-y-0.5"
+                                    >
                                         <span className="flex items-center justify-center gap-3">
                                             <span className="relative block h-[1.2em] overflow-hidden text-primary-foreground">
                                                 <span className="block transition-transform duration-500 ease-in-out group-hover:-translate-y-full">

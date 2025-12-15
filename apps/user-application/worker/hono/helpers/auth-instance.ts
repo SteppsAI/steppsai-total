@@ -70,6 +70,21 @@ export const accessMiddleware = createMiddleware<{
   const userId = c.get("userId");
   const databaseUrl = c.get("databaseUrl");
 
+  // Check if request is for whitelisted public procedures (even if batched)
+  const url = new URL(c.req.url);
+  // Remove /trpc/ prefix and split by comma for batching
+  const path = url.pathname.replace(/^\/trpc\//, "");
+  const procedures = path.split(",");
+
+  const publicProcedures = ["users.getMePublic", "config.getPublicConfig"];
+  const isPublic = procedures.every(p => publicProcedures.includes(p));
+
+  if (isPublic) {
+    console.log(`[AccessMiddleware] Allowing public procedures: ${procedures.join(", ")}`);
+    await next();
+    return;
+  }
+
   // Initialize database and use the same checkUserAccess as tRPC routes
   await initDatabase(databaseUrl);
   const accessResult = await checkUserAccess(userId);

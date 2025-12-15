@@ -8,6 +8,7 @@ import { editorRouter } from "@/worker/trpc/routers/editor";
 import { recordingRouter } from "@/worker/trpc/routers/recording";
 import { notificationsRouter } from "@/worker/trpc/routers/notifications";
 import { publicGuidesRouter } from "@/worker/trpc/routers/public-guides";
+import { configRouter } from "@/worker/trpc/routers/config";
 
 /**
  * tRPC Router
@@ -27,6 +28,7 @@ export const appRouter = t.router({
   recording: recordingRouter,
   notifications: notificationsRouter,
   publicGuides: publicGuidesRouter,
+  config: configRouter,
 });
 
 export type AppRouter = typeof appRouter;

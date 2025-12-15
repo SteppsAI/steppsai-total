@@ -40,8 +40,29 @@ App.on(["POST", "GET"], "/api/auth/*", authRateLimiter, async (c) => {
 });
 
 // ========== PUBLIC: tRPC (session-only) ==========
+// ========== PUBLIC: tRPC (session-only) ==========
 App.all(
   "/trpc/users.getMePublic",
+  authMiddleware,
+  (c) => {
+    return fetchRequestHandler({
+      endpoint: "/trpc",
+      req: c.req.raw,
+      router: appRouter,
+      createContext: () =>
+        createContext({
+          req: c.req.raw,
+          env: c.env,
+          workerCtx: c.executionCtx,
+          userId: c.get("userId"),
+        }),
+    });
+  }
+);
+
+// ========== PUBLIC: Config (session-only, access allowed) ==========
+App.all(
+  "/trpc/config.getPublicConfig",
   authMiddleware,
   (c) => {
     return fetchRequestHandler({

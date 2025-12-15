@@ -3,9 +3,9 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import * as z from 'zod'
-import { ArrowRight, CheckCircle2, Loader2 } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Loader2, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { subscribeToWaitlist, subscribeToWebinar } from '@/lib/newsletterActions'
+import { subscribeToWebinar } from '@/lib/newsletterActions'
 
 const emailSchema = z.object({
     email: z.string().email({ message: "Please enter a valid email address" }),
@@ -22,16 +22,15 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>
 
-interface WaitlistFormProps {
+interface WebinarFormProps {
     className?: string
     variant?: 'default' | 'footer'
-    actionType?: 'waitlist' | 'webinar'
     onSuccess?: () => void
 }
 
 type FormStep = 'email' | 'name' | 'submitted'
 
-export function WaitlistForm({ className, variant = 'default', actionType = 'waitlist', onSuccess }: WaitlistFormProps) {
+export function WebinarForm({ className, variant = 'default', onSuccess }: WebinarFormProps) {
     const [currentStep, setCurrentStep] = useState<FormStep>('email')
     const [collectedEmail, setCollectedEmail] = useState('')
     const [submitError, setSubmitError] = useState('')
@@ -42,20 +41,18 @@ export function WaitlistForm({ className, variant = 'default', actionType = 'wai
     })
 
     const mutation = useMutation({
-        mutationFn: actionType === 'webinar' ? subscribeToWebinar : subscribeToWaitlist,
+        mutationFn: subscribeToWebinar,
         onSuccess: (data) => {
             setCurrentStep('submitted')
             reset()
             setCollectedEmail('')
 
-            // Trigger external success handler if provided
             if (onSuccess) {
                 onSuccess()
             }
 
-            // Waitlist might check existing, Webinar might too.
             if (data.is_existing) {
-                setSubmitError(actionType === 'webinar' ? "You are already registered!" : "You have already signed up for the waiting list!")
+                setSubmitError("You are already registered!")
             } else {
                 setSubmitError('')
             }
@@ -95,7 +92,7 @@ export function WaitlistForm({ className, variant = 'default', actionType = 'wai
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className={cn("w-full max-w-2xl", className)}>
-            <div className="mb-8">
+            <div className="mb-6">
                 {/* Container with integrated input and button */}
                 <div className={cn(
                     "relative flex items-center rounded-full overflow-hidden border transition-all",
@@ -103,25 +100,12 @@ export function WaitlistForm({ className, variant = 'default', actionType = 'wai
                         ? "bg-white/5 border-white/10 hover:border-white/20"
                         : "bg-white border-border hover:border-primary/30 shadow-sm"
                 )}>
-                    {/* Email Icon */}
+                    {/* Icon */}
                     <div className={cn(
                         "pl-6 pr-3",
                         variant === 'footer' ? "text-white/40" : "text-muted-foreground"
                     )}>
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <rect width="20" height="16" x="2" y="4" rx="2" />
-                            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                        </svg>
+                        <Calendar className="w-5 h-5" />
                     </div>
 
                     {/* Input */}
@@ -161,7 +145,7 @@ export function WaitlistForm({ className, variant = 'default', actionType = 'wai
                             <>
                                 <CheckCircle2 className="w-4 h-4" />
                                 <span className="hidden sm:inline">
-                                    {actionType === 'webinar' ? 'Registered!' : 'Joined!'}
+                                    Registered!
                                 </span>
                             </>
                         ) : currentStep === 'email' ? (
@@ -172,7 +156,7 @@ export function WaitlistForm({ className, variant = 'default', actionType = 'wai
                         ) : (
                             <>
                                 <span className="hidden sm:inline">
-                                    {actionType === 'webinar' ? 'Register' : 'Join Waitlist'}
+                                    Register
                                 </span>
                                 <ArrowRight className="w-4 h-4" />
                             </>
@@ -185,7 +169,7 @@ export function WaitlistForm({ className, variant = 'default', actionType = 'wai
             {/* Error Message */}
             {submitError && (
                 <p className={cn(
-                    "text-sm text-center",
+                    "text-sm text-center mb-4",
                     variant === 'footer' ? "text-red-300" : "text-red-500"
                 )}>
                     {submitError}
@@ -198,7 +182,7 @@ export function WaitlistForm({ className, variant = 'default', actionType = 'wai
                     "text-sm text-center",
                     variant === 'footer' ? "text-white/60" : "text-muted-foreground"
                 )}>
-                    {actionType === 'webinar' ? ' secure your spot' : 'Join the waitlist'}
+                    Reserve your spot for the live masterclass.
                 </p>
             )}
         </form>

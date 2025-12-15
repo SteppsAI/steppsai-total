@@ -30,6 +30,11 @@ export function Footer() {
                     support@stepps.ai
                   </a>
                 </li>
+                <li>
+                  <Link to="/webinar" className="text-base font-medium text-white hover:text-white/80 transition-colors">
+                    Webinar
+                  </Link>
+                </li>
               </ul>
             </div>
 

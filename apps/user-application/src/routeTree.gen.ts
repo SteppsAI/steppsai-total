@@ -11,6 +11,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WebinarRouteImport } from './routes/webinar'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as IndexRouteImport } from './routes/index'
@@ -37,6 +38,11 @@ const AppRouteImport = createFileRoute('/app')()
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WebinarRoute = WebinarRouteImport.update({
+  id: '/webinar',
+  path: '/webinar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/webinar': typeof WebinarRoute
   '/app': typeof AppAuthedRouteWithChildren
   '/app/upgrade': typeof AppUpgradeRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/webinar': typeof WebinarRoute
   '/app': typeof AppAuthedIndexRoute
   '/app/upgrade': typeof AppUpgradeRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -186,6 +194,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/webinar': typeof WebinarRoute
   '/app': typeof AppRouteWithChildren
   '/app/_authed': typeof AppAuthedRouteWithChildren
   '/app/upgrade': typeof AppUpgradeRoute
@@ -211,6 +220,7 @@ export interface FileRouteTypes {
     | '/'
     | '/privacy'
     | '/terms'
+    | '/webinar'
     | '/app'
     | '/app/upgrade'
     | '/auth/forgot-password'
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
     | '/'
     | '/privacy'
     | '/terms'
+    | '/webinar'
     | '/app'
     | '/app/upgrade'
     | '/auth/forgot-password'
@@ -253,6 +264,7 @@ export interface FileRouteTypes {
     | '/'
     | '/privacy'
     | '/terms'
+    | '/webinar'
     | '/app'
     | '/app/_authed'
     | '/app/upgrade'
@@ -277,6 +289,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
+  WebinarRoute: typeof WebinarRoute
   AppRoute: typeof AppRouteWithChildren
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
@@ -294,6 +307,13 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/webinar': {
+      id: '/webinar'
+      path: '/webinar'
+      fullPath: '/webinar'
+      preLoaderRoute: typeof WebinarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -491,6 +511,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
+  WebinarRoute: WebinarRoute,
   AppRoute: AppRouteWithChildren,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,

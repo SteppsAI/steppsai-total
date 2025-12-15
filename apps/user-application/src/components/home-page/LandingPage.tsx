@@ -1,8 +1,8 @@
 import { Navbar } from "./Navbar";
 import { Hero } from "./Hero";
 import { SocialProof } from "./SocialProof";
-import {HowItWorks} from "./HowItWorks";
-import { BlackFridayDeal } from "./BlackFridayDeal";
+import { HowItWorks } from "./HowItWorks";
+import { WaitlistSection } from "./WaitlistSection";
 import { FAQ } from "./FAQ";
 import { Footer } from "./footer";
 
@@ -16,9 +16,11 @@ export function LandingPage() {
                 <div className="bg-foggy">
                     <SocialProof />
                     <HowItWorks />
-                    <BlackFridayDeal />
+                    {/* <BlackFridayDeal /> */}
                 </div>
                 <FAQ />
+                <WaitlistSection />
+
             </main>
 
             <Footer />

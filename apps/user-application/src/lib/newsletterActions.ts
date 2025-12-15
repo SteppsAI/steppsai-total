@@ -41,3 +41,22 @@ export const subscribeToWaitlist = async (
         is_existing: false
     };
 }
+
+export const subscribeToWebinar = async (
+    payload: WaitlistSubscribeRequest,
+): Promise<WaitlistSubscribeResponse> => {
+    const validationResult = subscribeSchema.safeParse(payload)
+    if (!validationResult.success) {
+        const errorMessage = validationResult.error.errors.map((e) => e.message).join(', ')
+        throw new Error(errorMessage)
+    }
+
+    console.log('Subscribing to webinar:', payload);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    return {
+        success: true,
+        message: 'You are registered for the webinar!',
+        is_existing: false
+    };
+}

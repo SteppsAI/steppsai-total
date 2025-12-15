@@ -222,7 +222,7 @@ function EditorPage() {
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden bg-background">
       <EditorHeader
-        title={session.guide.title || "Untitled Stepps"}
+        title={session.guide.title}
         brandLogoUrl={session.guide.brandImageKey}
         isDirty={session.isDirty}
         isSyncing={session.isSyncing}
@@ -267,7 +267,7 @@ function EditorPage() {
       <ShareDialog
         open={isShareOpen}
         onOpenChange={setIsShareOpen}
-        guideTitle={session.guide.title || "Untitled Stepps"}
+        guideTitle={session.guide.title || "Untitled Guide"}
         guideId={guideId}
         guideStatus={(fetchedGuide as Guide)?.status as 'draft' | 'recording' | 'processing' | 'published'}
       />
@@ -275,7 +275,7 @@ function EditorPage() {
       <ExportDialog
         open={isExportOpen}
         onOpenChange={setIsExportOpen}
-        guideTitle={session.guide.title || "Untitled Stepps"}
+        guideTitle={session.guide.title || "Untitled Guide"}
         guideId={guideId}
       />
     </div>

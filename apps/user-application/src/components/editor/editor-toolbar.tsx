@@ -26,7 +26,7 @@ export function EditorToolbar({ activeTool, onToolChange }: EditorToolbarProps) 
     ];
 
     return (
-        <div className="absolute left-6 top-1/2 -translate-y-1/2 flex flex-col items-center bg-background rounded-full shadow-lg border border-border p-2 gap-2 z-30">
+        <div className="absolute left-6 top-1/2 -translate-y-1/2 flex flex-col items-center bg-[var(--color-200)] rounded-full shadow-lg border border-[var(--color-300)] p-2 gap-2 z-30">
             <TooltipProvider delayDuration={0}>
                 {tools.map((tool) => (
                     <Tooltip key={tool.id}>
@@ -38,8 +38,8 @@ export function EditorToolbar({ activeTool, onToolChange }: EditorToolbarProps) 
                                 className={cn(
                                     "rounded-full w-10 h-10",
                                     activeTool === tool.id
-                                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                                        : "text-slate-600 hover:text-primary hover:bg-primary/15"
+                                        ? "bg-[var(--color-500)] text-primary-foreground hover:bg-[var(--color-600)]"
+                                        : "text-[var(--color-900)] hover:text-primary hover:bg-primary/15"
                                 )}
                             >
                                 <tool.icon className="w-5 h-5" />

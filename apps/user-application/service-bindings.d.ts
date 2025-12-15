@@ -8,4 +8,5 @@ interface ServiceBindings extends Env {
     CREEM_WEBHOOK_SECRET?: string;
     CREEM_TEST_MODE?: string;
     BETTER_AUTH_SECRET: string;
+    VITE_AUTH_URL: string;
 }

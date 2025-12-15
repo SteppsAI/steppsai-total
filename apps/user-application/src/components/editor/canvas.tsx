@@ -743,7 +743,7 @@ export function Canvas({
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center bg-slate-100 p-8 pb-16 relative overflow-hidden">
+    <div className="flex-1 flex flex-col items-center justify-center bg-[var(--color-50)] p-8 pb-16 relative overflow-hidden">
       <div className="max-w-5xl w-full space-y-4 z-10">
         {/* Toolbar for undo/redo/delete with icons */}
 
@@ -841,29 +841,29 @@ export function Canvas({
 
         {/* Action buttons at bottom */}
         <div className="flex justify-center items-center gap-3">
-          <div className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-full shadow-xl border border-border">
+          <div className="flex items-center gap-2 bg-[var(--color-200)] px-4 py-2.5 rounded-full shadow-lg border border-[var(--color-300)]">
             <Button
               onClick={undo}
               disabled={!canUndo}
               variant="ghost"
               size="icon"
-              className="h-9 w-9 rounded-full hover:bg-primary/10"
+              className="h-10 w-10 rounded-full text-[var(--color-900)] hover:text-primary hover:bg-primary/15"
               title="Undo"
             >
-              <Undo2 className="w-4 h-4" />
+              <Undo2 className="w-5 h-5" />
             </Button>
             <Button
               onClick={redo}
               disabled={!canRedo}
               variant="ghost"
               size="icon"
-              className="h-9 w-9 rounded-full hover:bg-primary/10"
+              className="h-10 w-10 rounded-full text-[var(--color-900)] hover:text-primary hover:bg-primary/15"
               title="Redo"
             >
-              <Redo2 className="w-4 h-4" />
+              <Redo2 className="w-5 h-5" />
             </Button>
 
-            <div className="h-6 w-px bg-border/50" />
+            <div className="h-6 w-px bg-[var(--color-300)]" />
 
             {(activeTool === 'text' || (selectedId && annotations.find(a => a.id === selectedId)?.type === 'text')) && (
               <>
@@ -872,7 +872,7 @@ export function Canvas({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-9 px-2 hover:bg-primary/10 text-sm font-medium w-24 justify-between"
+                      className="h-10 px-3 text-[var(--color-900)] hover:text-primary hover:bg-primary/15 text-sm font-medium w-28 justify-between"
                       title="Font Family"
                     >
                       <span className="truncate">
@@ -899,31 +899,31 @@ export function Canvas({
                   </PopoverContent>
                 </Popover>
 
-                <div className="h-6 w-px bg-border/50" />
+                <div className="h-6 w-px bg-[var(--color-300)]" />
 
                 <div className="flex items-center gap-1">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-full hover:bg-primary/10"
+                    className="h-9 w-9 rounded-full text-[var(--color-900)] hover:text-primary hover:bg-primary/15"
                     onClick={() => handleFontSizeChange(Math.max(12, selectedFontSize - 4))}
                     title="Decrease font size"
                   >
-                    <Minus className="w-3 h-3" />
+                    <Minus className="w-4 h-4" />
                   </Button>
-                  <span className="text-xs font-medium w-6 text-center">{selectedFontSize}</span>
+                  <span className="text-sm font-medium w-8 text-center text-[var(--color-900)]">{selectedFontSize}</span>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-full hover:bg-primary/10"
+                    className="h-9 w-9 rounded-full text-[var(--color-900)] hover:text-primary hover:bg-primary/15"
                     onClick={() => handleFontSizeChange(Math.min(128, selectedFontSize + 4))}
                     title="Increase font size"
                   >
-                    <Plus className="w-3 h-3" />
+                    <Plus className="w-4 h-4" />
                   </Button>
                 </div>
 
-                <div className="h-6 w-px bg-border/50" />
+                <div className="h-6 w-px bg-[var(--color-300)]" />
               </>
             )}
 
@@ -932,7 +932,7 @@ export function Canvas({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 rounded-full hover:bg-primary/10 p-1.5"
+                  className="h-10 w-10 rounded-full hover:bg-primary/15 p-2"
                   title="Color"
                 >
                   <div
@@ -958,7 +958,7 @@ export function Canvas({
               </PopoverContent>
             </Popover>
 
-            <div className="h-6 w-px bg-border/50" />
+            <div className="h-6 w-px bg-[var(--color-300)]" />
 
             <Button
               onClick={() => {
@@ -973,10 +973,10 @@ export function Canvas({
               }}
               variant="ghost"
               size="icon"
-              className="h-9 w-9 rounded-full hover:bg-red-50 text-red-600"
+              className="h-10 w-10 rounded-full text-red-600 hover:bg-red-100 hover:text-red-700"
               title={selectedId ? "Delete annotation" : "Delete step"}
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-5 h-5" />
             </Button>
           </div>
         </div>

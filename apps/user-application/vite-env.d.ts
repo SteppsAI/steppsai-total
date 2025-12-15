@@ -1,6 +1,7 @@
 interface ImportMetaEnv {
   readonly VITE_BACKEND_HOST: string;
   readonly VITE_BASE_HOST: string;
+  readonly VITE_AUTH_URL: string;
   readonly VITE_EXTENSION_ID_DEVELOPMENT: string;
   readonly VITE_EXTENSION_ID_PRODUCTION: string;
   // Payment Links

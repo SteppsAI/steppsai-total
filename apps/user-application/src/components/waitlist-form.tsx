@@ -101,12 +101,12 @@ export function WaitlistForm({ className, variant = 'default', actionType = 'wai
                     "relative flex items-center rounded-full overflow-hidden border transition-all",
                     variant === 'footer'
                         ? "bg-white/5 border-white/10 hover:border-white/20"
-                        : "bg-white border-border hover:border-primary/30 shadow-sm"
+                        : "bg-white border-[var(--color-200)] hover:border-[var(--color-300)] shadow-sm"
                 )}>
                     {/* Email Icon */}
                     <div className={cn(
                         "pl-6 pr-3",
-                        variant === 'footer' ? "text-white/40" : "text-muted-foreground"
+                        variant === 'footer' ? "text-white/40" : "text-[var(--color-500)]"
                     )}>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -139,7 +139,7 @@ export function WaitlistForm({ className, variant = 'default', actionType = 'wai
                             "placeholder:text-sm",
                             variant === 'footer'
                                 ? "text-white placeholder:text-white/40"
-                                : "text-foreground placeholder:text-muted-foreground"
+                                : "text-[var(--color-900)] placeholder:text-[var(--color-400)]"
                         )}
                     />
 
@@ -150,8 +150,8 @@ export function WaitlistForm({ className, variant = 'default', actionType = 'wai
                         className={cn(
                             "m-1.5 h-11 px-6 rounded-full font-medium transition-all shrink-0 flex items-center gap-2",
                             variant === 'footer'
-                                ? "bg-white text-brand-dark hover:bg-white/90"
-                                : "bg-brand-dark text-white hover:bg-brand-dark/90",
+                                ? "bg-white text-[var(--color-900)] hover:bg-white/90"
+                                : "bg-[var(--color-700)] text-white hover:bg-[var(--color-800)]",
                             "disabled:opacity-50 disabled:cursor-not-allowed"
                         )}
                     >
@@ -186,7 +186,7 @@ export function WaitlistForm({ className, variant = 'default', actionType = 'wai
             {submitError && (
                 <p className={cn(
                     "text-sm text-center",
-                    variant === 'footer' ? "text-red-300" : "text-red-500"
+                    variant === 'footer' ? "text-red-300" : "text-[var(--destructive)]"
                 )}>
                     {submitError}
                 </p>
@@ -196,7 +196,7 @@ export function WaitlistForm({ className, variant = 'default', actionType = 'wai
             {currentStep === 'email' && (
                 <p className={cn(
                     "text-sm text-center",
-                    variant === 'footer' ? "text-white/60" : "text-muted-foreground"
+                    variant === 'footer' ? "text-white/60" : "text-[var(--color-500)]"
                 )}>
                     {actionType === 'webinar' ? ' secure your spot' : 'Join the waitlist'}
                 </p>

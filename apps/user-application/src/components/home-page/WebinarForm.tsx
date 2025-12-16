@@ -182,7 +182,7 @@ export function WebinarForm({ className, variant = 'default', onSuccess }: Webin
                     "text-sm text-center",
                     variant === 'footer' ? "text-white/60" : "text-[var(--color-500)]"
                 )}>
-                    Reserve your spot for the live masterclass.
+                    Reserve your spot for the live demo webinar.
                 </p>
             )}
         </form>

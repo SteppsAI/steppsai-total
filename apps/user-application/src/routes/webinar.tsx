@@ -41,15 +41,15 @@ function WebinarPage() {
                                 <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-[var(--destructive)] opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--destructive)]"></span>
                             </span>
-                            Live Masterclass
+                            Live Demo
                         </div>
 
                         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-[var(--color-950)] leading-[0.95]">
-                            Mastering Stepps.ai
+                            See Stepps.ai in Action
                         </h1>
 
                         <p className="text-xl md:text-2xl text-[var(--color-600)] max-w-2xl mx-auto leading-relaxed font-medium">
-                            Join our exclusive live webinar and learn how to 10x your documentation speed.
+                            Join our live demo and discover how to turn actions into step-by-step documentation.
                         </p>
                     </div>
 

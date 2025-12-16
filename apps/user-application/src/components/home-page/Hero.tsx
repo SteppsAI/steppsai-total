@@ -99,20 +99,28 @@ export function Hero() {
 
                             {/* CTAs */}
                             <div className="hero-text-stagger flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 w-full sm:w-auto">
-                                <Link
+                                <a
+                                    href="#waitlist"
+                                    className="btn-glass-primary group inline-flex h-11 sm:h-12 items-center justify-center rounded-full px-6 sm:px-8 text-sm font-medium text-primary-foreground transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                >
+                                    Join Waitlist
+                                    <ArrowRight className="ml-2 size-4 transition-transform duration-200 group-hover:translate-x-1" />
+                                </a>
+
+                                {/* <Link
                                     to="/auth/login"
                                     className="btn-glass-primary group inline-flex h-11 sm:h-12 items-center justify-center rounded-full px-6 sm:px-8 text-sm font-medium text-primary-foreground transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 >
                                     Get Started
                                     <ArrowRight className="ml-2 size-4 transition-transform duration-200 group-hover:translate-x-1" />
-                                </Link>
+                                </Link> */}
 
                                 <Link
                                     to="/webinar"
                                     className="btn-glass-secondary group inline-flex h-11 sm:h-12 items-center justify-center rounded-full px-6 sm:px-8 text-sm font-medium text-[var(--color-800)] transition-all duration-200 hover:-translate-y-0.5 hover:text-primary active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 >
                                     <Play className="mr-2 size-4 fill-current transition-transform duration-200 group-hover:scale-110" />
-                                    Webinar
+                                    Live Demo
                                 </Link>
 
                                 {/* 
@@ -191,13 +199,13 @@ export function Hero() {
                                                 <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-[var(--destructive)] opacity-75"></span>
                                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--destructive)]"></span>
                                             </span>
-                                            Live Masterclass
+                                            Live Demo
                                         </div>
                                         <h3 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[var(--color-950)] leading-[0.95]">
-                                            Mastering Stepps.ai
+                                            See Stepps.ai in Action
                                         </h3>
                                         <p className="text-xl md:text-2xl text-[var(--color-600)] max-w-2xl mx-auto leading-relaxed font-medium">
-                                            Join our exclusive live webinar and learn how to 10x your documentation speed.
+                                            Join our live demo and discover how to turn actions into step-by-step documentation.
                                         </p>
                                     </div>
 

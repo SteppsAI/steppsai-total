@@ -14,6 +14,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WebinarRouteImport } from './routes/webinar'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PaymentsRouteImport } from './routes/payments'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SharedGuideIdRouteImport } from './routes/shared/$guideId'
 import { Route as PaymentSuccessRouteImport } from './routes/payment/success'
@@ -53,6 +54,11 @@ const TermsRoute = TermsRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentsRoute = PaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -147,6 +153,7 @@ const AppAuthedEditorGuideIdRoute = AppAuthedEditorGuideIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/payments': typeof PaymentsRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/webinar': typeof WebinarRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/payments': typeof PaymentsRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/webinar': typeof WebinarRoute
@@ -192,6 +200,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/payments': typeof PaymentsRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/webinar': typeof WebinarRoute
@@ -218,6 +227,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/payments'
     | '/privacy'
     | '/terms'
     | '/webinar'
@@ -241,6 +251,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/payments'
     | '/privacy'
     | '/terms'
     | '/webinar'
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/payments'
     | '/privacy'
     | '/terms'
     | '/webinar'
@@ -287,6 +299,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PaymentsRoute: typeof PaymentsRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   WebinarRoute: typeof WebinarRoute
@@ -328,6 +341,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payments': {
+      id: '/payments'
+      path: '/payments'
+      fullPath: '/payments'
+      preLoaderRoute: typeof PaymentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -509,6 +529,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PaymentsRoute: PaymentsRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   WebinarRoute: WebinarRoute,

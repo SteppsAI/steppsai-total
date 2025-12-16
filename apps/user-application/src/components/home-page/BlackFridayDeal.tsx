@@ -68,8 +68,7 @@ export function BlackFridayDeal() {
         <section id="black-friday" ref={containerRef} className="py-16 md:py-24 relative overflow-hidden font-sans bg-gradient-to-b from-[var(--color-100)] via-[var(--color-50)]/30 to-transparent duration-500">
             <div className="container mx-auto px-4 md:px-6 relative z-10">
                 <div className="max-w-5xl mx-auto">
-
-                    {/* Header */}
+                    { /*
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12 gap-6">
                         <div>
                             <div className="bf-badge inline-flex items-center gap-2 px-3 py-1 rounded-full bg-background/50 backdrop-blur-sm border border-[var(--color-900)]/10 text-[var(--color-900)] text-sm font-medium mb-4 shadow-sm">
@@ -92,6 +91,7 @@ export function BlackFridayDeal() {
                             </p>
                         </div>
                     </div>
+                    */}
 
                     {/* Minimal Card (Cell Layout) */}
                     <div className="bf-card mx-auto grid max-w-5xl border-2 border-primary shadow-2xl overflow-hidden rounded-3xl bg-background">

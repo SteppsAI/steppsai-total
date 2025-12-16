@@ -102,7 +102,7 @@ export function WebinarForm({ className, variant = 'default', onSuccess }: Webin
                 )}>
                     {/* Icon */}
                     <div className={cn(
-                        "pl-6 pr-3",
+                        "pl-3 pr-2 sm:pl-6 sm:pr-3",
                         variant === 'footer' ? "text-white/40" : "text-[var(--color-500)]"
                     )}>
                         <Calendar className="w-5 h-5" />
@@ -119,7 +119,7 @@ export function WebinarForm({ className, variant = 'default', onSuccess }: Webin
                         }
                         disabled={mutation.isPending || currentStep === 'submitted'}
                         className={cn(
-                            "flex-1 h-14 bg-transparent border-0 outline-none text-base",
+                            "flex-1 min-w-0 h-12 sm:h-14 bg-transparent border-0 outline-none text-base",
                             "placeholder:text-sm",
                             variant === 'footer'
                                 ? "text-white placeholder:text-white/40"
@@ -132,7 +132,7 @@ export function WebinarForm({ className, variant = 'default', onSuccess }: Webin
                         type="submit"
                         disabled={mutation.isPending || currentStep === 'submitted'}
                         className={cn(
-                            "m-1.5 h-11 px-6 rounded-full font-medium transition-all shrink-0 flex items-center gap-2",
+                            "m-1 sm:m-1.5 h-10 sm:h-11 px-3 sm:px-6 rounded-full font-medium transition-all shrink-0 flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base whitespace-nowrap",
                             variant === 'footer'
                                 ? "bg-white text-[var(--color-900)] hover:bg-white/90"
                                 : "bg-[var(--color-700)] text-white hover:bg-[var(--color-800)]",
@@ -144,18 +144,18 @@ export function WebinarForm({ className, variant = 'default', onSuccess }: Webin
                         ) : currentStep === 'submitted' ? (
                             <>
                                 <CheckCircle2 className="w-4 h-4" />
-                                <span className="hidden sm:inline">
+                                <span className="inline">
                                     Registered!
                                 </span>
                             </>
                         ) : currentStep === 'email' ? (
                             <>
-                                <span className="hidden sm:inline">Next</span>
+                                <span className="inline">Next</span>
                                 <ArrowRight className="w-4 h-4" />
                             </>
                         ) : (
                             <>
-                                <span className="hidden sm:inline">
+                                <span className="inline">
                                     Register
                                 </span>
                                 <ArrowRight className="w-4 h-4" />

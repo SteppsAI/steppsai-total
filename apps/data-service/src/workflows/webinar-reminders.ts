@@ -1,8 +1,8 @@
 import { WorkflowEntrypoint, WorkflowEvent, WorkflowStep } from 'cloudflare:workers';
 import { initDatabase } from '@repo/data-ops/database';
 import { getWebinarRegistrations } from '@repo/data-ops/queries/webinar';
-import { createLoopsClient } from '../lib/loops-client';
-import { formatWebinarDateTime } from '../lib/calendar-link';
+import { createLoopsClient } from '../helpers/loops-client';
+import { formatWebinarDateTime } from '../helpers/calendar-link';
 
 export interface WebinarReminderParams {
     webinarId: string;

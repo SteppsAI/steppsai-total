@@ -1,16 +1,16 @@
 import { initDatabase } from '@repo/data-ops/database';
 import { addWebinarRegistration, findWebinarRegistration, getWebinarRegistrationCount } from '@repo/data-ops/queries/webinar';
-import { createLoopsClient } from '../lib/loops-client';
-import { generateWebinarCalendarLink, formatWebinarDateTime } from '../lib/calendar-link';
+import { createLoopsClient } from '../helpers/loops-client';
+import { generateWebinarCalendarLink, formatWebinarDateTime } from '../helpers/calendar-link';
 
 // Current webinar configuration
 // TODO: Move to DB or config when you have multiple webinars
 const CURRENT_WEBINAR = {
     webinarId: 'webinar-dec-2025',
     title: 'See Stepps.ai in Action - Live Demo',
-    startAt: '2025-12-24T14:00:00Z', // Update this to your actual webinar date (UTC)
+    startAt: '2025-12-22T18:00:00Z', // Update this to your actual webinar date (UTC)
     timezone: 'Europe/Amsterdam',
-    durationMinutes: 60,
+    durationMinutes: 20,
     // Leave empty until you pick a webinar provider - calendar link will say "Link coming soon"
     joinUrl: '',
     // Optional: Loops mailing list ID for this webinar (create in Loops dashboard, copy ID)

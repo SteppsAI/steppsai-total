@@ -119,14 +119,23 @@ export function formatWebinarDateTime(
 ): string {
     const date = new Date(isoDate);
 
-    return date.toLocaleString('en-US', {
+    const dateOptions: Intl.DateTimeFormatOptions = {
         weekday: 'long',
-        year: 'numeric',
         month: 'long',
         day: 'numeric',
-        hour: 'numeric',
+        timeZone: timezone,
+    };
+    
+    const timeOptions: Intl.DateTimeFormatOptions = {
+        hour: '2-digit',
         minute: '2-digit',
+        hour12: false,
         timeZone: timezone,
         timeZoneName: 'short',
-    });
+    };
+    
+    const formattedDate = new Intl.DateTimeFormat('en-US', dateOptions).format(date);
+    const formattedTime = new Intl.DateTimeFormat('en-US', timeOptions).format(date);
+    
+    return `${formattedDate}, ${formattedTime}`;
 }

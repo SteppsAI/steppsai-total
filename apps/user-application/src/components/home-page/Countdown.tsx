@@ -9,10 +9,10 @@ interface TimeUnitProps {
 function TimeUnit({ value, label }: TimeUnitProps) {
     return (
         <div className="flex flex-col items-center gap-0 sm:gap-1 min-w-[70px] sm:min-w-[90px]">
-            <span className="text-4xl sm:text-6xl font-bold font-mono text-[var(--color-950)] tabular-nums tracking-tighter leading-none">
+            <span className="text-2xl sm:text-4xl font-bold font-mono text-[var(--color-900)] tabular-nums tracking-tighter leading-none">
                 {value.toString().padStart(2, '0')}
             </span>
-            <span className="text-[10px] sm:text-xs font-bold text-[var(--color-500)] uppercase tracking-widest mt-1">
+            <span className="text-[10px] sm:text-xs font-bold text-[var(--color-600)] uppercase tracking-widest mt-1">
                 {label}
             </span>
         </div>

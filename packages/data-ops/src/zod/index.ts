@@ -10,3 +10,4 @@ export * from "./users";
 export * from "./sessions";
 export * from "./workflows";
 export * from "./feedback";
+export * from "./webinar";

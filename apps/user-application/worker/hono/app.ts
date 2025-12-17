@@ -1,13 +1,16 @@
 import { Hono } from "hono";
-import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { appRouter } from "../trpc/router";
-import { createContext } from "../trpc/context";
 import {
   getAuthInstance,
   authMiddleware,
   accessMiddleware,
 } from "./helpers/auth-instance";
 import { authRateLimiter, trpcRateLimiter, publicRateLimiter } from "./helpers/rate-limiter";
+import {
+  authenticatedTrpcHandler,
+  publicTrpcHandler,
+  PUBLIC_TRPC_ROUTES,
+  SESSION_ONLY_ROUTES,
+} from "./helpers/trpc-routes";
 
 export const App = new Hono<{
   Bindings: ServiceBindings & {
@@ -17,20 +20,13 @@ export const App = new Hono<{
   Variables: { userId: string };
 }>();
 
-
-// ========== PUBLIC: Auth routes ==========
+// ========== AUTH ROUTES ==========
 App.on(["POST", "GET"], "/api/auth/*", authRateLimiter, async (c) => {
   try {
-    console.log(`[AuthRoute] Handling request: ${c.req.url}`);
     const auth = await getAuthInstance(c.env, c.req.raw);
     return auth.handler(c.req.raw);
   } catch (error) {
-    console.error("[AuthRoute] CRITICAL ERROR IN AUTH HANDLER:", error);
-    if (error instanceof Error) {
-      console.error("Stack:", error.stack);
-      console.error("Cause:", error.cause);
-    }
-    // Return detailed error in non-prod environments or generic in prod
+    console.error("[AuthRoute] Error:", error);
     return c.json({
       error: "auth_unavailable",
       details: error instanceof Error ? error.message : "Unknown error",
@@ -39,85 +35,15 @@ App.on(["POST", "GET"], "/api/auth/*", authRateLimiter, async (c) => {
   }
 });
 
-// ========== PUBLIC: tRPC (session-only) ==========
-// ========== PUBLIC: tRPC (session-only) ==========
-App.all(
-  "/trpc/users.getMePublic",
-  authMiddleware,
-  (c) => {
-    return fetchRequestHandler({
-      endpoint: "/trpc",
-      req: c.req.raw,
-      router: appRouter,
-      createContext: () =>
-        createContext({
-          req: c.req.raw,
-          env: c.env,
-          workerCtx: c.executionCtx,
-          userId: c.get("userId"),
-        }),
-    });
-  }
-);
+// ========== PUBLIC TRPC ROUTES (no auth, IP rate limited) ==========
+for (const route of PUBLIC_TRPC_ROUTES) {
+  App.all(route, publicRateLimiter, publicTrpcHandler);
+}
 
-// ========== PUBLIC: Config (session-only, access allowed) ==========
-App.all(
-  "/trpc/config.getPublicConfig",
-  authMiddleware,
-  (c) => {
-    return fetchRequestHandler({
-      endpoint: "/trpc",
-      req: c.req.raw,
-      router: appRouter,
-      createContext: () =>
-        createContext({
-          req: c.req.raw,
-          env: c.env,
-          workerCtx: c.executionCtx,
-          userId: c.get("userId"),
-        }),
-    });
-  }
-);
+// ========== SESSION-ONLY TRPC ROUTES (auth required, no access check) ==========
+for (const route of SESSION_ONLY_ROUTES) {
+  App.all(route, authMiddleware, authenticatedTrpcHandler);
+}
 
-// ========== PUBLIC: Published guides (no auth, IP rate limited) ==========
-App.all(
-  "/trpc/publicGuides.*",
-  publicRateLimiter,
-  (c) => {
-    return fetchRequestHandler({
-      endpoint: "/trpc",
-      req: c.req.raw,
-      router: appRouter,
-      createContext: () =>
-        createContext({
-          req: c.req.raw,
-          env: c.env,
-          workerCtx: c.executionCtx,
-          userId: "anonymous",
-        }),
-    });
-  }
-);
-
-// ========== PROTECTED: tRPC routes ==========
-App.all(
-  "/trpc/*",
-  authMiddleware,
-  accessMiddleware,
-  trpcRateLimiter,
-  (c) => {
-    return fetchRequestHandler({
-      endpoint: "/trpc",
-      req: c.req.raw,
-      router: appRouter,
-      createContext: () =>
-        createContext({
-          req: c.req.raw,
-          env: c.env,
-          workerCtx: c.executionCtx,
-          userId: c.get("userId"),
-        }),
-    });
-  }
-);
+// ========== PROTECTED TRPC ROUTES (full auth + access check) ==========
+App.all("/trpc/*", authMiddleware, accessMiddleware, trpcRateLimiter, authenticatedTrpcHandler);

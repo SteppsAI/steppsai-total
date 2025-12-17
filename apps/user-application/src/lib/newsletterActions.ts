@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { trpcClient } from './trpc-client'
 
 export interface WaitlistSubscribeRequest {
     name: string
@@ -16,47 +17,56 @@ const subscribeSchema = z.object({
     email: z.string().email({ message: 'Invalid email address' }),
 })
 
-// Client-side adapter that calls the API
+/**
+ * Subscribe to waitlist via tRPC
+ * Sends event to Loops for confirmation email
+ */
 export const subscribeToWaitlist = async (
     payload: WaitlistSubscribeRequest,
 ): Promise<WaitlistSubscribeResponse> => {
-    // 1. Validate input
+    // Validate input
     const validationResult = subscribeSchema.safeParse(payload)
     if (!validationResult.success) {
         const errorMessage = validationResult.error.errors.map((e) => e.message).join(', ')
         throw new Error(errorMessage)
     }
 
-    // 2. Send to backend (Mocked for now, or point to actual endpoint if available)
-    // In a real Vite app, this would likely call a tRPC mutation or a standard API endpoint
-    console.log('Subscribing to waitlist:', payload);
+    // Call tRPC endpoint
+    const result = await trpcClient.webinar.joinWaitlist.mutate({
+        email: payload.email,
+        name: payload.name,
+    })
 
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Mock success response
     return {
-        success: true,
-        message: 'You are on the waitlist!',
-        is_existing: false
-    };
+        success: result.success,
+        message: result.message,
+        is_existing: result.is_existing,
+    }
 }
 
+/**
+ * Register for webinar via tRPC
+ * Sends event to Loops for confirmation email and starts reminder workflow
+ */
 export const subscribeToWebinar = async (
     payload: WaitlistSubscribeRequest,
 ): Promise<WaitlistSubscribeResponse> => {
+    // Validate input
     const validationResult = subscribeSchema.safeParse(payload)
     if (!validationResult.success) {
         const errorMessage = validationResult.error.errors.map((e) => e.message).join(', ')
         throw new Error(errorMessage)
     }
 
-    console.log('Subscribing to webinar:', payload);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Call tRPC endpoint
+    const result = await trpcClient.webinar.register.mutate({
+        email: payload.email,
+        name: payload.name,
+    })
 
     return {
-        success: true,
-        message: 'You are registered for the webinar!',
-        is_existing: false
-    };
+        success: result.success,
+        message: result.message,
+        is_existing: result.is_existing,
+    }
 }

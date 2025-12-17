@@ -54,6 +54,12 @@
 					"binding": "GUIDE_EXPORT_WORKFLOW",
 					"class_name": "GuidePdfExportWorkflow",
 					"remote": false
+				},
+				{
+					"name": "webinar-reminder-workflow-stage",
+					"binding": "WEBINAR_REMINDER_WORKFLOW",
+					"class_name": "WebinarReminderWorkflow",
+					"remote": false
 				}
 			],
 			"durable_objects": {
@@ -112,6 +118,12 @@
 					"name": "guide-pdf-export-workflow",
 					"binding": "GUIDE_EXPORT_WORKFLOW",
 					"class_name": "GuidePdfExportWorkflow",
+					"remote": false
+				},
+				{
+					"name": "webinar-reminder-workflow",
+					"binding": "WEBINAR_REMINDER_WORKFLOW",
+					"class_name": "WebinarReminderWorkflow",
 					"remote": false
 				}
 			],

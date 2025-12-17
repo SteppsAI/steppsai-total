@@ -5,6 +5,7 @@ import { queueMessageSchema } from "@repo/data-ops/zod-schema/queue";
 import { handleStepsInsert } from './queue-handlers/recording-ingest';
 import * as rpc from './rpc-methods';
 export { GuidePdfExportWorkflow } from './workflows/guide-pdf-export';
+export { WebinarReminderWorkflow } from './workflows/webinar-reminders';
 export { GuideSession } from './durable-objects/GuideSession';
 
 export default class DataService extends WorkerEntrypoint<Env> {
@@ -69,6 +70,14 @@ export default class DataService extends WorkerEntrypoint<Env> {
 	// ===== NOTIFICATIONS =====
 	sendFeedback(data: { email: string; name: string; subject: string; type: string; message: string }) {
 		return rpc.sendFeedback(this.env, data);
+	}
+
+	// ===== WEBINAR & WAITLIST =====
+	registerForWebinar(data: { email: string; name: string; webinarId?: string; source?: string }) {
+		return rpc.registerForWebinar(this.env, data);
+	}
+	joinWaitlist(data: { email: string; name: string; source?: string }) {
+		return rpc.joinWaitlist(this.env, data);
 	}
 
 	// ===== QUEUE =====

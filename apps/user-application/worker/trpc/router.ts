@@ -9,10 +9,11 @@ import { recordingRouter } from "@/worker/trpc/routers/recording";
 import { notificationsRouter } from "@/worker/trpc/routers/notifications";
 import { publicGuidesRouter } from "@/worker/trpc/routers/public-guides";
 import { configRouter } from "@/worker/trpc/routers/config";
+import { webinarRouter } from "@/worker/trpc/routers/webinar";
 
 /**
  * tRPC Router
- * 
+ *
  * All operations go through tRPC:
  * - DB operations use data-ops directly
  * - R2/DO/Workflow operations use BACKEND_SERVICE RPC
@@ -29,6 +30,7 @@ export const appRouter = t.router({
   notifications: notificationsRouter,
   publicGuides: publicGuidesRouter,
   config: configRouter,
+  webinar: webinarRouter,
 });
 
 export type AppRouter = typeof appRouter;

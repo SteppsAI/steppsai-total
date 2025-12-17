@@ -57,3 +57,16 @@ export const exportsTable = pgTable("exports", {
 	index("exports_guideId_idx").on(table.guideId),
 ]);
 
+// Webinar registrations - stores leads who registered for webinars
+export const webinarRegistrations = pgTable("webinar_registrations", {
+	id: uuid("id").defaultRandom().primaryKey().notNull(),
+	email: text("email").notNull(),
+	name: text("name").notNull(),
+	webinarId: text("webinar_id").notNull(),
+	registeredAt: timestamp("registered_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+	source: text("source"), // utm_source, referrer, etc.
+}, (table) => [
+	index("webinar_registrations_email_idx").on(table.email),
+	index("webinar_registrations_webinarId_idx").on(table.webinarId),
+]);
+

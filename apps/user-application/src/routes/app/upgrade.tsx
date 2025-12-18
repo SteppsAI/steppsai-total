@@ -225,7 +225,7 @@ function UpgradePage() {
               {/* Deal Badge */}
               <div className={cn(
                 "inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] sm:text-xs font-bold rounded-md mb-3",
-                selectedPlan === "team" ? "bg-emerald-500 text-white" : "bg-primary text-white"
+                selectedPlan === "team" ? "bg-secondary text-white" : "bg-primary text-white"
               )}>
                 {currentBadge}
               </div>
@@ -288,9 +288,9 @@ function UpgradePage() {
               onClick={handleCheckout}
               disabled={isLoading || !currentProductId}
               className={cn(
-                "group cursor-pointer w-full h-12 sm:h-13 text-base sm:text-lg font-bold rounded-xl sm:rounded-full shadow-lg transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed",
+                "group cursor-pointer w-full h-12 sm:h-13 text-base sm:text-lg font-bold rounded-xl sm:rounded-full shadow-lg transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed text-white",
                 selectedPlan === "team"
-                  ? "bg-emerald-500 hover:bg-emerald-600 text-white hover:shadow-emerald-500/25"
+                  ? "bg-secondary hover:bg-secondary/90 hover:shadow-secondary/25"
                   : "btn-glass-primary hover:shadow-primary/25"
               )}
             >

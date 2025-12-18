@@ -18,6 +18,7 @@ const navigation = [
   { name: "Why Stepps", link: "/#save-time" },
   { name: "How it works", link: "/#how-it-works" },
   { name: "FAQ", link: "/#faq" },
+  { name: "Extension ↗", link: "https://chromewebstore.google.com/detail/hlahheljlplnnagiogmihjgcjbnjehpc?utm_source=item-share-cb"},
 ];
 
 export function Navbar() {

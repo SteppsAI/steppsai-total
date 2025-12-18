@@ -120,7 +120,7 @@ export function Hero() {
                                     className="btn-glass-secondary group inline-flex h-11 sm:h-12 items-center justify-center rounded-full px-6 sm:px-8 text-sm font-medium text-[var(--color-800)] transition-all duration-200 hover:-translate-y-0.5 hover:text-primary active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 >
                                     <Play className="mr-2 size-4 fill-current transition-transform duration-200 group-hover:scale-110" />
-                                    Live Demo
+                                    Watch Demo
                                 </Link>
 
                                 {/* 

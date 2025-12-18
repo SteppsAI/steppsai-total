@@ -33,7 +33,7 @@ interface ExportDialogProps {
     guideId: string;
 }
 
-type ExportFormat = "pdf" | "html" | "word" | "url";
+type ExportFormat = "pdf" | "html" | "docx" | "url";
 
 export const PdfIcon = (props: React.ComponentProps<"img">) => (
     <img src="/icons/pdf-icon.svg" alt="PDF" {...props} />
@@ -160,11 +160,6 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
     };
 
     const handleExport = async () => {
-        if (format === 'word') {
-            toast.info("Word export is coming soon!");
-            return;
-        }
-
         if (format === 'url') {
             publishMutation.mutate({ id: guideId });
             return;
@@ -172,7 +167,7 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
 
         triggerExportMutation.mutate({
             guideId,
-            format: format as "pdf" | "html",
+            format: format as "pdf" | "html" | "docx",
         });
     };
 
@@ -255,11 +250,9 @@ export function ExportDialog({ open, onOpenChange, guideTitle, guideId }: Export
                         onSelect={(f) => { setFormat(f); setShowUrlCopy(false); }}
                     />
                     <FormatOption
-                        id="word"
+                        id="docx"
                         label="Microsoft Word"
                         icon={WordIcon}
-                        disabled
-                        badge="Soon"
                         selectedFormat={format}
                         onSelect={(f) => { setFormat(f); setShowUrlCopy(false); }}
                     />

@@ -47,7 +47,7 @@ export const guideExportsRouter = router({
     triggerExport: publicProcedure
         .input(z.object({
             guideId: z.string(),
-            format: z.enum(["pdf", "html"]),
+            format: z.enum(["pdf", "html", "docx"]),
         }))
         .mutation(async ({ input, ctx }) => {
             const backend = ctx.env.BACKEND_SERVICE as any;

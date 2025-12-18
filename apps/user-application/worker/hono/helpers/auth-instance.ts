@@ -3,15 +3,34 @@ import { createMiddleware } from "hono/factory";
 import { checkUserAccess } from "@repo/data-ops/queries/subscriptions";
 import { initDatabase } from "@repo/data-ops/database";
 
+
 // ============ AUTH INSTANCE ============
+let healthCache: { ok: boolean; timestamp: number } | null = null;
+const HEALTH_CACHE_TTL = 60 * 1000; // 60 seconds
+
 export const getAuthInstance = async (env: ServiceBindings, req: Request) => {
   const backend = env.BACKEND_SERVICE as any;
   const url = new URL(req.url);
   const baseURL = `${url.protocol}//${url.host}`;
 
-  // Health check
-  const health = await backend.authHealthCheck();
-  if (!health?.ok) {
+  // Health check with caching
+  const now = Date.now();
+  if (!healthCache || (now - healthCache.timestamp > HEALTH_CACHE_TTL)) {
+    try {
+      const health = await backend.authHealthCheck();
+      // Update cache
+      healthCache = {
+        ok: !!health?.ok,
+        timestamp: now
+      };
+    } catch (e) {
+      console.error("[AuthInstance] Health check failed", e);
+
+      throw new Error("Auth infrastructure unavailable");
+    }
+  }
+
+  if (!healthCache?.ok) {
     throw new Error("Auth infrastructure unavailable");
   }
 

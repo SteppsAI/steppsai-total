@@ -17,22 +17,30 @@ export const configRouter = t.router({
         const isProd = env.VITE_AUTH_URL === "https://stepps.ai";
 
         let productId = "";
+        let teamProductId = "";
 
         if (isProd) {
             productId = isEU
                 ? env.VITE_CREEM_LIFETIME_PRODUCT_EU_PRODUCTION
                 : env.VITE_CREEM_LIFETIME_PRODUCT_US_PRODUCTION;
+            teamProductId = isEU
+                ? env.VITE_CREEM_TEAM_PRODUCT_EU_PRODUCTION
+                : env.VITE_CREEM_TEAM_PRODUCT_US_PRODUCTION;
         } else {
             // Fallback checks for dev
             productId = isEU
                 ? (env.VITE_CREEM_LIFETIME_PRODUCT_EU_DEVELOPMENT || env.VITE_CREEM_LIFETIME_PRODUCT_EU)
                 : (env.VITE_CREEM_LIFETIME_PRODUCT_US_DEVELOPMENT || env.VITE_CREEM_LIFETIME_PRODUCT_US);
+            teamProductId = isEU
+                ? (env.VITE_CREEM_TEAM_PRODUCT_EU_DEVELOPMENT || env.VITE_CREEM_TEAM_PRODUCT_EU)
+                : (env.VITE_CREEM_TEAM_PRODUCT_US_DEVELOPMENT || env.VITE_CREEM_TEAM_PRODUCT_US);
         }
 
-        console.log("[ConfigRouter] Region detection:", { country, continent, isEU, isProd, productId });
+        console.log("[ConfigRouter] Region detection:", { country, continent, isEU, isProd, productId, teamProductId });
 
         return {
             productId,
+            teamProductId,
             country,
             continent,
             isEU

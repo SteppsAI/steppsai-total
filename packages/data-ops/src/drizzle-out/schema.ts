@@ -70,3 +70,20 @@ export const webinarRegistrations = pgTable("webinar_registrations", {
 	index("webinar_registrations_webinarId_idx").on(table.webinarId),
 ]);
 
+// Pricing deals - stores product/pricing configurations
+export const pricingDeals = pgTable("pricing_deals", {
+	id: uuid("id").defaultRandom().primaryKey().notNull(),
+	name: text("name").notNull(),
+	slug: text("slug").notNull().unique(),
+	type: text("type").notNull(), // 'lifetime' | 'team'
+	region: text("region").notNull(), // 'US' | 'EU'
+	environment: text("environment").notNull(), // 'production' | 'development'
+	productId: text("product_id").notNull(),
+	priceAmount: integer("price_amount").notNull(), // cents
+	teamSize: integer("team_size"), // null for individual
+	isActive: integer("is_active").default(1),
+	displayOrder: integer("display_order").default(0),
+}, (table) => [
+	index("pricing_deals_type_region_env_idx").on(table.type, table.region, table.environment),
+]);
+

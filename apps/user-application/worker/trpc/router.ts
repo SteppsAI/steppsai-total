@@ -10,6 +10,8 @@ import { notificationsRouter } from "@/worker/trpc/routers/notifications";
 import { publicGuidesRouter } from "@/worker/trpc/routers/public-guides";
 import { configRouter } from "@/worker/trpc/routers/config";
 import { webinarRouter } from "@/worker/trpc/routers/webinar";
+import { teamRouter } from "@/worker/trpc/routers/team";
+import { pricingRouter } from "@/worker/trpc/routers/pricing";
 
 /**
  * tRPC Router
@@ -31,6 +33,8 @@ export const appRouter = t.router({
   publicGuides: publicGuidesRouter,
   config: configRouter,
   webinar: webinarRouter,
+  team: teamRouter,
+  pricing: pricingRouter,
 });
 
 export type AppRouter = typeof appRouter;

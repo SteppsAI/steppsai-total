@@ -20,13 +20,7 @@ function WebinarPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[var(--color-50)] flex flex-col font-sans relative overflow-x-hidden">
-
-            {/* Background Elements from upgrade.tsx */}
-            <div className="fixed inset-0 bg-foggy -z-10" />
-            <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_center,_var(--color-100)_0%,_transparent_70%)] -z-10 opacity-60" />
-            <div className="fixed top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px] -z-10" />
-            <div className="fixed bottom-1/4 right-1/4 w-96 h-96 bg-[var(--color-200)] rounded-full blur-[100px] -z-10" />
+        <div className="min-h-screen bg-foggy flex flex-col font-sans relative overflow-x-hidden">
 
             <Navbar />
 
@@ -36,20 +30,13 @@ function WebinarPage() {
 
                     {/* Header Section - Clean & Professional */}
                     <div className="space-y-6 animate-fade-in-up">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/60 backdrop-blur-md border border-[var(--color-200)] text-[var(--color-900)] text-xs font-bold tracking-wider uppercase shadow-sm">
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-[var(--destructive)] opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--destructive)]"></span>
-                            </span>
-                            Live Demo
-                        </div>
 
-                        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-[var(--color-950)] leading-[0.95]">
-                            See Stepps.ai in Action
+                        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight text-[var(--color-900)] leading-[0.95]">
+                            How to create onboarding guides that users actually finish
                         </h1>
 
-                        <p className="text-xl md:text-2xl text-[var(--color-600)] max-w-2xl mx-auto leading-relaxed font-medium">
-                            Join our live demo and discover how to turn actions into step-by-step documentation.
+                        <p className="text-base md:text-lg text-[var(--color-600)] max-w-2xl mx-auto leading-relaxed font-medium">
+                            We will show you how you can create proffesional onboarding guides in minutes using Stepps.ai.
                         </p>
                     </div>
 
@@ -59,15 +46,12 @@ function WebinarPage() {
                     </div>
 
                     {/* Registration Card - Glassmorphism like upgrade modal */}
-                    <div className="bg-white/70 backdrop-blur-2xl border border-[var(--color-200)] rounded-[2rem] p-8 md:p-12 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] relative overflow-hidden ring-1 ring-white/50 max-w-2xl mx-auto">
+                    <div className="bg-muted/10 backdrop-blur-2xl rounded-[2rem] p-8 md:p-12 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] relative overflow-hidden ring-1 ring-white/50 max-w-2xl mx-auto">
                         {/* Decorative effects inside card */}
                         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[80px] pointer-events-none" />
 
                         <div className="relative z-10">
-                            <h2 className="text-2xl font-bold mb-3 text-[var(--color-950)]">Secure your spot</h2>
-                            <p className="text-[var(--color-600)] mb-8">
-                                Enter your details below to receive the calendar invite.
-                            </p>
+                            <h2 className="text-2xl font-bold mb-8 text-[var(--color-900)]">Secure your spot</h2>
 
                             <WebinarForm
                                 className="mx-auto"

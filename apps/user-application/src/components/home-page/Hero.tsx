@@ -194,18 +194,11 @@ export function Hero() {
 
                                 <div className="relative z-10 flex flex-col items-center gap-8">
                                     <div className="space-y-6">
-                                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/60 backdrop-blur-md border border-[var(--color-200)] text-[var(--color-900)] text-xs font-bold tracking-wider uppercase shadow-sm">
-                                            <span className="relative flex h-2 w-2">
-                                                <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-[var(--destructive)] opacity-75"></span>
-                                                <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--destructive)]"></span>
-                                            </span>
-                                            Live Demo
-                                        </div>
-                                        <h3 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[var(--color-950)] leading-[0.95]">
-                                            See Stepps.ai in Action
+                                        <h3 className="text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight text-[var(--color-900)] leading-[0.95]">
+                                            How to create onboarding guides that users actually finish
                                         </h3>
-                                        <p className="text-xl md:text-2xl text-[var(--color-600)] max-w-2xl mx-auto leading-relaxed font-medium">
-                                            Join our live demo and discover how to turn actions into step-by-step documentation.
+                                        <p className="text-base md:text-lg text-[var(--color-600)] max-w-2xl mx-auto leading-relaxed font-medium">
+                                            We will show you how you can create proffesional onboarding guides in minutes using Stepps.ai.
                                         </p>
                                     </div>
 

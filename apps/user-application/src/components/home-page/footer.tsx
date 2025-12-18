@@ -23,6 +23,18 @@ export function Footer() {
 
             {/* Contact */}
             <div className="space-y-4">
+              <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider">Extension</h3>
+              <ul className="space-y-3">
+                <li>
+                  <a href="https://chromewebstore.google.com/detail/hlahheljlplnnagiogmihjgcjbnjehpc?utm_source=item-share-cb" target="_blank" className="text-base font-medium text-white hover:text-white/80 transition-colors">
+                    Download the extension
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div className="space-y-4">
               <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider">Contact</h3>
               <ul className="space-y-3">
                 <li>

@@ -83,6 +83,13 @@ export const guidesRouter = router({
             await updateGuide(input.id, { status: 'draft' });
             return { success: true };
         }),
+    // Lightweight status check
+    getExportStatus: publicProcedure
+        .input(z.object({ id: z.string() }))
+        .query(async ({ input }) => {
+            const { getGuideExportStatus } = await import("@repo/data-ops/queries");
+            return await getGuideExportStatus(input.id);
+        }),
 });
 
 

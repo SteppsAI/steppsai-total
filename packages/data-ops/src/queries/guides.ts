@@ -119,7 +119,7 @@ function parseSteps(steps: unknown): Step[] {
  */
 export async function updateGuideExportStatus(
 	guideId: string,
-	type: 'pdf' | 'html' | 'markdown',
+	type: 'pdf' | 'html' | 'markdown' | 'docx',
 	status: 'PENDING' | 'COMPLETED' | 'FAILED',
 	url?: string
 ): Promise<void> {
@@ -192,4 +192,23 @@ export async function deleteStep(guideId: string, stepId: string): Promise<void>
 			updatedAt: sql`now()`,
 		})
 		.where(eq(guides.guideId, guideId));
+}
+
+/**
+ * Lightweight query to get just the export status
+ * Avoids fetching the entire guide with all steps and images
+ */
+export async function getGuideExportStatus(guideId: string): Promise<Record<string, any> | null> {
+	const db = getDb();
+
+	const result = await db
+		.select({
+			exportedDocs: guides.exportedDocs
+		})
+		.from(guides)
+		.where(eq(guides.guideId, guideId))
+		.limit(1);
+
+	if (!result.length) return null;
+	return result[0].exportedDocs as Record<string, any> || {};
 }

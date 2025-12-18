@@ -7,7 +7,7 @@ import { z } from "zod";
  */
 export const exportParamsSchema = z.object({
     guideId: z.string().uuid(),
-    format: z.enum(["pdf", "html"]),
+    format: z.enum(["pdf", "html", "docx"]),
 });
 
 // Type exports

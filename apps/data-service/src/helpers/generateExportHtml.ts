@@ -28,7 +28,55 @@ export function generateExportHtml(
             const aspectRatio = typeof imageEntry === 'object' ? imageEntry.aspectRatio : undefined;
 
             const caption = step.caption || step.aiCaption || `Step ${index + 1}`;
-            const hasImage = step.imageKey && imageDataUrl;
+
+            // Check current step image status
+            const hasImage = !!(step.imageKey && imageDataUrl);
+
+            // Check previous step image status to determine if we are starting a text group
+            const prevStep = visibleSteps[index - 1];
+            const prevImageEntry = prevStep ? imageMap[prevStep.id] : undefined;
+            const prevDataUrl = typeof prevImageEntry === 'string' ? prevImageEntry : prevImageEntry?.dataUrl || '';
+            const prevHasImage = prevStep ? !!(prevStep.imageKey && prevDataUrl) : false;
+
+            // Logic:
+            // If this is the FIRST step, it's a "start"
+            // If the PREVIOUS step had an image, this step (if text) starts a new group/page -> "start"
+            // If the PREVIOUS step was text, and this is text, this is a "follow" -> less padding
+
+            const isFirstStep = index === 0;
+            const previousWasImageOrBreak = isFirstStep || prevHasImage;
+
+            // Check next step for grouping logic
+            const nextStep = visibleSteps[index + 1];
+            const nextImageEntry = nextStep ? imageMap[nextStep.id] : undefined;
+            const nextDataUrl = typeof nextImageEntry === 'string' ? nextImageEntry : nextImageEntry?.dataUrl || '';
+            const nextHasImage = nextStep ? !!(nextStep.imageKey && nextDataUrl) : false;
+
+            let pageBreakClass = '';
+            let stepClass = 'step';
+
+            if (hasImage) {
+                stepClass = 'step step-with-image';
+                pageBreakClass = 'force-break';
+            } else {
+                // Text Only
+                if (previousWasImageOrBreak) {
+                    stepClass = 'step step-text-start'; // 80px top padding
+                } else {
+                    stepClass = 'step step-text-follow'; // Standard spacing
+                }
+
+                if (nextHasImage) {
+                    pageBreakClass = 'force-break';
+                } else {
+                    pageBreakClass = 'avoid-break-after';
+                }
+            }
+
+            // Override for last element
+            if (index === visibleSteps.length - 1) {
+                pageBreakClass = '';
+            }
 
             let imageHtml = '';
             if (hasImage) {
@@ -40,7 +88,6 @@ export function generateExportHtml(
                     </div>
                 `;
             } else if (step.imageKey) {
-                // Image key exists but base64 failed - show placeholder
                 imageHtml = `
                     <div class="screenshot">
                         <div class="screenshot-placeholder">Image could not be loaded</div>
@@ -49,7 +96,7 @@ export function generateExportHtml(
             }
 
             return `
-                <div class="step">
+                <div class="${stepClass} ${pageBreakClass}">
                     <div class="step-content">
                         <div class="step-header">
                             <div class="step-number">${index + 1}</div>
@@ -64,8 +111,6 @@ export function generateExportHtml(
         })
         .join('');
 
-    // Match frontend design from $guideId.tsx and globals.css
-    // Using brand colors: primary=#6366F1, muted=#E2E8F0
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -148,18 +193,41 @@ export function generateExportHtml(
             gap: 0;
         }
 
+        /* Base Step Style */
         .step {
             display: flex;
             flex-direction: column;
-            gap: 12px; /* Reduced gap from 24px */
-            min-height: 100vh;
-            /* justify-content: center; - Removed to let text sit at top */
-            page-break-after: always;
-            break-after: page;
-            padding: 80px 0 40px; /* Increased top padding from 40px */
+            gap: 12px;
+            position: relative;
         }
 
-        .step:last-child {
+        /* Image Steps - Specific Layout */
+        .step-with-image {
+             min-height: 100vh;
+             justify-content: start;
+             padding-top: 80px; /* CONSTANT TOP PADDING */
+             padding-bottom: 40px;
+        }
+        
+        /* Text Start Steps - Same top padding as Image Steps */
+        .step-text-start {
+             padding-top: 80px; /* CONSTANT TOP PADDING */
+             padding-bottom: 24px;
+        }
+        
+        /* Follow-up text steps - tighter spacing */
+        .step-text-follow {
+            padding-top: 24px;
+            padding-bottom: 24px;
+        }
+
+        /* Page Break Utilities */
+        .force-break {
+            page-break-after: always;
+            break-after: page;
+        }
+        
+        .avoid-break-after {
             page-break-after: avoid;
             break-after: avoid;
         }
@@ -171,42 +239,36 @@ export function generateExportHtml(
             max-width: 768px;
             width: 100%;
             margin: 0 auto;
-            flex-shrink: 0; /* Ensure text doesn't shrink */
-            align-items: center; /* Center text horizontally */
+            flex-shrink: 0; 
+            align-items: center; 
             text-align: center;
         }
 
         .step-header {
             display: flex;
-            align-items: center; /* Center vertically */
-            justify-content: center; /* Center horizontally */
+            align-items: center;
+            justify-content: center;
             gap: 16px;
         }
 
-        /* Step number with primary color background - matches frontend */
+        /* Step number with primary color background */
         .step-number {
             flex-shrink: 0;
-            width: 48px; /* Increased from 32px */
-            height: 48px; /* Increased from 32px */
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             background: rgba(99, 102, 241, 0.1);
             color: #6366F1;
             font-family: 'Space Grotesk', sans-serif;
             font-weight: 700;
-            font-size: 1.25rem; /* Increased from 0.875rem */
+            font-size: 1.25rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 0; /* Removed margin-top since we align-items: center */
-        }
-
-        .step-title-wrapper {
-            /* flex: 1; - Removed to allow centering */
-            padding-top: 0; /* Removed padding */
         }
 
         .step h2 {
-            font-size: 1.5rem; /* Increased from 1.25rem */
+            font-size: 1.5rem;
             font-weight: 500;
             line-height: 1.4;
             color: #0B0F19;
@@ -215,7 +277,7 @@ export function generateExportHtml(
 
         @media (min-width: 768px) {
             .step h2 {
-                font-size: 2rem; /* Increased from 1.5rem */
+                font-size: 2rem;
             }
         }
 
@@ -226,12 +288,11 @@ export function generateExportHtml(
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             background: rgba(0, 0, 0, 0.025);
             position: relative;
-            /* Ring effect like frontend */
             outline: 1px solid rgba(0, 0, 0, 0.05);
             outline-offset: -1px;
-            max-width: 90%; /* Widen to 90% */
+            max-width: 90%;
             width: 100%;
-            margin: 0 auto; /* Center horizontally only, remove vertical centering */
+            margin: 0 auto;
         }
 
         .screenshot img {
@@ -263,17 +324,7 @@ export function generateExportHtml(
             pointer-events: none;
         }
 
-        /* PDF page break handling */
-        .step {
-            page-break-inside: avoid;
-            break-inside: avoid;
-        }
-
-        .screenshot {
-            page-break-inside: avoid;
-            break-inside: avoid;
-        }
-
+        /* Print Specifics */
         @media print {
             .container {
                 padding: 0;
@@ -282,21 +333,18 @@ export function generateExportHtml(
             }
             
             .header {
-                page-break-after: always;
-                break-after: page;
+                height: 100vh;
                 margin-bottom: 0;
-                padding-bottom: 0;
+            }
+            
+            .step-with-image {
                 height: 100vh;
             }
             
-            .steps {
-                gap: 0;
-            }
-
-            .step {
-                height: 100vh;
-                page-break-after: always;
-                break-after: page;
+            /* Ensure text steps don't get split awkwardly */
+            .step-text-start, .step-text-follow {
+                break-inside: avoid;
+                page-break-inside: avoid;
             }
         }
     </style>
@@ -319,22 +367,11 @@ export function generateExportHtml(
  * Renders overlay annotations as an SVG element
  * 
  * CRITICAL: This must match the rendering logic in canvas.tsx exactly.
- * 
- * Overlays are stored as percentages (0-100 range):
- * - x, y: percentage of width/height
- * - radius (circle): percentage of min(width, height)
- * - points (arrow): [x1%, y1%, x2%, y2%] as percentages
- * - fontSize (text): absolute pixel value (NOT percentage)
- * 
- * We use viewBox="0 0 1000 1000" to get better precision, then scale coordinates.
- * The key insight: we need to match the VISUAL output of canvas.tsx which renders
- * at actual pixel dimensions, not in a 100x100 viewBox.
  */
 function renderOverlaysSvg(overlays?: Overlay[], imageAspectRatio?: number): string {
     if (!overlays || overlays.length === 0) return '';
 
     // Use a large viewBox for precision (1000x1000 base, adjusted for aspect ratio)
-    // This matches how canvas.tsx works: it uses actual pixel dimensions
     const viewBoxWidth = 1000;
     const viewBoxHeight = imageAspectRatio ? viewBoxWidth / imageAspectRatio : 1000;
     const minDim = Math.min(viewBoxWidth, viewBoxHeight);
@@ -347,10 +384,9 @@ function renderOverlaysSvg(overlays?: Overlay[], imageAspectRatio?: number): str
         }
     });
 
-    // Generate marker definitions - size matches canvas.tsx (pointerLength=12, pointerWidth=12)
+    // Generate marker definitions
     const markers = Array.from(arrowColors).map((color, idx) => {
         const markerId = `arrowhead-${idx}`;
-        // Match canvas.tsx Arrow component: pointerLength={12} pointerWidth={12}
         return `<marker id="${markerId}" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
                     <polygon points="0 0, 12 6, 0 12" fill="${color}" />
                 </marker>`;
@@ -365,13 +401,8 @@ function renderOverlaysSvg(overlays?: Overlay[], imageAspectRatio?: number): str
     const elements = overlays
         .map((overlay) => {
             if (overlay.type === 'circle') {
-                // Convert percentage to viewBox coordinates
-                // x, y are percentages (0-100) of width/height
-                // radius is percentage of min(width, height) - this matches canvas.tsx logic
                 const cx = ((overlay.x ?? 50) / 100) * viewBoxWidth;
                 const cy = ((overlay.y ?? 50) / 100) * viewBoxHeight;
-                // In canvas.tsx: radius = (overlay.radius / 100) * minDim (in pixels)
-                // Here we do the same but in viewBox units
                 const radius = ((overlay.radius ?? 2.5) / 100) * minDim;
                 const color = overlay.color || '#ef4444';
                 const strokeWidth = overlay.strokeWidth || 3;
@@ -382,7 +413,6 @@ function renderOverlaysSvg(overlays?: Overlay[], imageAspectRatio?: number): str
             if (overlay.type === 'arrow') {
                 const points = overlay.points;
                 if (!points || points.length < 4) return '';
-                // Convert percentage points to viewBox coordinates
                 const x1 = (points[0] / 100) * viewBoxWidth;
                 const y1 = (points[1] / 100) * viewBoxHeight;
                 const x2 = (points[2] / 100) * viewBoxWidth;
@@ -395,27 +425,20 @@ function renderOverlaysSvg(overlays?: Overlay[], imageAspectRatio?: number): str
             }
 
             if (overlay.type === 'hide') {
-                // Convert percentage to viewBox coordinates
                 const x = ((overlay.x ?? 0) / 100) * viewBoxWidth;
                 const y = ((overlay.y ?? 0) / 100) * viewBoxHeight;
                 const width = ((overlay.width ?? 10) / 100) * viewBoxWidth;
                 const height = ((overlay.height ?? 10) / 100) * viewBoxHeight;
                 const color = overlay.color || '#000';
-                // Handle negative width/height
                 const rectX = width < 0 ? x + width : x;
                 const rectY = height < 0 ? y + height : y;
                 return `<rect x="${rectX}" y="${rectY}" width="${Math.abs(width)}" height="${Math.abs(height)}" fill="${color}" rx="4" />`;
             }
 
             if (overlay.type === 'text') {
-                // Convert percentage position to viewBox coordinates
                 const x = ((overlay.x ?? 50) / 100) * viewBoxWidth;
                 const y = ((overlay.y ?? 50) / 100) * viewBoxHeight;
                 const text = overlay.text || '';
-                // fontSize is stored as absolute pixels in the overlay
-                // Scale it relative to the viewBox (1000px base = typical screen width)
-                // In canvas.tsx, fontSize is used directly as pixels
-                // We need to scale: if viewBox is 1000 and typical render is ~800px, scale up slightly
                 const fontSize = (overlay.fontSize || 20) * (viewBoxWidth / 800);
                 const fontFamily = overlay.fontFamily || 'Arial';
                 const fill = overlay.fill || '#000';
@@ -430,8 +453,6 @@ function renderOverlaysSvg(overlays?: Overlay[], imageAspectRatio?: number): str
 
     if (!elements) return '';
 
-    // Use "none" preserveAspectRatio to stretch SVG to fill container exactly
-    // This matches how canvas.tsx renders: the Stage fills the container dimensions
     return `
         <svg class="overlays" viewBox="0 0 ${viewBoxWidth} ${viewBoxHeight}" preserveAspectRatio="none">
             <defs>
@@ -464,11 +485,7 @@ export async function imageToBase64DataUrl(
     imageKey: string
 ): Promise<ImageDataResult | null> {
     try {
-        // Strip any URL prefix - imageKey might be stored as full URL or just the path
-        // R2 keys should be like: screenshots/userId/guideId/stepId.webp
         let key = imageKey;
-
-        // Remove common URL prefixes
         const urlPrefixes = [
             'https://stepps-assets-stage.stepps.ai/',
             'https://assets.stepps.ai/',
@@ -482,9 +499,7 @@ export async function imageToBase64DataUrl(
             }
         }
 
-        // Also handle any generic https:// prefix
         if (key.startsWith('https://')) {
-            // Extract path after domain
             const url = new URL(key);
             key = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname;
         }
@@ -498,19 +513,12 @@ export async function imageToBase64DataUrl(
 
         const buffer = await object.arrayBuffer();
         const bytes = new Uint8Array(buffer);
-        console.log(`📊 Image size: ${bytes.length} bytes`);
 
-        // Extract image dimensions from binary data
         const dimensions = getImageDimensions(bytes);
         const aspectRatio = dimensions ? dimensions.width / dimensions.height : 16 / 9;
-        console.log(`📐 Image dimensions: ${dimensions?.width}x${dimensions?.height}, aspect ratio: ${aspectRatio.toFixed(2)}`);
 
-        // Convert to base64 using chunked approach for large files
         const base64 = uint8ArrayToBase64(bytes);
-
-        // Determine content type
         const contentType = object.httpMetadata?.contentType || getContentTypeFromKey(key);
-        console.log(`✅ Image converted to base64, content-type: ${contentType}`);
 
         return {
             dataUrl: `data:${contentType};base64,${base64}`,
@@ -524,19 +532,18 @@ export async function imageToBase64DataUrl(
 
 /**
  * Extracts image dimensions from binary data
- * Supports WebP, PNG, JPEG, GIF
  */
 function getImageDimensions(bytes: Uint8Array): { width: number; height: number } | null {
     try {
-        // WebP: RIFF....WEBPVP8
+        // WebP
         if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46) {
-            // VP8 (lossy)
+            // VP8
             if (bytes[12] === 0x56 && bytes[13] === 0x50 && bytes[14] === 0x38 && bytes[15] === 0x20) {
                 const width = (bytes[26] | (bytes[27] << 8)) & 0x3FFF;
                 const height = (bytes[28] | (bytes[29] << 8)) & 0x3FFF;
                 return { width, height };
             }
-            // VP8L (lossless)
+            // VP8L
             if (bytes[12] === 0x56 && bytes[13] === 0x50 && bytes[14] === 0x38 && bytes[15] === 0x4C) {
                 const signature = bytes[21];
                 if (signature !== 0x2F) return null;
@@ -545,7 +552,7 @@ function getImageDimensions(bytes: Uint8Array): { width: number; height: number 
                 const height = ((bits >> 14) & 0x3FFF) + 1;
                 return { width, height };
             }
-            // VP8X (extended)
+            // VP8X
             if (bytes[12] === 0x56 && bytes[13] === 0x50 && bytes[14] === 0x38 && bytes[15] === 0x58) {
                 const width = 1 + (bytes[24] | (bytes[25] << 8) | (bytes[26] << 16));
                 const height = 1 + (bytes[27] | (bytes[28] << 8) | (bytes[29] << 16));
@@ -553,20 +560,19 @@ function getImageDimensions(bytes: Uint8Array): { width: number; height: number 
             }
         }
 
-        // PNG: 89 50 4E 47 0D 0A 1A 0A
+        // PNG
         if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) {
             const width = (bytes[16] << 24) | (bytes[17] << 16) | (bytes[18] << 8) | bytes[19];
             const height = (bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23];
             return { width, height };
         }
 
-        // JPEG: FF D8 FF
+        // JPEG
         if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) {
             let offset = 2;
             while (offset < bytes.length - 8) {
                 if (bytes[offset] !== 0xFF) break;
                 const marker = bytes[offset + 1];
-                // SOF0, SOF1, SOF2 markers contain dimensions
                 if (marker >= 0xC0 && marker <= 0xC2) {
                     const height = (bytes[offset + 5] << 8) | bytes[offset + 6];
                     const width = (bytes[offset + 7] << 8) | bytes[offset + 8];
@@ -577,7 +583,7 @@ function getImageDimensions(bytes: Uint8Array): { width: number; height: number 
             }
         }
 
-        // GIF: 47 49 46 38
+        // GIF
         if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38) {
             const width = bytes[6] | (bytes[7] << 8);
             const height = bytes[8] | (bytes[9] << 8);
@@ -590,25 +596,16 @@ function getImageDimensions(bytes: Uint8Array): { width: number; height: number 
     }
 }
 
-/**
- * Converts Uint8Array to base64 string
- * Uses chunked approach to avoid call stack issues with large arrays
- */
 function uint8ArrayToBase64(bytes: Uint8Array): string {
     const CHUNK_SIZE = 8192;
     let binary = '';
-
     for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
         const chunk = bytes.subarray(i, Math.min(i + CHUNK_SIZE, bytes.length));
         binary += String.fromCharCode.apply(null, chunk as unknown as number[]);
     }
-
     return btoa(binary);
 }
 
-/**
- * Gets content type from file extension
- */
 function getContentTypeFromKey(key: string): string {
     if (key.endsWith('.webp')) return 'image/webp';
     if (key.endsWith('.png')) return 'image/png';

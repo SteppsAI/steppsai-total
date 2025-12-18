@@ -3,7 +3,7 @@ import { z } from "zod";
 export const exportsSchema = z.object({
 	exportId: z.string().uuid(),
 	guideId: z.string().uuid(),
-	type: z.enum(["pdf", "carousel", "markdown"]),
+	type: z.enum(["pdf", "html", "docx", "carousel", "markdown"]),
 	fileUrl: z.string().url().optional(),
 	status: z.enum(["processing", "completed", "failed"]),
 	createdAt: z.string().optional(),

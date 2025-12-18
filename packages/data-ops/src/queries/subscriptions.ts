@@ -1,6 +1,7 @@
 import { getDb } from "../db/database";
 import { creem_subscription, user as users } from "../drizzle-out/auth-schema";
-import { eq } from "drizzle-orm";
+import { teamMembers } from "../drizzle-out/schema";
+import { eq, and } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 
 // Helper to sync creemCustomerId to users table (required for BetterAuth portal)
@@ -152,42 +153,90 @@ export async function updateSubscriptionStatus(
 
 /**
  * Custom access check that supports both subscriptions and one-time orders.
- * Returns true if the user has an active subscription OR a completed one-time order.
- * ProductId determines the type (lifetime, monthly, yearly etc.)
+ * Returns true if the user has an active subscription OR a completed one-time order,
+ * OR if they are an accepted member of a team where the owner has access.
+ * ProductId determines the type (lifetime, monthly, yearly, team etc.)
  */
 export async function checkUserAccess(userId: string): Promise<{
 	hasAccess: boolean;
 	status: string | null;
 	productId: string | null;
 	expiresAt: Date | null;
+	viaTeam?: boolean;
+	teamOwnerId?: string;
 }> {
 	console.log(`[checkUserAccess] Checking access for user: ${userId}`);
 
+	// First check if user has their own subscription
 	const subscription = await getSubscriptionByUserId(userId);
 
-	if (!subscription) {
-		console.log(`[checkUserAccess] No subscription/order found for user ${userId}`);
-		return { hasAccess: false, status: null, productId: null, expiresAt: null };
-	}
+	if (subscription) {
+		console.log(`[checkUserAccess] Found record with status: ${subscription.status}, productId: ${subscription.productId}`);
 
-	console.log(`[checkUserAccess] Found record with status: ${subscription.status}, productId: ${subscription.productId}`);
+		// Active statuses that grant access
+		const activeStatuses = ["active", "trialing", "paid"];
+		const hasAccess = activeStatuses.includes(subscription.status ?? "");
 
-	// Active statuses that grant access
-	const activeStatuses = ["active", "trialing", "paid"];
-	const hasAccess = activeStatuses.includes(subscription.status ?? "");
-
-	// For one-time orders (no periodEnd), access is permanent
-	// For subscriptions, check if within billing period
-	let expiresAt: Date | null = null;
-	if (subscription.periodEnd) {
-		expiresAt = new Date(subscription.periodEnd);
-		// If subscription has expired, revoke access
-		if (expiresAt < new Date() && !activeStatuses.includes(subscription.status ?? "")) {
-			console.log(`[checkUserAccess] Subscription expired at ${expiresAt}`);
-			return { hasAccess: false, status: subscription.status, productId: subscription.productId, expiresAt };
+		// For one-time orders (no periodEnd), access is permanent
+		// For subscriptions, check if within billing period
+		let expiresAt: Date | null = null;
+		if (subscription.periodEnd) {
+			expiresAt = new Date(subscription.periodEnd);
+			// If subscription has expired, revoke access
+			if (expiresAt < new Date() && !activeStatuses.includes(subscription.status ?? "")) {
+				console.log(`[checkUserAccess] Subscription expired at ${expiresAt}`);
+				// Fall through to check team membership
+			} else {
+				console.log(`[checkUserAccess] Access granted via own subscription: ${hasAccess}`);
+				return { hasAccess, status: subscription.status, productId: subscription.productId, expiresAt };
+			}
+		} else if (hasAccess) {
+			console.log(`[checkUserAccess] Access granted via own subscription: ${hasAccess}`);
+			return { hasAccess, status: subscription.status, productId: subscription.productId, expiresAt };
 		}
 	}
 
-	console.log(`[checkUserAccess] Access granted: ${hasAccess}`);
-	return { hasAccess, status: subscription.status, productId: subscription.productId, expiresAt };
+	// If no own subscription or expired, check team membership
+	console.log(`[checkUserAccess] Checking team membership for user ${userId}`);
+	const db = getDb();
+
+	// Find teams where user is an accepted member
+	const teamMembership = await db
+		.select({ ownerId: teamMembers.ownerId })
+		.from(teamMembers)
+		.where(
+			and(
+				eq(teamMembers.memberId, userId),
+				eq(teamMembers.status, "accepted")
+			)
+		)
+		.limit(1);
+
+	if (teamMembership.length > 0) {
+		const ownerId = teamMembership[0].ownerId;
+		console.log(`[checkUserAccess] User is team member of owner: ${ownerId}`);
+
+		// Check if team owner has access
+		const ownerSubscription = await getSubscriptionByUserId(ownerId);
+
+		if (ownerSubscription) {
+			const activeStatuses = ["active", "trialing", "paid"];
+			const ownerHasAccess = activeStatuses.includes(ownerSubscription.status ?? "");
+
+			if (ownerHasAccess) {
+				console.log(`[checkUserAccess] Access granted via team membership (owner: ${ownerId})`);
+				return {
+					hasAccess: true,
+					status: ownerSubscription.status,
+					productId: ownerSubscription.productId,
+					expiresAt: ownerSubscription.periodEnd ? new Date(ownerSubscription.periodEnd) : null,
+					viaTeam: true,
+					teamOwnerId: ownerId,
+				};
+			}
+		}
+	}
+
+	console.log(`[checkUserAccess] No access found for user ${userId}`);
+	return { hasAccess: false, status: null, productId: null, expiresAt: null };
 }

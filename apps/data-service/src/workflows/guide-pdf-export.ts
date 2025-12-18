@@ -1,6 +1,7 @@
 import { WorkflowEntrypoint, WorkflowEvent, WorkflowStep } from 'cloudflare:workers';
 import { renderGuideToPdf } from '../helpers/browser-render';
 import { generateExportHtml, imageToBase64DataUrl } from '../helpers/generateExportHtml';
+import { generateExportDocx } from '../helpers/generateExportDocx';
 import { getGuide, updateGuideExportStatus } from '@repo/data-ops/queries/guides';
 import { initDatabase } from '@repo/data-ops/database';
 import { v4 as uuidv4 } from 'uuid';
@@ -79,7 +80,8 @@ export class GuidePdfExportWorkflow extends WorkflowEntrypoint<Env, ExportParams
             initDatabase(this.env.DATABASE_URL);
 
             const prefix = `exports/${userId}/${guideId}/`;
-            const extension = format === 'pdf' ? '.pdf' : '.html';
+            const extensionMap: Record<string, string> = { pdf: '.pdf', html: '.html', docx: '.docx' };
+            const extension = extensionMap[format] || '.pdf';
 
             console.log(`🗑️ Deleting old ${format} files with prefix: ${prefix}`);
 
@@ -101,11 +103,12 @@ export class GuidePdfExportWorkflow extends WorkflowEntrypoint<Env, ExportParams
             console.log('✅ DB updated to PENDING');
         });
 
-        // Step 4: Render PDF (if format is pdf)
-        // For PDFs: Store temporarily in R2 to avoid 1 MiB step output limit
-        // For HTML: Store temporarily in R2 as well for consistency with large guides
+        // Step 4: Render export based on format
+        // Store temporarily in R2 to avoid 1 MiB step output limit
         const tempR2Key = await step.do('Render Export', retryConfig, async () => {
-            const tempKey = `temp-exports/${userId}/${guideId}/${uuidv4()}.${format === 'pdf' ? 'pdf' : 'html'}`;
+            const extensionMap: Record<string, string> = { pdf: 'pdf', html: 'html', docx: 'docx' };
+            const ext = extensionMap[format] || 'pdf';
+            const tempKey = `temp-exports/${userId}/${guideId}/${uuidv4()}.${ext}`;
 
             if (format === 'pdf') {
                 console.log('🎨 Rendering PDF...');
@@ -115,7 +118,6 @@ export class GuidePdfExportWorkflow extends WorkflowEntrypoint<Env, ExportParams
                     const pdfBytes = await renderGuideToPdf(this.env, htmlContent);
                     console.log(`✅ PDF rendered: ${pdfBytes.length} bytes`);
 
-                    // Store PDF in R2 temporarily to avoid step output size limit
                     await this.env.BUCKET.put(tempKey, pdfBytes, {
                         httpMetadata: { contentType: 'application/pdf' }
                     });
@@ -128,8 +130,39 @@ export class GuidePdfExportWorkflow extends WorkflowEntrypoint<Env, ExportParams
                     await updateGuideExportStatus(guideId, format, 'FAILED');
                     throw error;
                 }
+            } else if (format === 'docx') {
+                console.log('📝 Rendering Word document...');
+
+                try {
+                    // Re-fetch images for docx generation (imageMap from step 2 is embedded in HTML)
+                    const steps = (guide.steps || []) as Step[];
+                    const imageMap: Record<string, ImageDataResult> = {};
+
+                    for (const stepItem of steps) {
+                        if (!stepItem.imageKey || stepItem.isExcluded) continue;
+                        const imageData = await imageToBase64DataUrl(this.env.BUCKET, stepItem.imageKey);
+                        if (imageData) {
+                            imageMap[stepItem.id] = imageData;
+                        }
+                    }
+
+                    const docxBytes = await generateExportDocx(guide, imageMap);
+                    console.log(`✅ Word document generated: ${docxBytes.length} bytes`);
+
+                    await this.env.BUCKET.put(tempKey, docxBytes, {
+                        httpMetadata: { contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }
+                    });
+                    console.log(`📦 Word document stored temporarily at: ${tempKey}`);
+
+                    return tempKey;
+                } catch (error) {
+                    console.error('❌ Word document generation failed:', error);
+                    initDatabase(this.env.DATABASE_URL);
+                    await updateGuideExportStatus(guideId, format, 'FAILED');
+                    throw error;
+                }
             } else {
-                // Store HTML in R2 temporarily as well (large guides can exceed limit)
+                // HTML format
                 await this.env.BUCKET.put(tempKey, htmlContent, {
                     httpMetadata: { contentType: 'text/html' }
                 });
@@ -143,9 +176,15 @@ export class GuidePdfExportWorkflow extends WorkflowEntrypoint<Env, ExportParams
             initDatabase(this.env.DATABASE_URL);
 
             const fileId = uuidv4();
-            const extension = format === 'pdf' ? 'pdf' : 'html';
+            const extensionMap: Record<string, string> = { pdf: 'pdf', html: 'html', docx: 'docx' };
+            const contentTypeMap: Record<string, string> = {
+                pdf: 'application/pdf',
+                html: 'text/html',
+                docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            };
+            const extension = extensionMap[format] || 'pdf';
             const r2Key = `exports/${userId}/${guideId}/${fileId}.${extension}`;
-            const contentType = format === 'pdf' ? 'application/pdf' : 'text/html';
+            const contentType = contentTypeMap[format] || 'application/pdf';
 
             console.log(`☁️ Moving from temp to final location: ${r2Key}`);
 

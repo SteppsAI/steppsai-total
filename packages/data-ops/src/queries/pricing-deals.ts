@@ -5,17 +5,11 @@ import { eq, and, asc } from "drizzle-orm";
 export type PricingDeal = typeof pricingDeals.$inferSelect;
 
 /**
- * Get all active pricing deals for a region and environment
- * This is the ONLY query needed - fetches all deals, UI filters as needed
+ * Get active pricing deals for a region and environment
  */
-export async function getPricingDeals(
-	region: string,
-	environment: string
-): Promise<PricingDeal[]> {
+export async function getPricingDeals(region: string, environment: string): Promise<PricingDeal[]> {
 	const db = getDb();
-
-	// Get region-specific deals
-	const deals = await db
+	return await db
 		.select()
 		.from(pricingDeals)
 		.where(
@@ -26,6 +20,4 @@ export async function getPricingDeals(
 			)
 		)
 		.orderBy(asc(pricingDeals.displayOrder));
-
-	return deals;
 }

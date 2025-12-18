@@ -60,7 +60,11 @@ export function TeamSection() {
         ...trpc.team.acceptInvitation.mutationOptions(),
         onSuccess: () => {
             toast.success("Invitation accepted!");
+            // Invalidate all team-related queries after accepting
             queryClient.invalidateQueries({ queryKey: trpc.team.getPendingInvitations.queryOptions().queryKey });
+            queryClient.invalidateQueries({ queryKey: trpc.team.getMyTeam.queryOptions().queryKey });
+            queryClient.invalidateQueries({ queryKey: trpc.team.getTeamStats.queryOptions().queryKey });
+            queryClient.invalidateQueries({ queryKey: trpc.team.getMyMemberships.queryOptions().queryKey });
         },
         onError: () => {
             toast.error("Failed to accept invitation");

@@ -1,222 +1,124 @@
-# December 2024 Changes Overview
+# December 2024 Changes
 
 ## 1. Word Export Fix
 
-### Problem
-Caption and image were appearing on separate pages in Word exports.
-
-### Solution
-Changed from separate paragraphs to a **table-based approach**. Each step with an image is now wrapped in a 2-row table:
-- Row 1: Caption text
-- Row 2: Image
-
-Tables in Word naturally keep their rows together on the same page.
-
-### File
-`apps/data-service/src/helpers/generateExportDocx.ts`
+Caption and image now stay on the same page using a table-based approach in `generateExportDocx.ts`.
 
 ---
 
-## 2. Pricing Deals System
+## 2. Pricing Deals Table
 
-### Purpose
-Store all subscription types in the database instead of hardcoding in env vars.
-
-### Table: `pricing_deals`
-
+### Schema (simplified)
 ```sql
 CREATE TABLE pricing_deals (
-  id UUID PRIMARY KEY,
-  name TEXT,              -- "Lifetime Deal", "Team Plan"
-  slug TEXT UNIQUE,       -- "lifetime-us", "team-eu"
-  type TEXT,              -- "lifetime" | "team" | "monthly" | "yearly"
-  region TEXT,            -- "US" | "EU"
-  environment TEXT,       -- "production" | "development"
-  product_id TEXT,        -- Creem product ID for checkout
-  price_amount INTEGER,   -- Price in cents (14900 = $149)
-  team_size INTEGER,      -- 3 for team plans, NULL for individual
-  features JSONB,         -- ["Feature 1", "Feature 2"]
-  badge TEXT,             -- "BEST VALUE"
-  is_active INTEGER,      -- 1 or 0
-  display_order INTEGER   -- Sort order
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  type TEXT NOT NULL,        -- 'lifetime' | 'team'
+  region TEXT NOT NULL,      -- 'US' | 'EU'
+  environment TEXT NOT NULL, -- 'production' | 'development'
+  product_id TEXT NOT NULL,
+  price_amount INTEGER NOT NULL,
+  team_size INTEGER,
+  is_active INTEGER DEFAULT 1,
+  display_order INTEGER DEFAULT 0
 );
 ```
 
-### Usage
-```typescript
-// One query fetches all deals for a region
-const deals = await getPricingDeals("US", "production");
+### SQL Insert (run after `pnpm --filter @repo/data-ops push`)
 
-// Frontend filters by type
-const lifetimeDeal = deals.find(d => d.type === "lifetime");
-const teamDeal = deals.find(d => d.type === "team");
+```sql
+-- DEVELOPMENT
+INSERT INTO pricing_deals (name, slug, type, region, environment, product_id, price_amount, team_size, is_active, display_order)
+VALUES
+('Lifetime Deal', 'lifetime-eu-dev', 'lifetime', 'EU', 'development', 'prod_4vYeqb4GliF45ShZtj5v4z', 14900, NULL, 1, 1),
+('Lifetime Deal', 'lifetime-us-dev', 'lifetime', 'US', 'development', 'prod_6KA7T37qW1NqzrdIzY4KPC', 14900, NULL, 1, 1);
+
+-- PRODUCTION
+INSERT INTO pricing_deals (name, slug, type, region, environment, product_id, price_amount, team_size, is_active, display_order)
+VALUES
+('Lifetime Deal', 'lifetime-eu-prod', 'lifetime', 'EU', 'production', 'prod_7lYJ3I4faEQkaZuntOnV7E', 14900, NULL, 1, 1),
+('Lifetime Deal', 'lifetime-us-prod', 'lifetime', 'US', 'production', 'prod_1f68HplUNotde3bINTGPiH', 14900, NULL, 1, 1);
+
+-- TEAM
+INSERT INTO pricing_deals (name, slug, type, region, environment, product_id, price_amount, team_size, is_active, display_order)
+VALUES 
+('Team Plan', 'team-us-dev', 'team', 'US', 'development', 'prod_4jyRA99A5sf29bcShAQzKk', 24900, 3, 1, 2),
+('Team Plan', 'team-eu-dev', 'team', 'EU', 'development', 'prod_4xt2tyu3pgRfTkDz012zKo', 24900, 3, 1, 2),
+('Team Plan', 'team-us-prod', 'team', 'US', 'production', 'prod_7N2fLGpeREpxWs5jpac4ua', 24900, 3, 1, 2),
+('Team Plan', 'team-eu-prod', 'team', 'EU', 'production', 'prod_kqcb36vCT1lqNMALqdfTw', 24900, 3, 1, 2);
 ```
 
 ---
 
-## 3. Team/Organization System
+## 3. Team System
 
-### How It Works
+### How 3-Member Limit Works
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         TEAM OWNER                               │
-│                                                                  │
-│  1. Buys "Team Plan" ($249) via Creem checkout                  │
-│  2. Gets productId stored in creem_subscription                  │
-│  3. Can invite up to 3 team members                             │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      creem_subscription                          │
-│                                                                  │
-│  id: "abc123"                                                   │
-│  reference_id: "owner-user-id"   ← Links to team owner          │
-│  product_id: "team_product_xxx"  ← Identifies as team plan      │
-│  status: "active"                                               │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                       team_members                               │
-│                                                                  │
-│  Row 1: owner_id="owner", member_id="user1", status="accepted"  │
-│  Row 2: owner_id="owner", member_id="user2", status="accepted"  │
-│  Row 3: owner_id="owner", member_id="user3", status="pending"   │
-└─────────────────────────────────────────────────────────────────┘
+Owner buys Team Plan ($249)
+        ↓
+creem_subscription.product_id = team product ID
+        ↓
+team.ts checks: is product_id a team product?
+        ↓
+If yes → maxMembers = 3
+        ↓
+countActiveTeamMembers(ownerId) checks current count
+        ↓
+If count >= 3 → reject new invites
 ```
 
-### Tables Involved
+### Tables
+- `creem_subscription` - stores who bought what product
+- `team_members` - links owner to members (status: pending/accepted)
 
-**1. `creem_subscription`** - Stores who bought what
-```
-reference_id  → User ID (the team owner)
-product_id    → Which product they bought (lifetime vs team)
-status        → "active", "cancelled", etc.
-```
+### Team Members Query Functions (`packages/data-ops/src/queries/team-members.ts`)
 
-**2. `team_members`** - Links owners to members
-```
-owner_id   → The user who bought the team plan
-member_id  → The invited user
-status     → "pending" | "accepted"
-role       → "editor" | "admin"
-```
+| Function | Purpose |
+|----------|---------|
+| `getTeamMembers(ownerId)` | Get all team members for an owner (with user info) |
+| `countActiveTeamMembers(ownerId)` | Count accepted members for limit check |
+| `addTeamMemberByEmail(ownerId, email, role)` | Invite user by email |
+| `removeTeamMember(ownerId, teamMemberId)` | Remove a member |
+| `acceptTeamInvitation(memberId, teamMemberId)` | Accept pending invite |
+| `declineTeamInvitation(memberId, teamMemberId)` | Decline pending invite |
+| `getPendingInvitations(userId)` | Get invites for a user |
+| `getTeamsAsMember(userId)` | Get teams where user is member |
+| `updateTeamMemberRole(ownerId, teamMemberId, role)` | Change member role |
 
-### How 3-Member Limit is Enforced
-
-```typescript
-// In team.ts router - addMember mutation
-
-// 1. Check if user has a team product
-const access = await checkUserAccess(userId);
-const maxMembers = getTeamLimit(access.productId, env);
-// → Returns 3 if productId matches team products, 0 otherwise
-
-// 2. Count current accepted members
-const currentCount = await countActiveTeamMembers(userId);
-
-// 3. Reject if at limit
-if (currentCount >= maxMembers) {
-  return { error: "Team limit reached (3 members)" };
-}
-```
-
-### How Team Members Get Access
-
-When a user logs in, `checkUserAccess()` runs:
-
-```typescript
-// 1. Check if user has their OWN subscription
-const subscription = await getSubscriptionByUserId(userId);
-if (subscription?.status === "active") {
-  return { hasAccess: true };
-}
-
-// 2. If not, check if they're a team MEMBER
-const teamMembership = await db
-  .select({ ownerId: teamMembers.ownerId })
-  .from(teamMembers)
-  .where(
-    memberId = userId AND
-    status = "accepted"
-  );
-
-// 3. If they are, check if the OWNER has access
-if (teamMembership) {
-  const ownerSubscription = await getSubscriptionByUserId(ownerId);
-  if (ownerSubscription?.status === "active") {
-    return { hasAccess: true, viaTeam: true };
-  }
-}
-
-return { hasAccess: false };
-```
-
-### Invitation Flow
-
-1. **Owner invites** → `team.addMember({ email: "user@example.com" })`
-   - Creates row in `team_members` with `status: "pending"`
-
-2. **Member sees invitation** → `team.getPendingInvitations()`
-   - Shows in their dashboard
-
-3. **Member accepts** → `team.acceptInvitation({ teamMemberId })`
-   - Updates `status` to `"accepted"`
-   - Member now has access through owner's subscription
+### Access Check Flow
+1. User logs in
+2. `checkUserAccess(userId)` runs
+3. First checks own subscription
+4. If none, checks if user is accepted member of a team
+5. If team member, checks if owner has active subscription
 
 ---
 
-## 4. Upgrade Page Changes
+## 4. Files Changed
 
-### Before
-- Only showed $149 lifetime deal
-- No team option visible
-
-### After
-- Shows plan selector: **Individual** | **Team (3 seats)**
-- Individual: $149 - single user
-- Team: $249 - owner + 3 team members
-- Selector only appears if `teamProductId` exists in config
-
-### File
-`apps/user-application/src/routes/app/upgrade.tsx`
+| File | Purpose |
+|------|---------|
+| `schema.ts` | Added `pricing_deals` table |
+| `pricing-deals.ts` | One query: `getPricingDeals()` |
+| `team-members.ts` | Simplified to essential functions |
+| `team_members.ts` (zod) | Type definition |
+| `pricing.ts` (tRPC) | One endpoint: `getDeals` |
+| `upgrade.tsx` | Plan selector (individual/team) |
+| `generateExportDocx.ts` | Table-based layout |
+| `$.tsx` | Catch-all redirect to `/` |
 
 ---
 
-## 5. 404 Routing Fix
+## 5. Setup
 
-### Problem
-Unknown routes like `/webinars` showed "Page not found"
+```bash
+# 1. Push schema
+pnpm --filter @repo/data-ops push
 
-### Solution
-Created catch-all route that redirects to `/`
+# 2. Run SQL inserts above in Supabase/database
 
-### File
-`apps/user-application/src/routes/$.tsx`
-
----
-
-## Files Changed Summary
-
-| Area | Files |
-|------|-------|
-| Word Export | `generateExportDocx.ts` |
-| Pricing DB | `schema.ts`, `pricing-deals.ts`, `pricing.ts` |
-| Team System | `team-members.ts`, `team.ts`, `subscriptions.ts` |
-| Upgrade Page | `upgrade.tsx` |
-| Routing | `$.tsx` |
-
----
-
-## Setup Checklist
-
-1. Push schema: `pnpm --filter @repo/data-ops push`
-2. Insert pricing deals into `pricing_deals` table
-3. Add team product IDs to wrangler.toml:
-   ```
-   VITE_CREEM_TEAM_PRODUCT_US_PRODUCTION = "prod_xxx"
-   VITE_CREEM_TEAM_PRODUCT_EU_PRODUCTION = "prod_yyy"
-   ```
-4. Rebuild: `pnpm build-package`
+# 3. Rebuild
+pnpm build-package
+```

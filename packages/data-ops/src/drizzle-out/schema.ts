@@ -71,31 +71,19 @@ export const webinarRegistrations = pgTable("webinar_registrations", {
 ]);
 
 // Pricing deals - stores product/pricing configurations
-// Types: 'lifetime', 'team', 'monthly', 'yearly', 'launch_special'
 export const pricingDeals = pgTable("pricing_deals", {
 	id: uuid("id").defaultRandom().primaryKey().notNull(),
-	name: text("name").notNull(), // Display name e.g. "Lifetime Deal", "Team Plan"
-	slug: text("slug").notNull().unique(), // URL-friendly identifier e.g. "lifetime-us", "team-eu"
-	type: text("type").notNull(), // 'lifetime' | 'team' | 'monthly' | 'yearly' | 'launch_special'
-	region: text("region").notNull(), // 'US' | 'EU' | 'GLOBAL'
+	name: text("name").notNull(),
+	slug: text("slug").notNull().unique(),
+	type: text("type").notNull(), // 'lifetime' | 'team'
+	region: text("region").notNull(), // 'US' | 'EU'
 	environment: text("environment").notNull(), // 'production' | 'development'
-	productId: text("product_id").notNull(), // Creem product ID
-	priceAmount: integer("price_amount").notNull(), // Price in cents (e.g. 14900 = $149.00)
-	priceCurrency: text("price_currency").default('USD'), // 'USD' | 'EUR' etc.
-	originalPrice: integer("original_price"), // Original price for strikethrough (optional)
-	teamSize: integer("team_size"), // Number of seats for team plans (null for individual)
-	description: text("description"), // Short description
-	features: jsonb("features").default([]), // Array of feature strings
-	badge: text("badge"), // Badge text e.g. "MOST POPULAR", "BEST VALUE"
-	isActive: integer("is_active").default(1), // 1 = active, 0 = inactive (using integer for better compatibility)
-	displayOrder: integer("display_order").default(0), // For sorting in UI
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
-	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+	productId: text("product_id").notNull(),
+	priceAmount: integer("price_amount").notNull(), // cents
+	teamSize: integer("team_size"), // null for individual
+	isActive: integer("is_active").default(1),
+	displayOrder: integer("display_order").default(0),
 }, (table) => [
-	index("pricing_deals_slug_idx").on(table.slug),
-	index("pricing_deals_type_idx").on(table.type),
-	index("pricing_deals_region_idx").on(table.region),
-	index("pricing_deals_environment_idx").on(table.environment),
-	index("pricing_deals_is_active_idx").on(table.isActive),
+	index("pricing_deals_type_region_env_idx").on(table.type, table.region, table.environment),
 ]);
 

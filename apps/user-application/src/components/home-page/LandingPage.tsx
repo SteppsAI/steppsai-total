@@ -16,7 +16,7 @@ export function LandingPage() {
                 <div className="bg-foggy">
                     <SocialProof />
                     <HowItWorks />
-                    {/* <BlackFridayDeal /> */}
+                    {/* <LifetimeDeal /> */}
                 </div>
                 <FAQ />
                 <WaitlistSection />

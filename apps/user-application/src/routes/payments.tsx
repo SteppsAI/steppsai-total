@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Navbar } from '@/components/home-page/Navbar'
 import { Footer } from '@/components/home-page/footer'
-import { BlackFridayDeal } from '@/components/home-page/LifetimeDeal'
+import { LifetimeDeal } from '@/components/home-page/LifetimeDeal'
 // import { Pricing2 } from '@/components/ui/pricing-block'
 import {
     Accordion,
@@ -150,7 +150,7 @@ function PaymentsPage() {
                 {/* <Pricing2 
                     plans={plans} 
                 /> */}
-                <BlackFridayDeal />
+                <LifetimeDeal />
 
                 {/* FAQ Section */}
                 <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 mb-20">
@@ -194,20 +194,20 @@ function PaymentsPage() {
                                 Ready to start documenting?
                             </h2>
                             <p className="text-[var(--color-200)] text-lg md:text-xl max-w-2xl mx-auto">
-                                Join thousands of teams who have switched to Stepps.ai for their documentation needs.
+                                Reduce your documentation time by 80% and start creating beautiful guides in seconds.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                                 <a
                                     href="/auth/login"
                                     className="inline-flex h-14 items-center justify-center rounded-full bg-white text-[var(--color-900)] px-8 text-lg font-semibold transition-transform hover:-translate-y-1 hover:bg-[var(--color-50)] focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[var(--color-900)]"
                                 >
-                                    Get Started for Free
+                                    Get Started
                                 </a>
                                 <a
                                     href="mailto:support@stepps.ai"
                                     className="inline-flex h-14 items-center justify-center rounded-full border border-[var(--color-700)] bg-[var(--color-800)]/50 text-white px-8 text-lg font-semibold backdrop-blur-sm transition-all hover:-translate-y-1 hover:bg-[var(--color-800)] focus:outline-none focus:ring-2 focus:ring-[var(--color-500)] focus:ring-offset-2 focus:ring-offset-[var(--color-900)]"
                                 >
-                                    Contact Sales
+                                    Contact Us
                                 </a>
                             </div>
                         </div>

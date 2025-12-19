@@ -185,12 +185,13 @@ function EditorPage() {
     try {
       await session.save();
       toast.success("Changes saved", { duration: 2000 });
-      // Invalidate guides query to refresh list
+      // Invalidate guides queries - getAll for list, getById for this guide's cache
       queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
+      queryClient.invalidateQueries({ queryKey: trpc.guides.getById.queryOptions({ id: guideId }).queryKey });
     } catch (error) {
       toast.error("Failed to save changes");
     }
-  }, [session, queryClient]);
+  }, [session, queryClient, guideId]);
 
   // Loading state
   if (session.isLoading) {

@@ -30,7 +30,7 @@ interface EditorSession {
 }
 
 // Sync to DO after 10 seconds of inactivity
-const INACTIVITY_SYNC_DELAY = 10000;
+const INACTIVITY_SYNC_DELAY = 6000;
 // Max retries before giving up
 const MAX_SYNC_RETRIES = 3;
 
@@ -183,10 +183,14 @@ export function useEditorSession(guideId: string, initialGuide: Guide | null): E
 
 		initSession();
 
-		// Cleanup on unmount
+		// Cleanup on unmount - sync pending changes before leaving
 		return () => {
 			if (inactivityTimerRef.current) {
 				clearTimeout(inactivityTimerRef.current);
+			}
+			// Sync any pending changes to DO before unmount
+			if (pendingChangesRef.current && !hasErrorRef.current) {
+				syncToDO(pendingChangesRef.current);
 			}
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps

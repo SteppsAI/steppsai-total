@@ -1,8 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Stepps.ai Extension",
-    "version": "1.0.1",
-    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtr1gZR+ruqZGAAOfqjpazxMfyBbrzHL1ucvIWZYI8on2+4S0ucRUdXaKMBfA6df/OZcZkNXaeiWFluLa7HnXWO8boMXrybchWSZCMpHJLcKXedSoI2YaEjQf6LxDljeUP8DFgQIaU6ySZbrRFAZMIC2hIIaH+GUuB4Ovp4xoKP+LQpzzeQ124usJddA8foZjbA1SHtYNdDVOAPzjbQMX/CH0nlJIJuF6UNvjdB9qI6EkCeerZWhg57lhb1y58d1O0c8AWCjbCyCfqfompPnS1ApW2YVaRgCSMQR1nCmuvM7xztOOaMkb1M8/cOZoZ0jHZyVNBqx08Zlv/LaP97zC2QIDAQAB",
+    "version": "1.0.2",
     "description": "Turn any workflow into SOP in seconds.",
     "permissions": [
         "activeTab",

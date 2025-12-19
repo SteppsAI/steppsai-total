@@ -11,6 +11,7 @@ export const WEB_APP_URL = import.meta.env.VITE_USER_APP_URL
 
 // Data Service (Images only - direct access for serving)
 export const IMAGES_URL = import.meta.env.VITE_DATA_SERVICE_URL
+
     || import.meta.env.VITE_DATA_SERVICE_URL_STAGE
     || 'https://api.stage.stepps.ai';
 

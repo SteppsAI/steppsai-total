@@ -26,7 +26,7 @@ export function EditorToolbar({ activeTool, onToolChange }: EditorToolbarProps) 
     ];
 
     return (
-        <div className="absolute left-6 top-1/2 -translate-y-1/2 flex flex-col items-center bg-[var(--color-200)] rounded-full shadow-lg border border-[var(--color-300)] p-2 gap-2 z-30">
+        <div className="absolute left-6 top-1/2 -translate-y-1/2 flex flex-col items-center bg-[var(--color-50)] rounded-full shadow-lg border border-[var(--color-200)] p-2 gap-2 z-30">
             <TooltipProvider delayDuration={0}>
                 {tools.map((tool) => (
                     <Tooltip key={tool.id}>

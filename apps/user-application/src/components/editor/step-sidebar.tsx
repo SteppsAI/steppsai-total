@@ -146,7 +146,7 @@ export function StepSidebar({
         <div className={cn(
             "flex flex-col z-10 h-full transition-all duration-300 relative",
             "bg-white/50 backdrop-blur-xl supports-[backdrop-filter]:bg-white/50",
-            "border-l border-white/20",
+            "border-l border-[var(--color-200)]",
             isCollapsed ? "w-14" : "w-[300px]"
         )}>
             {/* Toggle Button */}

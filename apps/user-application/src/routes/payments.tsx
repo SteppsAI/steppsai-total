@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Navbar } from '@/components/home-page/Navbar'
 import { Footer } from '@/components/home-page/footer'
-import { BlackFridayDeal } from '@/components/home-page/BlackFridayDeal'
+import { BlackFridayDeal } from '@/components/home-page/LifetimeDeal'
 // import { Pricing2 } from '@/components/ui/pricing-block'
 import {
     Accordion,

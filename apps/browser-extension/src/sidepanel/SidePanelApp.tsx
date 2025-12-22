@@ -284,7 +284,7 @@ function SidePanelApp() {
                     </div>
                 ) : (
                     <div className="text-center">
-                        <a href="#" className="text-sm text-slate-900 underline decoration-slate-900 underline-offset-4">
+                        <a href={`${WEB_APP_URL}/app`} className="text-sm text-slate-900 underline decoration-slate-900 underline-offset-4">
                             open dashboard
                         </a>
                     </div>

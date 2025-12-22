@@ -96,7 +96,7 @@ export function EditorHeader({
     }, []);
 
     return (
-        <header className="h-16 border-b border-white/20 bg-white/50 backdrop-blur-xl supports-[backdrop-filter]:bg-white/50 flex items-center justify-between px-4 sticky top-0 z-50 transition-all duration-300">
+        <header className="h-16 border-b border-[var(--color-200)] bg-white/50 backdrop-blur-xl supports-[backdrop-filter]:bg-white/50 flex items-center justify-between px-4 sticky top-0 z-50 transition-all duration-300">
             {/* Left Section: Back & Brand */}
             <div className="flex items-center gap-3 flex-1">
                 <Button
@@ -109,7 +109,7 @@ export function EditorHeader({
                 </Button>
 
                 {brandLogoUrl && (
-                    <div className="w-8 h-8 rounded-lg overflow-hidden border border-white/20 shadow-sm">
+                    <div className="w-8 h-8 rounded-lg overflow-hidden border border-[var(--color-200)] shadow-sm">
                         <img
                             src={brandLogoUrl}
                             alt="Brand logo"
@@ -207,7 +207,7 @@ export function EditorHeader({
                     </Button>
                 )}
 
-                <div className="h-6 w-px bg-gradient-to-b from-transparent via-gray-200 to-transparent mx-1 hidden sm:block"></div>
+                <div className="h-6 w-px bg-gradient-to-b from-transparent via-[var(--color-200)] to-transparent mx-1 hidden sm:block"></div>
 
                 <Button
                     variant="ghost"

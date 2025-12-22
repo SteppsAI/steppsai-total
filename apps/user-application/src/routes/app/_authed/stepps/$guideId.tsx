@@ -148,38 +148,82 @@ function GuideViewPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Minimal Sticky Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-14">
-        <div className="container max-w-5xl h-full mx-auto flex items-center justify-between px-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="-ml-2 hover:bg-muted/50" onClick={() => router.history.back()}>
-              <ChevronLeft className="size-5 text-muted-foreground" />
+      <header className="sticky top-0 z-50 border-b border-slate-200/50 bg-white/50 backdrop-blur-xl supports-[backdrop-filter]:bg-white/20 h-16 transition-all duration-300">
+        <div className="h-full flex items-center justify-between px-4">
+          {/* Left Section: Back & Brand */}
+          <div className="flex items-center gap-3 flex-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-9 h-9 rounded-full btn-glass-secondary text-muted-foreground hover:text-foreground transition-all duration-300 hover:scale-105"
+              onClick={() => router.history.back()}
+            >
+              <ChevronLeft className="w-4 h-4" />
               <span className="sr-only">Back</span>
             </Button>
-            <span className="font-medium text-sm hidden sm:inline-block truncate max-w-[300px]">
-              {guide.title}
-            </span>
+            {guide.brandImageKey && (
+              <div className="w-8 h-8 rounded-lg overflow-hidden border border-[var(--color-200)] shadow-sm hidden sm:block">
+                <img
+                  src={guide.brandImageKey}
+                  alt="Brand logo"
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            )}
           </div>
 
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" className="h-8 gap-2 text-muted-foreground hover:text-foreground" asChild>
+          {/* Center Section: Title */}
+          <div className="flex flex-col items-center justify-center flex-[2] gap-1 px-4">
+            <h1 className="text-center font-display font-semibold text-lg text-foreground truncate max-w-[300px] md:max-w-[400px]">
+              {guide.title}
+            </h1>
+          </div>
+
+          {/* Right Section: Actions */}
+          <div className="flex items-center justify-end gap-2 flex-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 btn-glass-secondary text-muted-foreground hover:text-[var(--primary)] transition-all duration-300 group rounded-lg"
+              asChild
+            >
               <Link to="/app/editor/$guideId" params={{ guideId: guide.guideId }}>
-                <Pencil className="size-4" />
+                <Pencil className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
                 <span className="hidden sm:inline">Edit</span>
               </Link>
             </Button>
-            <Button variant="ghost" size="sm" className="h-8 gap-2 text-muted-foreground hover:text-foreground" onClick={() => setIsShareOpen(true)}>
-              <Share2 className="size-4" />
+
+            <div className="h-6 w-px bg-gradient-to-b from-transparent via-[var(--color-200)] to-transparent mx-1 hidden sm:block"></div>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 btn-glass-secondary text-muted-foreground hover:text-[var(--primary)] transition-all duration-300 group rounded-lg"
+              onClick={() => setIsShareOpen(true)}
+            >
+              <Share2 className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
               <span className="hidden sm:inline">Share</span>
             </Button>
-            <Button variant="ghost" size="sm" className="h-8 gap-2 text-muted-foreground hover:text-foreground" onClick={() => setIsExportOpen(true)}>
-              <Download className="size-4" />
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 btn-glass-secondary text-muted-foreground hover:text-[var(--primary)] transition-all duration-300 group rounded-lg"
+              onClick={() => setIsExportOpen(true)}
+            >
+              <Download className="w-3.5 h-3.5 group-hover:translate-y-[1px] transition-transform" />
               <span className="hidden sm:inline">Export</span>
             </Button>
 
             <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
-                  <MoreVertical className="size-4" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-full btn-glass-secondary text-muted-foreground hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300 hover:scale-105"
+                >
+                  <MoreVertical className="w-4 h-4" />
                   <span className="sr-only">More options</span>
                 </Button>
               </DropdownMenuTrigger>

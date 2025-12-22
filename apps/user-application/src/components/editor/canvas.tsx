@@ -841,7 +841,7 @@ export function Canvas({
 
         {/* Action buttons at bottom */}
         <div className="flex justify-center items-center gap-3">
-          <div className="flex items-center gap-2 bg-[var(--color-200)] px-4 py-2.5 rounded-full shadow-lg border border-[var(--color-300)]">
+          <div className="flex items-center gap-2 bg-[var(--color-50)] px-4 py-2.5 rounded-full shadow-lg border border-[var(--color-200)]">
             <Button
               onClick={undo}
               disabled={!canUndo}

@@ -18,7 +18,7 @@ const navigation = [
   { name: "Why Stepps", link: "/#save-time" },
   { name: "How it works", link: "/#how-it-works" },
   { name: "FAQ", link: "/#faq" },
-  { name: "Extension ↗", link: "https://chromewebstore.google.com/detail/hlahheljlplnnagiogmihjgcjbnjehpc?utm_source=item-share-cb", target: "_blank"},
+  { name: "Extension ↗", link: "https://chromewebstore.google.com/detail/hlahheljlplnnagiogmihjgcjbnjehpc?utm_source=item-share-cb", target: "_blank" },
 ];
 
 export function Navbar() {
@@ -39,14 +39,14 @@ export function Navbar() {
           </Link> */}
           <a
             href="/#waitlist"
-            className="btn-glass-primary group inline-flex h-10 items-center justify-center rounded-full px-6 text-sm font-medium text-primary-foreground transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative z-20"
+            className="btn-glass-primary group inline-flex h-10 items-center justify-center rounded-full px-6 text-sm font-medium text-primary-foreground leading-none transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative z-20"
           >
             <span className="flex items-center justify-center gap-2">
-              <span className="relative block h-[1.2em] overflow-hidden">
+              <span className="relative flex items-center h-[1.2em] overflow-hidden">
                 <span className="block transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
                   Join Waitlist
                 </span>
-                <span className="absolute top-full left-0 block transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
+                <span className="absolute inset-0 flex items-center transition-transform duration-500 ease-in-out translate-y-full group-hover:translate-y-0 whitespace-nowrap">
                   Join Waitlist
                 </span>
               </span>
@@ -86,14 +86,14 @@ export function Navbar() {
           </Link> */}
           <a
             href="/#waitlist"
-            className="btn-glass-primary w-full group inline-flex h-12 items-center justify-center rounded-full mt-2 text-base font-medium text-primary-foreground transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="btn-glass-primary w-full group inline-flex h-12 items-center justify-center rounded-full mt-2 text-base font-medium text-primary-foreground leading-none transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <span className="flex items-center justify-center gap-2">
-              <span className="relative block h-[1.2em] overflow-hidden">
+              <span className="relative flex items-center h-[1.2em] overflow-hidden">
                 <span className="block transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
                   Join Waitlist
                 </span>
-                <span className="absolute top-full left-0 block transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
+                <span className="absolute inset-0 flex items-center justify-center transition-transform duration-500 ease-in-out translate-y-full group-hover:translate-y-0 whitespace-nowrap">
                   Join Waitlist
                 </span>
               </span>

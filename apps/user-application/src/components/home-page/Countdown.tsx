@@ -29,7 +29,7 @@ export function Countdown() {
 
     useEffect(() => {
         // Target: Monday, Dec 22 2025 at 19:00 CET
-        const target = new Date('2025-12-29T19:00:00+01:00');
+        const target = new Date('2026-01-05T19:00:00+01:00');
 
         const interval = setInterval(() => {
             const now = new Date();

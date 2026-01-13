@@ -5,6 +5,7 @@ import { HowItWorks } from "./HowItWorks";
 import { WaitlistSection } from "./WaitlistSection";
 import { FAQ } from "./FAQ";
 import { Footer } from "./footer";
+import { LifetimeDeal } from "./LifetimeDeal";
 
 export function LandingPage() {
     return (
@@ -16,7 +17,7 @@ export function LandingPage() {
                 <div className="bg-foggy">
                     <SocialProof />
                     <HowItWorks />
-                    {/* <LifetimeDeal /> */}
+                    <LifetimeDeal />
                 </div>
                 <FAQ />
                 <WaitlistSection />

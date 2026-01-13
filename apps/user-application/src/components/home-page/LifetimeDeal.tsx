@@ -67,7 +67,7 @@ export function LifetimeDeal() {
     }, { scope: containerRef });
 
     return (
-        <section id="black-friday" ref={containerRef} className="py-16 md:py-24 relative overflow-hidden font-sans duration-500">
+        <section id="black-friday" ref={containerRef} className="bg-[var(--color-100)] py-16 md:py-24 relative overflow-hidden font-sans duration-500">
             {/* Background elements to make cards stand out */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-6xl -z-10 opacity-30">
                 <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px]"></div>

@@ -34,7 +34,7 @@ function PublicGuideViewPage() {
   const steps = (guide.steps ?? []) as Step[];
 
   return (
-    <div className="min-h-screen bg-[var(--color-50)] flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Refined Glass Header */}
       <header className="sticky top-0 z-50 w-full border-b border-slate-200/50 bg-white/50 backdrop-blur-xl supports-[backdrop-filter]:bg-white/20">
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -63,7 +63,7 @@ function PublicGuideViewPage() {
         <div className="space-y-6 text-center border-b pb-12">
           <div className="space-y-4">
             <div className="flex items-center justify-center gap-3">
-              <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-[var(--color-950)]">
+              <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground">
                 {guide.title}
               </h1>
               {guide.brandImageKey && (
@@ -76,12 +76,12 @@ function PublicGuideViewPage() {
               )}
             </div>
             {guide.description && (
-              <p className="text-xl text-[var(--color-600)] leading-relaxed max-w-2xl mx-auto">
+              <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
                 {guide.description}
               </p>
             )}
           </div>
-          <div className="flex items-center justify-center gap-4 text-sm text-[var(--color-600)]">
+          <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
             <span>{steps.length} steps</span>
             <span>•</span>
             <span>Last updated {new Date(guide.updatedAt || new Date()).toLocaleDateString()}</span>
@@ -95,11 +95,11 @@ function PublicGuideViewPage() {
               <div key={step.id || index} className="space-y-6 group">
                 <div className="flex flex-col gap-4">
                   <div className="flex items-start gap-4">
-                    <div className="flex-none flex items-center justify-center size-8 rounded-full bg-[var(--color-200)] text-[var(--color-700)] font-bold text-sm mt-1">
+                    <div className="flex-none flex items-center justify-center size-8 rounded-full bg-primary/10 text-primary font-bold text-sm mt-1">
                       {index + 1}
                     </div>
                     <div className="space-y-2 pt-1">
-                      <h2 className="text-xl md:text-2xl font-medium text-[var(--color-900)] leading-snug">
+                      <h2 className="text-xl md:text-2xl font-medium text-foreground leading-snug">
                         {step.caption || step.aiCaption || `Step ${index + 1}`}
                       </h2>
                     </div>

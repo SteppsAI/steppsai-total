@@ -206,14 +206,14 @@ export function Hero() {
 
                                     <Link
                                         to="/webinar"
-                                        className="btn-glass-primary btn-reserve group inline-flex h-12 md:h-14 items-center justify-center rounded-full px-6 md:px-8 text-sm md:text-base font-medium text-primary-foreground transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 mt-2"
+                                        className="btn-glass-primary btn-reserve group inline-flex h-12 md:h-14 items-center justify-center rounded-full px-6 md:px-8 text-sm md:text-base font-medium text-primary-foreground leading-none transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 mt-2"
                                     >
                                         <span className="flex items-center justify-center w-full">
-                                            <span className="relative block h-[1.2em] overflow-hidden">
+                                            <span className="relative flex items-center h-[1.2em] overflow-hidden">
                                                 <span className="block text-center whitespace-nowrap transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
                                                     Reserve Your Free Spot
                                                 </span>
-                                                <span className="absolute top-full left-0 block text-center whitespace-nowrap transition-transform duration-500 ease-in-out group-hover:-translate-y-full w-full">
+                                                <span className="absolute inset-0 flex items-center justify-center text-center whitespace-nowrap transition-transform duration-500 ease-in-out translate-y-full group-hover:translate-y-0 w-full">
                                                     Reserve Your Free Spot
                                                 </span>
                                             </span>

@@ -2,7 +2,6 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Navbar } from '@/components/home-page/Navbar'
 import { Footer } from '@/components/home-page/footer'
 import { WebinarForm } from '@/components/home-page/WebinarForm'
-import { Countdown } from '@/components/home-page/Countdown'
 import confetti from 'canvas-confetti'
 
 export const Route = createFileRoute('/webinar')({
@@ -38,11 +37,6 @@ function WebinarPage() {
                         <p className="text-base md:text-lg text-[var(--color-600)] max-w-2xl mx-auto leading-relaxed font-medium">
                             We will show you how you can create proffesional onboarding guides in minutes using Stepps.ai.
                         </p>
-                    </div>
-
-                    {/* Countdown Section */}
-                    <div className="py-2">
-                        <Countdown />
                     </div>
 
                     {/* Registration Card - Glassmorphism like upgrade modal */}

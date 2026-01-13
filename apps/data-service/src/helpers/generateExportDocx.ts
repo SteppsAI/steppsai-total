@@ -76,7 +76,9 @@ export async function generateExportDocx(
         const caption = step.caption || step.aiCaption || `Step ${index + 1}`;
         const imageEntry = imageMap[step.id];
 
-        const hasImage = !!(step.imageKey && imageEntry?.dataUrl);
+        const imageType = imageEntry?.dataUrl ? getImageTypeFromDataUrl(imageEntry.dataUrl) : null;
+        // Only consider image valid if we have the data AND format is supported by docx
+        const hasImage = !!(step.imageKey && imageEntry?.dataUrl && imageType);
         const isLastStep = index === visibleSteps.length - 1;
 
         if (hasImage) {
@@ -139,7 +141,7 @@ export async function generateExportDocx(
                                                 new ImageRun({
                                                     data: imageBuffer,
                                                     transformation: { width, height },
-                                                    type: 'png',
+                                                    type: imageType,
                                                 }),
                                             ],
                                             alignment: AlignmentType.CENTER,
@@ -303,4 +305,25 @@ function base64ToBuffer(dataUrl: string): Buffer {
     // Remove data URL prefix (e.g., "data:image/png;base64,")
     const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, '');
     return Buffer.from(base64Data, 'base64');
+}
+
+/**
+ * Extracts image type from data URL for docx embedding
+ * docx only supports: png, gif, jpg, bmp
+ * Returns null if format is unsupported (e.g., webp)
+ */
+function getImageTypeFromDataUrl(dataUrl: string): 'png' | 'gif' | 'jpg' | 'bmp' | null {
+    const match = dataUrl.match(/^data:image\/(\w+);base64,/);
+    if (!match) return null;
+
+    const mimeType = match[1].toLowerCase();
+
+    // Map mime types to docx supported types
+    if (mimeType === 'png') return 'png';
+    if (mimeType === 'gif') return 'gif';
+    if (mimeType === 'jpeg' || mimeType === 'jpg') return 'jpg';
+    if (mimeType === 'bmp') return 'bmp';
+
+    // webp and other formats are NOT supported by docx
+    return null;
 }

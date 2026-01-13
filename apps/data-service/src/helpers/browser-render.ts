@@ -71,3 +71,71 @@ export function prepareHtmlForExport(htmlContent: string): string {
     // - Adding metadata
     return htmlContent;
 }
+
+/**
+ * Converts a webp image to PNG using Cloudflare Browser Rendering screenshot API
+ * Needed because docx library only supports png/jpg/gif/bmp, not webp
+ */
+export async function convertWebpToPng(
+    env: Env,
+    webpDataUrl: string,
+    width: number,
+    height: number
+): Promise<string | null> {
+    if (!env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_API_TOKEN_BROWSER) {
+        console.error('❌ Missing Cloudflare credentials for webp conversion');
+        return null;
+    }
+
+    // Create minimal HTML that just displays the image
+    const html = `<!DOCTYPE html>
+<html><head><style>
+*{margin:0;padding:0}
+body{width:${width}px;height:${height}px;overflow:hidden}
+img{width:100%;height:100%;object-fit:contain}
+</style></head>
+<body><img src="${webpDataUrl}"/></body></html>`;
+
+    const apiUrl = `https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/browser-rendering/screenshot`;
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${env.CLOUDFLARE_API_TOKEN_BROWSER}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                html,
+                screenshotOptions: {
+                    type: 'png',
+                    clip: { x: 0, y: 0, width, height },
+                },
+                viewport: { width, height },
+            }),
+        });
+
+        if (!response.ok) {
+            console.error('❌ Webp conversion failed:', response.status);
+            return null;
+        }
+
+        const pngBuffer = await response.arrayBuffer();
+        const base64 = uint8ArrayToBase64(new Uint8Array(pngBuffer));
+        console.log(`✅ Converted webp to PNG: ${pngBuffer.byteLength} bytes`);
+        return `data:image/png;base64,${base64}`;
+    } catch (error) {
+        console.error('❌ Webp to PNG conversion error:', error);
+        return null;
+    }
+}
+
+function uint8ArrayToBase64(bytes: Uint8Array): string {
+    const CHUNK_SIZE = 8192;
+    let binary = '';
+    for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
+        const chunk = bytes.subarray(i, Math.min(i + CHUNK_SIZE, bytes.length));
+        binary += String.fromCharCode.apply(null, chunk as unknown as number[]);
+    }
+    return btoa(binary);
+}

@@ -1,5 +1,5 @@
 import { WorkflowEntrypoint, WorkflowEvent, WorkflowStep } from 'cloudflare:workers';
-import { renderGuideToPdf } from '../helpers/browser-render';
+import { renderGuideToPdf, convertWebpToPng } from '../helpers/browser-render';
 import { generateExportHtml, imageToBase64DataUrl } from '../helpers/generateExportHtml';
 import { generateExportDocx } from '../helpers/generateExportDocx';
 import { getGuide, updateGuideExportStatus } from '@repo/data-ops/queries/guides';
@@ -135,6 +135,7 @@ export class GuidePdfExportWorkflow extends WorkflowEntrypoint<Env, ExportParams
 
                 try {
                     // Re-fetch images for docx generation (imageMap from step 2 is embedded in HTML)
+                    // DOCX only supports png/jpg/gif/bmp - NOT webp, so we convert webp to PNG
                     const steps = (guide.steps || []) as Step[];
                     const imageMap: Record<string, ImageDataResult> = {};
 
@@ -142,7 +143,25 @@ export class GuidePdfExportWorkflow extends WorkflowEntrypoint<Env, ExportParams
                         if (!stepItem.imageKey || stepItem.isExcluded) continue;
                         const imageData = await imageToBase64DataUrl(this.env.BUCKET, stepItem.imageKey);
                         if (imageData) {
-                            imageMap[stepItem.id] = imageData;
+                            // Check if image is webp (not supported by docx library)
+                            if (imageData.dataUrl.startsWith('data:image/webp')) {
+                                console.log(`🔄 Converting webp to PNG for step ${stepItem.id}...`);
+                                // Calculate dimensions from aspect ratio (use reasonable max width)
+                                const maxWidth = 1200;
+                                const width = maxWidth;
+                                const height = Math.round(width / imageData.aspectRatio);
+
+                                const pngDataUrl = await convertWebpToPng(this.env, imageData.dataUrl, width, height);
+                                if (pngDataUrl) {
+                                    imageMap[stepItem.id] = { dataUrl: pngDataUrl, aspectRatio: imageData.aspectRatio };
+                                    console.log(`✅ Converted to PNG for step ${stepItem.id}`);
+                                } else {
+                                    console.warn(`⚠️ Failed to convert webp for step ${stepItem.id}`);
+                                }
+                            } else {
+                                // Already a supported format (png, jpg, gif, bmp)
+                                imageMap[stepItem.id] = imageData;
+                            }
                         }
                     }
 

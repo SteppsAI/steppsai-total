@@ -1,7 +1,6 @@
 "use client"
 
 import { ArrowRight, Play } from 'lucide-react'
-import { Countdown } from './Countdown'
 import { useRef } from 'react'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
@@ -201,8 +200,6 @@ export function Hero() {
                                             We will show you how you can create proffesional onboarding guides in minutes using Stepps.ai.
                                         </p>
                                     </div>
-
-                                    <Countdown />
 
                                     <Link
                                         to="/webinar"

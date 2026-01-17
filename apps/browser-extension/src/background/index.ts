@@ -3,6 +3,127 @@
 import { trpc } from '../lib/trpc';
 import { convertToWebP } from '../lib/helpers';
 
+// ===== OFFSCREEN DOCUMENT MANAGEMENT =====
+let creatingOffscreen: Promise<void> | null = null;
+
+async function ensureOffscreenDocument(): Promise<void> {
+    const offscreenUrl = chrome.runtime.getURL('offscreen.html');
+
+    // Check if offscreen document already exists
+    const existingContexts = await chrome.runtime.getContexts({
+        contextTypes: [chrome.runtime.ContextType.OFFSCREEN_DOCUMENT],
+        documentUrls: [offscreenUrl]
+    });
+
+    if (existingContexts.length > 0) {
+        return;
+    }
+
+    // Avoid race conditions when creating
+    if (creatingOffscreen) {
+        await creatingOffscreen;
+        return;
+    }
+
+    creatingOffscreen = chrome.offscreen.createDocument({
+        url: offscreenUrl,
+        reasons: [chrome.offscreen.Reason.DISPLAY_MEDIA],
+        justification: 'Capture screen/window for step screenshots'
+    });
+
+    await creatingOffscreen;
+    creatingOffscreen = null;
+}
+
+async function closeOffscreenDocument(): Promise<void> {
+    const offscreenUrl = chrome.runtime.getURL('offscreen.html');
+
+    const existingContexts = await chrome.runtime.getContexts({
+        contextTypes: [chrome.runtime.ContextType.OFFSCREEN_DOCUMENT],
+        documentUrls: [offscreenUrl]
+    });
+
+    if (existingContexts.length > 0) {
+        await chrome.offscreen.closeDocument();
+    }
+}
+
+// ===== DESKTOP CAPTURE =====
+// Track if capture is active
+let captureActive = false;
+
+async function startDesktopCapture(): Promise<boolean> {
+    try {
+        // Always close any existing offscreen document first for a clean start
+        await closeOffscreenDocument();
+        captureActive = false;
+
+        // Create fresh offscreen document
+        await ensureOffscreenDocument();
+
+        // Delay to ensure offscreen script is fully loaded
+        await new Promise(resolve => setTimeout(resolve, 200));
+
+        // Tell offscreen to start capture - this will show the picker
+        const response = await chrome.runtime.sendMessage({
+            type: 'START_CAPTURE'
+        });
+
+        if (response.success) {
+            captureActive = true;
+            return true;
+        } else {
+            console.error('Failed to start capture:', response.error);
+            await closeOffscreenDocument();
+            return false;
+        }
+    } catch (error) {
+        console.error('Failed to start desktop capture:', error);
+        await closeOffscreenDocument();
+        return false;
+    }
+}
+
+type CaptureType = 'screen' | 'window' | 'tab';
+
+type CaptureResult = {
+    dataUrl: string;
+    captureType: CaptureType;
+};
+
+async function captureFrame(): Promise<CaptureResult> {
+    if (!captureActive) {
+        throw new Error('No active capture stream. Start recording first.');
+    }
+
+    const response = await chrome.runtime.sendMessage({
+        type: 'CAPTURE_FRAME'
+    });
+
+    if (response.success) {
+        return {
+            dataUrl: response.dataUrl,
+            captureType: response.captureType ?? 'tab'
+        };
+    } else {
+        throw new Error(response.error || 'Frame capture failed');
+    }
+}
+
+async function stopDesktopCapture(): Promise<void> {
+    if (captureActive) {
+        try {
+            await chrome.runtime.sendMessage({ type: 'STOP_STREAM' });
+        } catch (error) {
+            console.warn('Error stopping stream:', error);
+        }
+        captureActive = false;
+    }
+
+    // Close offscreen document to free resources
+    await closeOffscreenDocument();
+}
+
 type BrandLogoContext = {
     guideId: string;
     userId: string;
@@ -114,16 +235,23 @@ async function injectContentScript(tabId: number) {
 
 async function handleStartRecording() {
     try {
-        // 1. Create guide via tRPC
+        // 1. Prompt user to select capture source (screen/window/tab)
+        const captureStarted = await startDesktopCapture();
+        if (!captureStarted) {
+            return { success: false, error: 'Screen capture permission denied or cancelled' };
+        }
+
+        // 2. Create guide via tRPC
         const result = await trpc.recording.start.mutate();
 
         if (!result.success) {
+            await stopDesktopCapture(); // Cleanup on failure
             throw new Error('Failed to create guide');
         }
 
         const { guideId, userId } = result;
 
-        // 1b. Capture + persist brand logo (best effort)
+        // 2b. Capture + persist brand logo (best effort)
         await captureAndPersistBrandLogo({ guideId, userId });
 
         // 2. Clear previous data and store new recording state
@@ -192,6 +320,9 @@ async function handleStopRecording() {
             steps: steps || []
         });
 
+        // Stop desktop capture stream
+        await stopDesktopCapture();
+
         // Clear local storage
         await chrome.storage.local.remove(['steps', 'recordingStartTime', 'isRecording', 'guideId', 'userId']);
         await chrome.action.setBadgeText({ text: '' });
@@ -199,6 +330,7 @@ async function handleStopRecording() {
         console.log(`Completed recording - Guide: ${guideId}`);
         return { success: true, guideId };
     } catch (error) {
+        await stopDesktopCapture(); // Cleanup on error
         console.error('Failed to stop recording:', error);
         return { success: false, error: String(error) };
     }
@@ -235,12 +367,16 @@ async function handleDiscardRecording() {
             }
         }
 
+        // Stop desktop capture stream
+        await stopDesktopCapture();
+
         // Clear local storage
         await chrome.storage.local.remove(['steps', 'recordingStartTime', 'isRecording', 'guideId', 'userId']);
         await chrome.action.setBadgeText({ text: '' });
 
         return { success: true };
     } catch (error) {
+        await stopDesktopCapture(); // Cleanup on error
         console.error('Failed to discard recording:', error);
         return { success: false, error: String(error) };
     }
@@ -323,10 +459,8 @@ async function handleStepAction(payload: any, tabId?: number) {
     if (!isRecording || isPaused || !tabId || !guideId) return;
 
     try {
-        // Capture Screenshot as PNG first
-        const pngDataUrl = await chrome.tabs.captureVisibleTab(chrome.windows.WINDOW_ID_CURRENT, {
-            format: 'png'
-        });
+        // Capture frame from the persistent desktop capture stream
+        const { dataUrl: pngDataUrl, captureType } = await captureFrame();
 
         // Convert to WebP with 85% quality (good for text-heavy screenshots)
         const webpDataUrl = await convertToWebP(pngDataUrl, 0.85);
@@ -338,6 +472,24 @@ async function handleStepAction(payload: any, tabId?: number) {
         // Create step object with previewUrl for immediate display
         const { steps: currentSteps = [] } = await chrome.storage.local.get('steps');
 
+        // Use the correct coordinates based on capture type
+        let x: number, y: number;
+        switch (captureType) {
+            case 'screen':
+                x = payload.screenX;
+                y = payload.screenY;
+                break;
+            case 'window':
+                x = payload.windowX;
+                y = payload.windowY;
+                break;
+            case 'tab':
+            default:
+                x = payload.viewportX;
+                y = payload.viewportY;
+                break;
+        }
+
         const newStep = {
             id: stepId,
             type: 'click',
@@ -345,8 +497,8 @@ async function handleStepAction(payload: any, tabId?: number) {
             imageKey,
             pageUrl: payload.url || '',
             domSelector: payload.selector || '',
-            x: payload.x,
-            y: payload.y,
+            x,
+            y,
             previewUrl: webpDataUrl
         };
 

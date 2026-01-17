@@ -5,6 +5,7 @@ import { resolve } from 'path';
 
 export default defineConfig({
     plugins: [react(), tailwindcss()],
+    base: './',  // Use relative paths for Chrome extension compatibility
     resolve: {
         alias: {
             '@': resolve(__dirname, 'src'),
@@ -16,6 +17,7 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 sidepanel: resolve(__dirname, 'sidepanel.html'),
+                offscreen: resolve(__dirname, 'offscreen.html'),
                 background: resolve(__dirname, 'src/background/index.ts'),
                 content: resolve(__dirname, 'src/content/index.ts'),
             },

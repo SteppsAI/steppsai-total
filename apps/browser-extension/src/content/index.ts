@@ -88,18 +88,27 @@ document.addEventListener('mousedown', (event) => {
         return;
     }
 
-    const x = (event as MouseEvent).clientX;
-    const y = (event as MouseEvent).clientY;
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
+    const mouseEvent = event as MouseEvent;
 
+    // Calculate browser chrome offset (toolbars, address bar, etc.)
+    const chromeOffsetX = (window.outerWidth - window.innerWidth) / 2; // Usually 0
+    const chromeOffsetY = window.outerHeight - window.innerHeight; // Toolbar height
+
+    // Send ALL coordinate systems - background will pick the right one
     chrome.runtime.sendMessage({
         type: 'STEP_ACTION',
         payload: {
             selector,
             url: window.location.href,
-            x: (x / windowWidth) * 100,
-            y: (y / windowHeight) * 100
+            // Viewport-relative (for tab capture)
+            viewportX: (mouseEvent.clientX / window.innerWidth) * 100,
+            viewportY: (mouseEvent.clientY / window.innerHeight) * 100,
+            // Window-relative (for window capture) - accounts for browser chrome
+            windowX: ((mouseEvent.clientX + chromeOffsetX) / window.outerWidth) * 100,
+            windowY: ((mouseEvent.clientY + chromeOffsetY) / window.outerHeight) * 100,
+            // Screen-relative (for full screen capture)
+            screenX: (mouseEvent.screenX / window.screen.width) * 100,
+            screenY: (mouseEvent.screenY / window.screen.height) * 100,
         }
     }).catch(() => {
         // Extension context invalidated - silently ignore

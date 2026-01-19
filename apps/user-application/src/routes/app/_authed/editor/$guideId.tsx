@@ -11,7 +11,7 @@ import { ExportDialog } from "@/components/export-dialog";
 import { useSidebar } from "@/components/ui/sidebar";
 import { toast } from "sonner";
 import { trpc } from "@/router";
-import { useDeleteStep } from "@/hooks/use-api";
+import { useDeleteStep, useUploadImage, useUpdateGuide } from "@/hooks/use-api";
 import { Step, Overlay, Guide } from "@/types/db";
 import { useEditorSession } from "@/hooks/use-editor-session";
 
@@ -117,6 +117,8 @@ function EditorPage() {
 
   // Delete step mutation (via Hono API to RPC for atomic R2 + DB delete)
   const deleteStepMutation = useDeleteStep();
+  const uploadImageMutation = useUploadImage();
+  const updateGuideMutation = useUpdateGuide();
 
   const handleDeleteStep = useCallback(async (id: string) => {
     if (!session.guide?.steps) return;
@@ -210,17 +212,16 @@ function EditorPage() {
       const imageKey = `brand-logos/${guideId}/${Date.now()}.${file.type.split('/')[1] || 'png'}`;
 
       // Upload to R2
-      const uploadResult = await trpc.images.upload.mutate({ key: imageKey, dataUrl });
+      const uploadResult = await uploadImageMutation.mutateAsync({ key: imageKey, dataUrl });
       if (!uploadResult.success) {
         throw new Error('Upload failed');
       }
 
       // Update guide with new brandImageKey
-      await trpc.guides.update.mutate({ id: guideId, data: { brandImageKey: imageKey } });
+      await updateGuideMutation.mutateAsync({ id: guideId, data: { brandImageKey: imageKey } });
 
       // Invalidate cache to refresh the UI
       queryClient.invalidateQueries({ queryKey: trpc.guides.getById.queryOptions({ id: guideId }).queryKey });
-      queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
 
       toast.success("Brand logo updated", { duration: 2000 });
     } catch (error) {
@@ -229,7 +230,7 @@ function EditorPage() {
     } finally {
       setIsUploadingLogo(false);
     }
-  }, [guideId, queryClient]);
+  }, [guideId, queryClient, uploadImageMutation, updateGuideMutation]);
 
   // Loading state
   if (session.isLoading) {

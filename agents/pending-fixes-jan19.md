@@ -80,15 +80,23 @@ Fixed `confirmSelection()` in `selection-overlay/index.ts` to:
 - Add "Resume upload" feature
 
 ### 2. Brand Logo Change in Editor
-**Status:** NOT STARTED
+**Status:** IMPLEMENTED ✅
 **Priority:** MEDIUM
 
 **Problem:** Users cannot change the brand logo after recording. Currently it captures the favicon of the first visited page.
 
 **Solution:**
-- Make brand logo clickable in editor header
-- Add upload functionality
-- Update `brandImageKey` in database
+- Made brand logo clickable in editor header with camera icon overlay on hover
+- Added hidden file input for image upload
+- Uploads to R2 via `images.upload` mutation
+- Updates `brandImageKey` in database via `guides.update` mutation
+- Shows loading spinner while uploading
+- Tooltip shows "Change brand logo" or "Add brand logo"
+
+**Files changed:**
+- `apps/user-application/src/components/editor/editor-header.tsx` - Clickable logo with upload UI
+- `apps/user-application/src/routes/app/_authed/editor/$guideId.tsx` - Upload handler
+- `apps/user-application/src/hooks/use-api.ts` - Added `useUploadImage` and `useUpdateGuide` hooks
 
 ---
 

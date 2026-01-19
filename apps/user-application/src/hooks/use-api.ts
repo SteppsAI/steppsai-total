@@ -44,3 +44,20 @@ export function useDeleteAvatar() {
         },
     });
 }
+
+export function useUploadImage() {
+    return useMutation({
+        ...trpc.images.upload.mutationOptions(),
+    });
+}
+
+export function useUpdateGuide() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        ...trpc.guides.update.mutationOptions(),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: trpc.guides.getAll.queryOptions().queryKey });
+        },
+    });
+}

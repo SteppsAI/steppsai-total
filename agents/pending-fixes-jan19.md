@@ -108,6 +108,7 @@ Fixed `confirmSelection()` in `selection-overlay/index.ts` to:
 - [ ] Drag & drop works in extension sidepanel
 - [x] Manual capture with 'manual' type saves correctly
 - [ ] Step reordering persists after page refresh
+- [ ] Brand logo can be changed in editor (click logo → upload new image)
 
 ---
 

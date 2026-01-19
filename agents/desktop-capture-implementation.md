@@ -46,6 +46,7 @@ Implemented full screen, window, and tab capture using the `getDisplayMedia` API
   - Editor: Uses @dnd-kit library with grip handle
   - Extension sidepanel: Uses native HTML5 drag & drop
 - **Fixed Zod schema**: Added `'manual'` to step type enum (`'click' | 'navigate' | 'manual'`)
+- **Brand logo change**: Users can now change the brand logo in the editor by clicking on it
 - **Files changed**:
   ```
   apps/browser-extension/src/selection-overlay/index.ts   # Fixed crop coordinate calculation
@@ -53,6 +54,9 @@ Implemented full screen, window, and tab capture using the `getDisplayMedia` API
   apps/data-service/src/queue-handlers/recording-ingest.ts # Handle manual type caption
   apps/user-application/src/components/editor/step-sidebar.tsx # Drag & drop
   apps/browser-extension/src/sidepanel/SidePanelApp.tsx   # Drag & drop
+  apps/user-application/src/components/editor/editor-header.tsx # Brand logo upload UI
+  apps/user-application/src/routes/app/_authed/editor/$guideId.tsx # Brand logo handler
+  apps/user-application/src/hooks/use-api.ts              # New upload/update hooks
   ```
 
 ## Architecture
@@ -183,6 +187,7 @@ The `getDisplayMedia` API shows Chrome's native permission dialog, giving users 
 - [ ] Drag & drop works in extension sidepanel
 - [x] Manual capture with 'manual' type saves correctly
 - [ ] Step reordering persists after page refresh
+- [ ] Brand logo can be changed in editor (click logo → upload new image)
 
 ## Rollback Plan
 

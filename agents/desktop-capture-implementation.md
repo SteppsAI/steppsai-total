@@ -25,21 +25,20 @@ Implemented full screen, window, and tab capture using the `getDisplayMedia` API
 - **Stream validation & auto-recovery**: Fixed issue where manual capture would fail silently when Chrome closed the offscreen document or stream
 - **New `CHECK_STREAM_STATUS` message**: Offscreen document can now report if stream is actually alive
 - **`ensureActiveCaptureStream()`**: Validates stream before each capture, auto-restarts if lost
-- **Major refactoring**: Split 700+ line `background/index.ts` into modular structure:
+- **Major refactoring**: Split 700+ line `background/index.ts` into modular structure
+
+### After (v1.3.0) - January 19, 2026
+- **Area selection for manual capture**: When clicking "Capture Now", a fullscreen overlay appears
+- **Drag-to-select**: User can drag a rectangle to select specific area
+- **Full screen option**: Button to capture entire screen without cropping
+- **Selection styling**: Uses brand color `#6366F1` with 15% opacity for selection area
+- **New files**:
   ```
-  background/
-  ├── index.ts              # 64 lines - Only listeners
-  ├── capture/
-  │   ├── offscreen.ts      # Offscreen document management
-  │   └── desktop-capture.ts # Capture + stream validation
-  ├── handlers/
-  │   ├── recording.ts      # Start/stop/discard
-  │   ├── step-actions.ts   # Manual + click capture
-  │   └── navigation.ts     # Navigation handler
-  └── helpers/
-      ├── favicon.ts        # Brand logo capture
-      └── content-script.ts # Script injection
+  selection.html                        # Fullscreen selection overlay page
+  src/selection-overlay/index.ts        # Selection logic (drag, crop, confirm)
+  src/background/handlers/selection.ts  # Selection flow handlers
   ```
+- **New message types**: `GET_SELECTION_SCREENSHOT`, `SELECTION_CONFIRMED`, `SELECTION_CANCELLED`
 
 ## Architecture
 
@@ -152,6 +151,16 @@ The `getDisplayMedia` API shows Chrome's native permission dialog, giving users 
 - [ ] Click capture continues to work after stream recovery
 - [ ] All handlers work correctly after refactoring
 - [ ] No TypeScript errors in build
+
+### v1.3.0
+- [ ] "Capture Now" opens fullscreen selection overlay
+- [ ] Drag-to-select works correctly
+- [ ] Selection rectangle has correct styling (#6366F1 with 15% opacity)
+- [ ] "Capture Selection" crops and saves only selected area
+- [ ] "Full Screen" captures entire screen without cropping
+- [ ] "Cancel" closes overlay without capturing
+- [ ] ESC key cancels selection
+- [ ] ENTER key confirms selection
 
 ## Rollback Plan
 

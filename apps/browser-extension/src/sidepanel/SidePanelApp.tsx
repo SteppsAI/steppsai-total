@@ -98,10 +98,29 @@ function SidePanelApp() {
             const response = await chrome.runtime.sendMessage({ type: 'MANUAL_CAPTURE' });
             if (!response?.success) {
                 console.error('Manual capture failed:', response?.error);
+                setIsCapturing(false);
+            } else if (response?.awaitingSelection) {
+                // Selection window is open, wait for it to complete
+                // The isCapturing state will be reset when steps change
+                // (detected via storage change listener)
+                const currentStepCount = steps.length;
+                const checkInterval = setInterval(async () => {
+                    const { steps: newSteps } = await chrome.storage.local.get('steps');
+                    if (newSteps && newSteps.length > currentStepCount) {
+                        clearInterval(checkInterval);
+                        setIsCapturing(false);
+                    }
+                }, 500);
+                // Timeout after 60 seconds
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    setIsCapturing(false);
+                }, 60000);
+            } else {
+                setIsCapturing(false);
             }
         } catch (error) {
             console.error('Manual capture error:', error);
-        } finally {
             setIsCapturing(false);
         }
     };

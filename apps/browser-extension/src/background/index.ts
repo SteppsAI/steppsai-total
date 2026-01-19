@@ -4,10 +4,13 @@ import {
     handleStartRecording,
     handleStopRecording,
     handleDiscardRecording,
-    handleManualCapture,
     handleStepAction,
     handleDeleteStep,
-    handleNavigation
+    handleNavigation,
+    handleManualCaptureWithSelection,
+    handleGetSelectionScreenshot,
+    handleSelectionConfirmed,
+    handleSelectionCancelled
 } from './handlers';
 
 // ===== MESSAGE LISTENERS =====
@@ -27,8 +30,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         handleDeleteStep(message.payload).then(sendResponse);
         return true;
     } else if (message.type === 'MANUAL_CAPTURE') {
-        handleManualCapture().then(sendResponse);
+        // Use selection-based capture for manual captures
+        handleManualCaptureWithSelection().then(sendResponse);
         return true;
+    } else if (message.type === 'GET_SELECTION_SCREENSHOT') {
+        sendResponse(handleGetSelectionScreenshot());
+        return false;
+    } else if (message.type === 'SELECTION_CONFIRMED') {
+        handleSelectionConfirmed(message.payload).then(sendResponse);
+        return true;
+    } else if (message.type === 'SELECTION_CANCELLED') {
+        sendResponse(handleSelectionCancelled());
+        return false;
     }
 });
 

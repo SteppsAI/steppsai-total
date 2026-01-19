@@ -11,3 +11,10 @@ export {
 } from './step-actions';
 
 export { handleNavigation } from './navigation';
+
+export {
+    handleManualCaptureWithSelection,
+    handleGetSelectionScreenshot,
+    handleSelectionConfirmed,
+    handleSelectionCancelled
+} from './selection';

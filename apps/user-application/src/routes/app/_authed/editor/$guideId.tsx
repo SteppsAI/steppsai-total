@@ -11,7 +11,7 @@ import { ExportDialog } from "@/components/export-dialog";
 import { useSidebar } from "@/components/ui/sidebar";
 import { toast } from "sonner";
 import { trpc } from "@/router";
-import { useDeleteStep } from "@/hooks/use-api";
+import { useDeleteStep, useUploadImage, useUpdateGuide } from "@/hooks/use-api";
 import { Step, Overlay, Guide } from "@/types/db";
 import { useEditorSession } from "@/hooks/use-editor-session";
 
@@ -59,6 +59,7 @@ function EditorPage() {
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
   // Set initial active step when guide loads
   useEffect(() => {
@@ -116,6 +117,8 @@ function EditorPage() {
 
   // Delete step mutation (via Hono API to RPC for atomic R2 + DB delete)
   const deleteStepMutation = useDeleteStep();
+  const uploadImageMutation = useUploadImage();
+  const updateGuideMutation = useUpdateGuide();
 
   const handleDeleteStep = useCallback(async (id: string) => {
     if (!session.guide?.steps) return;
@@ -193,6 +196,42 @@ function EditorPage() {
     }
   }, [session, queryClient, guideId]);
 
+  // Handle brand logo change
+  const handleBrandLogoChange = useCallback(async (file: File) => {
+    setIsUploadingLogo(true);
+    try {
+      // Convert file to base64 dataUrl
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      // Generate unique key for the brand logo
+      const imageKey = `brand-logos/${guideId}/${Date.now()}.${file.type.split('/')[1] || 'png'}`;
+
+      // Upload to R2
+      const uploadResult = await uploadImageMutation.mutateAsync({ key: imageKey, dataUrl });
+      if (!uploadResult.success) {
+        throw new Error('Upload failed');
+      }
+
+      // Update guide with new brandImageKey
+      await updateGuideMutation.mutateAsync({ id: guideId, data: { brandImageKey: imageKey } });
+
+      // Invalidate cache to refresh the UI
+      queryClient.invalidateQueries({ queryKey: trpc.guides.getById.queryOptions({ id: guideId }).queryKey });
+
+      toast.success("Brand logo updated", { duration: 2000 });
+    } catch (error) {
+      console.error('Failed to update brand logo:', error);
+      toast.error("Failed to update brand logo");
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  }, [guideId, queryClient, uploadImageMutation, updateGuideMutation]);
+
   // Loading state
   if (session.isLoading) {
     return (
@@ -228,9 +267,11 @@ function EditorPage() {
         isDirty={session.isDirty}
         isSyncing={session.isSyncing}
         isSaving={session.isSaving}
+        isUploadingLogo={isUploadingLogo}
         lastSaved={session.lastSaved}
         error={session.error}
         onTitleChange={handleTitleChange}
+        onBrandLogoChange={handleBrandLogoChange}
         onSave={handleSave}
         onShare={() => setIsShareOpen(true)}
         onExport={() => setIsExportOpen(true)}

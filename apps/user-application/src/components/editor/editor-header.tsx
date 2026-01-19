@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Share2, Download, Save, Loader2, Check, AlertCircle } from "lucide-react";
+import { ArrowLeft, Share2, Download, Save, Loader2, Check, AlertCircle, Camera } from "lucide-react";
 import { useRouter } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface EditorHeaderProps {
     title: string | null | undefined;
@@ -11,9 +12,11 @@ interface EditorHeaderProps {
     isDirty?: boolean;
     isSyncing?: boolean;
     isSaving?: boolean;
+    isUploadingLogo?: boolean;
     lastSaved?: Date | null;
     error?: string | null;
     onTitleChange: (title: string) => void;
+    onBrandLogoChange?: (file: File) => void;
     onSave?: () => void;
     onShare?: () => void;
     onExport?: () => void;
@@ -26,9 +29,11 @@ export function EditorHeader({
     isDirty = false,
     isSyncing = false,
     isSaving = false,
+    isUploadingLogo = false,
     lastSaved,
     error,
     onTitleChange,
+    onBrandLogoChange,
     onSave,
     onShare,
     onExport,
@@ -38,6 +43,24 @@ export function EditorHeader({
     const [localTitle, setLocalTitle] = useState(title || '');
     const [isTitleFocused, setIsTitleFocused] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const logoInputRef = useRef<HTMLInputElement>(null);
+
+    const handleLogoClick = () => {
+        if (onBrandLogoChange) {
+            logoInputRef.current?.click();
+        }
+    };
+
+    const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file && onBrandLogoChange) {
+            onBrandLogoChange(file);
+        }
+        // Reset input so same file can be selected again
+        if (logoInputRef.current) {
+            logoInputRef.current.value = '';
+        }
+    };
 
     // Sync local title with prop when it changes externally
     useEffect(() => {
@@ -108,16 +131,58 @@ export function EditorHeader({
                     <ArrowLeft className="w-4 h-4" />
                 </Button>
 
-                {brandLogoUrl && (
-                    <div className="w-8 h-8 rounded-lg overflow-hidden border border-[var(--color-200)] shadow-sm">
-                        <img
-                            src={brandLogoUrl}
-                            alt="Brand logo"
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                        />
-                    </div>
-                )}
+                {/* Hidden file input for logo upload */}
+                <input
+                    ref={logoInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoFileChange}
+                    className="hidden"
+                />
+
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <button
+                            onClick={handleLogoClick}
+                            disabled={isUploadingLogo}
+                            className={cn(
+                                "relative w-8 h-8 rounded-lg overflow-hidden border border-[var(--color-200)] shadow-sm",
+                                "transition-all duration-200 group",
+                                onBrandLogoChange && "cursor-pointer hover:border-[var(--primary)]/50 hover:shadow-md"
+                            )}
+                        >
+                            {brandLogoUrl ? (
+                                <img
+                                    src={brandLogoUrl}
+                                    alt="Brand logo"
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                />
+                            ) : (
+                                <div className="w-full h-full bg-[var(--color-100)] flex items-center justify-center">
+                                    <Camera className="w-4 h-4 text-[var(--color-400)]" />
+                                </div>
+                            )}
+
+                            {/* Hover overlay */}
+                            {onBrandLogoChange && !isUploadingLogo && (
+                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <Camera className="w-3.5 h-3.5 text-white" />
+                                </div>
+                            )}
+
+                            {/* Loading spinner */}
+                            {isUploadingLogo && (
+                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                    <Loader2 className="w-4 h-4 text-white animate-spin" />
+                                </div>
+                            )}
+                        </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                        <p>{brandLogoUrl ? "Change brand logo" : "Add brand logo"}</p>
+                    </TooltipContent>
+                </Tooltip>
             </div>
 
             {/* Center Section: Title & Status */}

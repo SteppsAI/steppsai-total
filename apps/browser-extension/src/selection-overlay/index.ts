@@ -142,28 +142,55 @@ function confirmSelection() {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        // Calculate scale factor (image might be scaled to fit window)
-        const scaleX = img.naturalWidth / screenshot.clientWidth;
-        const scaleY = img.naturalHeight / screenshot.clientHeight;
-
-        // Get screenshot position in window
+        // Get screenshot element bounds
         const imgRect = screenshot.getBoundingClientRect();
 
-        // Adjust selection coordinates relative to the image
-        const cropX = (currentSelection!.x - imgRect.left) * scaleX;
-        const cropY = (currentSelection!.y - imgRect.top) * scaleY;
+        // Calculate the actual rendered size within object-fit: contain
+        // The image may be letterboxed if aspect ratios don't match
+        const imgAspect = img.naturalWidth / img.naturalHeight;
+        const containerAspect = imgRect.width / imgRect.height;
+
+        let renderedWidth: number, renderedHeight: number, offsetX: number, offsetY: number;
+
+        if (imgAspect > containerAspect) {
+            // Image is wider than container, fits by width (letterbox top/bottom)
+            renderedWidth = imgRect.width;
+            renderedHeight = imgRect.width / imgAspect;
+            offsetX = 0;
+            offsetY = (imgRect.height - renderedHeight) / 2;
+        } else {
+            // Image is taller than container, fits by height (letterbox left/right)
+            renderedHeight = imgRect.height;
+            renderedWidth = imgRect.height * imgAspect;
+            offsetX = (imgRect.width - renderedWidth) / 2;
+            offsetY = 0;
+        }
+
+        // Calculate scale factor from rendered size to natural size
+        const scaleX = img.naturalWidth / renderedWidth;
+        const scaleY = img.naturalHeight / renderedHeight;
+
+        // Adjust selection coordinates relative to the actual rendered image (accounting for letterbox offset)
+        const cropX = (currentSelection!.x - imgRect.left - offsetX) * scaleX;
+        const cropY = (currentSelection!.y - imgRect.top - offsetY) * scaleY;
         const cropWidth = currentSelection!.width * scaleX;
         const cropHeight = currentSelection!.height * scaleY;
 
+        // Clamp values to image bounds
+        const finalCropX = Math.max(0, Math.min(cropX, img.naturalWidth));
+        const finalCropY = Math.max(0, Math.min(cropY, img.naturalHeight));
+        const finalCropWidth = Math.min(cropWidth, img.naturalWidth - finalCropX);
+        const finalCropHeight = Math.min(cropHeight, img.naturalHeight - finalCropY);
+
         // Set canvas size to crop dimensions
-        canvas.width = cropWidth;
-        canvas.height = cropHeight;
+        canvas.width = finalCropWidth;
+        canvas.height = finalCropHeight;
 
         // Draw cropped portion
         ctx.drawImage(
             img,
-            cropX, cropY, cropWidth, cropHeight,
-            0, 0, cropWidth, cropHeight
+            finalCropX, finalCropY, finalCropWidth, finalCropHeight,
+            0, 0, finalCropWidth, finalCropHeight
         );
 
         // Convert to data URL

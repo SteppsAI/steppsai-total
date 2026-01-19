@@ -14,14 +14,19 @@ export async function handleStepsInsert(env: Env, event: StepsInsertMessage) {
     try {
         // Transform extension steps to full steps with readable captions
         const steps: Step[] = rawSteps.map((step) => {
-            const isNavigate = step.type === 'navigate';
-            const caption = isNavigate
-                ? `Navigate to ${new URL(step.pageUrl).hostname}`
-                : generateStepDescription(step.domSelector || '');
+            let caption: string;
+            if (step.type === 'navigate') {
+                caption = `Navigate to ${new URL(step.pageUrl).hostname}`;
+            } else if (step.type === 'manual') {
+                caption = 'Screenshot';
+            } else {
+                caption = generateStepDescription(step.domSelector || '');
+            }
 
             // Create circle overlay at click position (matching frontend Overlay format)
             // Coordinates are percentages of viewport, radius is % of smaller dimension
-            const overlays = (!isNavigate && step.x !== undefined && step.y !== undefined) ? [{
+            // Only add overlays for click steps (not navigate or manual)
+            const overlays = (step.type === 'click' && step.x !== undefined && step.y !== undefined) ? [{
                 id: `overlay-${nanoid(8)}`,
                 type: 'circle' as const,
                 x: step.x,

@@ -8,7 +8,7 @@ import {
  */
 export const stepSchema = z.object({
 	id: z.string().uuid(),
-	type: z.enum(['click', 'navigate']).default('click'),
+	type: z.enum(['click', 'navigate', 'manual']).default('click'),
 	orderIndex: z.number().int(),
 	imageKey: z.string().optional(),         // Optional for navigation steps
 	pageUrl: z.string(),
@@ -28,7 +28,7 @@ export type Step = z.infer<typeof stepSchema>;
  */
 export const stepFromExtensionSchema = z.object({
 	id: z.string().uuid(),
-	type: z.enum(['click', 'navigate']).default('click'),
+	type: z.enum(['click', 'navigate', 'manual']).default('click'),
 	orderIndex: z.number().int(),
 	imageKey: z.string().optional(),
 	pageUrl: z.string(),

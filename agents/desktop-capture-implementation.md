@@ -162,6 +162,13 @@ The `getDisplayMedia` API shows Chrome's native permission dialog, giving users 
 - [ ] ESC key cancels selection
 - [ ] ENTER key confirms selection
 
+### v1.4.0 (January 19, 2026)
+- [ ] Screenshots display full content (no cropping at top)
+- [ ] Drag & drop works in editor sidebar
+- [ ] Drag & drop works in extension sidepanel
+- [ ] Manual capture with 'manual' type saves correctly
+- [ ] Step reordering persists after page refresh
+
 ## Rollback Plan
 
 If issues arise in production:

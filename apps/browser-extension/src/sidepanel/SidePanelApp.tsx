@@ -1,4 +1,4 @@
-import { Play, Pause, Trash2, Loader2, Check, Camera } from 'lucide-react';
+import { Play, Pause, Trash2, Loader2, Check, Camera, GripVertical } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import Logo from '../assets/logo.svg';
 import { Button } from '../components/Button';
@@ -12,6 +12,8 @@ function SidePanelApp() {
     const [steps, setSteps] = useState<Step[]>([]);
     const [guideId, setGuideId] = useState<string | null>(null);
     const [isCapturing, setIsCapturing] = useState(false);
+    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+    const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
     const stepsContainerRef = useRef<HTMLDivElement>(null);
 
@@ -125,6 +127,55 @@ function SidePanelApp() {
         }
     };
 
+    // Drag and drop handlers
+    const handleDragStart = (index: number) => {
+        setDraggedIndex(index);
+    };
+
+    const handleDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault();
+        if (draggedIndex !== null && draggedIndex !== index) {
+            setDragOverIndex(index);
+        }
+    };
+
+    const handleDragLeave = () => {
+        setDragOverIndex(null);
+    };
+
+    const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
+        e.preventDefault();
+        if (draggedIndex === null || draggedIndex === dropIndex) {
+            setDraggedIndex(null);
+            setDragOverIndex(null);
+            return;
+        }
+
+        // Reorder steps
+        const newSteps = [...steps];
+        const [draggedStep] = newSteps.splice(draggedIndex, 1);
+        newSteps.splice(dropIndex, 0, draggedStep);
+
+        // Update orderIndex for all steps
+        const reorderedSteps = newSteps.map((step, idx) => ({
+            ...step,
+            orderIndex: idx
+        }));
+
+        // Update local state immediately
+        setSteps(reorderedSteps);
+        setDraggedIndex(null);
+        setDragOverIndex(null);
+
+        // Persist to chrome.storage.local
+        await chrome.storage.local.set({ steps: reorderedSteps });
+    };
+
+    const handleDragEnd = () => {
+        setDraggedIndex(null);
+        setDragOverIndex(null);
+    };
+
     const isRecording = recordingState !== 'idle';
 
     return (
@@ -198,9 +249,25 @@ function SidePanelApp() {
                                 steps.map((step, index) => (
                                     <div
                                         key={step.id || index}
-                                        className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 shadow-sm overflow-hidden group"
+                                        draggable
+                                        onDragStart={() => handleDragStart(index)}
+                                        onDragOver={(e) => handleDragOver(e, index)}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={(e) => handleDrop(e, index)}
+                                        onDragEnd={handleDragEnd}
+                                        className={`bg-white/80 backdrop-blur-sm rounded-xl border shadow-sm overflow-hidden group transition-all duration-200 ${
+                                            draggedIndex === index
+                                                ? 'opacity-50 scale-95 border-[#6366F1]'
+                                                : dragOverIndex === index
+                                                    ? 'border-[#6366F1] border-2 scale-[1.02]'
+                                                    : 'border-slate-200'
+                                        }`}
                                     >
                                         <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100">
+                                            {/* Drag Handle */}
+                                            <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 transition-colors">
+                                                <GripVertical className="w-4 h-4" />
+                                            </div>
                                             <div className={`flex items-center justify-center w-6 h-6 rounded-full ${step.type === 'navigate' ? 'bg-slate-500' : step.type === 'manual' ? 'bg-emerald-500' : 'bg-[#6366F1]'} text-white text-xs font-bold shrink-0`}>
                                                 {index + 1}
                                             </div>

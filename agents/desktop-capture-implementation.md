@@ -1,8 +1,8 @@
 # Desktop Capture Implementation
 
-**Date:** January 17, 2026
+**Date:** January 18, 2026
 **Status:** ✅ COMPLETED
-**Version:** 1.1.0
+**Version:** 1.2.0
 
 ## Summary
 
@@ -20,6 +20,26 @@ Implemented full screen, window, and tab capture using the `getDisplayMedia` API
 - User can choose: **Entire Screen**, **Window**, or **Tab**
 - Automatic coordinate system detection for accurate marker positioning
 - Can now record native applications, other browser windows, etc.
+
+### After (v1.2.0) - January 18, 2026
+- **Stream validation & auto-recovery**: Fixed issue where manual capture would fail silently when Chrome closed the offscreen document or stream
+- **New `CHECK_STREAM_STATUS` message**: Offscreen document can now report if stream is actually alive
+- **`ensureActiveCaptureStream()`**: Validates stream before each capture, auto-restarts if lost
+- **Major refactoring**: Split 700+ line `background/index.ts` into modular structure:
+  ```
+  background/
+  ├── index.ts              # 64 lines - Only listeners
+  ├── capture/
+  │   ├── offscreen.ts      # Offscreen document management
+  │   └── desktop-capture.ts # Capture + stream validation
+  ├── handlers/
+  │   ├── recording.ts      # Start/stop/discard
+  │   ├── step-actions.ts   # Manual + click capture
+  │   └── navigation.ts     # Navigation handler
+  └── helpers/
+      ├── favicon.ts        # Brand logo capture
+      └── content-script.ts # Script injection
+  ```
 
 ## Architecture
 
@@ -57,6 +77,7 @@ The content script sends three coordinate systems, and the background picks the 
 
 ## Files Modified
 
+### v1.1.0
 | File | Changes |
 |------|---------|
 | `public/manifest.json` | Added `offscreen` permission, version 1.1.0 |
@@ -65,6 +86,22 @@ The content script sends three coordinate systems, and the background picks the 
 | `src/background/index.ts` | New capture flow, coordinate selection logic |
 | `src/content/index.ts` | Sends all three coordinate systems |
 | `vite.config.ts` | Added offscreen.html to build, relative paths |
+
+### v1.2.0
+| File | Changes |
+|------|---------|
+| `src/offscreen/index.ts` | Added `CHECK_STREAM_STATUS` message handler, `isActive` in response type |
+| `src/background/index.ts` | **REFACTORED** - Now only contains message listeners (64 lines) |
+| `src/background/capture/offscreen.ts` | **NEW** - Offscreen document management |
+| `src/background/capture/desktop-capture.ts` | **NEW** - Capture functions + stream validation |
+| `src/background/capture/index.ts` | **NEW** - Re-exports |
+| `src/background/handlers/recording.ts` | **NEW** - Start/stop/discard recording |
+| `src/background/handlers/step-actions.ts` | **NEW** - Manual capture, click capture, delete step |
+| `src/background/handlers/navigation.ts` | **NEW** - Navigation handler |
+| `src/background/handlers/index.ts` | **NEW** - Re-exports |
+| `src/background/helpers/favicon.ts` | **NEW** - Brand logo capture |
+| `src/background/helpers/content-script.ts` | **NEW** - Content script injection |
+| `src/background/helpers/index.ts` | **NEW** - Re-exports |
 
 ## Permissions
 
@@ -102,12 +139,19 @@ The `getDisplayMedia` API shows Chrome's native permission dialog, giving users 
 
 ## Testing Checklist
 
+### v1.1.0
 - [x] Chrome-Tab capture - viewport coordinates work correctly
 - [x] Fenster (Window) capture - window coordinates with toolbar offset work correctly
 - [x] Gesamter Bildschirm (Full Screen) capture - screen coordinates work correctly
 - [x] Multiple recording sessions work (start → stop → start again)
 - [x] Discard recording cleans up properly
 - [x] Recording works after browser restart
+
+### v1.2.0
+- [ ] Manual capture works after stream is lost (should show picker again)
+- [ ] Click capture continues to work after stream recovery
+- [ ] All handlers work correctly after refactoring
+- [ ] No TypeScript errors in build
 
 ## Rollback Plan
 

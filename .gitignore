@@ -11,6 +11,8 @@ node_modules/*
 # Environment variables
 .env*
 .dev*
+.env.production
+.env.staging
 
 # Build outputs
 dist/

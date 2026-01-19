@@ -90,9 +90,10 @@ document.addEventListener('mousedown', (event) => {
 
     const mouseEvent = event as MouseEvent;
 
-    // Calculate browser chrome offset (toolbars, address bar, etc.)
-    const chromeOffsetX = (window.outerWidth - window.innerWidth) / 2; // Usually 0
-    const chromeOffsetY = window.outerHeight - window.innerHeight; // Toolbar height
+    // Window-relative coordinates: click position relative to browser window origin
+    // This correctly handles toolbars, sidebars, devtools regardless of position
+    const clickInWindowX = mouseEvent.screenX - window.screenX;
+    const clickInWindowY = mouseEvent.screenY - window.screenY;
 
     // Send ALL coordinate systems - background will pick the right one
     chrome.runtime.sendMessage({
@@ -103,9 +104,9 @@ document.addEventListener('mousedown', (event) => {
             // Viewport-relative (for tab capture)
             viewportX: (mouseEvent.clientX / window.innerWidth) * 100,
             viewportY: (mouseEvent.clientY / window.innerHeight) * 100,
-            // Window-relative (for window capture) - accounts for browser chrome
-            windowX: ((mouseEvent.clientX + chromeOffsetX) / window.outerWidth) * 100,
-            windowY: ((mouseEvent.clientY + chromeOffsetY) / window.outerHeight) * 100,
+            // Window-relative (for window capture) - uses screen position minus window origin
+            windowX: (clickInWindowX / window.outerWidth) * 100,
+            windowY: (clickInWindowY / window.outerHeight) * 100,
             // Screen-relative (for full screen capture)
             screenX: (mouseEvent.screenX / window.screen.width) * 100,
             screenY: (mouseEvent.screenY / window.screen.height) * 100,

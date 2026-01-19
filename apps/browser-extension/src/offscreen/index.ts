@@ -3,14 +3,16 @@
 type Message =
     | { type: 'START_CAPTURE' }
     | { type: 'CAPTURE_FRAME' }
-    | { type: 'STOP_STREAM' };
+    | { type: 'STOP_STREAM' }
+    | { type: 'CHECK_STREAM_STATUS' };
 
 type CaptureType = 'screen' | 'window' | 'tab';
 
-type Response = {
+type CaptureResponse = {
     success: true;
     dataUrl?: string;
     captureType?: CaptureType;
+    isActive?: boolean;
 } | {
     success: false;
     error: string;
@@ -24,7 +26,7 @@ let captureType: CaptureType = 'tab';
 chrome.runtime.onMessage.addListener((
     message: Message,
     _sender: chrome.runtime.MessageSender,
-    sendResponse: (response: Response) => void
+    sendResponse: (response: CaptureResponse) => void
 ) => {
     if (message.type === 'START_CAPTURE') {
         startCapture()
@@ -43,6 +45,12 @@ chrome.runtime.onMessage.addListener((
     if (message.type === 'STOP_STREAM') {
         stopStream();
         sendResponse({ success: true });
+        return false;
+    }
+
+    if (message.type === 'CHECK_STREAM_STATUS') {
+        const isActive = activeStream !== null && activeStream.active;
+        sendResponse({ success: true, isActive, captureType });
         return false;
     }
 });
@@ -79,33 +87,23 @@ async function startCapture(): Promise<void> {
         video.onerror = () => reject(new Error('Video failed to load'));
     });
 
-    // Detect capture type by comparing video dimensions
-    // Account for device pixel ratio (Retina displays capture at higher resolution)
-    const dpr = window.devicePixelRatio || 1;
-    const screenWidth = window.screen.width * dpr;
-    const screenHeight = window.screen.height * dpr;
-    const windowWidth = window.outerWidth * dpr;
-    const windowHeight = window.outerHeight * dpr;
-    const viewportWidth = window.innerWidth * dpr;
-    const viewportHeight = window.innerHeight * dpr;
+    // Detect capture type from MediaStreamTrack settings (the correct way!)
+    // The displaySurface property tells us exactly what was selected
+    const videoTrack = activeStream.getVideoTracks()[0];
+    const settings = videoTrack?.getSettings() as MediaTrackSettings & { displaySurface?: string };
+    const displaySurface = settings?.displaySurface;
 
-    // Helper to check if dimensions match within 5% tolerance
-    const dimensionsMatch = (w1: number, h1: number, w2: number, h2: number) => {
-        const widthMatch = Math.abs(w1 - w2) / w2 < 0.05;
-        const heightMatch = Math.abs(h1 - h2) / h2 < 0.05;
-        return widthMatch && heightMatch;
-    };
-
-    // Detect capture type (check in order: screen, window, tab)
-    if (dimensionsMatch(video.videoWidth, video.videoHeight, screenWidth, screenHeight)) {
+    // Map Chrome's displaySurface values to our capture types
+    // 'monitor' = full screen, 'window' = specific window, 'browser' = browser tab
+    if (displaySurface === 'monitor') {
         captureType = 'screen';
-    } else if (dimensionsMatch(video.videoWidth, video.videoHeight, windowWidth, windowHeight)) {
+    } else if (displaySurface === 'window') {
         captureType = 'window';
     } else {
+        // 'browser' or undefined defaults to tab
         captureType = 'tab';
     }
 
-    console.log(`Capture type: ${captureType} (video: ${video.videoWidth}x${video.videoHeight}, screen: ${screenWidth}x${screenHeight}, window: ${windowWidth}x${windowHeight}, viewport: ${viewportWidth}x${viewportHeight})`);
 }
 
 async function captureFrame(): Promise<string> {

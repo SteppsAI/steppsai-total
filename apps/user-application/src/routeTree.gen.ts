@@ -15,6 +15,7 @@ import { Route as WebinarRouteImport } from './routes/webinar'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PaymentsRouteImport } from './routes/payments'
+import { Route as GuidesRouteImport } from './routes/guides'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SharedGuideIdRouteImport } from './routes/shared/$guideId'
@@ -60,6 +61,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const PaymentsRoute = PaymentsRouteImport.update({
   id: '/payments',
   path: '/payments',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidesRoute = GuidesRouteImport.update({
+  id: '/guides',
+  path: '/guides',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SplatRoute = SplatRouteImport.update({
@@ -160,6 +166,7 @@ const AppAuthedEditorGuideIdRoute = AppAuthedEditorGuideIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/guides': typeof GuidesRoute
   '/payments': typeof PaymentsRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/guides': typeof GuidesRoute
   '/payments': typeof PaymentsRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
@@ -209,6 +217,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/guides': typeof GuidesRoute
   '/payments': typeof PaymentsRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$'
+    | '/guides'
     | '/payments'
     | '/privacy'
     | '/terms'
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$'
+    | '/guides'
     | '/payments'
     | '/privacy'
     | '/terms'
@@ -285,6 +296,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$'
+    | '/guides'
     | '/payments'
     | '/privacy'
     | '/terms'
@@ -312,6 +324,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
+  GuidesRoute: typeof GuidesRoute
   PaymentsRoute: typeof PaymentsRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
@@ -361,6 +374,13 @@ declare module '@tanstack/react-router' {
       path: '/payments'
       fullPath: '/payments'
       preLoaderRoute: typeof PaymentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides': {
+      id: '/guides'
+      path: '/guides'
+      fullPath: '/guides'
+      preLoaderRoute: typeof GuidesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$': {
@@ -550,6 +570,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
+  GuidesRoute: GuidesRoute,
   PaymentsRoute: PaymentsRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,

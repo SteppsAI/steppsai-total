@@ -1,4 +1,4 @@
-import { Play, Pause, Trash2, Loader2, Check } from 'lucide-react';
+import { Play, Pause, Trash2, Loader2, Check, Camera } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import Logo from '../assets/logo.svg';
 import { Button } from '../components/Button';
@@ -11,6 +11,7 @@ function SidePanelApp() {
     const [recordingState, setRecordingState] = useState<RecordingState>('idle');
     const [steps, setSteps] = useState<Step[]>([]);
     const [guideId, setGuideId] = useState<string | null>(null);
+    const [isCapturing, setIsCapturing] = useState(false);
 
     const stepsContainerRef = useRef<HTMLDivElement>(null);
 
@@ -90,6 +91,40 @@ function SidePanelApp() {
         }
     };
 
+    const handleManualCapture = async () => {
+        if (isCapturing) return;
+        setIsCapturing(true);
+        try {
+            const response = await chrome.runtime.sendMessage({ type: 'MANUAL_CAPTURE' });
+            if (!response?.success) {
+                console.error('Manual capture failed:', response?.error);
+                setIsCapturing(false);
+            } else if (response?.awaitingSelection) {
+                // Selection window is open, wait for it to complete
+                // The isCapturing state will be reset when steps change
+                // (detected via storage change listener)
+                const currentStepCount = steps.length;
+                const checkInterval = setInterval(async () => {
+                    const { steps: newSteps } = await chrome.storage.local.get('steps');
+                    if (newSteps && newSteps.length > currentStepCount) {
+                        clearInterval(checkInterval);
+                        setIsCapturing(false);
+                    }
+                }, 500);
+                // Timeout after 60 seconds
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    setIsCapturing(false);
+                }, 60000);
+            } else {
+                setIsCapturing(false);
+            }
+        } catch (error) {
+            console.error('Manual capture error:', error);
+            setIsCapturing(false);
+        }
+    };
+
     const isRecording = recordingState !== 'idle';
 
     return (
@@ -155,8 +190,9 @@ function SidePanelApp() {
                         {/* Steps List */}
                         <div ref={stepsContainerRef} className="flex-1 overflow-y-auto min-h-0 space-y-2 scrollbar-hide">
                             {steps.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center h-full">
-                                    <p className="text-sm font-medium text-slate-400">Click anywhere to capture</p>
+                                <div className="flex flex-col items-center justify-center h-full text-center px-4">
+                                    <p className="text-sm font-medium text-slate-400">Click in browser to auto-capture</p>
+                                    <p className="text-xs text-slate-400 mt-1">or use "Capture Now" for external apps</p>
                                 </div>
                             ) : (
                                 steps.map((step, index) => (
@@ -165,13 +201,15 @@ function SidePanelApp() {
                                         className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 shadow-sm overflow-hidden group"
                                     >
                                         <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100">
-                                            <div className={`flex items-center justify-center w-6 h-6 rounded-full ${step.type === 'navigate' ? 'bg-slate-500' : 'bg-[#6366F1]'} text-white text-xs font-bold shrink-0`}>
+                                            <div className={`flex items-center justify-center w-6 h-6 rounded-full ${step.type === 'navigate' ? 'bg-slate-500' : step.type === 'manual' ? 'bg-emerald-500' : 'bg-[#6366F1]'} text-white text-xs font-bold shrink-0`}>
                                                 {index + 1}
                                             </div>
                                             <span className="text-sm font-medium text-slate-800 truncate flex-1">
                                                 {step.type === 'navigate'
                                                     ? `Navigate to ${new URL(step.pageUrl).hostname}`
-                                                    : generateStepDescription(step.domSelector || '')}
+                                                    : step.type === 'manual'
+                                                        ? 'Manual capture'
+                                                        : generateStepDescription(step.domSelector || '')}
                                             </span>
                                             <button
                                                 onClick={async (e) => {
@@ -187,7 +225,7 @@ function SidePanelApp() {
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>
-                                        {step.type === 'click' && (
+                                        {(step.type === 'click' || step.type === 'manual') && (
                                             <div className="w-full relative bg-slate-100">
                                                 <img
                                                     src={step.previewUrl || `${API_BASE_URL}/images/${step.imageKey}`}
@@ -195,7 +233,7 @@ function SidePanelApp() {
                                                     className="w-full h-auto block"
                                                     loading="lazy"
                                                 />
-                                                {step.x !== undefined && step.y !== undefined && (
+                                                {step.type === 'click' && step.x !== undefined && step.y !== undefined && (
                                                     <div
                                                         className="absolute pointer-events-none"
                                                         style={{
@@ -244,6 +282,16 @@ function SidePanelApp() {
             <div className="z-10 shrink-0 px-6 pb-6">
                 {recordingState === 'finished' ? null : isRecording ? (
                     <div className="flex flex-col gap-3">
+                        {/* Manual Capture Button - for capturing outside browser */}
+                        <Button
+                            variant="ghost"
+                            className="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 shadow-sm rounded-xl py-3 font-medium text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={handleManualCapture}
+                            disabled={isCapturing || recordingState === 'paused'}
+                            icon={isCapturing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
+                        >
+                            {isCapturing ? 'Capturing...' : 'Capture Now'}
+                        </Button>
                         <div className="flex items-center gap-3">
                             {recordingState === 'recording' ? (
                                 <Button

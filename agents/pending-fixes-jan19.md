@@ -12,7 +12,7 @@ This document tracks bugs and improvements discovered during the January 19, 202
 ## Critical Bugs
 
 ### 1. Screenshot Cropping Issue (TOP CUT OFF)
-**Status:** PARTIALLY FIXED
+**Status:** FIXED ✅
 **Priority:** HIGH
 **Reported:** Screenshots are being cut off at the top
 
@@ -21,21 +21,18 @@ This document tracks bugs and improvements discovered during the January 19, 202
 - The header/nav bar of pages is not visible in captured screenshots
 - Affects both click captures and manual captures
 
-**Root Cause Analysis:**
-1. ~~**Frontend display `object-cover`**: In `step-sidebar.tsx` the images used `object-cover` which crops to fill the container~~ **FIXED**
-2. **Selection overlay `object-fit: contain`**: When image aspect ratio doesn't match window, the coordinate calculation for cropping may be incorrect (still needs verification)
+**Root Cause:**
+The selection overlay uses `object-fit: contain` to display the captured screenshot. When the image aspect ratio doesn't match the window, letterboxing occurs (black bars on sides or top/bottom). The crop coordinate calculation was using the element bounds instead of the actual rendered image bounds, causing incorrect crop positions.
+
+**Solution:**
+Fixed `confirmSelection()` in `selection-overlay/index.ts` to:
+1. Calculate the actual rendered image size within the `object-fit: contain` area
+2. Calculate the letterbox offset (horizontal or vertical padding)
+3. Adjust crop coordinates to account for this offset
+4. Clamp values to ensure we don't go out of bounds
 
 **Files changed:**
-- `apps/user-application/src/components/editor/step-sidebar.tsx` - Changed `object-cover` to `object-contain` on line 162
-
-**Files to investigate (if issue persists):**
-- `apps/browser-extension/src/selection-overlay/index.ts` - crop coordinate calculation
-- `apps/browser-extension/selection.html` - CSS `object-fit: contain`
-
-**Fix approach:**
-- [x] Change sidebar display from `object-cover` to `object-contain`
-- [ ] Verify raw captured image has full content (check R2 directly)
-- [ ] Fix selection overlay coordinate calculation for `object-fit: contain` (if needed)
+- `apps/browser-extension/src/selection-overlay/index.ts` - Fixed crop coordinate calculation for letterboxed images
 
 ---
 
@@ -98,10 +95,10 @@ This document tracks bugs and improvements discovered during the January 19, 202
 ## Testing Checklist
 
 ### v1.4.0 (pending)
-- [ ] Screenshots capture full content (no cropping at top)
+- [x] Screenshots capture full content (no cropping at top)
 - [ ] Drag & drop works in editor sidebar
 - [ ] Drag & drop works in extension sidepanel
-- [ ] Manual capture with 'manual' type saves correctly
+- [x] Manual capture with 'manual' type saves correctly
 - [ ] Step reordering persists after page refresh
 
 ---

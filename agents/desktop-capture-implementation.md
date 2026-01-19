@@ -40,6 +40,21 @@ Implemented full screen, window, and tab capture using the `getDisplayMedia` API
   ```
 - **New message types**: `GET_SELECTION_SCREENSHOT`, `SELECTION_CONFIRMED`, `SELECTION_CANCELLED`
 
+### After (v1.4.0) - January 19, 2026
+- **Fixed screenshot cropping**: Selection overlay crop coordinates now correctly account for `object-fit: contain` letterboxing
+- **Drag & Drop step reordering**: Users can reorder steps by dragging
+  - Editor: Uses @dnd-kit library with grip handle
+  - Extension sidepanel: Uses native HTML5 drag & drop
+- **Fixed Zod schema**: Added `'manual'` to step type enum (`'click' | 'navigate' | 'manual'`)
+- **Files changed**:
+  ```
+  apps/browser-extension/src/selection-overlay/index.ts   # Fixed crop coordinate calculation
+  packages/data-ops/src/zod/steps.ts                      # Added 'manual' type
+  apps/data-service/src/queue-handlers/recording-ingest.ts # Handle manual type caption
+  apps/user-application/src/components/editor/step-sidebar.tsx # Drag & drop
+  apps/browser-extension/src/sidepanel/SidePanelApp.tsx   # Drag & drop
+  ```
+
 ## Architecture
 
 ```
@@ -163,10 +178,10 @@ The `getDisplayMedia` API shows Chrome's native permission dialog, giving users 
 - [ ] ENTER key confirms selection
 
 ### v1.4.0 (January 19, 2026)
-- [ ] Screenshots display full content (no cropping at top)
+- [x] Screenshots display full content (no cropping at top)
 - [ ] Drag & drop works in editor sidebar
 - [ ] Drag & drop works in extension sidepanel
-- [ ] Manual capture with 'manual' type saves correctly
+- [x] Manual capture with 'manual' type saves correctly
 - [ ] Step reordering persists after page refresh
 
 ## Rollback Plan

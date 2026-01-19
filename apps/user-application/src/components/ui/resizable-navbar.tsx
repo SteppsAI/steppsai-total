@@ -101,7 +101,7 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
         damping: 50,
       }}
       style={{
-        minWidth: visible ? "1000px" : "100%",
+        minWidth: visible ? "900px" : "100%",
       }}
       className={cn(
         "relative z-[60] mx-auto hidden w-full max-w-7xl flex-row items-center justify-between self-start rounded-full bg-transparent px-4 py-2 lg:flex dark:bg-transparent",
@@ -121,7 +121,7 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
     <motion.div
       onMouseLeave={() => setHovered(null)}
       className={cn(
-        "absolute inset-0 hidden flex-1 flex-row items-center justify-center space-x-2 text-base font-semibold text-[var(--color-900)] transition duration-200 hover:text-[var(--color-700)] lg:flex lg:space-x-2",
+        "absolute inset-0 hidden flex-1 flex-row items-center justify-center space-x-0.5 text-sm lg:text-[15px] font-semibold text-[var(--color-900)] transition duration-200 hover:text-[var(--color-700)] lg:flex",
         className,
       )}
     >
@@ -129,7 +129,7 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
         <a
           onMouseEnter={() => setHovered(idx)}
           onClick={onItemClick}
-          className="relative px-5 py-2.5 text-[var(--color-900)] hover:text-[var(--color-700)] transition-colors"
+          className="relative px-2.5 py-2.5 text-[var(--color-900)] hover:text-[var(--color-700)] transition-colors whitespace-nowrap"
           key={`link-${idx}`}
           href={item.link}
           target={item?.target}

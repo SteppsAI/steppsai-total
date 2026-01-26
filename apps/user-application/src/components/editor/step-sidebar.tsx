@@ -23,6 +23,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+export type SidebarWidth = "collapsed" | "narrow" | "medium" | "wide";
+
 interface StepSidebarProps {
     steps: Step[];
     activeStepId: string;
@@ -31,8 +33,8 @@ interface StepSidebarProps {
     onDeleteStep: (id: string) => void;
     onReorderSteps: (steps: Step[]) => void;
     onAddStep?: (step: { title: string; file: File; previewUrl: string }) => void;
-    isCollapsed?: boolean;
-    onToggleCollapse?: () => void;
+    sidebarWidth?: SidebarWidth;
+    onCycleWidth?: () => void;
 }
 
 interface SortableStepItemProps {
@@ -89,7 +91,7 @@ function SortableStepItem({
             ref={setNodeRef}
             style={style}
             className={cn(
-                "group relative flex flex-col gap-2",
+                "group relative flex flex-col gap-2 mb-6 last:mb-0",
                 isDragging && "shadow-lg rounded-xl bg-white/80"
             )}
         >
@@ -205,6 +207,13 @@ function SortableStepItem({
     );
 }
 
+const SIDEBAR_WIDTHS: Record<SidebarWidth, string> = {
+    collapsed: "w-14",
+    narrow: "w-[280px]",
+    medium: "w-[380px]",
+    wide: "w-[480px]",
+};
+
 export function StepSidebar({
     steps,
     activeStepId,
@@ -213,9 +222,10 @@ export function StepSidebar({
     onDeleteStep,
     onReorderSteps,
     onAddStep,
-    isCollapsed = false,
-    onToggleCollapse,
+    sidebarWidth = "medium",
+    onCycleWidth,
 }: StepSidebarProps) {
+    const isCollapsed = sidebarWidth === "collapsed";
     const [editingStepId, setEditingStepId] = useState<string | null>(null);
     const [deletingStepId, setDeletingStepId] = useState<string | null>(null);
     const [editValue, setEditValue] = useState("");
@@ -372,14 +382,14 @@ export function StepSidebar({
             "flex flex-col z-10 h-full transition-all duration-300 relative",
             "bg-white/50 backdrop-blur-xl supports-[backdrop-filter]:bg-white/50",
             "border-l border-[var(--color-200)]",
-            isCollapsed ? "w-14" : "w-[300px]"
+            SIDEBAR_WIDTHS[sidebarWidth]
         )}>
             {/* Toggle Button */}
-            {onToggleCollapse && (
+            {onCycleWidth && (
                 <Button
                     variant="ghost"
                     size="icon"
-                    onClick={onToggleCollapse}
+                    onClick={onCycleWidth}
                     className="absolute -left-3 top-4 z-20 h-6 w-6 rounded-full bg-white shadow-md border border-[var(--color-200)] hover:bg-[var(--color-50)] hover:text-primary transition-all duration-300 hover:scale-110"
                 >
                     {isCollapsed ? (
@@ -397,7 +407,7 @@ export function StepSidebar({
                             key={step.id}
                             onClick={() => {
                                 onStepSelect(step.id);
-                                onToggleCollapse?.();
+                                onCycleWidth?.();
                             }}
                             className={cn(
                                 "w-8 h-8 rounded-lg text-xs font-bold transition-all duration-300 flex items-center justify-center",

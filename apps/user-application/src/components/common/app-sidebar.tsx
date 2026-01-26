@@ -85,7 +85,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   className="h-10 transition-all duration-200 ease-in-out font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:[&>span]:hidden"
                 >
                   <Link to="/app" onClick={handleLinkClick} className="flex items-center gap-3">
-                    <Home className="size-5 opacity-70 group-hover:opacity-100 transition-opacity"/>
+                    <Home className="size-5 opacity-70 group-hover:opacity-100 transition-opacity" />
                     <span className="text-base">Home</span>
                   </Link>
                 </SidebarMenuButton>

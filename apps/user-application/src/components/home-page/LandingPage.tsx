@@ -2,7 +2,6 @@ import { Navbar } from "./Navbar";
 import { Hero } from "./Hero";
 import { SocialProof } from "./SocialProof";
 import { HowItWorks } from "./HowItWorks";
-import { WaitlistSection } from "./WaitlistSection";
 import { FAQ } from "./FAQ";
 import { Footer } from "./footer";
 import { LifetimeDeal } from "./LifetimeDeal";
@@ -20,8 +19,6 @@ export function LandingPage() {
                     <LifetimeDeal />
                 </div>
                 <FAQ />
-                <WaitlistSection />
-
             </main>
 
             <Footer />

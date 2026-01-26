@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import { EditorHeader } from "@/components/editor/editor-header";
 import { EditorToolbar, EditorTool } from "@/components/editor/editor-toolbar";
 import { Canvas } from "@/components/editor/canvas";
-import { StepSidebar } from "@/components/editor/step-sidebar";
+import { StepSidebar, SidebarWidth } from "@/components/editor/step-sidebar";
 import { useState, useCallback, useEffect } from "react";
 import { ShareDialog } from "@/components/share-dialog";
 import { ExportDialog } from "@/components/export-dialog";
@@ -58,8 +58,17 @@ function EditorPage() {
   const [activeTool, setActiveTool] = useState<EditorTool>("pointer");
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState<SidebarWidth>("medium");
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+
+  // Cycle through sidebar widths: medium -> wide -> narrow -> collapsed -> medium
+  const handleCycleWidth = useCallback(() => {
+    setSidebarWidth((current) => {
+      const cycle: SidebarWidth[] = ["medium", "wide", "narrow", "collapsed"];
+      const currentIndex = cycle.indexOf(current);
+      return cycle[(currentIndex + 1) % cycle.length];
+    });
+  }, []);
 
   // Set initial active step when guide loads
   useEffect(() => {
@@ -301,8 +310,8 @@ function EditorPage() {
           onDeleteStep={handleDeleteStep}
           onReorderSteps={handleReorderSteps}
           onAddStep={handleAddStep}
-          isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          sidebarWidth={sidebarWidth}
+          onCycleWidth={handleCycleWidth}
         />
       </div>
 

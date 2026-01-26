@@ -38,16 +38,16 @@ export function Navbar() {
             Log in
           </Link> */}
           <a
-            href="/#waitlist"
+            href="/auth/login"
             className="btn-glass-primary group inline-flex h-10 items-center justify-center rounded-full px-6 text-sm font-medium text-primary-foreground leading-none transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative z-20"
           >
             <span className="flex items-center justify-center gap-2">
               <span className="relative flex items-center h-[1.2em] overflow-hidden">
                 <span className="block transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
-                  Join Waitlist
+                  Sign Up
                 </span>
                 <span className="absolute inset-0 flex items-center transition-transform duration-500 ease-in-out translate-y-full group-hover:translate-y-0 whitespace-nowrap">
-                  Join Waitlist
+                  Sign Up
                 </span>
               </span>
               <img src="/icons/3d/rocket.png" alt="Rocket" className="w-5 h-5 object-contain group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
@@ -85,16 +85,16 @@ export function Navbar() {
             Log in
           </Link> */}
           <a
-            href="/#waitlist"
+            href="/auth/login"
             className="btn-glass-primary w-full group inline-flex h-12 items-center justify-center rounded-full mt-2 text-base font-medium text-primary-foreground leading-none transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <span className="flex items-center justify-center gap-2">
               <span className="relative flex items-center h-[1.2em] overflow-hidden">
                 <span className="block transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
-                  Join Waitlist
+                  Sign Up
                 </span>
                 <span className="absolute inset-0 flex items-center justify-center transition-transform duration-500 ease-in-out translate-y-full group-hover:translate-y-0 whitespace-nowrap">
-                  Join Waitlist
+                  Sign Up
                 </span>
               </span>
               <img src="/icons/3d/rocket.png" alt="Rocket" className="w-5 h-5 object-contain group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />

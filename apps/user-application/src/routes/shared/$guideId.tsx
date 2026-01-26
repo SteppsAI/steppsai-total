@@ -35,31 +35,29 @@ function PublicGuideViewPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Refined Glass Header */}
       <header className="sticky top-0 z-50 w-full border-b border-slate-200/50 bg-white/50 backdrop-blur-xl supports-[backdrop-filter]:bg-white/20">
-        <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div className="container max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <a href="https://stepps.ai" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-              <img src="/brand/logo.svg" alt="Stepps" className="h-8 w-auto" />
+            <a href="https://stepps.ai" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 focus-visible:outline-none">
+              <img src="/brand/logo.svg" alt="Stepps" className="h-6 sm:h-8 w-auto" />
             </a>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <a
               href="https://stepps.ai"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-glass-primary group inline-flex h-10 items-center justify-center rounded-full px-6 text-sm font-medium text-primary-foreground transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 shadow-lg shadow-primary/20"
+              className="btn-glass-primary group inline-flex h-9 sm:h-10 items-center justify-center rounded-full px-3 sm:px-6 text-xs sm:text-sm font-medium text-primary-foreground transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 shadow-lg shadow-primary/20 whitespace-nowrap"
             >
-              Create your own guide
-              <ArrowRight className="ml-2 size-4 transition-transform duration-200 group-hover:translate-x-1" />
+              <span className="hidden sm:inline">Create your own guide</span>
+              <span className="sm:hidden">Create guide</span>
+              <ArrowRight className="ml-1.5 sm:ml-2 size-3.5 sm:size-4 transition-transform duration-200 group-hover:translate-x-1" />
             </a>
           </div>
         </div>
       </header>
 
-      {/* Main Content - Reset to original style */}
       <main className="flex-1 w-full max-w-3xl mx-auto p-6 py-12 md:py-16 space-y-16">
-        {/* Guide Header */}
         <div className="space-y-6 text-center border-b pb-12">
           <div className="space-y-4">
             <div className="flex items-center justify-center gap-3">
@@ -88,7 +86,6 @@ function PublicGuideViewPage() {
           </div>
         </div>
 
-        {/* Steps List */}
         {steps.length > 0 ? (
           <div className="space-y-20">
             {steps.map((step, index) => (
@@ -106,7 +103,6 @@ function PublicGuideViewPage() {
                   </div>
                 </div>
 
-                {/* Screenshot */}
                 {step.imageKey && (
                   <div className="flex justify-center w-full">
                     <ViewerCanvas
@@ -125,7 +121,6 @@ function PublicGuideViewPage() {
         )}
       </main>
 
-      {/* Footer */}
       <div className="mt-20">
         <Footer />
       </div>

@@ -98,21 +98,21 @@ export function Hero() {
 
                             {/* CTAs */}
                             <div className="hero-text-stagger flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 w-full sm:w-auto">
-                                <a
+                                {/*<a
                                     href="#waitlist"
                                     className="btn-glass-primary group inline-flex h-11 sm:h-12 items-center justify-center rounded-full px-6 sm:px-8 text-sm font-medium text-primary-foreground transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 >
                                     Join Waitlist
                                     <ArrowRight className="ml-2 size-4 transition-transform duration-200 group-hover:translate-x-1" />
-                                </a>
+                                </a>*/}
 
-                                {/* <Link
+                                <Link
                                     to="/auth/login"
                                     className="btn-glass-primary group inline-flex h-11 sm:h-12 items-center justify-center rounded-full px-6 sm:px-8 text-sm font-medium text-primary-foreground transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 >
                                     Get Started
                                     <ArrowRight className="ml-2 size-4 transition-transform duration-200 group-hover:translate-x-1" />
-                                </Link> */}
+                                </Link>
 
                                 <Link
                                     to="/webinar"

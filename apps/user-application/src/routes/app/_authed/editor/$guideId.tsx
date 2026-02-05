@@ -175,7 +175,7 @@ function EditorPage() {
     session.updateSteps(reindexed);
   }, [session]);
 
-  // Handle add step - syncs to DO
+  // Handle add step with image - syncs to DO
   const handleAddStep = useCallback((stepData: { title: string; file: File; previewUrl: string }) => {
     const newStep: Step = {
       id: crypto.randomUUID(),
@@ -185,6 +185,22 @@ function EditorPage() {
       overlays: [],
       pageUrl: "",
       domSelector: "",
+    };
+
+    const updatedSteps = [...(session.guide?.steps || []), newStep];
+    session.updateSteps(updatedSteps);
+    setActiveStepId(newStep.id);
+  }, [session]);
+
+  // Handle add text-only step - syncs to DO
+  const handleAddTextStep = useCallback((title: string) => {
+    const newStep: Step = {
+      id: crypto.randomUUID(),
+      caption: title,
+      type: 'navigate',
+      orderIndex: (session.guide?.steps?.length || 0),
+      overlays: [],
+      pageUrl: "",
     };
 
     const updatedSteps = [...(session.guide?.steps || []), newStep];
@@ -310,6 +326,7 @@ function EditorPage() {
           onDeleteStep={handleDeleteStep}
           onReorderSteps={handleReorderSteps}
           onAddStep={handleAddStep}
+          onAddTextStep={handleAddTextStep}
           sidebarWidth={sidebarWidth}
           onCycleWidth={handleCycleWidth}
         />

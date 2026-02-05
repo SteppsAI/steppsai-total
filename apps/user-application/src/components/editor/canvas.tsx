@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Stage, Layer, Image as KonvaImage, Arrow, Circle, Group, Transformer, Rect, Text } from "react-konva";
 import useImage from "use-image";
 import Konva from "konva";
-import { Undo2, Redo2, Trash2, Minus, Plus } from "lucide-react";
+import { Undo2, Redo2, Trash2, Minus, Plus, Type } from "lucide-react";
 import { EditorTool } from "./editor-toolbar";
 import {
   Overlay as Annotation,
@@ -741,6 +741,45 @@ export function Canvas({
       return null;
     });
   };
+
+  // Text-only step placeholder
+  if (!screenshotUrl) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center bg-[var(--color-50)] p-8 pb-16 relative overflow-hidden">
+        <div className="max-w-5xl w-full space-y-4 z-10">
+          <div ref={containerRef} className="w-full flex justify-center">
+            <div
+              className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl shadow-lg border-2 border-dashed border-primary/30 flex flex-col items-center justify-center gap-4"
+              style={{ width: Math.min(dimensions.width, 600), height: 200 }}
+            >
+              <div className="p-4 rounded-full bg-primary/10">
+                <Type className="w-10 h-10 text-primary" />
+              </div>
+              <div className="text-center space-y-1">
+                <p className="text-lg font-medium text-foreground">Text Step</p>
+                <p className="text-sm text-muted-foreground">This step contains only text, no image</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Delete button for text steps */}
+          <div className="flex justify-center items-center gap-3">
+            <div className="flex items-center gap-2 bg-[var(--color-50)] px-4 py-2.5 rounded-full shadow-lg border border-[var(--color-200)]">
+              <Button
+                onClick={() => onDeleteStep?.()}
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-full text-red-600 hover:bg-red-100 hover:text-red-700"
+                title="Delete step"
+              >
+                <Trash2 className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center bg-[var(--color-50)] p-8 pb-16 relative overflow-hidden">

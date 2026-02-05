@@ -103,12 +103,21 @@ function PublicGuideViewPage() {
                   </div>
                 </div>
 
-                {step.imageKey && (
+                {step.imageKey ? (
                   <div className="flex justify-center w-full">
                     <ViewerCanvas
                       screenshotUrl={step.imageKey}
                       overlays={step.overlays as any[]}
                     />
+                  </div>
+                ) : (
+                  <div className="w-full rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 p-6">
+                    <div className="flex items-center gap-3 text-muted-foreground">
+                      <div className="flex-none p-2 rounded-lg bg-primary/10">
+                        <ArrowRight className="w-5 h-5 text-primary" />
+                      </div>
+                      <span className="text-sm">Navigation step</span>
+                    </div>
                   </div>
                 )}
               </div>

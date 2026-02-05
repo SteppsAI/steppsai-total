@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Trash2, Plus, X, Check, PanelRightClose, PanelRightOpen, GripVertical } from "lucide-react";
+import { Trash2, Plus, Check, PanelRightClose, PanelRightOpen, GripVertical, Type } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useRef, useEffect } from "react";
 import { Step } from "@/types/db";
+import { AddStepDialog } from "./add-step-dialog";
 import {
     DndContext,
     closestCenter,
@@ -33,6 +34,7 @@ interface StepSidebarProps {
     onDeleteStep: (id: string) => void;
     onReorderSteps: (steps: Step[]) => void;
     onAddStep?: (step: { title: string; file: File; previewUrl: string }) => void;
+    onAddTextStep?: (title: string) => void;
     sidebarWidth?: SidebarWidth;
     onCycleWidth?: () => void;
 }
@@ -147,7 +149,7 @@ function SortableStepItem({
                 )}
             </div>
 
-            {step.imageKey && (
+            {step.imageKey ? (
                 <div
                     onClick={() => onStepSelect(step.id)}
                     className={cn(
@@ -174,6 +176,24 @@ function SortableStepItem({
                     {isActive && (
                         <div className="absolute inset-0 border-4 border-primary/10 rounded-xl pointer-events-none" />
                     )}
+                </div>
+            ) : (
+                <div
+                    onClick={() => onStepSelect(step.id)}
+                    className={cn(
+                        "relative rounded-xl overflow-hidden cursor-pointer transition-all duration-300 p-4",
+                        "bg-gradient-to-br from-primary/5 to-primary/10",
+                        isActive
+                            ? "ring-2 ring-primary shadow-lg shadow-primary/20 scale-[1.02]"
+                            : "border border-primary/20 shadow-sm hover:shadow-lg hover:border-primary/30 hover:translate-y-[-2px]"
+                    )}
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="flex-none p-2 rounded-lg bg-primary/10">
+                            <Type className="w-4 h-4 text-primary" />
+                        </div>
+                        <span className="text-sm text-muted-foreground">Text step</span>
+                    </div>
                 </div>
             )}
 
@@ -222,6 +242,7 @@ export function StepSidebar({
     onDeleteStep,
     onReorderSteps,
     onAddStep,
+    onAddTextStep,
     sidebarWidth = "medium",
     onCycleWidth,
 }: StepSidebarProps) {
@@ -229,18 +250,13 @@ export function StepSidebar({
     const [editingStepId, setEditingStepId] = useState<string | null>(null);
     const [deletingStepId, setDeletingStepId] = useState<string | null>(null);
     const [editValue, setEditValue] = useState("");
+    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
     // Reset delete confirmation when changing steps
     useEffect(() => {
         setDeletingStepId(null);
     }, [activeStepId]);
     const inputRef = useRef<HTMLInputElement>(null);
-
-    // New Step State
-    const [pendingFile, setPendingFile] = useState<{ file: File; previewUrl: string } | null>(null);
-    const [pendingTitle, setPendingTitle] = useState("");
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const newStepInputRef = useRef<HTMLInputElement>(null);
 
     // Drag and drop sensors
     const sensors = useSensors(
@@ -275,13 +291,6 @@ export function StepSidebar({
         }
     }, [editingStepId]);
 
-    // Focus new step title input when pending file is set
-    useEffect(() => {
-        if (pendingFile && newStepInputRef.current) {
-            newStepInputRef.current.focus();
-        }
-    }, [pendingFile]);
-
     const handleStartEdit = (step: Step, e: React.MouseEvent) => {
         e.stopPropagation();
         setEditingStepId(step.id);
@@ -308,54 +317,6 @@ export function StepSidebar({
         } else if (e.key === "Escape") {
             e.preventDefault();
             handleCancel();
-        }
-    };
-
-    const handleAddClick = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const previewUrl = URL.createObjectURL(file);
-            setPendingFile({ file, previewUrl });
-            setPendingTitle(`Step ${steps.length + 1}`);
-        }
-        // Reset input so same file can be selected again if needed
-        if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-        }
-    };
-
-    const handleConfirmAdd = () => {
-        if (pendingFile && onAddStep) {
-            onAddStep({
-                title: pendingTitle,
-                file: pendingFile.file,
-                previewUrl: pendingFile.previewUrl
-            });
-
-            setPendingFile(null);
-            setPendingTitle("");
-        }
-    };
-
-    const handleCancelAdd = () => {
-        if (pendingFile) {
-            URL.revokeObjectURL(pendingFile.previewUrl);
-        }
-        setPendingFile(null);
-        setPendingTitle("");
-    };
-
-    const handleNewStepKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            handleConfirmAdd();
-        } else if (e.key === "Escape") {
-            e.preventDefault();
-            handleCancelAdd();
         }
     };
 
@@ -457,62 +418,12 @@ export function StepSidebar({
                             </SortableContext>
                         </DndContext>
 
-                        {/* New Step Pending UI */}
-                        {pendingFile && (
-                            <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                <div className="flex items-center gap-2 px-1">
-                                    <span className="text-xs font-bold text-primary w-5 text-right">
-                                        {steps.length + 1}.
-                                    </span>
-                                    <Input
-                                        ref={newStepInputRef}
-                                        value={pendingTitle}
-                                        onChange={(e) => setPendingTitle(e.target.value)}
-                                        onKeyDown={handleNewStepKeyDown}
-                                        placeholder="Step Title"
-                                        className="h-7 px-2 py-0 text-sm font-medium bg-white/80 border-primary/30 shadow-sm rounded-md"
-                                    />
-                                </div>
-                                <div className="relative aspect-video rounded-xl overflow-hidden border-2 border-primary/20 shadow-lg bg-white">
-                                    <img
-                                        src={pendingFile.previewUrl}
-                                        alt="New Step Preview"
-                                        className="w-full h-full object-cover opacity-90"
-                                    />
-                                    <div className="absolute inset-0 flex items-center justify-center gap-3 bg-white/20 backdrop-blur-[2px]">
-                                        <Button
-                                            size="icon"
-                                            className="h-9 w-9 rounded-full shadow-lg bg-emerald-500 hover:bg-emerald-600 text-white transition-all hover:scale-105"
-                                            onClick={handleConfirmAdd}
-                                        >
-                                            <Check className="h-5 w-5" />
-                                        </Button>
-                                        <Button
-                                            size="icon"
-                                            variant="secondary"
-                                            className="h-9 w-9 rounded-full shadow-lg bg-white hover:bg-red-50 text-muted-foreground hover:text-red-500 transition-all hover:scale-105"
-                                            onClick={handleCancelAdd}
-                                        >
-                                            <X className="h-5 w-5" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
                         {/* Add Step Button */}
-                        {!pendingFile && onAddStep && (
+                        {(onAddStep || onAddTextStep) && (
                             <div className="pt-4 flex justify-center px-1">
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    ref={fileInputRef}
-                                    onChange={handleFileChange}
-                                />
                                 <Button
                                     variant="ghost"
-                                    onClick={handleAddClick}
+                                    onClick={() => setIsAddDialogOpen(true)}
                                     className="w-full group relative overflow-hidden rounded-xl border border-dashed border-[var(--color-300)] bg-white/30 hover:bg-white/60 hover:border-primary/50 text-muted-foreground hover:text-primary transition-all duration-300 h-16"
                                 >
                                     <div className="flex flex-col items-center gap-1.5">
@@ -524,6 +435,15 @@ export function StepSidebar({
                                 </Button>
                             </div>
                         )}
+
+                        {/* Add Step Dialog */}
+                        <AddStepDialog
+                            open={isAddDialogOpen}
+                            onOpenChange={setIsAddDialogOpen}
+                            onAddTextStep={(title) => onAddTextStep?.(title)}
+                            onAddImageStep={(step) => onAddStep?.(step)}
+                            nextStepNumber={steps.length + 1}
+                        />
                     </div>
                 </ScrollArea>
             )}

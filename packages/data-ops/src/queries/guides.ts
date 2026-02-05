@@ -166,6 +166,26 @@ export async function getPublishedGuide(guideId: string): Promise<Guide | null> 
 }
 
 /**
+ * Get all published guides for browsing
+ * Returns guides with status='published'
+ * Ordered by updatedAt DESC (most recent first)
+ */
+export async function getAllPublishedGuides(): Promise<Guide[]> {
+	const db = getDb();
+
+	const result = await db
+		.select()
+		.from(guides)
+		.where(eq(guides.status, 'published'))
+		.orderBy(desc(guides.updatedAt));
+
+	return result.map(guide => ({
+		...guide,
+		steps: parseSteps(guide.steps),
+	})) as Guide[];
+}
+
+/**
  * Delete a step from a guide
  * Removes the step from the guide's steps array and reindexes remaining steps
  */

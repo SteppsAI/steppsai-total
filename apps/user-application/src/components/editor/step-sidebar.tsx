@@ -139,7 +139,7 @@ function SortableStepItem({
                         </span>
                         <span
                             className={cn(
-                                "text-sm font-medium truncate transition-colors",
+                                "text-sm font-medium transition-colors break-words",
                                 isActive ? "text-[var(--color-950)]" : "text-[var(--color-600)] group-hover/title:text-[var(--color-900)]"
                             )}
                         >

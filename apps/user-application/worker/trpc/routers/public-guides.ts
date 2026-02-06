@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc-instance";
-import { getPublishedGuide } from "@repo/data-ops/queries";
+import { getPublishedGuide, getAllPublishedGuides } from "@repo/data-ops/queries";
 import { transformGuideWithUrls } from "../helpers/transform-assets";
 
 /**
@@ -22,5 +22,18 @@ export const publicGuidesRouter = router({
 
             const assetsUrl = ctx.env.ASSETS_URL;
             return transformGuideWithUrls(guide as any, assetsUrl);
+        }),
+
+    /**
+     * Get all published public guides
+     * For the /guides browse page
+     */
+    getAllPublished: publicProcedure
+        .query(async ({ ctx }) => {
+            const guides = await getAllPublishedGuides();
+            const assetsUrl = ctx.env.ASSETS_URL;
+
+            // Transform imageKeys to full URLs for all guides
+            return guides.map((guide) => transformGuideWithUrls(guide as any, assetsUrl));
         }),
 });

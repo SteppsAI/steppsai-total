@@ -1,117 +1,27 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { Navbar } from '@/components/home-page/Navbar'
 import { Footer } from '@/components/home-page/footer'
+import { trpc } from '@/router'
 
 export const Route = createFileRoute('/guides')({
   component: GuidesPage,
-  // TODO: Add prefetching in route loader
-  // loader: async ({ context }) => {
-  //   await context.queryClient.prefetchQuery(
-  //     context.trpc.publicGuides.getAllPublished.queryOptions()
-  //   );
-  // },
+  loader: async ({ context }) => {
+    await context.queryClient.prefetchQuery(
+      context.trpc.publicGuides.getAllPublished.queryOptions()
+    );
+  },
 })
 
-// TODO: Backend Integration - Replace dummy data with tRPC query
-// 1. Add getAllPublished procedure to publicGuidesRouter
-//    File: /worker/trpc/routers/public-guides.ts
-// 2. Create getAllPublishedGuides() in packages/data-ops/src/queries/guides.ts
-//    Query: SELECT * FROM guides WHERE status = 'published' ORDER BY updated_at DESC
-// 3. Replace DUMMY_GUIDES with:
-//    const queryOptions = trpc.publicGuides.getAllPublished.queryOptions();
-//    const { data: guides = [] } = useSuspenseQuery(queryOptions);
-
-// TODO: Asset URL Transformation (automatic when using real data)
-// transformGuideWithUrls() in tRPC router will prepend ASSETS_URL
-// to brandImageKey and step imageKeys automatically.
-// No changes needed in component.
-
-interface Step {
-  id: string
-  type: string
-  orderIndex: number
-  imageKey?: string
-  pageUrl?: string
-  caption?: string
-}
-
-interface Guide {
-  guideId: string
-  userId: string
-  title: string
-  description?: string
-  slug?: string
-  status: string
-  visibility: string
-  brandImageKey?: string
-  steps?: Step[]
-  createdAt: string
-  updatedAt: string
-}
-
-// Dummy data
-const DUMMY_GUIDES: Guide[] = [
-  {
-    guideId: "d6f14e87-6a34-408a-97e2-cf4d2a9aec0c",
-    userId: "dummy-user-1",
-    title: "How to Set Up Your First Campaign",
-    slug: "setup-first-campaign",
-    status: "published",
-    visibility: "public",
-    brandImageKey: "/icons/3d/rocket.png",
-    steps: [
-      {
-        id: "step-1",
-        type: "click",
-        orderIndex: 0,
-        imageKey: "/website/install-extension.webp",
-        pageUrl: "https://example.com",
-        caption: "Click the Get Started button"
-      },
-      {
-        id: "step-2",
-        type: "input",
-        orderIndex: 1,
-        imageKey: "/website/share-export.webp",
-        pageUrl: "https://example.com/step2",
-        caption: "Enter your campaign name"
-      },
-      {
-        id: "step-3",
-        type: "click",
-        orderIndex: 2,
-        pageUrl: "https://example.com/step3",
-        caption: "Select your target audience"
-      },
-      {
-        id: "step-4",
-        type: "click",
-        orderIndex: 3,
-        pageUrl: "https://example.com/step4",
-        caption: "Set your budget and schedule"
-      },
-      {
-        id: "step-5",
-        type: "click",
-        orderIndex: 4,
-        pageUrl: "https://example.com/step5",
-        caption: "Review and launch your campaign"
-      }
-    ],
-    createdAt: "2025-01-10T00:00:00.000Z",
-    updatedAt: "2025-01-15T00:00:00.000Z",
-  },
-]
-
 interface GuideCardProps {
-  guide: Guide
+  guide: any
 }
 
 function GuideCard({ guide }: GuideCardProps) {
   const previewImage =
     guide.steps?.[0]?.imageKey ||
     guide.brandImageKey ||
-    '/website/share-export.webp'
+    '/default-preview.svg'
 
   const stepCount = guide.steps?.length || 0
 
@@ -186,9 +96,8 @@ function EmptyState() {
 }
 
 function GuidesPage() {
-  // Using dummy data for now
-  // To test the empty state, change DUMMY_GUIDES to [] below
-  const guides = DUMMY_GUIDES
+  const queryOptions = trpc.publicGuides.getAllPublished.queryOptions();
+  const { data: guides = [] } = useSuspenseQuery(queryOptions);
 
   return (
     <div className="min-h-screen bg-foggy flex flex-col font-sans relative overflow-x-hidden">

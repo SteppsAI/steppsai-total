@@ -1,9 +1,15 @@
 export type AspectRatio = "3:4" | "1:1";
 
+export type TextAlign = "left" | "center" | "right";
+export type ImageFit = "contain" | "cover";
+
 export interface CarouselSlide {
   id: string;
   heading: string;
   imageUrl?: string | null;
+  headingFontSize?: number;
+  headingAlign?: TextAlign;
+  imageFit?: ImageFit;
 }
 
 export interface CarouselStyle {
@@ -51,7 +57,26 @@ export const FONT_FAMILIES = [
   { value: "Georgia, serif", label: "Georgia" },
   { value: "system-ui, sans-serif", label: "System" },
   { value: "'Courier New', monospace", label: "Mono" },
+  { value: "'Times New Roman', serif", label: "Times" },
+  { value: "Arial, sans-serif", label: "Arial" },
+  { value: "'Trebuchet MS', sans-serif", label: "Trebuchet" },
+  { value: "Verdana, sans-serif", label: "Verdana" },
+  { value: "'Palatino Linotype', serif", label: "Palatino" },
+  { value: "Impact, sans-serif", label: "Impact" },
+  { value: "'Comic Sans MS', cursive", label: "Comic Sans" },
+  { value: "'Lucida Console', monospace", label: "Lucida" },
 ];
+
+export const FONT_SIZE_PRESETS = [
+  { value: 32, label: "S" },
+  { value: 40, label: "M" },
+  { value: 48, label: "L" },
+  { value: 56, label: "XL" },
+  { value: 64, label: "2XL" },
+  { value: 80, label: "3XL" },
+];
+
+export const DEFAULT_HEADING_FONT_SIZE = 48;
 
 export const CAROUSEL_TEMPLATES: CarouselTemplate[] = [
   {

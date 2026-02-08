@@ -16,7 +16,8 @@ type CarouselAction =
   | { type: "DELETE_SLIDE"; slideId: string }
   | { type: "REORDER_SLIDES"; slides: CarouselSlide[] }
   | { type: "SET_STYLE"; style: Partial<CarouselStyle> }
-  | { type: "SET_EXPORT_FORMAT"; format: ExportFormat };
+  | { type: "SET_EXPORT_FORMAT"; format: ExportFormat }
+  | { type: "SET_AUTHOR_NAME"; authorName: string };
 
 function carouselReducer(state: CarouselState, action: CarouselAction): CarouselState {
   switch (action.type) {
@@ -71,6 +72,9 @@ function carouselReducer(state: CarouselState, action: CarouselAction): Carousel
 
     case "SET_EXPORT_FORMAT":
       return { ...state, exportFormat: action.format };
+
+    case "SET_AUTHOR_NAME":
+      return { ...state, authorName: action.authorName };
 
     default:
       return state;
@@ -189,6 +193,10 @@ export function useCarouselState(options: InitOptions) {
     dispatch({ type: "SET_EXPORT_FORMAT", format });
   }, []);
 
+  const setAuthorName = useCallback((authorName: string) => {
+    dispatch({ type: "SET_AUTHOR_NAME", authorName });
+  }, []);
+
   return {
     state,
     setTitle,
@@ -199,5 +207,6 @@ export function useCarouselState(options: InitOptions) {
     reorderSlides,
     setStyle,
     setExportFormat,
+    setAuthorName,
   };
 }

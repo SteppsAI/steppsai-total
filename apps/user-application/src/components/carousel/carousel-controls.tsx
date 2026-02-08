@@ -1,4 +1,8 @@
+import { useCallback, useRef } from "react";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -6,142 +10,450 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import type { CarouselStyle, ExportFormat } from "@/lib/carousel-templates";
-import { BACKGROUND_COLORS, FONT_FAMILIES } from "@/lib/carousel-templates";
+import type {
+  CarouselSlide,
+  CarouselStyle,
+  ExportFormat,
+} from "@/lib/carousel-templates";
+import {
+  BACKGROUND_COLORS,
+  FONT_FAMILIES,
+  FONT_SIZE_PRESETS,
+  DEFAULT_HEADING_FONT_SIZE,
+} from "@/lib/carousel-templates";
+import {
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  ImageIcon,
+  Trash2,
+  Upload,
+  RectangleHorizontal,
+  Square,
+  User,
+  Type,
+} from "lucide-react";
 
 interface CarouselControlsProps {
   style: CarouselStyle;
   exportFormat: ExportFormat;
+  currentSlide: CarouselSlide;
+  authorName: string;
   onStyleChange: (style: Partial<CarouselStyle>) => void;
   onExportFormatChange: (format: ExportFormat) => void;
+  onUpdateSlide: (slideId: string, data: Partial<CarouselSlide>) => void;
+  onAuthorNameChange: (name: string) => void;
 }
 
 export function CarouselControls({
   style,
   exportFormat,
+  currentSlide,
+  authorName,
   onStyleChange,
   onExportFormatChange,
+  onUpdateSlide,
+  onAuthorNameChange,
 }: CarouselControlsProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          onUpdateSlide(currentSlide.id, { imageUrl: reader.result as string });
+        };
+        reader.readAsDataURL(file);
+      }
+      // Reset input so same file can be re-selected
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    },
+    [currentSlide.id, onUpdateSlide]
+  );
+
+  const currentFontSize = currentSlide.headingFontSize || DEFAULT_HEADING_FONT_SIZE;
+  const currentAlign = currentSlide.headingAlign || "left";
+  const currentImageFit = currentSlide.imageFit || "contain";
+
   return (
-    <div className="w-[240px] flex flex-col h-full bg-white/50 backdrop-blur-xl supports-[backdrop-filter]:bg-white/50 border-r border-[var(--color-200)] overflow-y-auto">
-      <div className="p-4 space-y-6">
-        {/* Background Color */}
-        <div className="space-y-2">
-          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Background
-          </Label>
-          <div className="grid grid-cols-5 gap-1.5">
-            {BACKGROUND_COLORS.map((color) => (
-              <button
-                key={color}
-                onClick={() => onStyleChange({ backgroundColor: color })}
-                className={cn(
-                  "w-8 h-8 rounded-lg border-2 transition-all hover:scale-110",
-                  style.backgroundColor === color
-                    ? "border-primary shadow-md scale-105"
-                    : "border-transparent hover:border-border"
+    <div className="w-[260px] flex flex-col h-full bg-white/50 backdrop-blur-xl supports-[backdrop-filter]:bg-white/50 border-r border-[var(--color-200)]">
+      <ScrollArea className="flex-1">
+        <div className="p-4 space-y-5 pb-8">
+          {/* ── Slide Content ── */}
+          <Section icon={<Type className="w-3.5 h-3.5" />} title="Slide Content">
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Heading</Label>
+                <Textarea
+                  value={currentSlide.heading}
+                  onChange={(e) =>
+                    onUpdateSlide(currentSlide.id, { heading: e.target.value })
+                  }
+                  placeholder="Enter heading..."
+                  className="min-h-[72px] text-sm resize-none"
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Image</Label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                {currentSlide.imageUrl ? (
+                  <div className="space-y-2">
+                    <div className="relative rounded-lg overflow-hidden border border-border bg-muted/30">
+                      <img
+                        src={currentSlide.imageUrl}
+                        alt=""
+                        className="w-full h-20 object-cover"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 text-xs h-8"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <Upload className="w-3 h-3 mr-1.5" />
+                        Replace
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs h-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                        onClick={() =>
+                          onUpdateSlide(currentSlide.id, { imageUrl: null })
+                        }
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="w-full h-20 border-dashed text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <div className="flex flex-col items-center gap-1.5">
+                      <ImageIcon className="w-5 h-5" />
+                      <span className="text-xs">Upload image</span>
+                    </div>
+                  </Button>
                 )}
-                style={{ backgroundColor: color }}
-              />
-            ))}
-          </div>
-          <div className="flex items-center gap-2 mt-2">
-            <Label className="text-xs text-muted-foreground">Custom:</Label>
-            <input
-              type="color"
-              value={style.backgroundColor}
-              onChange={(e) => onStyleChange({ backgroundColor: e.target.value })}
-              className="w-8 h-8 rounded cursor-pointer border border-border"
+              </div>
+            </div>
+          </Section>
+
+          {/* ── Image Options (only when image exists) ── */}
+          {currentSlide.imageUrl && (
+            <Section icon={<ImageIcon className="w-3.5 h-3.5" />} title="Image Options">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Fit Mode</Label>
+                <div className="flex gap-2">
+                  <FitButton
+                    active={currentImageFit === "contain"}
+                    onClick={() =>
+                      onUpdateSlide(currentSlide.id, { imageFit: "contain" })
+                    }
+                    icon={<RectangleHorizontal className="w-3.5 h-3.5" />}
+                    label="Contain"
+                  />
+                  <FitButton
+                    active={currentImageFit === "cover"}
+                    onClick={() =>
+                      onUpdateSlide(currentSlide.id, { imageFit: "cover" })
+                    }
+                    icon={<Square className="w-3.5 h-3.5" />}
+                    label="Cover"
+                  />
+                </div>
+              </div>
+            </Section>
+          )}
+
+          {/* ── Typography ── */}
+          <Section icon={<Type className="w-3.5 h-3.5" />} title="Typography">
+            <div className="space-y-3">
+              {/* Font Family */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Font</Label>
+                <Select
+                  value={style.fontFamily}
+                  onValueChange={(val) => onStyleChange({ fontFamily: val })}
+                >
+                  <SelectTrigger className="w-full h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FONT_FAMILIES.map((f) => (
+                      <SelectItem key={f.value} value={f.value}>
+                        <span style={{ fontFamily: f.value }}>{f.label}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Font Size */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">
+                  Size ({currentFontSize}px)
+                </Label>
+                <div className="flex gap-1">
+                  {FONT_SIZE_PRESETS.map((preset) => (
+                    <button
+                      key={preset.value}
+                      onClick={() =>
+                        onUpdateSlide(currentSlide.id, {
+                          headingFontSize: preset.value,
+                        })
+                      }
+                      className={cn(
+                        "flex-1 py-1.5 rounded-md text-xs font-medium border transition-colors",
+                        currentFontSize === preset.value
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:bg-muted/50"
+                      )}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Text Alignment */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Alignment</Label>
+                <div className="flex gap-1">
+                  <AlignButton
+                    active={currentAlign === "left"}
+                    onClick={() =>
+                      onUpdateSlide(currentSlide.id, { headingAlign: "left" })
+                    }
+                    icon={<AlignLeft className="w-4 h-4" />}
+                    label="Left"
+                  />
+                  <AlignButton
+                    active={currentAlign === "center"}
+                    onClick={() =>
+                      onUpdateSlide(currentSlide.id, { headingAlign: "center" })
+                    }
+                    icon={<AlignCenter className="w-4 h-4" />}
+                    label="Center"
+                  />
+                  <AlignButton
+                    active={currentAlign === "right"}
+                    onClick={() =>
+                      onUpdateSlide(currentSlide.id, { headingAlign: "right" })
+                    }
+                    icon={<AlignRight className="w-4 h-4" />}
+                    label="Right"
+                  />
+                </div>
+              </div>
+            </div>
+          </Section>
+
+          {/* ── Colors ── */}
+          <Section title="Colors">
+            <div className="space-y-3">
+              {/* Background Color */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Background</Label>
+                <div className="grid grid-cols-6 gap-1.5">
+                  {BACKGROUND_COLORS.map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => onStyleChange({ backgroundColor: color })}
+                      className={cn(
+                        "w-7 h-7 rounded-lg border-2 transition-all hover:scale-110",
+                        style.backgroundColor === color
+                          ? "border-primary shadow-md scale-105"
+                          : "border-transparent hover:border-border"
+                      )}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <Label className="text-xs text-muted-foreground">Custom:</Label>
+                  <input
+                    type="color"
+                    value={style.backgroundColor}
+                    onChange={(e) =>
+                      onStyleChange({ backgroundColor: e.target.value })
+                    }
+                    className="w-7 h-7 rounded cursor-pointer border border-border"
+                  />
+                </div>
+              </div>
+
+              {/* Heading Color */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Heading Color</Label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={style.headingColor}
+                    onChange={(e) =>
+                      onStyleChange({ headingColor: e.target.value })
+                    }
+                    className="w-7 h-7 rounded cursor-pointer border border-border"
+                  />
+                  <span className="text-xs text-muted-foreground font-mono">
+                    {style.headingColor}
+                  </span>
+                </div>
+              </div>
+
+              {/* Font Color */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Text Color</Label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={style.fontColor}
+                    onChange={(e) =>
+                      onStyleChange({ fontColor: e.target.value })
+                    }
+                    className="w-7 h-7 rounded cursor-pointer border border-border"
+                  />
+                  <span className="text-xs text-muted-foreground font-mono">
+                    {style.fontColor}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Section>
+
+          {/* ── Author ── */}
+          <Section icon={<User className="w-3.5 h-3.5" />} title="Author">
+            <Input
+              value={authorName}
+              onChange={(e) => onAuthorNameChange(e.target.value)}
+              placeholder="Author name"
+              className="h-9 text-sm"
             />
-          </div>
-        </div>
+          </Section>
 
-        {/* Font Family */}
-        <div className="space-y-2">
-          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Font
-          </Label>
-          <Select
-            value={style.fontFamily}
-            onValueChange={(val) => onStyleChange({ fontFamily: val })}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {FONT_FAMILIES.map((f) => (
-                <SelectItem key={f.value} value={f.value}>
-                  <span style={{ fontFamily: f.value }}>{f.label}</span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* ── Export ── */}
+          <Section title="Export">
+            <div className="flex gap-2">
+              <button
+                onClick={() => onExportFormatChange("png")}
+                className={cn(
+                  "flex-1 py-2 rounded-lg text-sm font-medium border transition-colors",
+                  exportFormat === "png"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:bg-muted/50"
+                )}
+              >
+                PNG
+              </button>
+              <button
+                onClick={() => onExportFormatChange("jpg")}
+                className={cn(
+                  "flex-1 py-2 rounded-lg text-sm font-medium border transition-colors",
+                  exportFormat === "jpg"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:bg-muted/50"
+                )}
+              >
+                JPG
+              </button>
+            </div>
+          </Section>
         </div>
-
-        {/* Heading Color */}
-        <div className="space-y-2">
-          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Heading Color
-          </Label>
-          <div className="flex items-center gap-2">
-            <input
-              type="color"
-              value={style.headingColor}
-              onChange={(e) => onStyleChange({ headingColor: e.target.value })}
-              className="w-8 h-8 rounded cursor-pointer border border-border"
-            />
-            <span className="text-xs text-muted-foreground font-mono">{style.headingColor}</span>
-          </div>
-        </div>
-
-        {/* Font Color */}
-        <div className="space-y-2">
-          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Text Color
-          </Label>
-          <div className="flex items-center gap-2">
-            <input
-              type="color"
-              value={style.fontColor}
-              onChange={(e) => onStyleChange({ fontColor: e.target.value })}
-              className="w-8 h-8 rounded cursor-pointer border border-border"
-            />
-            <span className="text-xs text-muted-foreground font-mono">{style.fontColor}</span>
-          </div>
-        </div>
-
-        {/* Export Format */}
-        <div className="space-y-2">
-          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Export Format
-          </Label>
-          <div className="flex gap-2">
-            <button
-              onClick={() => onExportFormatChange("png")}
-              className={cn(
-                "flex-1 py-2 rounded-lg text-sm font-medium border transition-colors",
-                exportFormat === "png"
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:bg-muted/50"
-              )}
-            >
-              PNG
-            </button>
-            <button
-              onClick={() => onExportFormatChange("jpg")}
-              className={cn(
-                "flex-1 py-2 rounded-lg text-sm font-medium border transition-colors",
-                exportFormat === "jpg"
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:bg-muted/50"
-              )}
-            >
-              JPG
-            </button>
-          </div>
-        </div>
-      </div>
+      </ScrollArea>
     </div>
+  );
+}
+
+function Section({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-1.5">
+        {icon && (
+          <span className="text-muted-foreground">{icon}</span>
+        )}
+        <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          {title}
+        </Label>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function AlignButton({
+  active,
+  onClick,
+  icon,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={label}
+      className={cn(
+        "flex-1 flex items-center justify-center py-2 rounded-lg border transition-colors",
+        active
+          ? "border-primary bg-primary/10 text-primary"
+          : "border-border text-muted-foreground hover:bg-muted/50"
+      )}
+    >
+      {icon}
+    </button>
+  );
+}
+
+function FitButton({
+  active,
+  onClick,
+  icon,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-xs font-medium transition-colors",
+        active
+          ? "border-primary bg-primary/10 text-primary"
+          : "border-border text-muted-foreground hover:bg-muted/50"
+      )}
+    >
+      {icon}
+      {label}
+    </button>
   );
 }

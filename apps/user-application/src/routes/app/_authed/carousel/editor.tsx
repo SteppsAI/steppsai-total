@@ -64,6 +64,7 @@ function CarouselEditorPage() {
     reorderSlides,
     setStyle,
     setExportFormat,
+    setAuthorName,
   } = useCarouselState({
     aspectRatio: search.aspectRatio as AspectRatio,
     authorName,
@@ -151,8 +152,12 @@ function CarouselEditorPage() {
         <CarouselControls
           style={state.style}
           exportFormat={state.exportFormat}
+          currentSlide={currentSlide}
+          authorName={state.authorName}
           onStyleChange={setStyle}
           onExportFormatChange={setExportFormat}
+          onUpdateSlide={updateSlide}
+          onAuthorNameChange={setAuthorName}
         />
 
         <CarouselSlideEditor

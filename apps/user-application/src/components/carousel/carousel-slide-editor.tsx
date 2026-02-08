@@ -55,9 +55,15 @@ export function CarouselSlideEditor({
     return () => observer.disconnect();
   }, [dimensions.width, dimensions.height]);
 
-  // Sync heading value when slide changes
+  // Sync heading value when slide changes or heading updates externally
   useEffect(() => {
-    setHeadingValue(slide.heading);
+    if (!isEditingHeading) {
+      setHeadingValue(slide.heading);
+    }
+  }, [slide.id, slide.heading, isEditingHeading]);
+
+  // Close editing when switching slides
+  useEffect(() => {
     setIsEditingHeading(false);
   }, [slide.id]);
 
@@ -196,6 +202,7 @@ export function CarouselSlideEditor({
               style={{
                 color: style.headingColor,
                 fontFamily: style.fontFamily,
+                textAlign: slide.headingAlign || "left",
               }}
             />
           </div>

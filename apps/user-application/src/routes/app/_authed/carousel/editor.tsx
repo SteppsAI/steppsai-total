@@ -11,7 +11,7 @@ import { CarouselSlideSidebar } from "@/components/carousel/carousel-slide-sideb
 import { useCarouselState } from "@/hooks/use-carousel-state";
 import { exportCarouselSlides } from "@/lib/carousel-export";
 import { CAROUSEL_TEMPLATES } from "@/lib/carousel-templates";
-import type { AspectRatio, LayoutId } from "@/lib/carousel-templates";
+import type { AspectRatio, CarouselTemplate, LayoutId } from "@/lib/carousel-templates";
 import { trpc } from "@/router";
 import { useSidebar } from "@/components/ui/sidebar";
 
@@ -30,14 +30,11 @@ export const Route = createFileRoute("/app/_authed/carousel/editor")({
 
 function CarouselEditorPage() {
   const search = Route.useSearch();
-  const navigate = useNavigate();
   const { isMobile } = useSidebar();
 
-  // Fetch user info for author name
   const { data: userData } = useQuery(trpc.users.getMe.queryOptions());
   const authorName = (userData as any)?.name || "Author";
 
-  // Fetch guide data if source is stepp (enabled only when sourceGuideId present)
   const { data: guideData, isLoading: isGuideLoading } = useQuery({
     ...trpc.guides.getById.queryOptions({ id: search.sourceGuideId! }),
     enabled: !!search.sourceGuideId,
@@ -45,15 +42,71 @@ function CarouselEditorPage() {
 
   const guide = guideData as any;
 
-  // Find template if source is template
+  if (search.sourceGuideId && isGuideLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-background">
+        <div className="flex items-center gap-3 text-muted-foreground">
+          <Loader2 className="w-5 h-5 animate-spin" />
+          <span>Loading stepp data...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Pass CDN URLs directly — export handles fetching + compression at export time
+  const guideSteps = guide
+    ? (guide.steps || [])
+        .filter((s: any) => !s.isExcluded)
+        .sort((a: any, b: any) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))
+        .map((s: any) => ({
+          caption: s.caption || s.aiCaption || "",
+          imageKey: s.imageKey || null,
+        }))
+    : undefined;
+
+  if (isMobile) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-background p-8 text-center">
+        <div className="text-muted-foreground">
+          <p className="text-lg font-medium">Desktop Only</p>
+          <p className="text-sm mt-2">The carousel editor is only available on desktop devices.</p>
+        </div>
+      </div>
+    );
+  }
+
   const template = search.templateId
     ? CAROUSEL_TEMPLATES.find((t) => t.id === search.templateId)
     : undefined;
 
-  // Show watermark for now — can be wired to access check later
-  const showWatermark = true;
+  return (
+    <CarouselEditorInner
+      search={search}
+      authorName={authorName}
+      template={template}
+      guideTitle={guide?.title}
+      guideSteps={guideSteps}
+    />
+  );
+}
 
-  // Initialize carousel state
+interface CarouselEditorInnerProps {
+  search: z.infer<typeof searchSchema>;
+  authorName: string;
+  template?: CarouselTemplate;
+  guideTitle?: string;
+  guideSteps?: Array<{ caption: string; imageKey?: string | null }>;
+}
+
+function CarouselEditorInner({
+  search,
+  authorName,
+  template,
+  guideTitle,
+  guideSteps,
+}: CarouselEditorInnerProps) {
+  const navigate = useNavigate();
+
   const {
     state,
     setTitle,
@@ -71,17 +124,13 @@ function CarouselEditorPage() {
   } = useCarouselState({
     aspectRatio: search.aspectRatio as AspectRatio,
     authorName,
-    showWatermark,
+    showWatermark: true,
     template,
     layoutId: (search.layoutId as LayoutId) || "classic",
-    guideTitle: guide?.title,
-    guideSteps: guide?.steps?.map((s: any) => ({
-      caption: s.caption || s.aiCaption || "",
-      imageKey: s.imageKey || null,
-    })),
+    guideTitle,
+    guideSteps,
   });
 
-  // Slide refs for export
   const slideRefs = useRef<Map<string, React.RefObject<HTMLDivElement | null>>>(new Map());
 
   const [isExporting, setIsExporting] = useState(false);
@@ -118,29 +167,6 @@ function CarouselEditorPage() {
       setIsExporting(false);
     }
   }, [state.slides, state.title, state.exportFormat]);
-
-  // Loading state when fetching guide
-  if (search.sourceGuideId && isGuideLoading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-background">
-        <div className="flex items-center gap-3 text-muted-foreground">
-          <Loader2 className="w-5 h-5 animate-spin" />
-          <span>Loading stepp data...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (isMobile) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-background p-8 text-center">
-        <div className="text-muted-foreground">
-          <p className="text-lg font-medium">Desktop Only</p>
-          <p className="text-sm mt-2">The carousel editor is only available on desktop devices.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden bg-background">

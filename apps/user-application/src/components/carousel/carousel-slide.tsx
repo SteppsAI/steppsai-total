@@ -124,12 +124,10 @@ export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
           alt=""
           className="max-w-full max-h-full object-contain shadow-lg"
           style={{ borderRadius: slide.imageBorderRadius ?? 0 }}
-          crossOrigin="anonymous"
         />
       </div>
     ) : null;
 
-    // Centered layout: image without flex-1 so spacers can center the group
     const centeredImageEl = slide.imageUrl ? (
       <div
         className="shrink-0 flex items-center justify-center mt-6"
@@ -143,7 +141,6 @@ export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
           alt=""
           className="max-w-full max-h-full object-contain shadow-lg"
           style={{ borderRadius: slide.imageBorderRadius ?? 0 }}
-          crossOrigin="anonymous"
         />
       </div>
     ) : null;
@@ -157,7 +154,6 @@ export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
       transformOrigin: "top left" as const,
     };
 
-    // Standard layouts
     return (
       <div
         ref={ref}

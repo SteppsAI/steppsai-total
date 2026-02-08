@@ -49,9 +49,8 @@ function CarouselEditorPage() {
     ? CAROUSEL_TEMPLATES.find((t) => t.id === search.templateId)
     : undefined;
 
-  // Determine watermark (free tier check)
-  // For now, default to false — can be wired to access check later
-  const showWatermark = false;
+  // Show watermark for now — can be wired to access check later
+  const showWatermark = true;
 
   // Initialize carousel state
   const {
@@ -65,6 +64,8 @@ function CarouselEditorPage() {
     setStyle,
     setExportFormat,
     setAuthorName,
+    setSlideNumberFormat,
+    setSlideNumberPosition,
   } = useCarouselState({
     aspectRatio: search.aspectRatio as AspectRatio,
     authorName,
@@ -154,10 +155,14 @@ function CarouselEditorPage() {
           exportFormat={state.exportFormat}
           currentSlide={currentSlide}
           authorName={state.authorName}
+          slideNumberFormat={state.slideNumberFormat}
+          slideNumberPosition={state.slideNumberPosition}
           onStyleChange={setStyle}
           onExportFormatChange={setExportFormat}
           onUpdateSlide={updateSlide}
           onAuthorNameChange={setAuthorName}
+          onSlideNumberFormatChange={setSlideNumberFormat}
+          onSlideNumberPositionChange={setSlideNumberPosition}
         />
 
         <CarouselSlideEditor
@@ -166,6 +171,8 @@ function CarouselEditorPage() {
           aspectRatio={state.aspectRatio}
           authorName={state.authorName}
           showWatermark={state.showWatermark}
+          slideNumberFormat={state.slideNumberFormat}
+          slideNumberPosition={state.slideNumberPosition}
           onUpdateSlide={updateSlide}
           slideRefs={slideRefs}
           allSlides={state.slides}

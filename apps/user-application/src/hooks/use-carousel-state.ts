@@ -6,6 +6,8 @@ import type {
   CarouselTemplate,
   AspectRatio,
   ExportFormat,
+  SlideNumberFormat,
+  SlideNumberPosition,
 } from "@/lib/carousel-templates";
 
 type CarouselAction =
@@ -17,7 +19,9 @@ type CarouselAction =
   | { type: "REORDER_SLIDES"; slides: CarouselSlide[] }
   | { type: "SET_STYLE"; style: Partial<CarouselStyle> }
   | { type: "SET_EXPORT_FORMAT"; format: ExportFormat }
-  | { type: "SET_AUTHOR_NAME"; authorName: string };
+  | { type: "SET_AUTHOR_NAME"; authorName: string }
+  | { type: "SET_SLIDE_NUMBER_FORMAT"; format: SlideNumberFormat }
+  | { type: "SET_SLIDE_NUMBER_POSITION"; position: SlideNumberPosition };
 
 function carouselReducer(state: CarouselState, action: CarouselAction): CarouselState {
   switch (action.type) {
@@ -76,6 +80,12 @@ function carouselReducer(state: CarouselState, action: CarouselAction): Carousel
     case "SET_AUTHOR_NAME":
       return { ...state, authorName: action.authorName };
 
+    case "SET_SLIDE_NUMBER_FORMAT":
+      return { ...state, slideNumberFormat: action.format };
+
+    case "SET_SLIDE_NUMBER_POSITION":
+      return { ...state, slideNumberPosition: action.position };
+
     default:
       return state;
   }
@@ -114,6 +124,8 @@ function createInitialState(options: InitOptions): CarouselState {
       exportFormat: "png",
       authorName,
       showWatermark,
+      slideNumberFormat: "none",
+      slideNumberPosition: "top-left",
     };
   }
 
@@ -132,6 +144,8 @@ function createInitialState(options: InitOptions): CarouselState {
       exportFormat: "png",
       authorName,
       showWatermark,
+      slideNumberFormat: "none",
+      slideNumberPosition: "top-left",
     };
   }
 
@@ -155,6 +169,8 @@ function createInitialState(options: InitOptions): CarouselState {
     exportFormat: "png",
     authorName,
     showWatermark,
+    slideNumberFormat: "none",
+    slideNumberPosition: "top-left",
   };
 }
 
@@ -197,6 +213,14 @@ export function useCarouselState(options: InitOptions) {
     dispatch({ type: "SET_AUTHOR_NAME", authorName });
   }, []);
 
+  const setSlideNumberFormat = useCallback((format: SlideNumberFormat) => {
+    dispatch({ type: "SET_SLIDE_NUMBER_FORMAT", format });
+  }, []);
+
+  const setSlideNumberPosition = useCallback((position: SlideNumberPosition) => {
+    dispatch({ type: "SET_SLIDE_NUMBER_POSITION", position });
+  }, []);
+
   return {
     state,
     setTitle,
@@ -208,5 +232,7 @@ export function useCarouselState(options: InitOptions) {
     setStyle,
     setExportFormat,
     setAuthorName,
+    setSlideNumberFormat,
+    setSlideNumberPosition,
   };
 }

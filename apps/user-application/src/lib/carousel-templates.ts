@@ -2,6 +2,8 @@ export type AspectRatio = "3:4" | "1:1";
 
 export type TextAlign = "left" | "center" | "right";
 export type ImageFit = "contain" | "cover";
+export type SlideNumberFormat = "none" | "1" | "01" | "[01]" | "1/N" | "[1/N]";
+export type SlideNumberPosition = "top-left" | "top-right";
 
 export interface CarouselSlide {
   id: string;
@@ -10,6 +12,13 @@ export interface CarouselSlide {
   headingFontSize?: number;
   headingAlign?: TextAlign;
   imageFit?: ImageFit;
+  headingOffsetX?: number;
+  headingOffsetY?: number;
+  headingRotation?: number;
+  imageOffsetX?: number;
+  imageOffsetY?: number;
+  imageRotation?: number;
+  imageScale?: number;
 }
 
 export interface CarouselStyle {
@@ -30,6 +39,42 @@ export interface CarouselState {
   exportFormat: ExportFormat;
   authorName: string;
   showWatermark: boolean;
+  slideNumberFormat: SlideNumberFormat;
+  slideNumberPosition: SlideNumberPosition;
+}
+
+export const SLIDE_NUMBER_FORMATS: { value: SlideNumberFormat; label: string; example: string }[] = [
+  { value: "none", label: "None", example: "" },
+  { value: "1", label: "1", example: "1" },
+  { value: "01", label: "01", example: "01" },
+  { value: "[01]", label: "[01]", example: "[01]" },
+  { value: "1/N", label: "1/N", example: "1/6" },
+  { value: "[1/N]", label: "[1/N]", example: "[1/6]" },
+];
+
+export function formatSlideNumber(
+  format: SlideNumberFormat,
+  index: number,
+  total: number
+): string {
+  const num = index + 1;
+  const padded = String(num).padStart(2, "0");
+  switch (format) {
+    case "none":
+      return "";
+    case "1":
+      return String(num);
+    case "01":
+      return padded;
+    case "[01]":
+      return `[${padded}]`;
+    case "1/N":
+      return `${num}/${total}`;
+    case "[1/N]":
+      return `[${num}/${total}]`;
+    default:
+      return "";
+  }
 }
 
 export interface CarouselTemplate {

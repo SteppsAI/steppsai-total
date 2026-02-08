@@ -4,6 +4,8 @@ import type {
   CarouselSlide,
   CarouselStyle,
   AspectRatio,
+  SlideNumberFormat,
+  SlideNumberPosition,
 } from "@/lib/carousel-templates";
 import { ASPECT_RATIO_DIMENSIONS } from "@/lib/carousel-templates";
 
@@ -13,6 +15,8 @@ interface CarouselSlideEditorProps {
   aspectRatio: AspectRatio;
   authorName: string;
   showWatermark: boolean;
+  slideNumberFormat: SlideNumberFormat;
+  slideNumberPosition: SlideNumberPosition;
   onUpdateSlide: (slideId: string, data: Partial<CarouselSlide>) => void;
   slideRefs: React.MutableRefObject<Map<string, React.RefObject<HTMLDivElement | null>>>;
   allSlides: CarouselSlide[];
@@ -24,6 +28,8 @@ export function CarouselSlideEditor({
   aspectRatio,
   authorName,
   showWatermark,
+  slideNumberFormat,
+  slideNumberPosition,
   onUpdateSlide,
   slideRefs,
   allSlides,
@@ -147,6 +153,10 @@ export function CarouselSlideEditor({
             aspectRatio={aspectRatio}
             authorName={authorName}
             showWatermark={showWatermark}
+            slideIndex={allSlides.findIndex((s) => s.id === slide.id)}
+            totalSlides={allSlides.length}
+            slideNumberFormat={slideNumberFormat}
+            slideNumberPosition={slideNumberPosition}
           />
         </div>
 
@@ -227,6 +237,10 @@ export function CarouselSlideEditor({
                 aspectRatio={aspectRatio}
                 authorName={authorName}
                 showWatermark={showWatermark}
+                slideIndex={allSlides.findIndex((sl) => sl.id === s.id)}
+                totalSlides={allSlides.length}
+                slideNumberFormat={slideNumberFormat}
+                slideNumberPosition={slideNumberPosition}
               />
             );
           })}

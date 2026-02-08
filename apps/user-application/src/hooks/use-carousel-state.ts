@@ -8,6 +8,7 @@ import type {
   ExportFormat,
   SlideNumberFormat,
   SlideNumberPosition,
+  LayoutId,
 } from "@/lib/carousel-templates";
 
 type CarouselAction =
@@ -21,7 +22,8 @@ type CarouselAction =
   | { type: "SET_EXPORT_FORMAT"; format: ExportFormat }
   | { type: "SET_AUTHOR_NAME"; authorName: string }
   | { type: "SET_SLIDE_NUMBER_FORMAT"; format: SlideNumberFormat }
-  | { type: "SET_SLIDE_NUMBER_POSITION"; position: SlideNumberPosition };
+  | { type: "SET_SLIDE_NUMBER_POSITION"; position: SlideNumberPosition }
+  | { type: "SET_LAYOUT"; layout: LayoutId };
 
 function carouselReducer(state: CarouselState, action: CarouselAction): CarouselState {
   switch (action.type) {
@@ -86,6 +88,9 @@ function carouselReducer(state: CarouselState, action: CarouselAction): Carousel
     case "SET_SLIDE_NUMBER_POSITION":
       return { ...state, slideNumberPosition: action.position };
 
+    case "SET_LAYOUT":
+      return { ...state, layout: action.layout };
+
     default:
       return state;
   }
@@ -96,6 +101,7 @@ interface InitOptions {
   authorName: string;
   showWatermark: boolean;
   template?: CarouselTemplate;
+  layoutId?: LayoutId;
   guideTitle?: string;
   guideSteps?: Array<{ caption: string; imageKey?: string | null }>;
 }
@@ -108,7 +114,7 @@ const DEFAULT_STYLE: CarouselStyle = {
 };
 
 function createInitialState(options: InitOptions): CarouselState {
-  const { aspectRatio, authorName, showWatermark, template, guideTitle, guideSteps } = options;
+  const { aspectRatio, authorName, showWatermark, template, layoutId, guideTitle, guideSteps } = options;
 
   // Style: use template style if provided, otherwise default
   const style: CarouselStyle = template ? { ...template.style } : { ...DEFAULT_STYLE };
@@ -144,6 +150,7 @@ function createInitialState(options: InitOptions): CarouselState {
     showWatermark,
     slideNumberFormat: "none",
     slideNumberPosition: "top-left",
+    layout: layoutId || "classic",
   };
 }
 
@@ -194,6 +201,10 @@ export function useCarouselState(options: InitOptions) {
     dispatch({ type: "SET_SLIDE_NUMBER_POSITION", position });
   }, []);
 
+  const setLayout = useCallback((layout: LayoutId) => {
+    dispatch({ type: "SET_LAYOUT", layout });
+  }, []);
+
   return {
     state,
     setTitle,
@@ -207,5 +218,6 @@ export function useCarouselState(options: InitOptions) {
     setAuthorName,
     setSlideNumberFormat,
     setSlideNumberPosition,
+    setLayout,
   };
 }

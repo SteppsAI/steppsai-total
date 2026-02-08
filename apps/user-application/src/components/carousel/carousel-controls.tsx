@@ -19,6 +19,7 @@ import type {
   ExportFormat,
   SlideNumberFormat,
   SlideNumberPosition,
+  LayoutId,
 } from "@/lib/carousel-templates";
 import {
   BACKGROUND_COLORS,
@@ -26,6 +27,7 @@ import {
   FONT_SIZE_PRESETS,
   DEFAULT_HEADING_FONT_SIZE,
   SLIDE_NUMBER_FORMATS,
+  LAYOUT_TEMPLATES,
 } from "@/lib/carousel-templates";
 import {
   AlignLeft,
@@ -50,12 +52,14 @@ interface CarouselControlsProps {
   authorName: string;
   slideNumberFormat: SlideNumberFormat;
   slideNumberPosition: SlideNumberPosition;
+  layout: LayoutId;
   onStyleChange: (style: Partial<CarouselStyle>) => void;
   onExportFormatChange: (format: ExportFormat) => void;
   onUpdateSlide: (slideId: string, data: Partial<CarouselSlide>) => void;
   onAuthorNameChange: (name: string) => void;
   onSlideNumberFormatChange: (format: SlideNumberFormat) => void;
   onSlideNumberPositionChange: (position: SlideNumberPosition) => void;
+  onLayoutChange: (layout: LayoutId) => void;
 }
 
 export function CarouselControls({
@@ -65,12 +69,14 @@ export function CarouselControls({
   authorName,
   slideNumberFormat,
   slideNumberPosition,
+  layout,
   onStyleChange,
   onExportFormatChange,
   onUpdateSlide,
   onAuthorNameChange,
   onSlideNumberFormatChange,
   onSlideNumberPositionChange,
+  onLayoutChange,
 }: CarouselControlsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -185,6 +191,29 @@ export function CarouselControls({
                   className="h-8 text-sm"
                 />
               </div>
+            </div>
+          </Section>
+
+          <Separator className="my-4" />
+
+          {/* ━━━━━━━━━━ LAYOUT ━━━━━━━━━━ */}
+          <Section title="Layout">
+            <div className="grid grid-cols-3 gap-1.5">
+              {LAYOUT_TEMPLATES.map((lt) => (
+                <button
+                  key={lt.id}
+                  onClick={() => onLayoutChange(lt.id)}
+                  title={lt.description}
+                  className={cn(
+                    "py-1.5 rounded-md text-xs font-medium border transition-colors",
+                    layout === lt.id
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground hover:bg-muted/50"
+                  )}
+                >
+                  {lt.name}
+                </button>
+              ))}
             </div>
           </Section>
 

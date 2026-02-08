@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState, useEffect, createRef } from "react";
+import { useRef, useState, useEffect, createRef } from "react";
 import { CarouselSlideView } from "./carousel-slide";
 import type {
   CarouselSlide,
@@ -6,6 +6,7 @@ import type {
   AspectRatio,
   SlideNumberFormat,
   SlideNumberPosition,
+  LayoutId,
 } from "@/lib/carousel-templates";
 import { ASPECT_RATIO_DIMENSIONS } from "@/lib/carousel-templates";
 
@@ -17,7 +18,7 @@ interface CarouselSlideEditorProps {
   showWatermark: boolean;
   slideNumberFormat: SlideNumberFormat;
   slideNumberPosition: SlideNumberPosition;
-  onUpdateSlide: (slideId: string, data: Partial<CarouselSlide>) => void;
+  layout: LayoutId;
   slideRefs: React.MutableRefObject<Map<string, React.RefObject<HTMLDivElement | null>>>;
   allSlides: CarouselSlide[];
 }
@@ -30,15 +31,12 @@ export function CarouselSlideEditor({
   showWatermark,
   slideNumberFormat,
   slideNumberPosition,
-  onUpdateSlide,
+  layout,
   slideRefs,
   allSlides,
 }: CarouselSlideEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.5);
-  const [isEditingHeading, setIsEditingHeading] = useState(false);
-  const [headingValue, setHeadingValue] = useState(slide.heading);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const dimensions = ASPECT_RATIO_DIMENSIONS[aspectRatio];
 
@@ -61,18 +59,6 @@ export function CarouselSlideEditor({
     return () => observer.disconnect();
   }, [dimensions.width, dimensions.height]);
 
-  // Sync heading value when slide changes or heading updates externally
-  useEffect(() => {
-    if (!isEditingHeading) {
-      setHeadingValue(slide.heading);
-    }
-  }, [slide.id, slide.heading, isEditingHeading]);
-
-  // Close editing when switching slides
-  useEffect(() => {
-    setIsEditingHeading(false);
-  }, [slide.id]);
-
   // Ensure refs exist for all slides (for export)
   useEffect(() => {
     allSlides.forEach((s) => {
@@ -81,43 +67,6 @@ export function CarouselSlideEditor({
       }
     });
   }, [allSlides, slideRefs]);
-
-  const handleHeadingClick = useCallback(() => {
-    setIsEditingHeading(true);
-    setTimeout(() => textareaRef.current?.focus(), 0);
-  }, []);
-
-  const handleHeadingBlur = useCallback(() => {
-    setIsEditingHeading(false);
-    onUpdateSlide(slide.id, { heading: headingValue });
-  }, [slide.id, headingValue, onUpdateSlide]);
-
-  const handleHeadingKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsEditingHeading(false);
-        setHeadingValue(slide.heading);
-      }
-    },
-    [slide.heading]
-  );
-
-  const handleImageClick = useCallback(() => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          onUpdateSlide(slide.id, { imageUrl: reader.result as string });
-        };
-        reader.readAsDataURL(file);
-      }
-    };
-    input.click();
-  }, [slide.id, onUpdateSlide]);
 
   const slideRef = slideRefs.current.get(slide.id) || createRef<HTMLDivElement>();
   if (!slideRefs.current.has(slide.id)) {
@@ -136,7 +85,7 @@ export function CarouselSlideEditor({
           position: "relative",
         }}
       >
-        {/* Actual slide rendered at full resolution for export */}
+        {/* Slide rendered at full resolution, scaled down for preview */}
         <div
           style={{
             transform: `scale(${scale})`,
@@ -157,66 +106,9 @@ export function CarouselSlideEditor({
             totalSlides={allSlides.length}
             slideNumberFormat={slideNumberFormat}
             slideNumberPosition={slideNumberPosition}
+            layout={layout}
           />
         </div>
-
-        {/* Interactive overlay (scaled to match) */}
-        <div
-          className="absolute inset-0 z-10"
-          style={{ pointerEvents: isEditingHeading ? "none" : "auto" }}
-        >
-          {/* Heading click area */}
-          <div
-            className="absolute cursor-text hover:ring-2 hover:ring-primary/30 hover:ring-offset-2 rounded-lg transition-all"
-            style={{
-              top: `${(72 / dimensions.height) * 100}%`,
-              left: `${(64 / dimensions.width) * 100}%`,
-              right: `${(64 / dimensions.width) * 100}%`,
-              height: "30%",
-            }}
-            onClick={handleHeadingClick}
-          />
-
-          {/* Image click area */}
-          <div
-            className="absolute cursor-pointer hover:ring-2 hover:ring-primary/30 hover:ring-offset-2 rounded-lg transition-all"
-            style={{
-              top: "40%",
-              left: `${(64 / dimensions.width) * 100}%`,
-              right: `${(64 / dimensions.width) * 100}%`,
-              height: "35%",
-            }}
-            onClick={handleImageClick}
-            title={slide.imageUrl ? "Click to change image" : "Click to add image"}
-          />
-        </div>
-
-        {/* Heading editing overlay */}
-        {isEditingHeading && (
-          <div
-            className="absolute z-20"
-            style={{
-              top: `${(72 / dimensions.height) * 100}%`,
-              left: `${(64 / dimensions.width) * 100}%`,
-              right: `${(64 / dimensions.width) * 100}%`,
-              height: "30%",
-            }}
-          >
-            <textarea
-              ref={textareaRef}
-              value={headingValue}
-              onChange={(e) => setHeadingValue(e.target.value)}
-              onBlur={handleHeadingBlur}
-              onKeyDown={handleHeadingKeyDown}
-              className="w-full h-full resize-none bg-black/5 backdrop-blur-sm rounded-lg p-3 text-lg font-bold border-2 border-primary focus:outline-none"
-              style={{
-                color: style.headingColor,
-                fontFamily: style.fontFamily,
-                textAlign: slide.headingAlign || "left",
-              }}
-            />
-          </div>
-        )}
       </div>
 
       {/* Hidden full-resolution slides for non-selected slides (for export) */}
@@ -241,6 +133,7 @@ export function CarouselSlideEditor({
                 totalSlides={allSlides.length}
                 slideNumberFormat={slideNumberFormat}
                 slideNumberPosition={slideNumberPosition}
+                layout={layout}
               />
             );
           })}

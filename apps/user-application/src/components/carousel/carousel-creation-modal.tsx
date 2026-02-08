@@ -24,13 +24,15 @@ import {
   RectangleHorizontal,
   Square,
   Paintbrush,
-  Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/router";
-import type { AspectRatio, CarouselTemplate } from "@/lib/carousel-templates";
-import { CAROUSEL_TEMPLATES } from "@/lib/carousel-templates";
+import type { AspectRatio, LayoutId } from "@/lib/carousel-templates";
+import {
+  CAROUSEL_TEMPLATES,
+  LAYOUT_TEMPLATES,
+} from "@/lib/carousel-templates";
 
 interface ModalGuide {
   guideId: string;
@@ -67,6 +69,8 @@ export function CarouselCreationModal({
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
     new Set()
   );
+  const [selectedLayoutId, setSelectedLayoutId] = useState<LayoutId>("classic");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | undefined>(undefined);
 
   const { data: guidesData = [] } = useSuspenseQuery(
     trpc.guides.getAll.queryOptions()
@@ -132,14 +136,15 @@ export function CarouselCreationModal({
     setStep("style-picker");
   };
 
-  const handleSelectStyle = (template?: CarouselTemplate) => {
+  const handleCreate = () => {
     navigate({
       to: "/app/carousel/editor",
       search: {
         aspectRatio: selectedRatio,
         sourceType,
         sourceGuideId: selectedGuideId || undefined,
-        templateId: template?.id,
+        templateId: selectedTemplateId,
+        layoutId: selectedLayoutId,
       },
       replace: true,
     });
@@ -189,7 +194,7 @@ export function CarouselCreationModal({
                 {step === "stepp-picker" &&
                   "Select a stepp to generate slides from."}
                 {step === "style-picker" &&
-                  "Pick a template or start with custom styling."}
+                  "Choose a layout and style for your slides."}
               </DialogDescription>
             </div>
           </div>
@@ -233,20 +238,26 @@ export function CarouselCreationModal({
         {/* ── Step: Source Selection ── */}
         {step === "source" && (
           <div className="p-4">
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-2">
               <button
                 onClick={() => handleSelectSource("stepp")}
-                className="group flex items-center justify-between w-full p-3 rounded-lg hover:bg-muted/50 transition-colors text-left"
+                className="group flex items-center justify-between w-full p-3 rounded-lg border border-border hover:border-primary/30 hover:bg-muted/50 transition-all text-left"
               >
-                <span className="font-medium text-sm">From Stepps</span>
-                <ArrowRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div>
+                  <span className="font-medium text-sm">From Stepps</span>
+                  <p className="text-xs text-muted-foreground mt-0.5">Generate from an existing guide</p>
+                </div>
+                <ArrowRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
               </button>
               <button
                 onClick={() => handleSelectSource("manual")}
-                className="group flex items-center justify-between w-full p-3 rounded-lg hover:bg-muted/50 transition-colors text-left"
+                className="group flex items-center justify-between w-full p-3 rounded-lg border border-border hover:border-primary/30 hover:bg-muted/50 transition-all text-left"
               >
-                <span className="font-medium text-sm">From Scratch</span>
-                <ArrowRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div>
+                  <span className="font-medium text-sm">From Scratch</span>
+                  <p className="text-xs text-muted-foreground mt-0.5">Start with blank slides</p>
+                </div>
+                <ArrowRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
               </button>
             </div>
           </div>
@@ -420,74 +431,97 @@ export function CarouselCreationModal({
 
         {/* ── Step: Style Picker ── */}
         {step === "style-picker" && (
-          <ScrollArea className="h-[400px]">
-            <div className="p-6 space-y-4">
-              {/* Custom option */}
-              <button
-                onClick={() => handleSelectStyle(undefined)}
-                className="w-full group text-left rounded-xl border-2 border-dashed border-border p-5 hover:border-primary/50 hover:shadow-md transition-all flex items-center gap-4"
-              >
-                <div className="size-10 rounded-lg bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors shrink-0">
-                  <Paintbrush className="size-5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-sm">Custom</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Start with default colors and style everything manually
-                  </p>
-                </div>
-                <ArrowRight className="size-4 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-              </button>
-
-              <div className="flex items-center gap-2">
-                <Separator className="flex-1" />
-                <span className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
-                  <Sparkles className="size-3" />
-                  Templates
+          <ScrollArea className="h-[440px]">
+            <div className="p-6 space-y-5">
+              {/* Layout section */}
+              <div className="space-y-2.5">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Layout
                 </span>
-                <Separator className="flex-1" />
+                <div className="grid grid-cols-3 gap-2">
+                  {LAYOUT_TEMPLATES.map((layout) => (
+                    <button
+                      key={layout.id}
+                      onClick={() => setSelectedLayoutId(layout.id)}
+                      title={layout.description}
+                      className={cn(
+                        "flex flex-col items-center gap-1.5 p-2 rounded-lg border transition-all",
+                        selectedLayoutId === layout.id
+                          ? "border-primary bg-primary/5 shadow-sm"
+                          : "border-border hover:bg-muted/50"
+                      )}
+                    >
+                      <LayoutPreview layoutId={layout.id} active={selectedLayoutId === layout.id} />
+                      <span className="text-[10px] font-medium text-muted-foreground leading-tight text-center">
+                        {layout.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              {/* Template grid */}
-              <div className="grid grid-cols-2 gap-3">
-                {CAROUSEL_TEMPLATES.map((template) => (
-                  <button
-                    key={template.id}
-                    onClick={() => handleSelectStyle(template)}
-                    className="group text-left rounded-xl border border-border overflow-hidden hover:border-primary/50 hover:shadow-md transition-all"
-                  >
-                    <div
-                      className="h-24 flex items-end p-4"
-                      style={{
-                        backgroundColor: template.style.backgroundColor,
-                      }}
+              <Separator />
+
+              {/* Style section */}
+              <div className="space-y-2.5">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Style
+                </span>
+
+                {/* Custom option */}
+                <button
+                  onClick={() => setSelectedTemplateId(undefined)}
+                  className={cn(
+                    "w-full text-left rounded-lg border p-3 flex items-center gap-3 transition-all",
+                    selectedTemplateId === undefined
+                      ? "border-primary bg-primary/5 shadow-sm"
+                      : "border-dashed border-border hover:bg-muted/50"
+                  )}
+                >
+                  <Paintbrush className="size-4 text-muted-foreground shrink-0" />
+                  <div>
+                    <span className="text-sm font-medium">Custom</span>
+                    <span className="text-xs text-muted-foreground ml-2">
+                      Style everything manually
+                    </span>
+                  </div>
+                </button>
+
+                {/* Template grid */}
+                <div className="grid grid-cols-3 gap-2">
+                  {CAROUSEL_TEMPLATES.map((template) => (
+                    <button
+                      key={template.id}
+                      onClick={() => setSelectedTemplateId(template.id)}
+                      className={cn(
+                        "text-left rounded-lg border overflow-hidden transition-all",
+                        selectedTemplateId === template.id
+                          ? "border-primary shadow-sm ring-1 ring-primary/30"
+                          : "border-border hover:border-primary/30"
+                      )}
                     >
-                      <span
-                        className="text-sm font-bold leading-tight"
-                        style={{
-                          color: template.style.headingColor,
-                          fontFamily: template.style.fontFamily,
-                        }}
+                      <div
+                        className="h-14 flex items-end p-2.5"
+                        style={{ backgroundColor: template.style.backgroundColor }}
                       >
-                        {template.name}
-                      </span>
-                    </div>
-                    <div className="px-3 py-2.5 bg-background flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="size-3 rounded-full border border-border"
+                        <span
+                          className="text-[10px] font-bold leading-tight truncate"
                           style={{
-                            backgroundColor: template.style.backgroundColor,
+                            color: template.style.headingColor,
+                            fontFamily: template.style.fontFamily,
                           }}
-                        />
-                        <span className="text-xs font-medium">
+                        >
                           {template.name}
                         </span>
                       </div>
-                      <ArrowRight className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                  </button>
-                ))}
+                      <div className="px-2 py-1.5 bg-background">
+                        <span className="text-[10px] font-medium text-muted-foreground">
+                          {template.name}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </ScrollArea>
@@ -501,13 +535,59 @@ export function CarouselCreationModal({
             </kbd>{" "}
             to cancel
           </span>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            {step === "style-picker" && (
+              <Button onClick={handleCreate}>
+                Create Carousel
+              </Button>
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
   );
+}
+
+function LayoutPreview({ layoutId, active }: { layoutId: LayoutId; active: boolean }) {
+  const bar = active ? "bg-primary/40" : "bg-muted-foreground/25";
+  const barStrong = active ? "bg-primary/60" : "bg-muted-foreground/35";
+  const base = "w-full aspect-[3/4] rounded-md border p-1.5 flex flex-col gap-0.5";
+  const borderCls = active ? "border-primary/30 bg-primary/5" : "border-border bg-muted/30";
+
+  switch (layoutId) {
+    case "classic":
+      return (
+        <div className={cn(base, borderCls)}>
+          <div className={cn("h-1.5 rounded-sm w-3/4", barStrong)} />
+          <div className={cn("flex-1 rounded-sm", bar)} />
+          <div className={cn("h-1 rounded-sm w-1/2", bar)} />
+        </div>
+      );
+    case "centered":
+      return (
+        <div className={cn(base, borderCls)}>
+          <div className="flex-1" />
+          <div className={cn("h-1.5 rounded-sm w-3/4 self-center", barStrong)} />
+          <div className={cn("h-3 rounded-sm w-1/2 self-center mt-0.5", bar)} />
+          <div className="flex-1" />
+          <div className={cn("h-1 rounded-sm w-1/2", bar)} />
+        </div>
+      );
+    case "full-image":
+      return (
+        <div className={cn(base, borderCls, "relative")}>
+          <div className={cn("absolute inset-1.5 rounded-sm", bar)} />
+          <div className="flex-1" />
+          <div className={cn("h-1.5 rounded-sm w-3/4 relative z-10", barStrong)} />
+          <div className={cn("h-1 rounded-sm w-1/2 relative z-10", bar)} />
+        </div>
+      );
+    default:
+      return null;
+  }
 }
 
 interface GuideItemProps {

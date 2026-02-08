@@ -11,7 +11,7 @@ import { CarouselSlideSidebar } from "@/components/carousel/carousel-slide-sideb
 import { useCarouselState } from "@/hooks/use-carousel-state";
 import { exportCarouselSlides } from "@/lib/carousel-export";
 import { CAROUSEL_TEMPLATES } from "@/lib/carousel-templates";
-import type { AspectRatio } from "@/lib/carousel-templates";
+import type { AspectRatio, LayoutId } from "@/lib/carousel-templates";
 import { trpc } from "@/router";
 import { useSidebar } from "@/components/ui/sidebar";
 
@@ -20,6 +20,7 @@ const searchSchema = z.object({
   sourceType: z.enum(["stepp", "manual"]).default("manual"),
   sourceGuideId: z.string().optional(),
   templateId: z.string().optional(),
+  layoutId: z.string().optional(),
 });
 
 export const Route = createFileRoute("/app/_authed/carousel/editor")({
@@ -66,11 +67,13 @@ function CarouselEditorPage() {
     setAuthorName,
     setSlideNumberFormat,
     setSlideNumberPosition,
+    setLayout,
   } = useCarouselState({
     aspectRatio: search.aspectRatio as AspectRatio,
     authorName,
     showWatermark,
     template,
+    layoutId: (search.layoutId as LayoutId) || "classic",
     guideTitle: guide?.title,
     guideSteps: guide?.steps?.map((s: any) => ({
       caption: s.caption || s.aiCaption || "",
@@ -157,12 +160,14 @@ function CarouselEditorPage() {
           authorName={state.authorName}
           slideNumberFormat={state.slideNumberFormat}
           slideNumberPosition={state.slideNumberPosition}
+          layout={state.layout}
           onStyleChange={setStyle}
           onExportFormatChange={setExportFormat}
           onUpdateSlide={updateSlide}
           onAuthorNameChange={setAuthorName}
           onSlideNumberFormatChange={setSlideNumberFormat}
           onSlideNumberPositionChange={setSlideNumberPosition}
+          onLayoutChange={setLayout}
         />
 
         <CarouselSlideEditor
@@ -173,7 +178,7 @@ function CarouselEditorPage() {
           showWatermark={state.showWatermark}
           slideNumberFormat={state.slideNumberFormat}
           slideNumberPosition={state.slideNumberPosition}
-          onUpdateSlide={updateSlide}
+          layout={state.layout}
           slideRefs={slideRefs}
           allSlides={state.slides}
         />

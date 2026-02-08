@@ -4,6 +4,8 @@ export type TextAlign = "left" | "center" | "right";
 export type SlideNumberFormat = "none" | "1" | "01" | "[01]" | "1/N" | "[1/N]";
 export type SlideNumberPosition = "top-left" | "top-right";
 
+export type LayoutId = "classic" | "centered" | "full-image";
+
 export interface CarouselSlide {
   id: string;
   heading: string;
@@ -40,6 +42,7 @@ export interface CarouselState {
   showWatermark: boolean;
   slideNumberFormat: SlideNumberFormat;
   slideNumberPosition: SlideNumberPosition;
+  layout: LayoutId;
 }
 
 export const SLIDE_NUMBER_FORMATS: { value: SlideNumberFormat; label: string; example: string }[] = [
@@ -81,6 +84,18 @@ export interface CarouselTemplate {
   name: string;
   style: CarouselStyle;
 }
+
+export interface LayoutTemplate {
+  id: LayoutId;
+  name: string;
+  description: string;
+}
+
+export const LAYOUT_TEMPLATES: LayoutTemplate[] = [
+  { id: "classic", name: "Classic", description: "Title on top, image below" },
+  { id: "centered", name: "Centered", description: "Content vertically centered" },
+  { id: "full-image", name: "Full Image", description: "Image fills the slide" },
+];
 
 export const ASPECT_RATIO_DIMENSIONS: Record<AspectRatio, { width: number; height: number }> = {
   "3:4": { width: 1080, height: 1440 },
@@ -201,5 +216,25 @@ export const CAROUSEL_TEMPLATES: CarouselTemplate[] = [
     id: "terracotta",
     name: "Terracotta",
     style: { backgroundColor: "#c0392b", fontFamily: "Georgia, serif", headingColor: "#ffeaa7", fontColor: "#f5cba7" },
+  },
+  {
+    id: "elegant-serif",
+    name: "Elegant Serif",
+    style: { backgroundColor: "#f9f6f1", fontFamily: "'Palatino Linotype', serif", headingColor: "#2c2c2c", fontColor: "#6b6b6b" },
+  },
+  {
+    id: "neon-night",
+    name: "Neon Night",
+    style: { backgroundColor: "#0a0a0a", fontFamily: "'Courier New', monospace", headingColor: "#39ff14", fontColor: "#555555" },
+  },
+  {
+    id: "pastel-dream",
+    name: "Pastel Dream",
+    style: { backgroundColor: "#fce4ec", fontFamily: "Inter, sans-serif", headingColor: "#4a148c", fontColor: "#8e6e9e" },
+  },
+  {
+    id: "ocean-deep",
+    name: "Ocean Deep",
+    style: { backgroundColor: "#004d40", fontFamily: "'Trebuchet MS', sans-serif", headingColor: "#e0f2f1", fontColor: "#80cbc4" },
   },
 ];

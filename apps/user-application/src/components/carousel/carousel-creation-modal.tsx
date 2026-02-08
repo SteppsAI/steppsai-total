@@ -576,13 +576,12 @@ function LayoutPreview({ layoutId, active }: { layoutId: LayoutId; active: boole
           <div className={cn("h-1 rounded-sm w-1/2", bar)} />
         </div>
       );
-    case "full-image":
+    case "image-first":
       return (
-        <div className={cn(base, borderCls, "relative")}>
-          <div className={cn("absolute inset-1.5 rounded-sm", bar)} />
-          <div className="flex-1" />
-          <div className={cn("h-1.5 rounded-sm w-3/4 relative z-10", barStrong)} />
-          <div className={cn("h-1 rounded-sm w-1/2 relative z-10", bar)} />
+        <div className={cn(base, borderCls)}>
+          <div className={cn("flex-1 rounded-sm", bar)} />
+          <div className={cn("h-1.5 rounded-sm w-3/4", barStrong)} />
+          <div className={cn("h-1 rounded-sm w-1/2", bar)} />
         </div>
       );
     default:

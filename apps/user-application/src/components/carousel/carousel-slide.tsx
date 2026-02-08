@@ -157,43 +157,6 @@ export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
       transformOrigin: "top left" as const,
     };
 
-    // Full Image layout: image as background with gradient overlay
-    if (layout === "full-image" && slide.imageUrl) {
-      return (
-        <div
-          ref={ref}
-          style={outerStyle}
-          className="relative flex flex-col overflow-hidden shrink-0"
-        >
-          {slideNumberEl}
-          <img
-            src={slide.imageUrl}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{
-              borderRadius: slide.imageBorderRadius ?? 0,
-              ...(imageTransform ? { transform: imageTransform } : {}),
-            }}
-            crossOrigin="anonymous"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-          <div className="flex-1" />
-          <div
-            className="relative z-10 px-16 pb-4"
-            style={headingTransform ? { transform: headingTransform } : undefined}
-          >
-            <h2
-              style={{ ...headingStyle, color: "#ffffff" }}
-              className="font-bold whitespace-pre-wrap break-words"
-            >
-              {slide.heading || "\u00A0"}
-            </h2>
-          </div>
-          {footerEl}
-        </div>
-      );
-    }
-
     // Standard layouts
     return (
       <div
@@ -204,7 +167,13 @@ export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
         {slideNumberEl}
 
         <div className="flex-1 flex flex-col p-16 pb-4 min-h-0">
-          {layout === "centered" ? (
+          {layout === "image-first" ? (
+            <>
+              {imageEl}
+              {headingEl}
+              {!imageEl && <div className="flex-1" />}
+            </>
+          ) : layout === "centered" ? (
             <>
               <div className="flex-1" />
               {headingEl}

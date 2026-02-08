@@ -4,7 +4,7 @@ export type TextAlign = "left" | "center" | "right";
 export type SlideNumberFormat = "none" | "1" | "01" | "[01]" | "1/N" | "[1/N]";
 export type SlideNumberPosition = "top-left" | "top-right";
 
-export type LayoutId = "classic" | "centered" | "full-image";
+export type LayoutId = "classic" | "centered" | "image-first";
 
 export interface CarouselSlide {
   id: string;
@@ -94,7 +94,7 @@ export interface LayoutTemplate {
 export const LAYOUT_TEMPLATES: LayoutTemplate[] = [
   { id: "classic", name: "Classic", description: "Title on top, image below" },
   { id: "centered", name: "Centered", description: "Content vertically centered" },
-  { id: "full-image", name: "Full Image", description: "Image fills the slide" },
+  { id: "image-first", name: "Image First", description: "Image on top, title below" },
 ];
 
 export const ASPECT_RATIO_DIMENSIONS: Record<AspectRatio, { width: number; height: number }> = {

@@ -17,7 +17,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 
 const searchSchema = z.object({
   aspectRatio: z.enum(["3:4", "1:1"]).default("3:4"),
-  sourceType: z.enum(["stepp", "template"]).default("template"),
+  sourceType: z.enum(["stepp", "manual"]).default("manual"),
   sourceGuideId: z.string().optional(),
   templateId: z.string().optional(),
 });

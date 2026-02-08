@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -18,11 +17,16 @@ import {
   FileText,
   Folder,
   ArrowRight,
+  ArrowLeft,
   Clock,
   ChevronDown,
   ChevronRight,
   RectangleHorizontal,
   Square,
+  PenLine,
+  BookOpen,
+  Paintbrush,
+  Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -45,19 +49,33 @@ interface ModalFolder {
   name: string;
 }
 
+type Step = "source" | "stepp-picker" | "style-picker";
+
 interface CarouselCreationModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function CarouselCreationModal({ open, onOpenChange }: CarouselCreationModalProps) {
+export function CarouselCreationModal({
+  open,
+  onOpenChange,
+}: CarouselCreationModalProps) {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [step, setStep] = useState<Step>("source");
   const [selectedRatio, setSelectedRatio] = useState<AspectRatio>("3:4");
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  const [sourceType, setSourceType] = useState<"stepp" | "manual">("manual");
+  const [selectedGuideId, setSelectedGuideId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
+    new Set()
+  );
 
-  const { data: guidesData = [] } = useSuspenseQuery(trpc.guides.getAll.queryOptions());
-  const { data: foldersData = [] } = useSuspenseQuery(trpc.folders.getAll.queryOptions());
+  const { data: guidesData = [] } = useSuspenseQuery(
+    trpc.guides.getAll.queryOptions()
+  );
+  const { data: foldersData = [] } = useSuspenseQuery(
+    trpc.folders.getAll.queryOptions()
+  );
 
   const guides = guidesData as ModalGuide[];
   const folders = foldersData as ModalFolder[];
@@ -74,7 +92,9 @@ export function CarouselCreationModal({ open, onOpenChange }: CarouselCreationMo
 
   const guidesByFolder = folders.reduce(
     (acc, folder) => {
-      acc[folder.folderId] = guides.filter((g) => g.folderId === folder.folderId);
+      acc[folder.folderId] = guides.filter(
+        (g) => g.folderId === folder.folderId
+      );
       return acc;
     },
     {} as Record<string, ModalGuide[]>
@@ -100,28 +120,41 @@ export function CarouselCreationModal({ open, onOpenChange }: CarouselCreationMo
     });
   };
 
+  const handleSelectSource = (type: "stepp" | "manual") => {
+    setSourceType(type);
+    if (type === "stepp") {
+      setStep("stepp-picker");
+    } else {
+      setStep("style-picker");
+    }
+  };
+
   const handleSelectGuide = (guideId: string) => {
+    setSelectedGuideId(guideId);
+    setStep("style-picker");
+  };
+
+  const handleSelectStyle = (template?: CarouselTemplate) => {
     navigate({
       to: "/app/carousel/editor",
       search: {
         aspectRatio: selectedRatio,
-        sourceType: "stepp",
-        sourceGuideId: guideId,
+        sourceType,
+        sourceGuideId: selectedGuideId || undefined,
+        templateId: template?.id,
       },
       replace: true,
     });
   };
 
-  const handleSelectTemplate = (template: CarouselTemplate) => {
-    navigate({
-      to: "/app/carousel/editor",
-      search: {
-        aspectRatio: selectedRatio,
-        sourceType: "template",
-        templateId: template.id,
-      },
-      replace: true,
-    });
+  const handleBack = () => {
+    if (step === "style-picker" && sourceType === "stepp") {
+      setStep("stepp-picker");
+    } else {
+      setStep("source");
+      setSelectedGuideId(null);
+      setSearchQuery("");
+    }
   };
 
   const getFolderName = (folderId: string | null | undefined) => {
@@ -137,58 +170,103 @@ export function CarouselCreationModal({ open, onOpenChange }: CarouselCreationMo
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader className="px-6 pt-6 pb-4 border-b space-y-4">
-          <div>
-            <DialogTitle>Create Carousel</DialogTitle>
-            <DialogDescription className="mt-1">
-              Choose an aspect ratio and a source for your carousel slides.
-            </DialogDescription>
+          <div className="flex items-center gap-3">
+            {step !== "source" && (
+              <button
+                onClick={handleBack}
+                className="p-1.5 -ml-1.5 rounded-lg hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="size-4" />
+              </button>
+            )}
+            <div>
+              <DialogTitle>
+                {step === "source" && "Create Carousel"}
+                {step === "stepp-picker" && "Choose a Stepp"}
+                {step === "style-picker" && "Choose a Style"}
+              </DialogTitle>
+              <DialogDescription className="mt-1">
+                {step === "source" &&
+                  "Pick an aspect ratio and how you want to start."}
+                {step === "stepp-picker" &&
+                  "Select a stepp to generate slides from."}
+                {step === "style-picker" &&
+                  "Pick a template or start with custom styling."}
+              </DialogDescription>
+            </div>
           </div>
 
-          {/* Aspect ratio picker */}
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-muted-foreground">Ratio:</span>
-            <div className="flex gap-2">
+          {/* Aspect ratio picker - only on source step */}
+          {step === "source" && (
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-muted-foreground">
+                Ratio:
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSelectedRatio("3:4")}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors",
+                    selectedRatio === "3:4"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/50"
+                  )}
+                >
+                  <RectangleHorizontal className="size-4 rotate-90" />
+                  3:4
+                </button>
+                <button
+                  onClick={() => setSelectedRatio("1:1")}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors",
+                    selectedRatio === "1:1"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/50"
+                  )}
+                >
+                  <Square className="size-4" />
+                  1:1
+                </button>
+              </div>
+            </div>
+          )}
+        </DialogHeader>
+
+        {/* ── Step: Source Selection ── */}
+        {step === "source" && (
+          <div className="p-6">
+            <div className="grid grid-cols-2 gap-4">
               <button
-                onClick={() => setSelectedRatio("3:4")}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors",
-                  selectedRatio === "3:4"
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/50"
-                )}
+                onClick={() => handleSelectSource("stepp")}
+                className="group text-left rounded-xl border-2 border-border p-6 hover:border-primary/50 hover:shadow-md transition-all"
               >
-                <RectangleHorizontal className="size-4 rotate-90" />
-                3:4
+                <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                  <BookOpen className="size-6 text-primary" />
+                </div>
+                <h3 className="font-semibold text-base">From Stepps</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Generate slides from an existing stepp guide
+                </p>
               </button>
               <button
-                onClick={() => setSelectedRatio("1:1")}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors",
-                  selectedRatio === "1:1"
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/50"
-                )}
+                onClick={() => handleSelectSource("manual")}
+                className="group text-left rounded-xl border-2 border-border p-6 hover:border-primary/50 hover:shadow-md transition-all"
               >
-                <Square className="size-4" />
-                1:1
+                <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                  <PenLine className="size-6 text-primary" />
+                </div>
+                <h3 className="font-semibold text-base">From Scratch</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Create slides manually with your own content
+                </p>
               </button>
             </div>
           </div>
-        </DialogHeader>
+        )}
 
-        <Tabs defaultValue="stepps" className="flex flex-col">
-          <div className="px-6 pt-3">
-            <TabsList className="w-full">
-              <TabsTrigger value="stepps" className="flex-1">
-                From Stepps
-              </TabsTrigger>
-              <TabsTrigger value="templates" className="flex-1">
-                Templates
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          <TabsContent value="stepps" className="mt-0">
+        {/* ── Step: Stepp Picker ── */}
+        {step === "stepp-picker" && (
+          <>
             <div className="px-6 py-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
@@ -222,7 +300,7 @@ export function CarouselCreationModal({ open, onOpenChange }: CarouselCreationMo
                       </div>
                     ) : (
                       <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-                        <p>No stepps found matching "{searchQuery}"</p>
+                        <p>No stepps found matching &ldquo;{searchQuery}&rdquo;</p>
                       </div>
                     )}
                   </>
@@ -251,7 +329,8 @@ export function CarouselCreationModal({ open, onOpenChange }: CarouselCreationMo
 
                     {(() => {
                       const foldersWithGuides = folders.filter(
-                        (folder) => (guidesByFolder[folder.folderId] || []).length > 0
+                        (folder) =>
+                          (guidesByFolder[folder.folderId] || []).length > 0
                       );
                       return (
                         foldersWithGuides.length > 0 && (
@@ -261,23 +340,32 @@ export function CarouselCreationModal({ open, onOpenChange }: CarouselCreationMo
                             </div>
                             <div className="flex flex-col gap-1">
                               {foldersWithGuides.map((folder) => {
-                                const isExpanded = expandedFolders.has(folder.folderId);
-                                const folderGuides = guidesByFolder[folder.folderId] || [];
+                                const isExpanded = expandedFolders.has(
+                                  folder.folderId
+                                );
+                                const folderGuides =
+                                  guidesByFolder[folder.folderId] || [];
                                 return (
                                   <div key={folder.folderId}>
                                     <button
                                       className="flex items-center justify-between w-full p-3 rounded-lg hover:bg-muted/50 transition-colors text-left group"
-                                      onClick={() => toggleFolder(folder.folderId)}
+                                      onClick={() =>
+                                        toggleFolder(folder.folderId)
+                                      }
                                     >
                                       <div className="flex items-center gap-3">
                                         <div className="flex-shrink-0 size-10 rounded-lg bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                                           <Folder className="size-5" />
                                         </div>
                                         <div className="flex flex-col">
-                                          <span className="font-medium">{folder.name}</span>
+                                          <span className="font-medium">
+                                            {folder.name}
+                                          </span>
                                           <span className="text-xs text-muted-foreground">
                                             {folderGuides.length} stepp
-                                            {folderGuides.length !== 1 ? "s" : ""}
+                                            {folderGuides.length !== 1
+                                              ? "s"
+                                              : ""}
                                           </span>
                                         </div>
                                       </div>
@@ -293,7 +381,9 @@ export function CarouselCreationModal({ open, onOpenChange }: CarouselCreationMo
                                           <GuideItem
                                             key={guide.guideId}
                                             guide={guide}
-                                            onClick={() => handleSelectGuide(guide.guideId)}
+                                            onClick={() =>
+                                              handleSelectGuide(guide.guideId)
+                                            }
                                             compact
                                           />
                                         ))}
@@ -303,7 +393,9 @@ export function CarouselCreationModal({ open, onOpenChange }: CarouselCreationMo
                                 );
                               })}
                             </div>
-                            {looseGuides.length > 0 && <Separator className="my-2" />}
+                            {looseGuides.length > 0 && (
+                              <Separator className="my-2" />
+                            )}
                           </div>
                         )
                       );
@@ -328,30 +420,62 @@ export function CarouselCreationModal({ open, onOpenChange }: CarouselCreationMo
 
                     {guides.length === 0 && (
                       <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-                        <p>No stepps found. Create a Stepp first or use a template.</p>
+                        <p>No stepps found. Go back and start from scratch.</p>
                       </div>
                     )}
                   </>
                 )}
               </div>
             </ScrollArea>
-          </TabsContent>
+          </>
+        )}
 
-          <TabsContent value="templates" className="mt-0">
-            <ScrollArea className="h-[390px]">
-              <div className="grid grid-cols-2 gap-4 p-6">
+        {/* ── Step: Style Picker ── */}
+        {step === "style-picker" && (
+          <ScrollArea className="h-[400px]">
+            <div className="p-6 space-y-4">
+              {/* Custom option */}
+              <button
+                onClick={() => handleSelectStyle(undefined)}
+                className="w-full group text-left rounded-xl border-2 border-dashed border-border p-5 hover:border-primary/50 hover:shadow-md transition-all flex items-center gap-4"
+              >
+                <div className="size-10 rounded-lg bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors shrink-0">
+                  <Paintbrush className="size-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-sm">Custom</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Start with default colors and style everything manually
+                  </p>
+                </div>
+                <ArrowRight className="size-4 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+              </button>
+
+              <div className="flex items-center gap-2">
+                <Separator className="flex-1" />
+                <span className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
+                  <Sparkles className="size-3" />
+                  Templates
+                </span>
+                <Separator className="flex-1" />
+              </div>
+
+              {/* Template grid */}
+              <div className="grid grid-cols-2 gap-3">
                 {CAROUSEL_TEMPLATES.map((template) => (
                   <button
                     key={template.id}
-                    onClick={() => handleSelectTemplate(template)}
+                    onClick={() => handleSelectStyle(template)}
                     className="group text-left rounded-xl border border-border overflow-hidden hover:border-primary/50 hover:shadow-md transition-all"
                   >
                     <div
-                      className="h-28 flex items-center justify-center p-4"
-                      style={{ backgroundColor: template.style.backgroundColor }}
+                      className="h-24 flex items-end p-4"
+                      style={{
+                        backgroundColor: template.style.backgroundColor,
+                      }}
                     >
                       <span
-                        className="text-lg font-bold leading-tight"
+                        className="text-sm font-bold leading-tight"
                         style={{
                           color: template.style.headingColor,
                           fontFamily: template.style.fontFamily,
@@ -360,18 +484,26 @@ export function CarouselCreationModal({ open, onOpenChange }: CarouselCreationMo
                         {template.name}
                       </span>
                     </div>
-                    <div className="p-3 bg-background">
-                      <span className="text-sm font-medium">{template.name}</span>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {template.slides.length} slides
-                      </p>
+                    <div className="px-3 py-2.5 bg-background flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="size-3 rounded-full border border-border"
+                          style={{
+                            backgroundColor: template.style.backgroundColor,
+                          }}
+                        />
+                        <span className="text-xs font-medium">
+                          {template.name}
+                        </span>
+                      </div>
+                      <ArrowRight className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                   </button>
                 ))}
               </div>
-            </ScrollArea>
-          </TabsContent>
-        </Tabs>
+            </div>
+          </ScrollArea>
+        )}
 
         <div className="p-4 border-t bg-muted/20 flex justify-between items-center">
           <span className="text-xs text-muted-foreground">
@@ -398,7 +530,13 @@ interface GuideItemProps {
   compact?: boolean;
 }
 
-function GuideItem({ guide, folderName, onClick, showDate, compact }: GuideItemProps) {
+function GuideItem({
+  guide,
+  folderName,
+  onClick,
+  showDate,
+  compact,
+}: GuideItemProps) {
   return (
     <button
       className={`flex items-center justify-between w-full ${compact ? "p-2" : "p-3"} rounded-lg hover:bg-muted/50 transition-colors text-left group`}
@@ -425,7 +563,9 @@ function GuideItem({ guide, folderName, onClick, showDate, compact }: GuideItemP
           )}
         </div>
         <div className="flex flex-col overflow-hidden">
-          <span className={`font-medium truncate ${compact ? "text-sm" : ""}`}>
+          <span
+            className={`font-medium truncate ${compact ? "text-sm" : ""}`}
+          >
             {guide.title || "Untitled"}
           </span>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -435,18 +575,21 @@ function GuideItem({ guide, folderName, onClick, showDate, compact }: GuideItemP
                   <Folder className="size-3" />
                   {folderName}
                 </span>
-                <span>·</span>
+                <span>&middot;</span>
               </>
             )}
             {showDate && (
               <span>
                 Last updated{" "}
-                {guide.updatedAt ? new Date(guide.updatedAt).toLocaleDateString() : "N/A"}
+                {guide.updatedAt
+                  ? new Date(guide.updatedAt).toLocaleDateString()
+                  : "N/A"}
               </span>
             )}
             {!showDate && !compact && (
               <span>
-                {guide.steps?.length || 0} step{(guide.steps?.length || 0) !== 1 ? "s" : ""}
+                {guide.steps?.length || 0} step
+                {(guide.steps?.length || 0) !== 1 ? "s" : ""}
               </span>
             )}
           </div>
@@ -454,7 +597,10 @@ function GuideItem({ guide, folderName, onClick, showDate, compact }: GuideItemP
       </div>
       <div className="flex items-center gap-3">
         {!compact && (
-          <Badge variant="secondary" className="hidden sm:inline-flex capitalize">
+          <Badge
+            variant="secondary"
+            className="hidden sm:inline-flex capitalize"
+          >
             {guide.status || "draft"}
           </Badge>
         )}

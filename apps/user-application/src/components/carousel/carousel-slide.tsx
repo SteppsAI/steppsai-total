@@ -1,5 +1,4 @@
 import { forwardRef } from "react";
-import { cn } from "@/lib/utils";
 import type {
   CarouselSlide,
   CarouselStyle,
@@ -45,7 +44,6 @@ export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
     const dimensions = ASPECT_RATIO_DIMENSIONS[aspectRatio];
     const fontSize = slide.headingFontSize || DEFAULT_HEADING_FONT_SIZE;
     const textAlign = slide.headingAlign || "left";
-    const imageFit = slide.imageFit || "contain";
     const slideNumber = formatSlideNumber(slideNumberFormat, slideIndex, totalSlides);
 
     const headingTransform = buildTransform(
@@ -110,33 +108,18 @@ export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
               className="flex-1 flex items-center justify-center mt-6 min-h-0"
               style={imageTransform ? { transform: imageTransform } : undefined}
             >
-              <div
-                className={cn(
-                  "overflow-hidden",
-                  imageFit === "cover"
-                    ? "w-full h-full"
-                    : "w-full h-full flex items-center justify-center"
-                )}
-              >
-                <img
-                  src={slide.imageUrl}
-                  alt=""
-                  className={
-                    imageFit === "cover"
-                      ? "w-full h-full object-cover"
-                      : "max-w-full max-h-full object-contain"
-                  }
-                  crossOrigin="anonymous"
-                />
-              </div>
+              <img
+                src={slide.imageUrl}
+                alt=""
+                className="max-w-full max-h-full object-contain rounded-2xl shadow-lg"
+                crossOrigin="anonymous"
+              />
             </div>
           )}
 
-          {/* Spacer when no image */}
           {!slide.imageUrl && <div className="flex-1" />}
         </div>
 
-        {/* Bottom bar - always visible, pinned to bottom */}
         <div
           className="shrink-0 flex items-center justify-between px-16 py-8"
           style={{ color: style.fontColor }}

@@ -100,71 +100,44 @@ interface InitOptions {
   guideSteps?: Array<{ caption: string; imageKey?: string | null }>;
 }
 
+const DEFAULT_STYLE: CarouselStyle = {
+  backgroundColor: "#1a1a2e",
+  fontFamily: "Inter, sans-serif",
+  headingColor: "#ffffff",
+  fontColor: "#a0a0b0",
+};
+
 function createInitialState(options: InitOptions): CarouselState {
   const { aspectRatio, authorName, showWatermark, template, guideTitle, guideSteps } = options;
 
-  // Initialize from guide steps
+  // Style: use template style if provided, otherwise default
+  const style: CarouselStyle = template ? { ...template.style } : { ...DEFAULT_STYLE };
+
+  // Slides: from guide steps if provided, otherwise blank defaults
+  let slides: CarouselSlide[];
+  let title: string;
+
   if (guideSteps && guideSteps.length > 0) {
-    const slides: CarouselSlide[] = guideSteps.map((step) => ({
+    slides = guideSteps.map((step) => ({
       id: crypto.randomUUID(),
       heading: step.caption || "",
       imageUrl: step.imageKey || null,
     }));
-    return {
-      title: guideTitle || "Untitled Carousel",
-      slides,
-      selectedSlideId: slides[0].id,
-      style: {
-        backgroundColor: "#1a1a2e",
-        fontFamily: "Inter, sans-serif",
-        headingColor: "#ffffff",
-        fontColor: "#a0a0b0",
-      },
-      aspectRatio,
-      exportFormat: "png",
-      authorName,
-      showWatermark,
-      slideNumberFormat: "none",
-      slideNumberPosition: "top-left",
-    };
+    title = guideTitle || "Untitled Carousel";
+  } else {
+    slides = [
+      { id: crypto.randomUUID(), heading: "Your title here", imageUrl: null },
+      { id: crypto.randomUUID(), heading: "", imageUrl: null },
+      { id: crypto.randomUUID(), heading: "", imageUrl: null },
+    ];
+    title = "Untitled Carousel";
   }
 
-  // Initialize from template
-  if (template) {
-    const slides: CarouselSlide[] = template.slides.map((s) => ({
-      ...s,
-      id: crypto.randomUUID(),
-    }));
-    return {
-      title: "Untitled Carousel",
-      slides,
-      selectedSlideId: slides[0].id,
-      style: { ...template.style },
-      aspectRatio,
-      exportFormat: "png",
-      authorName,
-      showWatermark,
-      slideNumberFormat: "none",
-      slideNumberPosition: "top-left",
-    };
-  }
-
-  // Default blank
-  const defaultSlide: CarouselSlide = {
-    id: crypto.randomUUID(),
-    heading: "Your title here",
-    imageUrl: null,
-  };
   return {
-    title: "Untitled Carousel",
-    slides: [defaultSlide],
-    selectedSlideId: defaultSlide.id,
-    style: {
-      backgroundColor: "#1a1a2e",
-      fontFamily: "Inter, sans-serif",
-      headingColor: "#ffffff",
-      fontColor: "#a0a0b0",
-    },
+    title,
+    slides,
+    selectedSlideId: slides[0].id,
+    style,
     aspectRatio,
     exportFormat: "png",
     authorName,

@@ -34,8 +34,6 @@ import {
   ImageIcon,
   Trash2,
   Upload,
-  RectangleHorizontal,
-  Square,
   User,
   Type,
   Move,
@@ -100,7 +98,6 @@ export function CarouselControls({
   const currentFontSize =
     currentSlide.headingFontSize || DEFAULT_HEADING_FONT_SIZE;
   const currentAlign = currentSlide.headingAlign || "left";
-  const currentImageFit = currentSlide.imageFit || "contain";
 
   const updateField = (data: Partial<CarouselSlide>) =>
     onUpdateSlide(currentSlide.id, data);
@@ -208,27 +205,6 @@ export function CarouselControls({
                 title="Image"
               >
                 <div className="space-y-3">
-                  {/* Fit */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">
-                      Fit Mode
-                    </Label>
-                    <div className="flex gap-1.5">
-                      <ToggleButton
-                        active={currentImageFit === "contain"}
-                        onClick={() => updateField({ imageFit: "contain" })}
-                        icon={<RectangleHorizontal className="w-3.5 h-3.5" />}
-                        label="Contain"
-                      />
-                      <ToggleButton
-                        active={currentImageFit === "cover"}
-                        onClick={() => updateField({ imageFit: "cover" })}
-                        icon={<Square className="w-3.5 h-3.5" />}
-                        label="Cover"
-                      />
-                    </div>
-                  </div>
-
                   {/* Scale */}
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">

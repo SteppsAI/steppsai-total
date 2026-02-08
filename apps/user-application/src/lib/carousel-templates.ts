@@ -1,7 +1,6 @@
 export type AspectRatio = "3:4" | "1:1";
 
 export type TextAlign = "left" | "center" | "right";
-export type ImageFit = "contain" | "cover";
 export type SlideNumberFormat = "none" | "1" | "01" | "[01]" | "1/N" | "[1/N]";
 export type SlideNumberPosition = "top-left" | "top-right";
 
@@ -11,7 +10,6 @@ export interface CarouselSlide {
   imageUrl?: string | null;
   headingFontSize?: number;
   headingAlign?: TextAlign;
-  imageFit?: ImageFit;
   headingOffsetX?: number;
   headingOffsetY?: number;
   headingRotation?: number;
@@ -81,7 +79,6 @@ export interface CarouselTemplate {
   id: string;
   name: string;
   style: CarouselStyle;
-  slides: Omit<CarouselSlide, "id">[];
 }
 
 export const ASPECT_RATIO_DIMENSIONS: Record<AspectRatio, { width: number; height: number }> = {
@@ -127,61 +124,81 @@ export const CAROUSEL_TEMPLATES: CarouselTemplate[] = [
   {
     id: "minimal-dark",
     name: "Minimal Dark",
-    style: {
-      backgroundColor: "#1a1a2e",
-      fontFamily: "Inter, sans-serif",
-      headingColor: "#ffffff",
-      fontColor: "#a0a0b0",
-    },
-    slides: [
-      { heading: "Your title here", imageUrl: null },
-      { heading: "Add your content", imageUrl: null },
-      { heading: "Final slide", imageUrl: null },
-    ],
+    style: { backgroundColor: "#1a1a2e", fontFamily: "Inter, sans-serif", headingColor: "#ffffff", fontColor: "#a0a0b0" },
   },
   {
     id: "clean-light",
     name: "Clean Light",
-    style: {
-      backgroundColor: "#ffffff",
-      fontFamily: "Inter, sans-serif",
-      headingColor: "#1a1a2e",
-      fontColor: "#666666",
-    },
-    slides: [
-      { heading: "Your title here", imageUrl: null },
-      { heading: "Add your content", imageUrl: null },
-      { heading: "Final slide", imageUrl: null },
-    ],
+    style: { backgroundColor: "#ffffff", fontFamily: "Inter, sans-serif", headingColor: "#1a1a2e", fontColor: "#666666" },
   },
   {
-    id: "bold-gradient",
+    id: "bold-purple",
     name: "Bold Purple",
-    style: {
-      backgroundColor: "#6c5ce7",
-      fontFamily: "Inter, sans-serif",
-      headingColor: "#ffffff",
-      fontColor: "#ddd6fe",
-    },
-    slides: [
-      { heading: "Your title here", imageUrl: null },
-      { heading: "Add your content", imageUrl: null },
-      { heading: "Final slide", imageUrl: null },
-    ],
+    style: { backgroundColor: "#6c5ce7", fontFamily: "Inter, sans-serif", headingColor: "#ffffff", fontColor: "#ddd6fe" },
   },
   {
     id: "ocean-blue",
     name: "Ocean Blue",
-    style: {
-      backgroundColor: "#0f3460",
-      fontFamily: "Georgia, serif",
-      headingColor: "#e0f0ff",
-      fontColor: "#90b8e0",
-    },
-    slides: [
-      { heading: "Your title here", imageUrl: null },
-      { heading: "Add your content", imageUrl: null },
-      { heading: "Final slide", imageUrl: null },
-    ],
+    style: { backgroundColor: "#0f3460", fontFamily: "Georgia, serif", headingColor: "#e0f0ff", fontColor: "#90b8e0" },
+  },
+  {
+    id: "sunset-coral",
+    name: "Sunset Coral",
+    style: { backgroundColor: "#e17055", fontFamily: "Inter, sans-serif", headingColor: "#ffffff", fontColor: "#ffecd2" },
+  },
+  {
+    id: "forest-green",
+    name: "Forest Green",
+    style: { backgroundColor: "#00b894", fontFamily: "Arial, sans-serif", headingColor: "#ffffff", fontColor: "#d5f5e3" },
+  },
+  {
+    id: "warm-sand",
+    name: "Warm Sand",
+    style: { backgroundColor: "#f8f1e4", fontFamily: "Georgia, serif", headingColor: "#2d2d2d", fontColor: "#8b7355" },
+  },
+  {
+    id: "charcoal",
+    name: "Charcoal",
+    style: { backgroundColor: "#2d3436", fontFamily: "Inter, sans-serif", headingColor: "#dfe6e9", fontColor: "#b2bec3" },
+  },
+  {
+    id: "rose",
+    name: "Rose",
+    style: { backgroundColor: "#fd79a8", fontFamily: "Inter, sans-serif", headingColor: "#ffffff", fontColor: "#ffeef4" },
+  },
+  {
+    id: "midnight",
+    name: "Midnight",
+    style: { backgroundColor: "#0c0c1d", fontFamily: "'Courier New', monospace", headingColor: "#a29bfe", fontColor: "#636e72" },
+  },
+  {
+    id: "cream",
+    name: "Cream",
+    style: { backgroundColor: "#ffeaa7", fontFamily: "Georgia, serif", headingColor: "#2d3436", fontColor: "#636e72" },
+  },
+  {
+    id: "navy",
+    name: "Navy",
+    style: { backgroundColor: "#2c3e50", fontFamily: "Inter, sans-serif", headingColor: "#ecf0f1", fontColor: "#95a5a6" },
+  },
+  {
+    id: "lavender",
+    name: "Lavender",
+    style: { backgroundColor: "#a29bfe", fontFamily: "Inter, sans-serif", headingColor: "#ffffff", fontColor: "#dfe6e9" },
+  },
+  {
+    id: "mint",
+    name: "Mint Fresh",
+    style: { backgroundColor: "#55efc4", fontFamily: "Arial, sans-serif", headingColor: "#2d3436", fontColor: "#636e72" },
+  },
+  {
+    id: "slate",
+    name: "Slate",
+    style: { backgroundColor: "#636e72", fontFamily: "Arial, sans-serif", headingColor: "#ffffff", fontColor: "#b2bec3" },
+  },
+  {
+    id: "terracotta",
+    name: "Terracotta",
+    style: { backgroundColor: "#c0392b", fontFamily: "Georgia, serif", headingColor: "#ffeaa7", fontColor: "#f5cba7" },
   },
 ];

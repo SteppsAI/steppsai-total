@@ -17,6 +17,7 @@ export interface CarouselSlide {
   imageOffsetY?: number;
   imageRotation?: number;
   imageScale?: number;
+  imageBorderRadius?: number;
 }
 
 export interface CarouselStyle {

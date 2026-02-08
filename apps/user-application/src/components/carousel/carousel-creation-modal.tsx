@@ -23,8 +23,6 @@ import {
   ChevronRight,
   RectangleHorizontal,
   Square,
-  PenLine,
-  BookOpen,
   Paintbrush,
   Sparkles,
 } from "lucide-react";
@@ -234,31 +232,21 @@ export function CarouselCreationModal({
 
         {/* ── Step: Source Selection ── */}
         {step === "source" && (
-          <div className="p-6">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="p-4">
+            <div className="flex flex-col gap-1">
               <button
                 onClick={() => handleSelectSource("stepp")}
-                className="group text-left rounded-xl border-2 border-border p-6 hover:border-primary/50 hover:shadow-md transition-all"
+                className="group flex items-center justify-between w-full p-3 rounded-lg hover:bg-muted/50 transition-colors text-left"
               >
-                <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                  <BookOpen className="size-6 text-primary" />
-                </div>
-                <h3 className="font-semibold text-base">From Stepps</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Generate slides from an existing stepp guide
-                </p>
+                <span className="font-medium text-sm">From Stepps</span>
+                <ArrowRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
               <button
                 onClick={() => handleSelectSource("manual")}
-                className="group text-left rounded-xl border-2 border-border p-6 hover:border-primary/50 hover:shadow-md transition-all"
+                className="group flex items-center justify-between w-full p-3 rounded-lg hover:bg-muted/50 transition-colors text-left"
               >
-                <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                  <PenLine className="size-6 text-primary" />
-                </div>
-                <h3 className="font-semibold text-base">From Scratch</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Create slides manually with your own content
-                </p>
+                <span className="font-medium text-sm">From Scratch</span>
+                <ArrowRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
             </div>
           </div>

@@ -35,15 +35,11 @@ import {
   Trash2,
   Upload,
   User,
-  Type,
   Move,
   RotateCw,
-  Hash,
   Minus,
   Plus,
   ZoomIn,
-  Palette,
-  Download,
   RotateCcw,
 } from "lucide-react";
 
@@ -107,10 +103,7 @@ export function CarouselControls({
       <ScrollArea className="flex-1">
         <div className="p-4 pb-8">
           {/* ━━━━━━━━━━ CONTENT ━━━━━━━━━━ */}
-          <Section
-            icon={<Type className="w-3.5 h-3.5" />}
-            title="Content"
-          >
+          <Section title="Content">
             <div className="space-y-3">
               {/* Heading */}
               <div className="space-y-1.5">
@@ -197,14 +190,185 @@ export function CarouselControls({
 
           <Separator className="my-4" />
 
+          {/* ━━━━━━━━━━ STYLE ━━━━━━━━━━ */}
+          <Section title="Style">
+            <div className="space-y-3">
+              {/* Font */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Font</Label>
+                <Select
+                  value={style.fontFamily}
+                  onValueChange={(val) => onStyleChange({ fontFamily: val })}
+                >
+                  <SelectTrigger className="w-full h-8 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FONT_FAMILIES.map((f) => (
+                      <SelectItem key={f.value} value={f.value}>
+                        <span style={{ fontFamily: f.value }}>{f.label}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Size */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">
+                  Size ({currentFontSize}px)
+                </Label>
+                <div className="flex gap-1">
+                  {FONT_SIZE_PRESETS.map((preset) => (
+                    <button
+                      key={preset.value}
+                      onClick={() =>
+                        updateField({ headingFontSize: preset.value })
+                      }
+                      className={cn(
+                        "flex-1 py-1.5 rounded-md text-xs font-medium border transition-colors",
+                        currentFontSize === preset.value
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:bg-muted/50"
+                      )}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Alignment */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">
+                  Alignment
+                </Label>
+                <div className="flex gap-1">
+                  <AlignButton
+                    active={currentAlign === "left"}
+                    onClick={() => updateField({ headingAlign: "left" })}
+                    icon={<AlignLeft className="w-4 h-4" />}
+                    label="Left"
+                  />
+                  <AlignButton
+                    active={currentAlign === "center"}
+                    onClick={() => updateField({ headingAlign: "center" })}
+                    icon={<AlignCenter className="w-4 h-4" />}
+                    label="Center"
+                  />
+                  <AlignButton
+                    active={currentAlign === "right"}
+                    onClick={() => updateField({ headingAlign: "right" })}
+                    icon={<AlignRight className="w-4 h-4" />}
+                    label="Right"
+                  />
+                </div>
+              </div>
+
+              {/* Background */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">
+                  Background
+                </Label>
+                <div className="grid grid-cols-6 gap-1.5">
+                  {BACKGROUND_COLORS.map((color) => (
+                    <button
+                      key={color}
+                      onClick={() =>
+                        onStyleChange({ backgroundColor: color })
+                      }
+                      className={cn(
+                        "w-7 h-7 rounded-lg border-2 transition-all hover:scale-110",
+                        style.backgroundColor === color
+                          ? "border-primary shadow-md scale-105"
+                          : "border-transparent hover:border-border"
+                      )}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <Label className="text-xs text-muted-foreground">
+                    Custom:
+                  </Label>
+                  <input
+                    type="color"
+                    value={style.backgroundColor}
+                    onChange={(e) =>
+                      onStyleChange({ backgroundColor: e.target.value })
+                    }
+                    className="w-7 h-7 rounded cursor-pointer border border-border"
+                  />
+                </div>
+              </div>
+
+              {/* Heading + Text color row */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">
+                    Heading
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={style.headingColor}
+                      onChange={(e) =>
+                        onStyleChange({ headingColor: e.target.value })
+                      }
+                      className="w-7 h-7 rounded cursor-pointer border border-border shrink-0"
+                    />
+                    <span className="text-[10px] text-muted-foreground font-mono truncate">
+                      {style.headingColor}
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Text</Label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={style.fontColor}
+                      onChange={(e) =>
+                        onStyleChange({ fontColor: e.target.value })
+                      }
+                      className="w-7 h-7 rounded cursor-pointer border border-border shrink-0"
+                    />
+                    <span className="text-[10px] text-muted-foreground font-mono truncate">
+                      {style.fontColor}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Section>
+
+          <Separator className="my-4" />
+
           {/* ━━━━━━━━━━ IMAGE OPTIONS ━━━━━━━━━━ */}
           {currentSlide.imageUrl && (
             <>
-              <Section
-                icon={<ImageIcon className="w-3.5 h-3.5" />}
-                title="Image"
-              >
+              <Section title="Image">
                 <div className="space-y-3">
+                  {/* Border Radius */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">
+                      Border Radius
+                    </Label>
+                    <NudgeControl
+                      value={currentSlide.imageBorderRadius || 0}
+                      onChange={(v) => updateField({ imageBorderRadius: v })}
+                      step={4}
+                      min={0}
+                      max={48}
+                      format={(v) => `${v}`}
+                      parse={(s) => {
+                        const n = parseInt(s);
+                        return isNaN(n) ? null : n;
+                      }}
+                      suffix="px"
+                    />
+                  </div>
+
                   {/* Scale */}
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">
@@ -307,96 +471,14 @@ export function CarouselControls({
             </>
           )}
 
-          {/* ━━━━━━━━━━ TYPOGRAPHY ━━━━━━━━━━ */}
-          <Section icon={<Type className="w-3.5 h-3.5" />} title="Typography">
-            <div className="space-y-3">
-              {/* Font */}
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">Font</Label>
-                <Select
-                  value={style.fontFamily}
-                  onValueChange={(val) => onStyleChange({ fontFamily: val })}
-                >
-                  <SelectTrigger className="w-full h-8 text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {FONT_FAMILIES.map((f) => (
-                      <SelectItem key={f.value} value={f.value}>
-                        <span style={{ fontFamily: f.value }}>{f.label}</span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Size */}
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">
-                  Size ({currentFontSize}px)
-                </Label>
-                <div className="flex gap-1">
-                  {FONT_SIZE_PRESETS.map((preset) => (
-                    <button
-                      key={preset.value}
-                      onClick={() =>
-                        updateField({ headingFontSize: preset.value })
-                      }
-                      className={cn(
-                        "flex-1 py-1.5 rounded-md text-xs font-medium border transition-colors",
-                        currentFontSize === preset.value
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border text-muted-foreground hover:bg-muted/50"
-                      )}
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Alignment */}
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">
-                  Alignment
-                </Label>
-                <div className="flex gap-1">
-                  <AlignButton
-                    active={currentAlign === "left"}
-                    onClick={() => updateField({ headingAlign: "left" })}
-                    icon={<AlignLeft className="w-4 h-4" />}
-                    label="Left"
-                  />
-                  <AlignButton
-                    active={currentAlign === "center"}
-                    onClick={() => updateField({ headingAlign: "center" })}
-                    icon={<AlignCenter className="w-4 h-4" />}
-                    label="Center"
-                  />
-                  <AlignButton
-                    active={currentAlign === "right"}
-                    onClick={() => updateField({ headingAlign: "right" })}
-                    icon={<AlignRight className="w-4 h-4" />}
-                    label="Right"
-                  />
-                </div>
-              </div>
-            </div>
-          </Section>
-
-          <Separator className="my-4" />
-
-          {/* ━━━━━━━━━━ HEADING TRANSFORM ━━━━━━━━━━ */}
-          <Section
-            icon={<Move className="w-3.5 h-3.5" />}
-            title="Heading Transform"
-          >
+          {/* ━━━━━━━━━━ TEXT POSITION ━━━━━━━━━━ */}
+          <Section title="Text Position">
             <div className="space-y-3">
               {/* Position */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <Label className="text-xs text-muted-foreground">
-                    Position
+                    Offset
                   </Label>
                   {(currentSlide.headingOffsetX ||
                     currentSlide.headingOffsetY) && (
@@ -467,93 +549,8 @@ export function CarouselControls({
 
           <Separator className="my-4" />
 
-          {/* ━━━━━━━━━━ COLORS ━━━━━━━━━━ */}
-          <Section icon={<Palette className="w-3.5 h-3.5" />} title="Colors">
-            <div className="space-y-3">
-              {/* Background */}
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">
-                  Background
-                </Label>
-                <div className="grid grid-cols-6 gap-1.5">
-                  {BACKGROUND_COLORS.map((color) => (
-                    <button
-                      key={color}
-                      onClick={() =>
-                        onStyleChange({ backgroundColor: color })
-                      }
-                      className={cn(
-                        "w-7 h-7 rounded-lg border-2 transition-all hover:scale-110",
-                        style.backgroundColor === color
-                          ? "border-primary shadow-md scale-105"
-                          : "border-transparent hover:border-border"
-                      )}
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <Label className="text-xs text-muted-foreground">
-                    Custom:
-                  </Label>
-                  <input
-                    type="color"
-                    value={style.backgroundColor}
-                    onChange={(e) =>
-                      onStyleChange({ backgroundColor: e.target.value })
-                    }
-                    className="w-7 h-7 rounded cursor-pointer border border-border"
-                  />
-                </div>
-              </div>
-
-              {/* Heading + Text color row */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">
-                    Heading
-                  </Label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="color"
-                      value={style.headingColor}
-                      onChange={(e) =>
-                        onStyleChange({ headingColor: e.target.value })
-                      }
-                      className="w-7 h-7 rounded cursor-pointer border border-border shrink-0"
-                    />
-                    <span className="text-[10px] text-muted-foreground font-mono truncate">
-                      {style.headingColor}
-                    </span>
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">Text</Label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="color"
-                      value={style.fontColor}
-                      onChange={(e) =>
-                        onStyleChange({ fontColor: e.target.value })
-                      }
-                      className="w-7 h-7 rounded cursor-pointer border border-border shrink-0"
-                    />
-                    <span className="text-[10px] text-muted-foreground font-mono truncate">
-                      {style.fontColor}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Section>
-
-          <Separator className="my-4" />
-
           {/* ━━━━━━━━━━ SLIDE NUMBER ━━━━━━━━━━ */}
-          <Section
-            icon={<Hash className="w-3.5 h-3.5" />}
-            title="Slide Number"
-          >
+          <Section title="Slide Number">
             <div className="space-y-3">
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Format</Label>
@@ -600,7 +597,7 @@ export function CarouselControls({
           <Separator className="my-4" />
 
           {/* ━━━━━━━━━━ EXPORT ━━━━━━━━━━ */}
-          <Section icon={<Download className="w-3.5 h-3.5" />} title="Export">
+          <Section title="Export">
             <div className="flex gap-1.5">
               <button
                 onClick={() => onExportFormatChange("png")}
@@ -636,21 +633,16 @@ export function CarouselControls({
 
 function Section({
   title,
-  icon,
   children,
 }: {
   title: string;
-  icon?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <div className="space-y-2.5">
-      <div className="flex items-center gap-1.5">
-        {icon && <span className="text-muted-foreground">{icon}</span>}
-        <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-          {title}
-        </Label>
-      </div>
+      <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+        {title}
+      </Label>
       {children}
     </div>
   );

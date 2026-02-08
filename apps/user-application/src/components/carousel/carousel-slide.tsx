@@ -111,7 +111,8 @@ export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
               <img
                 src={slide.imageUrl}
                 alt=""
-                className="max-w-full max-h-full object-contain rounded-2xl shadow-lg"
+                className="max-w-full max-h-full object-contain shadow-lg"
+                style={{ borderRadius: slide.imageBorderRadius ?? 0 }}
                 crossOrigin="anonymous"
               />
             </div>

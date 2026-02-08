@@ -1,11 +1,5 @@
 import { toPng, toJpeg } from "html-to-image";
-import { trpcClient } from "./trpc-client";
 import type { ExportFormat } from "./carousel-templates";
-
-const MAX_IMG_DIM = 1500;
-const JPEG_QUALITY = 0.85;
-const PLACEHOLDER =
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
 function sanitizeFilename(name: string): string {
   return name
@@ -28,68 +22,43 @@ function delay(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = src;
-  });
+function getProxiedUrl(url: string): string {
+  if (!url || url.startsWith('data:') || url.startsWith('blob:')) return url;
+
+  if (url.includes('localhost') || url.includes('127.0.0.1')) return url;
+
+  return `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=png`;
 }
 
-function compressToJpeg(source: HTMLImageElement): string {
-  const scale = Math.min(
-    MAX_IMG_DIM / source.naturalWidth,
-    MAX_IMG_DIM / source.naturalHeight,
-    1
-  );
-  const w = Math.ceil(source.naturalWidth * scale);
-  const h = Math.ceil(source.naturalHeight * scale);
-  const canvas = document.createElement("canvas");
-  canvas.width = w;
-  canvas.height = h;
-  canvas.getContext("2d")!.drawImage(source, 0, 0, w, h);
-  return canvas.toDataURL("image/jpeg", JPEG_QUALITY);
-}
-
-/**
- * Prepare an <img> for export by resolving its src to a small JPEG data URI.
- *
- * - Data URIs: compress via canvas (PNG→JPEG, cap dimensions)
- * - Cross-origin URLs (CDN): fetch server-side via tRPC, then compress
- * - Same-origin URLs: skip — html-to-image handles them natively
- */
-async function prepareImageForExport(
-  img: HTMLImageElement
-): Promise<string | null> {
-  const src = img.src;
-  if (!src) return null;
-
-  // Data URI — compress if large
-  if (src.startsWith("data:")) {
-    if (!img.naturalWidth || !img.naturalHeight) return null;
-    if (img.naturalWidth <= 200 && img.naturalHeight <= 200) return null;
-    return compressToJpeg(img);
-  }
-
-  // HTTP(S) URL
-  if (src.startsWith("http")) {
-    // Same-origin → html-to-image handles it fine
-    try {
-      if (new URL(src).origin === window.location.origin) return null;
-    } catch {
-      return null;
-    }
-
-    // Cross-origin (CDN) → fetch server-side via tRPC, then compress
-    const dataUri = await trpcClient.images.fetchAsDataUri.query({
-      url: src,
+async function imageToDataUrl(url: string): Promise<string> {
+  const proxied = getProxiedUrl(url);
+  try {
+    const res = await fetch(proxied, { mode: 'cors', cache: 'no-cache' });
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
+    const blob = await res.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
     });
-    const loaded = await loadImage(dataUri);
-    return compressToJpeg(loaded);
+  } catch (error) {
+    console.warn("Retrying with cache bust...", error);
+    try {
+      const res = await fetch(`${proxied}&t=${Date.now()}`, { mode: 'cors' });
+      if (!res.ok) throw res;
+      const blob = await res.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (e) {
+      console.error(`Failed to load image ${url}`, e);
+      return "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+    }
   }
-
-  return null;
 }
 
 export async function exportCarouselSlides(
@@ -102,45 +71,77 @@ export async function exportCarouselSlides(
   const ext = format === "png" ? "png" : "jpg";
   const total = slideRefs.length;
 
-  for (let i = 0; i < total; i++) {
-    const ref = slideRefs[i];
-    if (!ref.current) continue;
+  const container = document.createElement("div");
+  container.style.position = "fixed";
+  container.style.top = "-9999px";
+  container.style.left = "-9999px";
+  container.style.width = "100%";
+  container.style.height = "100%";
+  container.style.pointerEvents = "none";
+  document.body.appendChild(container);
 
-    onProgress?.(i + 1, total);
+  try {
+    for (let i = 0; i < total; i++) {
+      const ref = slideRefs[i];
+      if (!ref.current) continue;
 
-    const node = ref.current;
-    const convert = format === "png" ? toPng : toJpeg;
-    const options =
-      format === "png"
-        ? { pixelRatio: 2, imagePlaceholder: PLACEHOLDER }
-        : { quality: 0.95, pixelRatio: 2, imagePlaceholder: PLACEHOLDER };
+      onProgress?.(i + 1, total);
 
-    // Resolve + compress images so the SVG stays within browser limits
-    const imgs = Array.from(node.querySelectorAll("img"));
-    const swapped: Array<{ el: HTMLImageElement; originalSrc: string }> = [];
+      const clone = ref.current.cloneNode(true) as HTMLElement;
 
-    await Promise.all(
-      imgs.map(async (img) => {
-        try {
-          const compressed = await prepareImageForExport(img);
-          if (compressed) {
-            swapped.push({ el: img, originalSrc: img.src });
-            img.src = compressed;
-          }
-        } catch {
-          // Skip this image on any error
+      const images = clone.querySelectorAll("img");
+      const processingPromises: Promise<void>[] = [];
+
+      images.forEach((img) => {
+        const originalSrc = img.getAttribute("src");
+        if (originalSrc && !originalSrc.startsWith("data:")) {
+          const p = imageToDataUrl(originalSrc).then(base64 => {
+            img.setAttribute("src", base64);
+            img.removeAttribute("crossorigin");
+          });
+          processingPromises.push(p);
         }
-      })
-    );
+      });
 
-    let dataUrl: string;
-    try {
-      dataUrl = await convert(node, options);
-    } finally {
-      for (const { el, originalSrc } of swapped) el.src = originalSrc;
+      if (processingPromises.length > 0) {
+        await Promise.all(processingPromises);
+      }
+
+      container.innerHTML = '';
+      container.appendChild(clone);
+
+      await delay(100);
+
+      const convert = format === "png" ? toPng : toJpeg;
+      const width = ref.current.offsetWidth;
+      const height = ref.current.offsetHeight;
+
+      const options =
+        format === "png"
+          ? {
+            pixelRatio: 3,
+            skipAutoScale: true,
+            width,
+            height,
+            cacheBust: true,
+          }
+          : {
+            quality: 1.0,
+            pixelRatio: 3,
+            skipAutoScale: true,
+            width,
+            height,
+            cacheBust: true,
+          };
+
+      const dataUrl = await convert(clone, options);
+      downloadBlob(dataUrl, `${sanitized}-carousel-${i + 1}.${ext}`);
+
+      if (i < total - 1) await delay(200);
     }
-
-    downloadBlob(dataUrl, `${sanitized}-carousel-${i + 1}.${ext}`);
-    if (i < total - 1) await delay(200);
+  } finally {
+    if (document.body.contains(container)) {
+      document.body.removeChild(container);
+    }
   }
 }

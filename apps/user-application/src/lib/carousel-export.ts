@@ -25,6 +25,8 @@ function delay(ms: number) {
 function getProxiedUrl(url: string): string {
   if (!url || url.startsWith('data:') || url.startsWith('blob:')) return url;
 
+  if (url.startsWith('/')) return url;
+
   if (url.includes('localhost') || url.includes('127.0.0.1')) return url;
 
   return `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=png`;

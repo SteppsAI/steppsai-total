@@ -32,9 +32,11 @@ import { Route as AppAuthedSteppsRouteImport } from './routes/app/_authed/stepps
 import { Route as AppAuthedSettingsRouteImport } from './routes/app/_authed/settings'
 import { Route as AppAuthedSteppsIndexRouteImport } from './routes/app/_authed/stepps/index'
 import { Route as AppAuthedEditorIndexRouteImport } from './routes/app/_authed/editor/index'
+import { Route as AppAuthedCarouselIndexRouteImport } from './routes/app/_authed/carousel/index'
 import { Route as AppAuthedSteppsGuideIdRouteImport } from './routes/app/_authed/stepps/$guideId'
 import { Route as AppAuthedFolderFolderIdRouteImport } from './routes/app/_authed/folder/$folderId'
 import { Route as AppAuthedEditorGuideIdRouteImport } from './routes/app/_authed/editor/$guideId'
+import { Route as AppAuthedCarouselEditorRouteImport } from './routes/app/_authed/carousel/editor'
 
 const AppRouteImport = createFileRoute('/app')()
 
@@ -147,6 +149,11 @@ const AppAuthedEditorIndexRoute = AppAuthedEditorIndexRouteImport.update({
   path: '/editor/',
   getParentRoute: () => AppAuthedRoute,
 } as any)
+const AppAuthedCarouselIndexRoute = AppAuthedCarouselIndexRouteImport.update({
+  id: '/carousel/',
+  path: '/carousel/',
+  getParentRoute: () => AppAuthedRoute,
+} as any)
 const AppAuthedSteppsGuideIdRoute = AppAuthedSteppsGuideIdRouteImport.update({
   id: '/$guideId',
   path: '/$guideId',
@@ -160,6 +167,11 @@ const AppAuthedFolderFolderIdRoute = AppAuthedFolderFolderIdRouteImport.update({
 const AppAuthedEditorGuideIdRoute = AppAuthedEditorGuideIdRouteImport.update({
   id: '/editor/$guideId',
   path: '/editor/$guideId',
+  getParentRoute: () => AppAuthedRoute,
+} as any)
+const AppAuthedCarouselEditorRoute = AppAuthedCarouselEditorRouteImport.update({
+  id: '/carousel/editor',
+  path: '/carousel/editor',
   getParentRoute: () => AppAuthedRoute,
 } as any)
 
@@ -183,9 +195,11 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AppAuthedSettingsRoute
   '/app/stepps': typeof AppAuthedSteppsRouteWithChildren
   '/app/': typeof AppAuthedIndexRoute
+  '/app/carousel/editor': typeof AppAuthedCarouselEditorRoute
   '/app/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
   '/app/folder/$folderId': typeof AppAuthedFolderFolderIdRoute
   '/app/stepps/$guideId': typeof AppAuthedSteppsGuideIdRoute
+  '/app/carousel': typeof AppAuthedCarouselIndexRoute
   '/app/editor': typeof AppAuthedEditorIndexRoute
   '/app/stepps/': typeof AppAuthedSteppsIndexRoute
 }
@@ -207,9 +221,11 @@ export interface FileRoutesByTo {
   '/payment/success': typeof PaymentSuccessRoute
   '/shared/$guideId': typeof SharedGuideIdRoute
   '/app/settings': typeof AppAuthedSettingsRoute
+  '/app/carousel/editor': typeof AppAuthedCarouselEditorRoute
   '/app/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
   '/app/folder/$folderId': typeof AppAuthedFolderFolderIdRoute
   '/app/stepps/$guideId': typeof AppAuthedSteppsGuideIdRoute
+  '/app/carousel': typeof AppAuthedCarouselIndexRoute
   '/app/editor': typeof AppAuthedEditorIndexRoute
   '/app/stepps': typeof AppAuthedSteppsIndexRoute
 }
@@ -235,9 +251,11 @@ export interface FileRoutesById {
   '/app/_authed/settings': typeof AppAuthedSettingsRoute
   '/app/_authed/stepps': typeof AppAuthedSteppsRouteWithChildren
   '/app/_authed/': typeof AppAuthedIndexRoute
+  '/app/_authed/carousel/editor': typeof AppAuthedCarouselEditorRoute
   '/app/_authed/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
   '/app/_authed/folder/$folderId': typeof AppAuthedFolderFolderIdRoute
   '/app/_authed/stepps/$guideId': typeof AppAuthedSteppsGuideIdRoute
+  '/app/_authed/carousel/': typeof AppAuthedCarouselIndexRoute
   '/app/_authed/editor/': typeof AppAuthedEditorIndexRoute
   '/app/_authed/stepps/': typeof AppAuthedSteppsIndexRoute
 }
@@ -263,9 +281,11 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/stepps'
     | '/app/'
+    | '/app/carousel/editor'
     | '/app/editor/$guideId'
     | '/app/folder/$folderId'
     | '/app/stepps/$guideId'
+    | '/app/carousel'
     | '/app/editor'
     | '/app/stepps/'
   fileRoutesByTo: FileRoutesByTo
@@ -287,9 +307,11 @@ export interface FileRouteTypes {
     | '/payment/success'
     | '/shared/$guideId'
     | '/app/settings'
+    | '/app/carousel/editor'
     | '/app/editor/$guideId'
     | '/app/folder/$folderId'
     | '/app/stepps/$guideId'
+    | '/app/carousel'
     | '/app/editor'
     | '/app/stepps'
   id:
@@ -314,9 +336,11 @@ export interface FileRouteTypes {
     | '/app/_authed/settings'
     | '/app/_authed/stepps'
     | '/app/_authed/'
+    | '/app/_authed/carousel/editor'
     | '/app/_authed/editor/$guideId'
     | '/app/_authed/folder/$folderId'
     | '/app/_authed/stepps/$guideId'
+    | '/app/_authed/carousel/'
     | '/app/_authed/editor/'
     | '/app/_authed/stepps/'
   fileRoutesById: FileRoutesById
@@ -495,6 +519,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthedEditorIndexRouteImport
       parentRoute: typeof AppAuthedRoute
     }
+    '/app/_authed/carousel/': {
+      id: '/app/_authed/carousel/'
+      path: '/carousel'
+      fullPath: '/app/carousel'
+      preLoaderRoute: typeof AppAuthedCarouselIndexRouteImport
+      parentRoute: typeof AppAuthedRoute
+    }
     '/app/_authed/stepps/$guideId': {
       id: '/app/_authed/stepps/$guideId'
       path: '/$guideId'
@@ -514,6 +545,13 @@ declare module '@tanstack/react-router' {
       path: '/editor/$guideId'
       fullPath: '/app/editor/$guideId'
       preLoaderRoute: typeof AppAuthedEditorGuideIdRouteImport
+      parentRoute: typeof AppAuthedRoute
+    }
+    '/app/_authed/carousel/editor': {
+      id: '/app/_authed/carousel/editor'
+      path: '/carousel/editor'
+      fullPath: '/app/carousel/editor'
+      preLoaderRoute: typeof AppAuthedCarouselEditorRouteImport
       parentRoute: typeof AppAuthedRoute
     }
   }
@@ -537,8 +575,10 @@ interface AppAuthedRouteChildren {
   AppAuthedSettingsRoute: typeof AppAuthedSettingsRoute
   AppAuthedSteppsRoute: typeof AppAuthedSteppsRouteWithChildren
   AppAuthedIndexRoute: typeof AppAuthedIndexRoute
+  AppAuthedCarouselEditorRoute: typeof AppAuthedCarouselEditorRoute
   AppAuthedEditorGuideIdRoute: typeof AppAuthedEditorGuideIdRoute
   AppAuthedFolderFolderIdRoute: typeof AppAuthedFolderFolderIdRoute
+  AppAuthedCarouselIndexRoute: typeof AppAuthedCarouselIndexRoute
   AppAuthedEditorIndexRoute: typeof AppAuthedEditorIndexRoute
 }
 
@@ -546,8 +586,10 @@ const AppAuthedRouteChildren: AppAuthedRouteChildren = {
   AppAuthedSettingsRoute: AppAuthedSettingsRoute,
   AppAuthedSteppsRoute: AppAuthedSteppsRouteWithChildren,
   AppAuthedIndexRoute: AppAuthedIndexRoute,
+  AppAuthedCarouselEditorRoute: AppAuthedCarouselEditorRoute,
   AppAuthedEditorGuideIdRoute: AppAuthedEditorGuideIdRoute,
   AppAuthedFolderFolderIdRoute: AppAuthedFolderFolderIdRoute,
+  AppAuthedCarouselIndexRoute: AppAuthedCarouselIndexRoute,
   AppAuthedEditorIndexRoute: AppAuthedEditorIndexRoute,
 }
 

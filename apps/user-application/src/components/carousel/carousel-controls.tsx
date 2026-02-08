@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import type {
   CarouselSlide,
@@ -43,6 +44,9 @@ import {
   Minus,
   Plus,
   ZoomIn,
+  Palette,
+  Download,
+  RotateCcw,
 } from "lucide-react";
 
 interface CarouselControlsProps {
@@ -82,7 +86,9 @@ export function CarouselControls({
       if (file) {
         const reader = new FileReader();
         reader.onload = () => {
-          onUpdateSlide(currentSlide.id, { imageUrl: reader.result as string });
+          onUpdateSlide(currentSlide.id, {
+            imageUrl: reader.result as string,
+          });
         };
         reader.readAsDataURL(file);
       }
@@ -102,12 +108,18 @@ export function CarouselControls({
   return (
     <div className="w-[268px] flex flex-col h-full bg-white/50 backdrop-blur-xl supports-[backdrop-filter]:bg-white/50 border-r border-[var(--color-200)]">
       <ScrollArea className="flex-1">
-        <div className="p-4 space-y-5 pb-8">
-          {/* ── Slide Content ── */}
-          <Section icon={<Type className="w-3.5 h-3.5" />} title="Slide Content">
+        <div className="p-4 pb-8">
+          {/* ━━━━━━━━━━ CONTENT ━━━━━━━━━━ */}
+          <Section
+            icon={<Type className="w-3.5 h-3.5" />}
+            title="Content"
+          >
             <div className="space-y-3">
+              {/* Heading */}
               <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">Heading</Label>
+                <Label className="text-xs text-muted-foreground">
+                  Heading
+                </Label>
                 <Textarea
                   value={currentSlide.heading}
                   onChange={(e) => updateField({ heading: e.target.value })}
@@ -117,6 +129,7 @@ export function CarouselControls({
                 />
               </div>
 
+              {/* Image */}
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Image</Label>
                 <input
@@ -158,121 +171,177 @@ export function CarouselControls({
                 ) : (
                   <Button
                     variant="outline"
-                    className="w-full h-20 border-dashed text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                    className="w-full h-16 border-dashed text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <div className="flex flex-col items-center gap-1.5">
-                      <ImageIcon className="w-5 h-5" />
+                    <div className="flex flex-col items-center gap-1">
+                      <ImageIcon className="w-4 h-4" />
                       <span className="text-xs">Upload image</span>
                     </div>
                   </Button>
                 )}
               </div>
+
+              {/* Author */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">
+                  <User className="w-3 h-3 inline mr-1" />
+                  Author
+                </Label>
+                <Input
+                  value={authorName}
+                  onChange={(e) => onAuthorNameChange(e.target.value)}
+                  placeholder="Author name"
+                  className="h-8 text-sm"
+                />
+              </div>
             </div>
           </Section>
 
-          {/* ── Image Options ── */}
+          <Separator className="my-4" />
+
+          {/* ━━━━━━━━━━ IMAGE OPTIONS ━━━━━━━━━━ */}
           {currentSlide.imageUrl && (
-            <Section
-              icon={<ImageIcon className="w-3.5 h-3.5" />}
-              title="Image Options"
-            >
-              <div className="space-y-3">
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">
-                    Fit Mode
-                  </Label>
-                  <div className="flex gap-2">
-                    <ToggleButton
-                      active={currentImageFit === "contain"}
-                      onClick={() => updateField({ imageFit: "contain" })}
-                      icon={<RectangleHorizontal className="w-3.5 h-3.5" />}
-                      label="Contain"
+            <>
+              <Section
+                icon={<ImageIcon className="w-3.5 h-3.5" />}
+                title="Image"
+              >
+                <div className="space-y-3">
+                  {/* Fit */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">
+                      Fit Mode
+                    </Label>
+                    <div className="flex gap-1.5">
+                      <ToggleButton
+                        active={currentImageFit === "contain"}
+                        onClick={() => updateField({ imageFit: "contain" })}
+                        icon={<RectangleHorizontal className="w-3.5 h-3.5" />}
+                        label="Contain"
+                      />
+                      <ToggleButton
+                        active={currentImageFit === "cover"}
+                        onClick={() => updateField({ imageFit: "cover" })}
+                        icon={<Square className="w-3.5 h-3.5" />}
+                        label="Cover"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Scale */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">
+                      <ZoomIn className="w-3 h-3 inline mr-1" />
+                      Scale
+                    </Label>
+                    <NudgeControl
+                      value={currentSlide.imageScale || 1}
+                      onChange={(v) =>
+                        updateField({
+                          imageScale: Math.round(v * 100) / 100,
+                        })
+                      }
+                      step={0.05}
+                      min={0.2}
+                      max={3}
+                      format={(v) => `${Math.round(v * 100)}%`}
+                      parse={(s) => {
+                        const n = parseFloat(s.replace("%", ""));
+                        return isNaN(n) ? null : n / 100;
+                      }}
                     />
-                    <ToggleButton
-                      active={currentImageFit === "cover"}
-                      onClick={() => updateField({ imageFit: "cover" })}
-                      icon={<Square className="w-3.5 h-3.5" />}
-                      label="Cover"
+                  </div>
+
+                  {/* Position */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs text-muted-foreground">
+                        <Move className="w-3 h-3 inline mr-1" />
+                        Position
+                      </Label>
+                      {(currentSlide.imageOffsetX ||
+                        currentSlide.imageOffsetY) && (
+                        <button
+                          onClick={() =>
+                            updateField({ imageOffsetX: 0, imageOffsetY: 0 })
+                          }
+                          className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <RotateCcw className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      <NudgeControl
+                        label="X"
+                        value={currentSlide.imageOffsetX || 0}
+                        onChange={(v) => updateField({ imageOffsetX: v })}
+                        step={10}
+                        min={-500}
+                        max={500}
+                        format={(v) => `${v}`}
+                        parse={(s) => {
+                          const n = parseInt(s);
+                          return isNaN(n) ? null : n;
+                        }}
+                        suffix="px"
+                      />
+                      <NudgeControl
+                        label="Y"
+                        value={currentSlide.imageOffsetY || 0}
+                        onChange={(v) => updateField({ imageOffsetY: v })}
+                        step={10}
+                        min={-500}
+                        max={500}
+                        format={(v) => `${v}`}
+                        parse={(s) => {
+                          const n = parseInt(s);
+                          return isNaN(n) ? null : n;
+                        }}
+                        suffix="px"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Rotation */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">
+                      <RotateCw className="w-3 h-3 inline mr-1" />
+                      Rotation
+                    </Label>
+                    <NudgeControl
+                      value={currentSlide.imageRotation || 0}
+                      onChange={(v) => updateField({ imageRotation: v })}
+                      step={1}
+                      min={-180}
+                      max={180}
+                      format={(v) => `${v}`}
+                      parse={(s) => {
+                        const n = parseInt(s);
+                        return isNaN(n) ? null : n;
+                      }}
+                      suffix={"\u00B0"}
                     />
                   </div>
                 </div>
+              </Section>
 
-                {/* Image Scale */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">
-                    <ZoomIn className="w-3 h-3 inline mr-1" />
-                    Scale ({Math.round((currentSlide.imageScale || 1) * 100)}%)
-                  </Label>
-                  <NudgeControl
-                    value={currentSlide.imageScale || 1}
-                    onChange={(v) =>
-                      updateField({ imageScale: Math.round(v * 100) / 100 })
-                    }
-                    step={0.05}
-                    min={0.2}
-                    max={3}
-                    format={(v) => `${Math.round(v * 100)}%`}
-                  />
-                </div>
-
-                {/* Image Position */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">
-                    <Move className="w-3 h-3 inline mr-1" />
-                    Position
-                  </Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <NudgeControl
-                      label="X"
-                      value={currentSlide.imageOffsetX || 0}
-                      onChange={(v) => updateField({ imageOffsetX: v })}
-                      step={10}
-                      min={-500}
-                      max={500}
-                      format={(v) => `${v}px`}
-                    />
-                    <NudgeControl
-                      label="Y"
-                      value={currentSlide.imageOffsetY || 0}
-                      onChange={(v) => updateField({ imageOffsetY: v })}
-                      step={10}
-                      min={-500}
-                      max={500}
-                      format={(v) => `${v}px`}
-                    />
-                  </div>
-                </div>
-
-                {/* Image Rotation */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">
-                    <RotateCw className="w-3 h-3 inline mr-1" />
-                    Rotation
-                  </Label>
-                  <NudgeControl
-                    value={currentSlide.imageRotation || 0}
-                    onChange={(v) => updateField({ imageRotation: v })}
-                    step={1}
-                    min={-180}
-                    max={180}
-                    format={(v) => `${v}\u00B0`}
-                  />
-                </div>
-              </div>
-            </Section>
+              <Separator className="my-4" />
+            </>
           )}
 
-          {/* ── Typography ── */}
+          {/* ━━━━━━━━━━ TYPOGRAPHY ━━━━━━━━━━ */}
           <Section icon={<Type className="w-3.5 h-3.5" />} title="Typography">
             <div className="space-y-3">
+              {/* Font */}
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Font</Label>
                 <Select
                   value={style.fontFamily}
                   onValueChange={(val) => onStyleChange({ fontFamily: val })}
                 >
-                  <SelectTrigger className="w-full h-9">
+                  <SelectTrigger className="w-full h-8 text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -285,6 +354,7 @@ export function CarouselControls({
                 </Select>
               </div>
 
+              {/* Size */}
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">
                   Size ({currentFontSize}px)
@@ -309,6 +379,7 @@ export function CarouselControls({
                 </div>
               </div>
 
+              {/* Alignment */}
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">
                   Alignment
@@ -334,14 +405,36 @@ export function CarouselControls({
                   />
                 </div>
               </div>
+            </div>
+          </Section>
 
-              {/* Heading Position */}
+          <Separator className="my-4" />
+
+          {/* ━━━━━━━━━━ HEADING TRANSFORM ━━━━━━━━━━ */}
+          <Section
+            icon={<Move className="w-3.5 h-3.5" />}
+            title="Heading Transform"
+          >
+            <div className="space-y-3">
+              {/* Position */}
               <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">
-                  <Move className="w-3 h-3 inline mr-1" />
-                  Heading Position
-                </Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-muted-foreground">
+                    Position
+                  </Label>
+                  {(currentSlide.headingOffsetX ||
+                    currentSlide.headingOffsetY) && (
+                    <button
+                      onClick={() =>
+                        updateField({ headingOffsetX: 0, headingOffsetY: 0 })
+                      }
+                      className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
                   <NudgeControl
                     label="X"
                     value={currentSlide.headingOffsetX || 0}
@@ -349,7 +442,12 @@ export function CarouselControls({
                     step={5}
                     min={-300}
                     max={300}
-                    format={(v) => `${v}px`}
+                    format={(v) => `${v}`}
+                    parse={(s) => {
+                      const n = parseInt(s);
+                      return isNaN(n) ? null : n;
+                    }}
+                    suffix="px"
                   />
                   <NudgeControl
                     label="Y"
@@ -358,16 +456,21 @@ export function CarouselControls({
                     step={5}
                     min={-300}
                     max={300}
-                    format={(v) => `${v}px`}
+                    format={(v) => `${v}`}
+                    parse={(s) => {
+                      const n = parseInt(s);
+                      return isNaN(n) ? null : n;
+                    }}
+                    suffix="px"
                   />
                 </div>
               </div>
 
-              {/* Heading Rotation */}
+              {/* Rotation */}
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">
                   <RotateCw className="w-3 h-3 inline mr-1" />
-                  Heading Rotation
+                  Rotation
                 </Label>
                 <NudgeControl
                   value={currentSlide.headingRotation || 0}
@@ -375,15 +478,23 @@ export function CarouselControls({
                   step={1}
                   min={-180}
                   max={180}
-                  format={(v) => `${v}\u00B0`}
+                  format={(v) => `${v}`}
+                  parse={(s) => {
+                    const n = parseInt(s);
+                    return isNaN(n) ? null : n;
+                  }}
+                  suffix={"\u00B0"}
                 />
               </div>
             </div>
           </Section>
 
-          {/* ── Colors ── */}
-          <Section title="Colors">
+          <Separator className="my-4" />
+
+          {/* ━━━━━━━━━━ COLORS ━━━━━━━━━━ */}
+          <Section icon={<Palette className="w-3.5 h-3.5" />} title="Colors">
             <div className="space-y-3">
+              {/* Background */}
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">
                   Background
@@ -420,48 +531,53 @@ export function CarouselControls({
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">
-                  Heading Color
-                </Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={style.headingColor}
-                    onChange={(e) =>
-                      onStyleChange({ headingColor: e.target.value })
-                    }
-                    className="w-7 h-7 rounded cursor-pointer border border-border"
-                  />
-                  <span className="text-xs text-muted-foreground font-mono">
-                    {style.headingColor}
-                  </span>
+              {/* Heading + Text color row */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">
+                    Heading
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={style.headingColor}
+                      onChange={(e) =>
+                        onStyleChange({ headingColor: e.target.value })
+                      }
+                      className="w-7 h-7 rounded cursor-pointer border border-border shrink-0"
+                    />
+                    <span className="text-[10px] text-muted-foreground font-mono truncate">
+                      {style.headingColor}
+                    </span>
+                  </div>
                 </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">
-                  Text Color
-                </Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={style.fontColor}
-                    onChange={(e) =>
-                      onStyleChange({ fontColor: e.target.value })
-                    }
-                    className="w-7 h-7 rounded cursor-pointer border border-border"
-                  />
-                  <span className="text-xs text-muted-foreground font-mono">
-                    {style.fontColor}
-                  </span>
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Text</Label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={style.fontColor}
+                      onChange={(e) =>
+                        onStyleChange({ fontColor: e.target.value })
+                      }
+                      className="w-7 h-7 rounded cursor-pointer border border-border shrink-0"
+                    />
+                    <span className="text-[10px] text-muted-foreground font-mono truncate">
+                      {style.fontColor}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </Section>
 
-          {/* ── Slide Number ── */}
-          <Section icon={<Hash className="w-3.5 h-3.5" />} title="Slide Number">
+          <Separator className="my-4" />
+
+          {/* ━━━━━━━━━━ SLIDE NUMBER ━━━━━━━━━━ */}
+          <Section
+            icon={<Hash className="w-3.5 h-3.5" />}
+            title="Slide Number"
+          >
             <div className="space-y-3">
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Format</Label>
@@ -488,7 +604,7 @@ export function CarouselControls({
                   <Label className="text-xs text-muted-foreground">
                     Position
                   </Label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1.5">
                     <ToggleButton
                       active={slideNumberPosition === "top-left"}
                       onClick={() => onSlideNumberPositionChange("top-left")}
@@ -505,19 +621,11 @@ export function CarouselControls({
             </div>
           </Section>
 
-          {/* ── Author ── */}
-          <Section icon={<User className="w-3.5 h-3.5" />} title="Author">
-            <Input
-              value={authorName}
-              onChange={(e) => onAuthorNameChange(e.target.value)}
-              placeholder="Author name"
-              className="h-9 text-sm"
-            />
-          </Section>
+          <Separator className="my-4" />
 
-          {/* ── Export ── */}
-          <Section title="Export">
-            <div className="flex gap-2">
+          {/* ━━━━━━━━━━ EXPORT ━━━━━━━━━━ */}
+          <Section icon={<Download className="w-3.5 h-3.5" />} title="Export">
+            <div className="flex gap-1.5">
               <button
                 onClick={() => onExportFormatChange("png")}
                 className={cn(
@@ -548,7 +656,7 @@ export function CarouselControls({
   );
 }
 
-/* ── Shared sub-components ── */
+/* ━━━━━━━━━━ Shared sub-components ━━━━━━━━━━ */
 
 function Section({
   title,
@@ -560,10 +668,10 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       <div className="flex items-center gap-1.5">
         {icon && <span className="text-muted-foreground">{icon}</span>}
-        <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
           {title}
         </Label>
       </div>
@@ -634,6 +742,8 @@ function NudgeControl({
   min,
   max,
   format,
+  parse,
+  suffix,
 }: {
   label?: string;
   value: number;
@@ -642,10 +752,36 @@ function NudgeControl({
   min: number;
   max: number;
   format: (v: number) => string;
+  parse: (s: string) => number | null;
+  suffix?: string;
 }) {
   const clamp = (v: number) => Math.min(max, Math.max(min, v));
+  const [editing, setEditing] = useState(false);
+  const [editValue, setEditValue] = useState("");
+
+  const startEdit = () => {
+    setEditValue(format(value));
+    setEditing(true);
+  };
+
+  const commitEdit = () => {
+    setEditing(false);
+    const parsed = parse(editValue);
+    if (parsed !== null) {
+      onChange(clamp(parsed));
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      commitEdit();
+    } else if (e.key === "Escape") {
+      setEditing(false);
+    }
+  };
+
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-0.5">
       {label && (
         <span className="text-[10px] font-medium text-muted-foreground w-3 shrink-0">
           {label}
@@ -655,16 +791,30 @@ function NudgeControl({
         onClick={() => onChange(clamp(value - step))}
         className="w-6 h-6 rounded border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 transition-colors shrink-0"
       >
-        <Minus className="w-3 h-3" />
+        <Minus className="w-2.5 h-2.5" />
       </button>
-      <span className="flex-1 text-center text-[11px] font-mono text-muted-foreground tabular-nums select-none">
-        {format(value)}
-      </span>
+      {editing ? (
+        <input
+          autoFocus
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onBlur={commitEdit}
+          onKeyDown={handleKeyDown}
+          className="flex-1 min-w-0 text-center text-[11px] font-mono tabular-nums bg-white border border-primary rounded px-1 h-6 focus:outline-none"
+        />
+      ) : (
+        <button
+          onClick={startEdit}
+          className="flex-1 min-w-0 text-center text-[11px] font-mono text-muted-foreground tabular-nums h-6 rounded hover:bg-muted/30 transition-colors cursor-text"
+        >
+          {format(value)}{suffix}
+        </button>
+      )}
       <button
         onClick={() => onChange(clamp(value + step))}
         className="w-6 h-6 rounded border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 transition-colors shrink-0"
       >
-        <Plus className="w-3 h-3" />
+        <Plus className="w-2.5 h-2.5" />
       </button>
     </div>
   );

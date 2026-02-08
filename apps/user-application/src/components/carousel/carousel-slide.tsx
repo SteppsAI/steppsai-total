@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+import { cn } from "@/lib/utils";
 import type {
   CarouselSlide,
   CarouselStyle,
@@ -72,7 +73,6 @@ export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
         }}
         className="relative flex flex-col overflow-hidden shrink-0"
       >
-        {/* Slide number */}
         {slideNumber && (
           <div
             className="absolute top-10 z-10"
@@ -89,9 +89,7 @@ export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
           </div>
         )}
 
-        {/* Content area - takes remaining space above the bottom bar */}
         <div className="flex-1 flex flex-col p-16 pb-4 min-h-0">
-          {/* Heading - shrinks to fit content */}
           <div className="shrink-0" style={headingTransform ? { transform: headingTransform } : undefined}>
             <h2
               style={{
@@ -107,18 +105,27 @@ export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
             </h2>
           </div>
 
-          {/* Optional image - fills remaining space but never overflows */}
           {slide.imageUrl && (
             <div
               className="flex-1 flex items-center justify-center mt-6 min-h-0"
               style={imageTransform ? { transform: imageTransform } : undefined}
             >
-              <div className="w-full h-full flex items-center justify-center rounded-2xl overflow-hidden bg-white/10 shadow-lg">
+              <div
+                className={cn(
+                  "overflow-hidden",
+                  imageFit === "cover"
+                    ? "w-full h-full"
+                    : "w-full h-full flex items-center justify-center"
+                )}
+              >
                 <img
                   src={slide.imageUrl}
                   alt=""
-                  className="max-w-full max-h-full"
-                  style={{ objectFit: imageFit }}
+                  className={
+                    imageFit === "cover"
+                      ? "w-full h-full object-cover"
+                      : "max-w-full max-h-full object-contain"
+                  }
                   crossOrigin="anonymous"
                 />
               </div>

@@ -3,6 +3,7 @@ import {
   Home,
   Library,
   Edit,
+  LayoutGrid,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useLocation } from "@tanstack/react-router";
@@ -102,6 +103,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Link to="/app/editor" onClick={handleLinkClick} className="flex items-center gap-3">
                     <Edit className="size-5 opacity-70 group-hover:opacity-100 transition-opacity" />
                     <span className="text-base">Editor</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith("/app/carousel")}
+                  tooltip="Carousel"
+                  size="default"
+                  className="h-10 transition-all duration-200 ease-in-out font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:[&>span]:hidden"
+                >
+                  <Link to="/app/carousel" onClick={handleLinkClick} className="flex items-center gap-3">
+                    <LayoutGrid className="size-5 opacity-70 group-hover:opacity-100 transition-opacity" />
+                    <span className="text-base">Carousel</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

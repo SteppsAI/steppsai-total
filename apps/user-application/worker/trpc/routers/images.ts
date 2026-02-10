@@ -54,6 +54,29 @@ export const imagesRouter = router({
             const result = await backend.deleteImagesBatch(input.keys);
             return result as { success: boolean; deleted: number };
         }),
+
+    /**
+     * Fetch an asset image and return it as a base64 data URI.
+     * Used by carousel export to avoid cross-origin canvas tainting.
+     */
+    fetchAsDataUri: publicProcedure
+        .input(z.object({ url: z.string() }))
+        .query(async ({ ctx, input }) => {
+            const assetsUrl = ctx.env.ASSETS_URL;
+            if (!input.url.startsWith(assetsUrl)) {
+                throw new Error("URL not allowed");
+            }
+
+            const response = await fetch(input.url);
+            if (!response.ok) throw new Error("Failed to fetch image");
+
+            const buffer = await response.arrayBuffer();
+            const base64 = btoa(
+                new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
+            );
+            const contentType = response.headers.get("Content-Type") || "image/png";
+            return `data:${contentType};base64,${base64}`;
+        }),
 });
 
 

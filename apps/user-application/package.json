@@ -63,6 +63,7 @@
     "hono": "^4.8.3",
     "hono-rate-limiter": "^0.4.2",
     "html-to-image": "^1.11.13",
+    "jszip": "^3.10.1",
     "iso-3166-1": "^2.1.1",
     "konva": "^10.0.12",
     "lucide-react": "^0.503.0",

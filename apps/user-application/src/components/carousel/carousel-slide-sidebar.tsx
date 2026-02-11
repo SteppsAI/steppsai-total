@@ -84,10 +84,10 @@ function SortableSlideItem({
         isDragging && "shadow-lg rounded-xl bg-white/80"
       )}
     >
-      <div className="flex items-center justify-between px-1">
+      <div className="flex items-center gap-1.5 px-1">
         <button
           className={cn(
-            "cursor-grab active:cursor-grabbing p-1 -ml-1 rounded hover:bg-[var(--color-100)] transition-colors",
+            "cursor-grab active:cursor-grabbing p-1 -ml-1 rounded hover:bg-[var(--color-100)] transition-colors shrink-0",
             "text-[var(--color-400)] hover:text-[var(--color-600)]",
             "opacity-0 group-hover:opacity-100 focus:opacity-100"
           )}
@@ -98,7 +98,7 @@ function SortableSlideItem({
         </button>
         <span
           className={cn(
-            "text-xs font-bold transition-colors",
+            "text-xs font-bold transition-colors shrink-0",
             isActive
               ? "text-primary"
               : "text-[var(--color-500)]"
@@ -106,6 +106,18 @@ function SortableSlideItem({
         >
           {index + 1}
         </span>
+        {slide.heading && (
+          <span
+            className={cn(
+              "text-[10px] leading-tight line-clamp-1 transition-colors",
+              isActive
+                ? "text-primary/70"
+                : "text-[var(--color-400)]"
+            )}
+          >
+            {slide.heading}
+          </span>
+        )}
       </div>
 
       <div

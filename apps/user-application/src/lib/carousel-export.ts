@@ -1,4 +1,5 @@
 import { toPng, toJpeg } from "html-to-image";
+import JSZip from "jszip";
 import type { ExportFormat } from "./carousel-templates";
 
 function sanitizeFilename(name: string): string {
@@ -7,15 +8,6 @@ function sanitizeFilename(name: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 50) || "carousel";
-}
-
-function downloadBlob(dataUrl: string, filename: string) {
-  const link = document.createElement("a");
-  link.download = filename;
-  link.href = dataUrl;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
 }
 
 function delay(ms: number) {
@@ -63,6 +55,17 @@ async function imageToDataUrl(url: string): Promise<string> {
   }
 }
 
+function dataUrlToBlob(dataUrl: string): Blob {
+  const [header, base64] = dataUrl.split(",");
+  const mime = header.match(/:(.*?);/)?.[1] ?? "image/png";
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new Blob([bytes], { type: mime });
+}
+
 export async function exportCarouselSlides(
   slideRefs: React.RefObject<HTMLDivElement | null>[],
   title: string,
@@ -72,6 +75,7 @@ export async function exportCarouselSlides(
   const sanitized = sanitizeFilename(title);
   const ext = format === "png" ? "png" : "jpg";
   const total = slideRefs.length;
+  const zip = new JSZip();
 
   const container = document.createElement("div");
   container.style.position = "fixed";
@@ -137,10 +141,21 @@ export async function exportCarouselSlides(
           };
 
       const dataUrl = await convert(clone, options);
-      downloadBlob(dataUrl, `${sanitized}-carousel-${i + 1}.${ext}`);
+      const blob = dataUrlToBlob(dataUrl);
+      zip.file(`${sanitized}-${i + 1}.${ext}`, blob);
 
       if (i < total - 1) await delay(200);
     }
+
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(zipBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${sanitized}-carousel.zip`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   } finally {
     if (document.body.contains(container)) {
       document.body.removeChild(container);

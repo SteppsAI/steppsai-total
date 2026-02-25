@@ -133,7 +133,7 @@ function UpgradePage() {
 
   const currentProductId = selectedPlan === "team" ? config.teamProductId : config.productId;
   const currentFeatures = selectedPlan === "team" ? TEAM_FEATURES : INDIVIDUAL_FEATURES;
-  const currentPrice = selectedPlan === "team" ? "$249" : "$149";
+  const currentPrice = selectedPlan === "team" ? "$249" : "$99";
   const currentBadge = selectedPlan === "team" ? "TEAM DEAL" : "LIFETIME DEAL";
   const currentDescription = selectedPlan === "team"
     ? "Perfect for small teams. 3 seats included with all Pro features."

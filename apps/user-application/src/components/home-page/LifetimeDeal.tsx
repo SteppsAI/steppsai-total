@@ -99,7 +99,7 @@ export function LifetimeDeal() {
 
                                     <div className="flex items-baseline gap-2 mb-8">
                                         <span className="text-5xl lg:text-6xl font-black tracking-tighter text-[var(--color-950)]">
-                                            $149
+                                            $99
                                         </span>
                                         <div className="flex flex-col">
                                             <span className="text-[10px] font-black text-primary uppercase tracking-widest leading-none">One-Time</span>

@@ -45,7 +45,7 @@ export function Features() {
                         <div>
                             <div className="flex items-center gap-2">
                                 <span className="flex justify-center items-center size-5 rounded-full border">
-                                    <span className="size-3 rounded-full bg-primary"/>
+                                    <span className="size-3 rounded-full bg-primary" />
                                 </span>
                                 <span className="text-muted-foreground text-xs">Sat 22 Feb</span>
                             </div>

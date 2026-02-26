@@ -24,6 +24,131 @@ Alles wat je nodig hebt om deze architectuur te repliceren in een ander project.
 
 ---
 
+## Waarom Deze Stack? (en niet Next.js)
+
+### De kernvraag: waarom geen Next.js?
+
+Next.js is een uitstekend framework, maar het past niet bij wat we bouwen. De keuze tegen Next.js en vóór React + Vite + Hono op Cloudflare Workers komt neer op drie dingen: **edge-native deployment**, **volledige controle**, en **geen vendor lock-in**.
+
+| Overweging | Next.js | Onze stack (React + Vite + Hono + CF Workers) |
+|---|---|---|
+| **Deployment** | Optimaal op Vercel, beperkt elders | Native op Cloudflare's edge (300+ locaties) |
+| **Server runtime** | Node.js (of edge met beperkingen) | Cloudflare Workers (V8 isolates, ~0ms cold start) |
+| **API layer** | API Routes (file-based, geen type safety) | tRPC (end-to-end type-safe, zero codegen) |
+| **Server controle** | Next.js bepaalt de middleware/server flow | Hono geeft volledige controle over elke request |
+| **Service bindings** | Niet mogelijk | Worker-to-Worker RPC (zero-latency, in-memory) |
+| **Vendor lock-in** | Sterk gekoppeld aan Vercel voor optimale ervaring | Cloudflare, maar Hono/Vite/React zijn portable |
+| **Bundle size** | Framework overhead (~85kb+ baseline) | Alleen wat je gebruikt (React + je code) |
+| **Build snelheid** | Webpack/Turbopack | Vite (ESBuild + Rollup, significant sneller) |
+
+### Waarom Cloudflare Workers als runtime?
+
+**Het probleem met traditionele hosting:** een Node.js server draait op één locatie. Gebruikers aan de andere kant van de wereld hebben altijd latency. Je kunt CDN's gebruiken voor assets, maar je API calls gaan nog steeds naar die ene server.
+
+**Workers lossen dit op:**
+- Code draait op 300+ edge locaties wereldwijd — dichtbij de gebruiker
+- V8 isolates in plaats van containers → ~0ms cold start (vs Lambda's 100-500ms)
+- Per-request pricing, geen idle servers
+- Native integratie met R2 (storage), Queues, Durable Objects, KV — alles binnen hetzelfde netwerk
+
+**Service bindings** zijn de killer feature: onze frontend Worker roept de backend Worker aan via `BACKEND_SERVICE.methodName()`. Dit is geen HTTP call — het is een in-memory functieaanroep binnen Cloudflare's netwerk. Zero latency overhead.
+
+### Waarom React + Vite (en niet een meta-framework)?
+
+**React zonder meta-framework geeft ons:**
+- **SPA model** — onze app is een dashboard/editor tool, geen content site. We hebben geen SSR nodig voor SEO op de app-pagina's
+- **Volledige controle over routing** — TanStack Router geeft ons file-based routing met type-safe params, prefetching, en auth guards zonder framework-magie
+- **Simpeler mentaal model** — geen server components, geen "use client" directives, geen hydration mismatches. Gewoon React
+
+**Vite als build tool:**
+- 10-50x snellere dev startup dan Webpack (ESBuild voor transforms)
+- Hot Module Replacement (HMR) in <50ms
+- Optimale code-splitting out of the box
+- Cloudflare's eigen Vite plugin (`@cloudflare/vite-plugin`) integreert Worker builds naadloos
+
+### Waarom Hono als BFF?
+
+**Het BFF (Backend-For-Frontend) pattern:** één server die precies weet wat de frontend nodig heeft.
+
+Hono is gekozen omdat:
+- **Gebouwd voor edge** — 14kb, zero dependencies, draait native op Workers
+- **Express-achtige DX** — middleware, routing, context — vertrouwd voor elke Node.js developer
+- **Middleware stack = onze security laag** — auth, access control, rate limiting zijn allemaal Hono middleware die request-per-request worden toegepast
+- **Flexibel** — we routeren auth naar Better-Auth, API calls naar tRPC, en static assets naar Vite's build output, allemaal vanuit één Hono app
+
+Vergelijk met Next.js API Routes: daar heb je geen middleware compositie, geen fine-grained rate limiting per route, en geen service bindings.
+
+### Waarom tRPC?
+
+**Het probleem:** frontend en backend moeten dezelfde data shapes kennen. Met REST schrijf je types twee keer (of gebruik je codegen). Met GraphQL heb je een schema + codegen pipeline.
+
+**tRPC lost dit op:**
+- Je definieert een procedure op de server met Zod validation
+- De frontend kent automatisch de input/output types — zero codegen
+- Autocompletion werkt door de hele stack heen: `trpc.guides.getAll.queryOptions()` is volledig typed
+- Integreert native met TanStack Query (caching, invalidation, optimistic updates)
+- `httpBatchLink` combineert meerdere calls in één HTTP request
+
+### Waarom Better-Auth?
+
+**Alternatieven overwogen:**
+- **Clerk/Auth0** → externe dependency, kosten per MAU, data buiten je controle
+- **Auth.js (NextAuth)** → primair ontworpen voor Next.js, edge support is beperkt
+- **Zelf bouwen** → security risico, onderhoudslast
+
+**Better-Auth past omdat:**
+- **Self-hosted** — draait in onze eigen Worker, data in onze eigen database
+- **Cookie-based** — geen token management op de frontend nodig, `credentials: "include"` is genoeg
+- **Edge-compatible** — werkt native op Cloudflare Workers
+- **Singleton factory** — één instance per Worker lifecycle, efficiënt op edge
+- **OAuth + email/password** — Google login en klassieke auth in één library
+
+### Waarom Tailwind v4 + shadcn/ui?
+
+- **Tailwind v4** → CSS-native (geen JS config), snellere builds, CSS variables voor theming
+- **shadcn/ui** → geen package dependency, componenten worden gekopieerd naar je project. Je **bezit** de code en kunt alles aanpassen. Gebouwd op Radix UI (accessibility out of the box)
+- **Geen CSS-in-JS overhead** — geen runtime style injection, alles is compile-time
+
+### Waarom TanStack Router i.p.v. React Router?
+
+- **Type-safe route params** — `$guideId` is typed als `string`, niet `any`
+- **File-based routing** — net als Next.js, maar voor SPA's
+- **Ingebouwde data loading** — `beforeLoad` voor auth guards + prefetching
+- **Auto code-splitting** — elke route is een lazy-loaded chunk
+- **Eerste klas TanStack Query integratie** — `queryOptions()` pattern werkt naadloos
+
+### Next.js vs React + Vite: de beslissing
+
+**Het verschil zit in hoe de eerste paginalading werkt:**
+
+- **Next.js (SSR)** — de server rendert HTML kant-en-klaar. De crawler en de gebruiker krijgen meteen de volledige pagina. Geen loading state, geen lege div.
+- **React + Vite (SPA)** — de browser krijgt eerst een lege `<div id="app">`, JavaScript laadt, dan pas verschijnt content. Google kan JavaScript uitvoeren in 2026, maar SSR is *gegarandeerd* goed terwijl SPA *waarschijnlijk* goed is.
+
+**Cloudflare maakt hosting snel, maar lost het rendering-probleem niet op.** Of je op Cloudflare of AWS zit — een SPA stuurt altijd eerst een lege div die JavaScript moet uitvoeren. Dat is een rendering-keuze, geen hosting-keuze.
+
+### Wanneer wat kiezen
+
+**Kies React + Vite als:**
+- Het een **app achter een login** is (dashboard, admin panel, editor, interne tool)
+- SEO niet relevant is voor de kernpagina's — crawlers hoeven daar niet te komen
+- Je **snelheid van development** wilt — simpeler mentaal model, geen server components, geen hydration issues
+- Voorbeeld: Stepps.ai — de editor, het dashboard, settings zijn allemaal achter login
+
+**Kies Next.js als:**
+- De klant **publieke pagina's** heeft die gevonden moeten worden (marketing, blog, producten, e-commerce)
+- **Eerste indruk qua laadsnelheid** belangrijk is — geen spinner bij eerste bezoek
+- Je **dynamische meta tags** nodig hebt voor social sharing (Open Graph previews)
+
+**Typisch klantproject (landing + app):**
+De meeste klantprojecten hebben allebei nodig — een SEO-geoptimaliseerde landing page + een app achter login. Dan heb je twee opties:
+
+1. **Next.js voor alles** — landing pages SSR, app-pagina's client-side met `"use client"`. Eén codebase, simpelste setup. Nadeel: je sleept server component complexiteit mee voor het app-gedeelte.
+2. **Split: aparte landing (Next.js/Astro) + app (React + Vite)** — elk deel krijgt de optimale tool. Nadeel: twee codebases/deploys.
+
+Voor de meeste klantprojecten is optie 1 (Next.js) het pragmatisch. Tenzij de app het zwaartepunt is en de landing page klein — dan is React + Vite voor de app + een simpele static site voor de landing de cleanere keuze. Dat is ook wat we bij Stepps.ai doen.
+
+---
+
 ## Hoe Het In Elkaar Zit
 
 ### Eén Worker doet alles

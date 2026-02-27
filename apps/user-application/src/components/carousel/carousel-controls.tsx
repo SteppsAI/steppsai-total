@@ -12,6 +12,12 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 import type {
   CarouselSlide,
@@ -115,7 +121,7 @@ export function CarouselControls({
               {/* Heading */}
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">
-                  Heading
+                  Screenshot Title
                 </Label>
                 <Textarea
                   value={currentSlide.heading}
@@ -379,6 +385,11 @@ export function CarouselControls({
             <>
               <Section title="Image">
                 <div className="space-y-3">
+                  <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
+                    Drag, resize, and rotate the image directly on the canvas.
+                    Use Advanced below for exact values.
+                  </div>
+
                   {/* Border Radius */}
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">
@@ -398,135 +409,6 @@ export function CarouselControls({
                       suffix="px"
                     />
                   </div>
-
-                  {/* Scale */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">
-                      <ZoomIn className="w-3 h-3 inline mr-1" />
-                      Fine Scale
-                    </Label>
-                    <NudgeControl
-                      value={currentSlide.imageScale || 1}
-                      onChange={(v) =>
-                        updateField({
-                          imageScale: Math.round(v * 100) / 100,
-                        })
-                      }
-                      step={0.05}
-                      min={0.2}
-                      max={3}
-                      format={(v) => `${Math.round(v * 100)}%`}
-                      parse={(s) => {
-                        const n = parseFloat(s.replace("%", ""));
-                        return isNaN(n) ? null : n / 100;
-                      }}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <NudgeControl
-                      label="Width"
-                      value={currentSlide.imageWidthPercent || 100}
-                      onChange={(v) =>
-                        updateField({ imageWidthPercent: Math.round(v) })
-                      }
-                      step={5}
-                      min={20}
-                      max={140}
-                      format={(v) => `${Math.round(v)}%`}
-                      parse={(s) => {
-                        const n = parseFloat(s.replace("%", ""));
-                        return isNaN(n) ? null : n;
-                      }}
-                    />
-                    <NudgeControl
-                      label="Height"
-                      value={currentSlide.imageHeightPercent || 100}
-                      onChange={(v) =>
-                        updateField({ imageHeightPercent: Math.round(v) })
-                      }
-                      step={5}
-                      min={20}
-                      max={140}
-                      format={(v) => `${Math.round(v)}%`}
-                      parse={(s) => {
-                        const n = parseFloat(s.replace("%", ""));
-                        return isNaN(n) ? null : n;
-                      }}
-                    />
-                  </div>
-
-                  {/* Position */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-xs text-muted-foreground">
-                        <Move className="w-3 h-3 inline mr-1" />
-                        Position
-                      </Label>
-                      {(currentSlide.imageOffsetX ||
-                        currentSlide.imageOffsetY) && (
-                        <button
-                          onClick={() =>
-                            updateField({ imageOffsetX: 0, imageOffsetY: 0 })
-                          }
-                          className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          <RotateCcw className="w-3 h-3" />
-                        </button>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      <NudgeControl
-                        label="X"
-                        value={currentSlide.imageOffsetX || 0}
-                        onChange={(v) => updateField({ imageOffsetX: v })}
-                        step={10}
-                        min={-500}
-                        max={500}
-                        format={(v) => `${v}`}
-                        parse={(s) => {
-                          const n = parseInt(s);
-                          return isNaN(n) ? null : n;
-                        }}
-                        suffix="px"
-                      />
-                      <NudgeControl
-                        label="Y"
-                        value={currentSlide.imageOffsetY || 0}
-                        onChange={(v) => updateField({ imageOffsetY: v })}
-                        step={10}
-                        min={-500}
-                        max={500}
-                        format={(v) => `${v}`}
-                        parse={(s) => {
-                          const n = parseInt(s);
-                          return isNaN(n) ? null : n;
-                        }}
-                        suffix="px"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Rotation */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">
-                      <RotateCw className="w-3 h-3 inline mr-1" />
-                      Rotation
-                    </Label>
-                    <NudgeControl
-                      value={currentSlide.imageRotation || 0}
-                      onChange={(v) => updateField({ imageRotation: v })}
-                      step={1}
-                      min={-180}
-                      max={180}
-                      format={(v) => `${v}`}
-                      parse={(s) => {
-                        const n = parseInt(s);
-                        return isNaN(n) ? null : n;
-                      }}
-                      suffix={"\u00B0"}
-                    />
-                  </div>
                 </div>
               </Section>
 
@@ -534,111 +416,275 @@ export function CarouselControls({
             </>
           )}
 
-          {/* ━━━━━━━━━━ TEXT POSITION ━━━━━━━━━━ */}
-          <Section title="Text Position">
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-1.5">
-                <NudgeControl
-                  label="Width"
-                  value={currentSlide.headingMaxWidth || 100}
-                  onChange={(v) => updateField({ headingMaxWidth: Math.round(v) })}
-                  step={5}
-                  min={35}
-                  max={100}
-                  format={(v) => `${Math.round(v)}%`}
-                  parse={(s) => {
-                    const n = parseFloat(s.replace("%", ""));
-                    return isNaN(n) ? null : n;
-                  }}
-                />
-                <NudgeControl
-                  label="Line"
-                  value={currentSlide.headingLineHeight || 1.15}
-                  onChange={(v) =>
-                    updateField({ headingLineHeight: Math.round(v * 100) / 100 })
-                  }
-                  step={0.05}
-                  min={0.8}
-                  max={1.8}
-                  format={(v) => `${v.toFixed(2)}`}
-                  parse={(s) => {
-                    const n = parseFloat(s);
-                    return isNaN(n) ? null : n;
-                  }}
-                />
-              </div>
+          <Section title="Advanced">
+            <Accordion
+              type="single"
+              collapsible
+              className="w-full rounded-lg border border-border/60 px-3"
+            >
+              <AccordionItem value="manual-adjustments" className="border-b-0">
+                <AccordionTrigger className="py-3 text-sm font-medium hover:no-underline">
+                  Manual adjustments
+                </AccordionTrigger>
+                <AccordionContent className="pt-1">
+                  <div className="space-y-4">
+                    {currentSlide.imageUrl && (
+                      <div className="space-y-3">
+                        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Image transform
+                        </Label>
 
-              {/* Position */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs text-muted-foreground">
-                    Offset
-                  </Label>
-                  {(currentSlide.headingOffsetX ||
-                    currentSlide.headingOffsetY) && (
-                    <button
-                      onClick={() =>
-                        updateField({ headingOffsetX: 0, headingOffsetY: 0 })
-                      }
-                      className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <RotateCcw className="w-3 h-3" />
-                    </button>
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-1.5">
-                  <NudgeControl
-                    label="X"
-                    value={currentSlide.headingOffsetX || 0}
-                    onChange={(v) => updateField({ headingOffsetX: v })}
-                    step={5}
-                    min={-300}
-                    max={300}
-                    format={(v) => `${v}`}
-                    parse={(s) => {
-                      const n = parseInt(s);
-                      return isNaN(n) ? null : n;
-                    }}
-                    suffix="px"
-                  />
-                  <NudgeControl
-                    label="Y"
-                    value={currentSlide.headingOffsetY || 0}
-                    onChange={(v) => updateField({ headingOffsetY: v })}
-                    step={5}
-                    min={-300}
-                    max={300}
-                    format={(v) => `${v}`}
-                    parse={(s) => {
-                      const n = parseInt(s);
-                      return isNaN(n) ? null : n;
-                    }}
-                    suffix="px"
-                  />
-                </div>
-              </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-muted-foreground">
+                            <ZoomIn className="w-3 h-3 inline mr-1" />
+                            Fine Scale
+                          </Label>
+                          <NudgeControl
+                            value={currentSlide.imageScale || 1}
+                            onChange={(v) =>
+                              updateField({
+                                imageScale: Math.round(v * 100) / 100,
+                              })
+                            }
+                            step={0.05}
+                            min={0.2}
+                            max={3}
+                            format={(v) => `${Math.round(v * 100)}%`}
+                            parse={(s) => {
+                              const n = parseFloat(s.replace("%", ""));
+                              return isNaN(n) ? null : n / 100;
+                            }}
+                          />
+                        </div>
 
-              {/* Rotation */}
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">
-                  <RotateCw className="w-3 h-3 inline mr-1" />
-                  Rotation
-                </Label>
-                <NudgeControl
-                  value={currentSlide.headingRotation || 0}
-                  onChange={(v) => updateField({ headingRotation: v })}
-                  step={1}
-                  min={-180}
-                  max={180}
-                  format={(v) => `${v}`}
-                  parse={(s) => {
-                    const n = parseInt(s);
-                    return isNaN(n) ? null : n;
-                  }}
-                  suffix={"\u00B0"}
-                />
-              </div>
-            </div>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          <NudgeControl
+                            label="Width"
+                            orientation="stacked"
+                            value={currentSlide.imageWidthPercent || 100}
+                            onChange={(v) =>
+                              updateField({ imageWidthPercent: Math.round(v) })
+                            }
+                            step={5}
+                            min={20}
+                            max={140}
+                            format={(v) => `${Math.round(v)}%`}
+                            parse={(s) => {
+                              const n = parseFloat(s.replace("%", ""));
+                              return isNaN(n) ? null : n;
+                            }}
+                          />
+                          <NudgeControl
+                            label="Height"
+                            orientation="stacked"
+                            value={currentSlide.imageHeightPercent || 100}
+                            onChange={(v) =>
+                              updateField({ imageHeightPercent: Math.round(v) })
+                            }
+                            step={5}
+                            min={20}
+                            max={140}
+                            format={(v) => `${Math.round(v)}%`}
+                            parse={(s) => {
+                              const n = parseFloat(s.replace("%", ""));
+                              return isNaN(n) ? null : n;
+                            }}
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-xs text-muted-foreground">
+                              <Move className="w-3 h-3 inline mr-1" />
+                              Position
+                            </Label>
+                            {(currentSlide.imageOffsetX ||
+                              currentSlide.imageOffsetY) && (
+                              <button
+                                onClick={() =>
+                                  updateField({
+                                    imageOffsetX: 0,
+                                    imageOffsetY: 0,
+                                  })
+                                }
+                                className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                <RotateCcw className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            <NudgeControl
+                              label="X"
+                              value={currentSlide.imageOffsetX || 0}
+                              onChange={(v) => updateField({ imageOffsetX: v })}
+                              step={10}
+                              min={-500}
+                              max={500}
+                              format={(v) => `${v}`}
+                              parse={(s) => {
+                                const n = parseInt(s);
+                                return isNaN(n) ? null : n;
+                              }}
+                              suffix="px"
+                            />
+                            <NudgeControl
+                              label="Y"
+                              value={currentSlide.imageOffsetY || 0}
+                              onChange={(v) => updateField({ imageOffsetY: v })}
+                              step={10}
+                              min={-500}
+                              max={500}
+                              format={(v) => `${v}`}
+                              parse={(s) => {
+                                const n = parseInt(s);
+                                return isNaN(n) ? null : n;
+                              }}
+                              suffix="px"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-muted-foreground">
+                            <RotateCw className="w-3 h-3 inline mr-1" />
+                            Rotation
+                          </Label>
+                          <NudgeControl
+                            value={currentSlide.imageRotation || 0}
+                            onChange={(v) => updateField({ imageRotation: v })}
+                            step={1}
+                            min={-180}
+                            max={180}
+                            format={(v) => `${v}`}
+                            parse={(s) => {
+                              const n = parseInt(s);
+                              return isNaN(n) ? null : n;
+                            }}
+                            suffix={"\u00B0"}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-3">
+                      <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Screenshot title
+                      </Label>
+
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <NudgeControl
+                          label="Width"
+                          orientation="stacked"
+                          value={currentSlide.headingMaxWidth || 100}
+                          onChange={(v) =>
+                            updateField({ headingMaxWidth: Math.round(v) })
+                          }
+                          step={5}
+                          min={35}
+                          max={100}
+                          format={(v) => `${Math.round(v)}%`}
+                          parse={(s) => {
+                            const n = parseFloat(s.replace("%", ""));
+                            return isNaN(n) ? null : n;
+                          }}
+                        />
+                        <NudgeControl
+                          label="Line"
+                          orientation="stacked"
+                          value={currentSlide.headingLineHeight || 1.15}
+                          onChange={(v) =>
+                            updateField({
+                              headingLineHeight: Math.round(v * 100) / 100,
+                            })
+                          }
+                          step={0.05}
+                          min={0.8}
+                          max={1.8}
+                          format={(v) => `${v.toFixed(2)}`}
+                          parse={(s) => {
+                            const n = parseFloat(s);
+                            return isNaN(n) ? null : n;
+                          }}
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs text-muted-foreground">
+                            Position
+                          </Label>
+                          {(currentSlide.headingOffsetX ||
+                            currentSlide.headingOffsetY) && (
+                            <button
+                              onClick={() =>
+                                updateField({
+                                  headingOffsetX: 0,
+                                  headingOffsetY: 0,
+                                })
+                              }
+                              className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              <RotateCcw className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          <NudgeControl
+                            label="X"
+                            value={currentSlide.headingOffsetX || 0}
+                            onChange={(v) => updateField({ headingOffsetX: v })}
+                            step={5}
+                            min={-300}
+                            max={300}
+                            format={(v) => `${v}`}
+                            parse={(s) => {
+                              const n = parseInt(s);
+                              return isNaN(n) ? null : n;
+                            }}
+                            suffix="px"
+                          />
+                          <NudgeControl
+                            label="Y"
+                            value={currentSlide.headingOffsetY || 0}
+                            onChange={(v) => updateField({ headingOffsetY: v })}
+                            step={5}
+                            min={-300}
+                            max={300}
+                            format={(v) => `${v}`}
+                            parse={(s) => {
+                              const n = parseInt(s);
+                              return isNaN(n) ? null : n;
+                            }}
+                            suffix="px"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label className="text-xs text-muted-foreground">
+                          <RotateCw className="w-3 h-3 inline mr-1" />
+                          Rotation
+                        </Label>
+                        <NudgeControl
+                          value={currentSlide.headingRotation || 0}
+                          onChange={(v) => updateField({ headingRotation: v })}
+                          step={1}
+                          min={-180}
+                          max={180}
+                          format={(v) => `${v}`}
+                          parse={(s) => {
+                            const n = parseInt(s);
+                            return isNaN(n) ? null : n;
+                          }}
+                          suffix={"\u00B0"}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </Section>
 
           <Separator className="my-4" />
@@ -798,6 +844,7 @@ function ToggleButton({
 
 function NudgeControl({
   label,
+  orientation = "inline",
   value,
   onChange,
   step,
@@ -808,6 +855,7 @@ function NudgeControl({
   suffix,
 }: {
   label?: string;
+  orientation?: "inline" | "stacked";
   value: number;
   onChange: (v: number) => void;
   step: number;
@@ -842,13 +890,8 @@ function NudgeControl({
     }
   };
 
-  return (
-    <div className="flex items-center gap-0.5">
-      {label && (
-        <span className="text-[10px] font-medium text-muted-foreground w-3 shrink-0">
-          {label}
-        </span>
-      )}
+  const controls = (
+    <div className="flex items-center gap-0.5 min-w-0">
       <button
         onClick={() => onChange(clamp(value - step))}
         className="w-6 h-6 rounded border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 transition-colors shrink-0"
@@ -869,7 +912,8 @@ function NudgeControl({
           onClick={startEdit}
           className="flex-1 min-w-0 text-center text-[11px] font-mono text-muted-foreground tabular-nums h-6 rounded hover:bg-muted/30 transition-colors cursor-text"
         >
-          {format(value)}{suffix}
+          {format(value)}
+          {suffix}
         </button>
       )}
       <button
@@ -878,6 +922,30 @@ function NudgeControl({
       >
         <Plus className="w-2.5 h-2.5" />
       </button>
+    </div>
+  );
+
+  if (orientation === "stacked") {
+    return (
+      <div className="space-y-1 min-w-0">
+        {label && (
+          <span className="block text-[10px] font-medium text-muted-foreground leading-none">
+            {label}
+          </span>
+        )}
+        {controls}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-0.5 min-w-0">
+      {label && (
+        <span className="text-[10px] font-medium text-muted-foreground w-3 shrink-0">
+          {label}
+        </span>
+      )}
+      {controls}
     </div>
   );
 }

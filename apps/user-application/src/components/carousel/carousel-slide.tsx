@@ -1,4 +1,9 @@
-import { forwardRef, useState } from "react";
+import {
+  forwardRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
+import { cn } from "@/lib/utils";
 import type {
   CarouselSlide,
   CarouselStyle,
@@ -13,6 +18,32 @@ import {
   formatSlideNumber,
 } from "@/lib/carousel-templates";
 
+export type CarouselEditableElement = "heading" | "image";
+export type CarouselResizeHandle =
+  | "left"
+  | "right"
+  | "top-left"
+  | "top-right"
+  | "bottom-left"
+  | "bottom-right";
+
+interface CarouselSlideEditorBindings {
+  selectedElement: CarouselEditableElement | null;
+  onSelectElement: (element: CarouselEditableElement) => void;
+  onStartMove: (
+    element: CarouselEditableElement,
+    event: ReactPointerEvent<HTMLDivElement>
+  ) => void;
+  onStartResize: (
+    element: CarouselEditableElement,
+    handle: CarouselResizeHandle,
+    event: ReactPointerEvent<HTMLButtonElement>
+  ) => void;
+  onStartRotate: (
+    element: CarouselEditableElement,
+    event: ReactPointerEvent<HTMLButtonElement>
+  ) => void;
+}
 
 interface CarouselSlideProps {
   slide: CarouselSlide;
@@ -26,6 +57,7 @@ interface CarouselSlideProps {
   slideNumberPosition: SlideNumberPosition;
   layout?: LayoutId;
   scale?: number;
+  editorBindings?: CarouselSlideEditorBindings;
 }
 
 export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
@@ -42,6 +74,7 @@ export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
       slideNumberPosition,
       layout = "classic",
       scale,
+      editorBindings,
     },
     ref
   ) => {
@@ -103,12 +136,22 @@ export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
     );
 
     const headingEl = (
-      <div
-        className="shrink-0 w-full"
+      <EditableWrapper
+        element="heading"
+        editorBindings={editorBindings}
+        className="shrink-0"
         style={{
-          maxWidth: `${slide.headingMaxWidth || 100}%`,
+          width: `${slide.headingMaxWidth || 100}%`,
           ...(headingTransform ? { transform: headingTransform } : {}),
         }}
+        resizeHandles={[
+          "left",
+          "right",
+          "top-left",
+          "top-right",
+          "bottom-left",
+          "bottom-right",
+        ]}
       >
         <h2
           style={headingStyle}
@@ -116,15 +159,20 @@ export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
         >
           {slide.heading || "\u00A0"}
         </h2>
-      </div>
+      </EditableWrapper>
     );
 
     const imageEl = slide.imageUrl ? (
-      <div
-        className="flex-1 flex items-center justify-center min-h-0 mt-6"
-        style={imageTransform ? { transform: imageTransform } : undefined}
-      >
-        <OverlayImage slide={slide} />
+      <div className="flex-1 flex items-center justify-center min-h-0 mt-6">
+        <EditableWrapper
+          element="image"
+          editorBindings={editorBindings}
+          className="inline-flex max-w-full max-h-full"
+          style={imageTransform ? { transform: imageTransform } : undefined}
+          resizeHandles={["top-left", "top-right", "bottom-left", "bottom-right"]}
+        >
+          <OverlayImage slide={slide} />
+        </EditableWrapper>
       </div>
     ) : null;
 
@@ -133,10 +181,17 @@ export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
         className="shrink-0 flex items-center justify-center mt-6"
         style={{
           maxHeight: "40%",
-          ...(imageTransform ? { transform: imageTransform } : {}),
         }}
       >
-        <OverlayImage slide={slide} />
+        <EditableWrapper
+          element="image"
+          editorBindings={editorBindings}
+          className="inline-flex max-w-full max-h-full"
+          style={imageTransform ? { transform: imageTransform } : undefined}
+          resizeHandles={["top-left", "top-right", "bottom-left", "bottom-right"]}
+        >
+          <OverlayImage slide={slide} />
+        </EditableWrapper>
       </div>
     ) : null;
 
@@ -188,6 +243,74 @@ export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
 
 CarouselSlideView.displayName = "CarouselSlideView";
 
+function EditableWrapper({
+  element,
+  editorBindings,
+  className,
+  style,
+  resizeHandles,
+  children,
+}: {
+  element: CarouselEditableElement;
+  editorBindings?: CarouselSlideEditorBindings;
+  className?: string;
+  style?: React.CSSProperties;
+  resizeHandles: CarouselResizeHandle[];
+  children: React.ReactNode;
+}) {
+  const isSelected = editorBindings?.selectedElement === element;
+
+  const handleMoveStart = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!editorBindings) return;
+    event.preventDefault();
+    event.stopPropagation();
+    editorBindings.onSelectElement(element);
+    editorBindings.onStartMove(element, event);
+  };
+
+  return (
+    <div
+      data-editable-element={element}
+      className={cn("relative min-w-0", editorBindings && "cursor-move", className)}
+      style={style}
+      onPointerDown={editorBindings ? handleMoveStart : undefined}
+    >
+      {children}
+
+      {editorBindings && isSelected && (
+        <div className="absolute inset-[-10px] z-30 pointer-events-none">
+          <div className="absolute inset-0 rounded-sm border-2 border-primary shadow-[0_0_0_1px_rgba(99,102,241,0.3)]" />
+
+          {resizeHandles.map((handle) => (
+            <ResizeHandleButton
+              key={handle}
+              handle={handle}
+              onPointerDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                editorBindings.onStartResize(element, handle, event);
+              }}
+            />
+          ))}
+
+          <button
+            type="button"
+            className="pointer-events-auto absolute left-1/2 -bottom-12 -translate-x-1/2 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-sm text-foreground shadow-sm hover:bg-muted/70"
+            onPointerDown={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              editorBindings.onStartRotate(element, event);
+            }}
+            aria-label={`Rotate ${element}`}
+          >
+            ↻
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function buildTransform(
   offsetX?: number,
   offsetY?: number,
@@ -201,6 +324,37 @@ function buildTransform(
     parts.push(`rotate(${rotation}deg)`);
   }
   return parts.length > 0 ? parts.join(" ") : undefined;
+}
+
+function ResizeHandleButton({
+  handle,
+  onPointerDown,
+}: {
+  handle: CarouselResizeHandle;
+  onPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => void;
+}) {
+  const positionClassMap: Record<CarouselResizeHandle, string> = {
+    left: "left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize",
+    right: "right-0 top-1/2 translate-x-1/2 -translate-y-1/2 cursor-ew-resize",
+    "top-left": "left-0 top-0 -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize",
+    "top-right": "right-0 top-0 translate-x-1/2 -translate-y-1/2 cursor-nesw-resize",
+    "bottom-left":
+      "left-0 bottom-0 -translate-x-1/2 translate-y-1/2 cursor-nesw-resize",
+    "bottom-right":
+      "right-0 bottom-0 translate-x-1/2 translate-y-1/2 cursor-nwse-resize",
+  };
+
+  return (
+    <button
+      type="button"
+      className={cn(
+        "pointer-events-auto absolute h-5 w-5 rounded-full border-2 border-primary bg-background shadow-sm",
+        positionClassMap[handle]
+      )}
+      onPointerDown={onPointerDown}
+      aria-label={`Resize from ${handle}`}
+    />
+  );
 }
 
 function getArrowPoints(overlay: any): [number, number, number, number] | null {

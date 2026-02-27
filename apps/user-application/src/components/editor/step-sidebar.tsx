@@ -305,13 +305,51 @@ export function StepSidebar({
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
 
-        if (over && active.id !== over.id) {
-            const oldIndex = steps.findIndex((step) => step.id === active.id);
-            const newIndex = steps.findIndex((step) => step.id === over.id);
+        if (!over || active.id === over.id) return;
 
-            const reorderedSteps = arrayMove(steps, oldIndex, newIndex);
-            onReorderSteps(reorderedSteps);
+        const activeId = String(active.id);
+        const overId = String(over.id);
+        const selectedIds = selectedStepIds.has(activeId)
+            ? Array.from(selectedStepIds)
+            : [activeId];
+
+        const selectedSet = new Set(selectedIds);
+        const selectedSteps = steps.filter((step) => selectedSet.has(step.id));
+
+        if (selectedSteps.length <= 1) {
+            const oldIndex = steps.findIndex((step) => step.id === activeId);
+            const newIndex = steps.findIndex((step) => step.id === overId);
+
+            if (oldIndex !== -1 && newIndex !== -1) {
+                const reorderedSteps = arrayMove(steps, oldIndex, newIndex);
+                onReorderSteps(reorderedSteps);
+            }
+            return;
         }
+
+        if (selectedSet.has(overId)) return;
+
+        const remainingSteps = steps.filter((step) => !selectedSet.has(step.id));
+        const overIndexInRemaining = remainingSteps.findIndex((step) => step.id === overId);
+        if (overIndexInRemaining === -1) return;
+
+        const activeBlockIndices = steps
+            .map((step, index) => (selectedSet.has(step.id) ? index : -1))
+            .filter((index) => index !== -1);
+        const minSelectedIndex = Math.min(...activeBlockIndices);
+        const maxSelectedIndex = Math.max(...activeBlockIndices);
+        const overIndex = steps.findIndex((step) => step.id === overId);
+
+        const insertIndex =
+            overIndex > maxSelectedIndex
+                ? overIndexInRemaining + 1
+                : overIndex < minSelectedIndex
+                  ? overIndexInRemaining
+                  : overIndexInRemaining;
+
+        const reorderedSteps = [...remainingSteps];
+        reorderedSteps.splice(insertIndex, 0, ...selectedSteps);
+        onReorderSteps(reorderedSteps);
     };
 
     // Auto-focus and select text when entering edit mode

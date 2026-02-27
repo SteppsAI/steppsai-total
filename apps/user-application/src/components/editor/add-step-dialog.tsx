@@ -172,7 +172,7 @@ export function AddStepDialog({
                 <Type className="w-7 h-7 text-primary" />
               </div>
               <div className="text-center max-w-[180px]">
-                <p className="font-semibold text-foreground text-2xl">Text Step</p>
+                <p className="font-semibold text-foreground text-lg">Text Step</p>
                 <p className="text-sm text-muted-foreground mt-3 leading-relaxed">Add a navigation or instruction step</p>
               </div>
             </button>
@@ -189,7 +189,7 @@ export function AddStepDialog({
                 <Image className="w-7 h-7 text-primary" />
               </div>
               <div className="text-center max-w-[180px]">
-                <p className="font-semibold text-foreground text-2xl">Image Step</p>
+                <p className="font-semibold text-foreground text-lg">Image Step</p>
                 <p className="text-sm text-muted-foreground mt-3 leading-relaxed">Add a screenshot with caption</p>
               </div>
             </button>
@@ -210,7 +210,7 @@ export function AddStepDialog({
                   <Copy className="w-7 h-7 text-primary" />
                 </div>
                 <div className="text-center max-w-[180px]">
-                  <p className="font-semibold text-foreground text-2xl">From Existing Stepp</p>
+                  <p className="font-semibold text-foreground text-lg">From Existing Stepp</p>
                   <p className="text-sm text-muted-foreground mt-3 leading-relaxed">Import steps from another guide</p>
                 </div>
               </button>

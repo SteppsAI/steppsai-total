@@ -209,6 +209,7 @@ function CarouselEditorInner({
           layout={state.layout}
           slideRefs={slideRefs}
           allSlides={state.slides}
+          onUpdateSlide={updateSlide}
         />
 
         <CarouselSlideSidebar

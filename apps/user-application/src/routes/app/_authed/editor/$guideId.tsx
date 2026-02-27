@@ -5,6 +5,7 @@ import { EditorHeader } from "@/components/editor/editor-header";
 import { EditorToolbar, EditorTool } from "@/components/editor/editor-toolbar";
 import { Canvas } from "@/components/editor/canvas";
 import { StepSidebar, SidebarWidth } from "@/components/editor/step-sidebar";
+import { ImportExistingStepsDialog } from "@/components/editor/import-existing-steps-dialog";
 import { useState, useCallback, useEffect } from "react";
 import { ShareDialog } from "@/components/share-dialog";
 import { ExportDialog } from "@/components/export-dialog";
@@ -23,6 +24,41 @@ export const Route = createFileRoute("/app/_authed/editor/$guideId")({
     );
   },
 });
+
+function mimeTypeToExtension(mimeType: string): string {
+  switch (mimeType.toLowerCase()) {
+    case "image/jpeg":
+      return "jpg";
+    case "image/webp":
+      return "webp";
+    case "image/gif":
+      return "gif";
+    case "image/svg+xml":
+      return "svg";
+    case "image/png":
+    default:
+      return "png";
+  }
+}
+
+function buildImportedImageUrl(sourceImageUrl: string, newKey: string): string {
+  try {
+    const sourceUrl = new URL(sourceImageUrl);
+    const markers = ["/screenshots/", "/brands/", "/brand-logos/"];
+    const marker = markers.find((candidate) => sourceUrl.pathname.includes(candidate));
+    const markerIndex = marker ? sourceUrl.pathname.indexOf(marker) : -1;
+    const prefixPath = markerIndex >= 0 ? sourceUrl.pathname.slice(0, markerIndex) : "";
+    const nextPath = `${prefixPath}/${newKey}`.replace(/\/{2,}/g, "/");
+
+    sourceUrl.pathname = nextPath.startsWith("/") ? nextPath : `/${nextPath}`;
+    sourceUrl.search = "";
+    sourceUrl.hash = "";
+
+    return sourceUrl.toString();
+  } catch {
+    return newKey;
+  }
+}
 
 function EditorPage() {
   const { guideId } = Route.useParams();
@@ -58,6 +94,7 @@ function EditorPage() {
   const [activeTool, setActiveTool] = useState<EditorTool>("pointer");
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState<SidebarWidth>("medium");
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
@@ -208,6 +245,77 @@ function EditorPage() {
     setActiveStepId(newStep.id);
   }, [session]);
 
+  const handleImportStepsFromExisting = useCallback(
+    async ({ sourceGuideId, steps }: { sourceGuideId: string; steps: Step[] }) => {
+      if (!steps.length) return;
+
+      const existingSteps = session.guide?.steps || [];
+      const importedSteps: Step[] = [];
+      let fallbackReferenceCount = 0;
+
+      for (const sourceStep of steps) {
+        let importedImageKey = sourceStep.imageKey || undefined;
+
+        if (sourceStep.imageKey?.startsWith("http")) {
+          try {
+            const dataUrl = await queryClient.fetchQuery(
+              trpc.images.fetchAsDataUri.queryOptions({ url: sourceStep.imageKey })
+            );
+            const mimeMatch = dataUrl.match(/^data:(image\/[^;]+);base64,/i);
+            const extension = mimeTypeToExtension(mimeMatch?.[1] || "image/png");
+            const key = `screenshots/${guideId}/imported-${Date.now()}-${crypto.randomUUID()}.${extension}`;
+
+            const uploadResult = await uploadImageMutation.mutateAsync({ key, dataUrl });
+            importedImageKey = buildImportedImageUrl(sourceStep.imageKey, uploadResult.key);
+          } catch (error) {
+            fallbackReferenceCount++;
+            importedImageKey = sourceStep.imageKey;
+            console.warn("Failed to clone imported image, using source reference:", error);
+          }
+        }
+
+        const nextOrderIndex = existingSteps.length + importedSteps.length;
+        const newStep: Step = {
+          id: crypto.randomUUID(),
+          type: sourceStep.type === "navigate" ? "navigate" : "click",
+          orderIndex: nextOrderIndex,
+          imageKey: importedImageKey,
+          pageUrl: sourceStep.pageUrl || "",
+          domSelector: sourceStep.domSelector || "",
+          x: sourceStep.x,
+          y: sourceStep.y,
+          caption: sourceStep.caption || sourceStep.aiCaption || `Step ${nextOrderIndex + 1}`,
+          aiCaption: sourceStep.aiCaption,
+          overlays: sourceStep.overlays
+            ? (JSON.parse(JSON.stringify(sourceStep.overlays)) as Overlay[])
+            : [],
+          isExcluded: sourceStep.isExcluded,
+        };
+
+        importedSteps.push(newStep);
+      }
+
+      if (!importedSteps.length) return;
+
+      session.updateSteps([...existingSteps, ...importedSteps]);
+      setActiveStepId(importedSteps[0].id);
+
+      toast.success(
+        `Imported ${importedSteps.length} step${importedSteps.length === 1 ? "" : "s"}`
+      );
+      console.log(`Imported steps from source guide ${sourceGuideId}`);
+
+      if (fallbackReferenceCount > 0) {
+        toast.warning(
+          `${fallbackReferenceCount} image${
+            fallbackReferenceCount === 1 ? "" : "s"
+          } could not be cloned and still reference the original guide`
+        );
+      }
+    },
+    [guideId, queryClient, session, uploadImageMutation]
+  );
+
   // Handle save - persists to database
   const handleSave = useCallback(async () => {
     try {
@@ -327,10 +435,18 @@ function EditorPage() {
           onReorderSteps={handleReorderSteps}
           onAddStep={handleAddStep}
           onAddTextStep={handleAddTextStep}
+          onImportFromExisting={() => setIsImportDialogOpen(true)}
           sidebarWidth={sidebarWidth}
           onCycleWidth={handleCycleWidth}
         />
       </div>
+
+      <ImportExistingStepsDialog
+        open={isImportDialogOpen}
+        onOpenChange={setIsImportDialogOpen}
+        currentGuideId={guideId}
+        onImportSteps={handleImportStepsFromExisting}
+      />
 
       <ShareDialog
         open={isShareOpen}

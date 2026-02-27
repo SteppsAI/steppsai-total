@@ -12,6 +12,7 @@ import { useCarouselState } from "@/hooks/use-carousel-state";
 import { exportCarouselSlides } from "@/lib/carousel-export";
 import { CAROUSEL_TEMPLATES } from "@/lib/carousel-templates";
 import type { AspectRatio, CarouselTemplate, LayoutId } from "@/lib/carousel-templates";
+import type { Overlay } from "@/types/db";
 import { trpc } from "@/router";
 import { useSidebar } from "@/components/ui/sidebar";
 
@@ -61,6 +62,7 @@ function CarouselEditorPage() {
         .map((s: any) => ({
           caption: s.caption || s.aiCaption || "",
           imageKey: s.imageKey || null,
+          overlays: (s.overlays as Overlay[]) || [],
         }))
     : undefined;
 
@@ -95,7 +97,7 @@ interface CarouselEditorInnerProps {
   authorName: string;
   template?: CarouselTemplate;
   guideTitle?: string;
-  guideSteps?: Array<{ caption: string; imageKey?: string | null }>;
+  guideSteps?: Array<{ caption: string; imageKey?: string | null; overlays?: Overlay[] }>;
 }
 
 function CarouselEditorInner({

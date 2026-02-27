@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Image, Type, Check } from "lucide-react";
+import { Image, Type, Check, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type StepType = "text" | "image";
@@ -20,6 +20,7 @@ interface AddStepDialogProps {
   onOpenChange: (open: boolean) => void;
   onAddTextStep: (title: string) => void;
   onAddImageStep: (step: { title: string; file: File; previewUrl: string }) => void;
+  onImportFromExisting?: () => void;
   nextStepNumber: number;
 }
 
@@ -28,6 +29,7 @@ export function AddStepDialog({
   onOpenChange,
   onAddTextStep,
   onAddImageStep,
+  onImportFromExisting,
   nextStepNumber,
 }: AddStepDialogProps) {
   const [selectedType, setSelectedType] = useState<StepType | null>(null);
@@ -157,7 +159,7 @@ export function AddStepDialog({
         />
 
         {selectedType === null ? (
-          <div className="grid grid-cols-2 gap-4 py-4">
+          <div className="grid gap-4 py-4 sm:grid-cols-3">
             <button
               onClick={() => handleSelectType("text")}
               className={cn(
@@ -191,6 +193,28 @@ export function AddStepDialog({
                 <p className="text-xs text-muted-foreground mt-1">Add a screenshot with caption</p>
               </div>
             </button>
+
+            {onImportFromExisting && (
+              <button
+                onClick={() => {
+                  onOpenChange(false);
+                  onImportFromExisting();
+                }}
+                className={cn(
+                  "flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-dashed",
+                  "hover:border-primary hover:bg-primary/5 transition-all duration-200",
+                  "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                )}
+              >
+                <div className="p-3 rounded-full bg-primary/10">
+                  <Copy className="w-6 h-6 text-primary" />
+                </div>
+                <div className="text-center">
+                  <p className="font-semibold text-foreground">From Existing Stepp</p>
+                  <p className="text-xs text-muted-foreground mt-1">Import steps from another guide</p>
+                </div>
+              </button>
+            )}
           </div>
         ) : selectedType === "text" ? (
           <div className="space-y-4 py-4">

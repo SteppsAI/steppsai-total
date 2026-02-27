@@ -88,6 +88,7 @@ export function CarouselControls({
         reader.onload = () => {
           onUpdateSlide(currentSlide.id, {
             imageUrl: reader.result as string,
+            overlays: [],
           });
         };
         reader.readAsDataURL(file);
@@ -158,7 +159,7 @@ export function CarouselControls({
                         variant="outline"
                         size="sm"
                         className="text-xs h-8 text-red-500 hover:text-red-600 hover:bg-red-50"
-                        onClick={() => updateField({ imageUrl: null })}
+                        onClick={() => updateField({ imageUrl: null, overlays: [] })}
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>

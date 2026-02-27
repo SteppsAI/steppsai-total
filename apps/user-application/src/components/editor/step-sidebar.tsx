@@ -35,6 +35,7 @@ interface StepSidebarProps {
     onReorderSteps: (steps: Step[]) => void;
     onAddStep?: (step: { title: string; file: File; previewUrl: string }) => void;
     onAddTextStep?: (title: string) => void;
+    onImportFromExisting?: () => void;
     sidebarWidth?: SidebarWidth;
     onCycleWidth?: () => void;
 }
@@ -243,6 +244,7 @@ export function StepSidebar({
     onReorderSteps,
     onAddStep,
     onAddTextStep,
+    onImportFromExisting,
     sidebarWidth = "medium",
     onCycleWidth,
 }: StepSidebarProps) {
@@ -442,6 +444,7 @@ export function StepSidebar({
                             onOpenChange={setIsAddDialogOpen}
                             onAddTextStep={(title) => onAddTextStep?.(title)}
                             onAddImageStep={(step) => onAddStep?.(step)}
+                            onImportFromExisting={onImportFromExisting}
                             nextStepNumber={steps.length + 1}
                         />
                     </div>

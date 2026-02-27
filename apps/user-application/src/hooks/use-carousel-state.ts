@@ -10,6 +10,7 @@ import type {
   SlideNumberPosition,
   LayoutId,
 } from "@/lib/carousel-templates";
+import type { Overlay } from "@/types/db";
 
 type CarouselAction =
   | { type: "SET_TITLE"; title: string }
@@ -103,7 +104,7 @@ interface InitOptions {
   template?: CarouselTemplate;
   layoutId?: LayoutId;
   guideTitle?: string;
-  guideSteps?: Array<{ caption: string; imageKey?: string | null }>;
+  guideSteps?: Array<{ caption: string; imageKey?: string | null; overlays?: Overlay[] }>;
 }
 
 const DEFAULT_STYLE: CarouselStyle = {
@@ -128,6 +129,7 @@ function createInitialState(options: InitOptions): CarouselState {
       id: crypto.randomUUID(),
       heading: step.caption || "",
       imageUrl: step.imageKey || null,
+      overlays: step.overlays || [],
     }));
     title = guideTitle || "Untitled Carousel";
   } else {

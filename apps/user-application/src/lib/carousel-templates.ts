@@ -1,3 +1,5 @@
+import type { Overlay } from "@/types/db";
+
 export type AspectRatio = "3:4" | "1:1";
 
 export type TextAlign = "left" | "center" | "right";
@@ -10,6 +12,7 @@ export interface CarouselSlide {
   id: string;
   heading: string;
   imageUrl?: string | null;
+  overlays?: Overlay[];
   headingFontSize?: number;
   headingAlign?: TextAlign;
   headingOffsetX?: number;

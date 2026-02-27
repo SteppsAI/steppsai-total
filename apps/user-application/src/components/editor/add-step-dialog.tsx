@@ -136,7 +136,7 @@ export function AddStepDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>
             {selectedType === null ? "Add New Step" : selectedType === "text" ? "Add Text Step" : "Add Image Step"}
@@ -159,38 +159,38 @@ export function AddStepDialog({
         />
 
         {selectedType === null ? (
-          <div className="grid gap-4 py-4 sm:grid-cols-3">
+          <div className="grid gap-5 py-4 sm:grid-cols-3">
             <button
               onClick={() => handleSelectType("text")}
               className={cn(
-                "flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-dashed",
+                "flex min-h-[260px] flex-col items-center justify-center gap-4 p-8 rounded-2xl border-2 border-dashed",
                 "hover:border-primary hover:bg-primary/5 transition-all duration-200",
                 "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               )}
             >
-              <div className="p-3 rounded-full bg-primary/10">
-                <Type className="w-6 h-6 text-primary" />
+              <div className="p-4 rounded-full bg-primary/10">
+                <Type className="w-7 h-7 text-primary" />
               </div>
-              <div className="text-center">
-                <p className="font-semibold text-foreground">Text Step</p>
-                <p className="text-xs text-muted-foreground mt-1">Add a navigation or instruction step</p>
+              <div className="text-center max-w-[180px]">
+                <p className="font-semibold text-foreground text-2xl">Text Step</p>
+                <p className="text-sm text-muted-foreground mt-3 leading-relaxed">Add a navigation or instruction step</p>
               </div>
             </button>
 
             <button
               onClick={() => handleSelectType("image")}
               className={cn(
-                "flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-dashed",
+                "flex min-h-[260px] flex-col items-center justify-center gap-4 p-8 rounded-2xl border-2 border-dashed",
                 "hover:border-primary hover:bg-primary/5 transition-all duration-200",
                 "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               )}
             >
-              <div className="p-3 rounded-full bg-primary/10">
-                <Image className="w-6 h-6 text-primary" />
+              <div className="p-4 rounded-full bg-primary/10">
+                <Image className="w-7 h-7 text-primary" />
               </div>
-              <div className="text-center">
-                <p className="font-semibold text-foreground">Image Step</p>
-                <p className="text-xs text-muted-foreground mt-1">Add a screenshot with caption</p>
+              <div className="text-center max-w-[180px]">
+                <p className="font-semibold text-foreground text-2xl">Image Step</p>
+                <p className="text-sm text-muted-foreground mt-3 leading-relaxed">Add a screenshot with caption</p>
               </div>
             </button>
 
@@ -201,17 +201,17 @@ export function AddStepDialog({
                   onImportFromExisting();
                 }}
                 className={cn(
-                  "flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-dashed",
+                  "flex min-h-[260px] flex-col items-center justify-center gap-4 p-8 rounded-2xl border-2 border-dashed",
                   "hover:border-primary hover:bg-primary/5 transition-all duration-200",
                   "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                 )}
               >
-                <div className="p-3 rounded-full bg-primary/10">
-                  <Copy className="w-6 h-6 text-primary" />
+                <div className="p-4 rounded-full bg-primary/10">
+                  <Copy className="w-7 h-7 text-primary" />
                 </div>
-                <div className="text-center">
-                  <p className="font-semibold text-foreground">From Existing Stepp</p>
-                  <p className="text-xs text-muted-foreground mt-1">Import steps from another guide</p>
+                <div className="text-center max-w-[180px]">
+                  <p className="font-semibold text-foreground text-2xl">From Existing Stepp</p>
+                  <p className="text-sm text-muted-foreground mt-3 leading-relaxed">Import steps from another guide</p>
                 </div>
               </button>
             )}

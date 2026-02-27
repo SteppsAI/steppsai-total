@@ -58,15 +58,14 @@ export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
     const imageTransform = buildTransform(
       slide.imageOffsetX,
       slide.imageOffsetY,
-      slide.imageRotation,
-      slide.imageScale
+      slide.imageRotation
     );
 
     const headingStyle = {
       color: style.headingColor,
       fontFamily: style.fontFamily,
       fontSize: `${fontSize}px`,
-      lineHeight: 1.15,
+      lineHeight: slide.headingLineHeight || 1.15,
       textAlign,
     } as const;
 
@@ -104,7 +103,13 @@ export const CarouselSlideView = forwardRef<HTMLDivElement, CarouselSlideProps>(
     );
 
     const headingEl = (
-      <div className="shrink-0" style={headingTransform ? { transform: headingTransform } : undefined}>
+      <div
+        className="shrink-0 w-full"
+        style={{
+          maxWidth: `${slide.headingMaxWidth || 100}%`,
+          ...(headingTransform ? { transform: headingTransform } : {}),
+        }}
+      >
         <h2
           style={headingStyle}
           className="font-bold whitespace-pre-wrap break-words mt-8"
@@ -186,8 +191,7 @@ CarouselSlideView.displayName = "CarouselSlideView";
 function buildTransform(
   offsetX?: number,
   offsetY?: number,
-  rotation?: number,
-  imgScale?: number
+  rotation?: number
 ): string | undefined {
   const parts: string[] = [];
   if (offsetX || offsetY) {
@@ -195,9 +199,6 @@ function buildTransform(
   }
   if (rotation) {
     parts.push(`rotate(${rotation}deg)`);
-  }
-  if (imgScale && imgScale !== 1) {
-    parts.push(`scale(${imgScale})`);
   }
   return parts.length > 0 ? parts.join(" ") : undefined;
 }
@@ -229,19 +230,26 @@ function OverlayImage({ slide }: { slide: CarouselSlide }) {
   const viewHeight = naturalSize?.height || 1000;
   const minDim = Math.min(viewWidth, viewHeight);
   const borderRadius = slide.imageBorderRadius ?? 0;
+  const imageScale = slide.imageScale ?? 1;
+  const imageWidthPercent = slide.imageWidthPercent ?? 100;
+  const imageHeightPercent = slide.imageHeightPercent ?? 100;
 
   return (
     <div
       className="relative inline-block max-w-full max-h-full shadow-lg"
       style={{
+        width: `${imageWidthPercent}%`,
+        height: `${imageHeightPercent}%`,
         borderRadius,
         overflow: borderRadius > 0 ? "hidden" : undefined,
+        transform: imageScale !== 1 ? `scale(${imageScale})` : undefined,
+        transformOrigin: "center center",
       }}
     >
       <img
         src={slide.imageUrl || undefined}
         alt=""
-        className="block max-w-full max-h-full object-contain"
+        className="block w-full h-full object-contain"
         onLoad={(e) => {
           const img = e.currentTarget;
           if (img.naturalWidth > 0 && img.naturalHeight > 0) {

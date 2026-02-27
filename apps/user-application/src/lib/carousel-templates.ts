@@ -18,10 +18,14 @@ export interface CarouselSlide {
   headingOffsetX?: number;
   headingOffsetY?: number;
   headingRotation?: number;
+  headingMaxWidth?: number;
+  headingLineHeight?: number;
   imageOffsetX?: number;
   imageOffsetY?: number;
   imageRotation?: number;
   imageScale?: number;
+  imageWidthPercent?: number;
+  imageHeightPercent?: number;
   imageBorderRadius?: number;
 }
 

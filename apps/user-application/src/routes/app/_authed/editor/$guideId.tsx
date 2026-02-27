@@ -203,6 +203,45 @@ function EditorPage() {
     }
   }, [session, deleteStepMutation, activeStepId, guideId]);
 
+  const handleDeleteMultipleSteps = useCallback(async (ids: string[]) => {
+    if (!session.guide?.steps || ids.length === 0) return;
+
+    const stepsToDelete = session.guide.steps.filter((step) => ids.includes(step.id));
+    const originalSteps = session.guide.steps;
+    const updatedSteps = originalSteps.filter((step) => !ids.includes(step.id));
+    const reindexedSteps = updatedSteps.map((step, idx) => ({
+      ...step,
+      orderIndex: idx,
+    }));
+
+    session.updateSteps(reindexedSteps);
+
+    if (ids.includes(activeStepId)) {
+      const nextActive = reindexedSteps.find((step) => step.imageKey) || reindexedSteps[0];
+      setActiveStepId(nextActive?.id || "");
+    }
+
+    try {
+      await Promise.all(
+        stepsToDelete.map((step) =>
+          deleteStepMutation.mutateAsync({
+            guideId,
+            stepId: step.id,
+            imageKey: step.imageKey || undefined,
+          })
+        )
+      );
+
+      toast.success(`Deleted ${stepsToDelete.length} step${stepsToDelete.length === 1 ? "" : "s"}`, {
+        duration: 1800,
+      });
+    } catch (error) {
+      session.updateSteps(originalSteps);
+      toast.error("Failed to delete selected steps");
+      console.error(error);
+    }
+  }, [session, activeStepId, deleteStepMutation, guideId]);
+
   // Handle step reorder - syncs to DO
   const handleReorderSteps = useCallback((steps: Step[]) => {
     const reindexed = steps.map((step, idx) => ({
@@ -432,6 +471,7 @@ function EditorPage() {
           onStepSelect={setActiveStepId}
           onUpdateStep={handleUpdateStep}
           onDeleteStep={handleDeleteStep}
+          onDeleteMultipleSteps={handleDeleteMultipleSteps}
           onReorderSteps={handleReorderSteps}
           onAddStep={handleAddStep}
           onAddTextStep={handleAddTextStep}

@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { Trash2, Plus, Check, PanelRightClose, PanelRightOpen, GripVertical, Type } from "lucide-react";
+import { Trash2, Plus, Check, PanelRightClose, PanelRightOpen, GripVertical, Type, X } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useRef, useEffect } from "react";
 import { Step } from "@/types/db";
@@ -36,6 +37,7 @@ interface StepSidebarProps {
     onAddStep?: (step: { title: string; file: File; previewUrl: string }) => void;
     onAddTextStep?: (title: string) => void;
     onImportFromExisting?: () => void;
+    onDeleteMultipleSteps?: (ids: string[]) => void;
     sidebarWidth?: SidebarWidth;
     onCycleWidth?: () => void;
 }
@@ -46,9 +48,11 @@ interface SortableStepItemProps {
     isActive: boolean;
     isEditing: boolean;
     isDeleting: boolean;
+    isSelected: boolean;
     editValue: string;
     inputRef: React.RefObject<HTMLInputElement | null>;
     onStepSelect: (id: string) => void;
+    onToggleSelect: (id: string, checked: boolean) => void;
     onStartEdit: (step: Step, e: React.MouseEvent) => void;
     onSave: (stepId: string) => void;
     onEditChange: (value: string) => void;
@@ -63,9 +67,11 @@ function SortableStepItem({
     isActive,
     isEditing,
     isDeleting,
+    isSelected,
     editValue,
     inputRef,
     onStepSelect,
+    onToggleSelect,
     onStartEdit,
     onSave,
     onEditChange,
@@ -99,18 +105,24 @@ function SortableStepItem({
             )}
         >
             <div className="flex items-center justify-between px-1">
-                {/* Drag Handle */}
-                <button
-                    className={cn(
-                        "cursor-grab active:cursor-grabbing p-1 -ml-1 rounded hover:bg-[var(--color-100)] transition-colors",
-                        "text-[var(--color-400)] hover:text-[var(--color-600)]",
-                        "opacity-0 group-hover:opacity-100 focus:opacity-100"
-                    )}
-                    {...attributes}
-                    {...listeners}
-                >
-                    <GripVertical className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-1">
+                    <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={(checked) => onToggleSelect(step.id, checked === true)}
+                    />
+                    {/* Drag Handle */}
+                    <button
+                        className={cn(
+                            "cursor-grab active:cursor-grabbing p-1 -ml-1 rounded hover:bg-[var(--color-100)] transition-colors",
+                            "text-[var(--color-400)] hover:text-[var(--color-600)]",
+                            "opacity-0 group-hover:opacity-100 focus:opacity-100"
+                        )}
+                        {...attributes}
+                        {...listeners}
+                    >
+                        <GripVertical className="w-4 h-4" />
+                    </button>
+                </div>
 
                 {isEditing ? (
                     <div className="flex items-center gap-2 flex-1 relative">
@@ -155,6 +167,7 @@ function SortableStepItem({
                     onClick={() => onStepSelect(step.id)}
                     className={cn(
                         "relative aspect-video rounded-xl overflow-hidden cursor-pointer transition-all duration-300",
+                        isSelected && "ring-2 ring-primary/40",
                         isActive
                             ? "ring-2 ring-primary shadow-lg shadow-primary/20 scale-[1.02]"
                             : "border border-white/40 shadow-sm hover:shadow-lg hover:border-primary/20 hover:translate-y-[-2px] opacity-90 hover:opacity-100"
@@ -184,6 +197,7 @@ function SortableStepItem({
                     className={cn(
                         "relative rounded-xl overflow-hidden cursor-pointer transition-all duration-300 p-4",
                         "bg-gradient-to-br from-primary/5 to-primary/10",
+                        isSelected && "ring-2 ring-primary/40",
                         isActive
                             ? "ring-2 ring-primary shadow-lg shadow-primary/20 scale-[1.02]"
                             : "border border-primary/20 shadow-sm hover:shadow-lg hover:border-primary/30 hover:translate-y-[-2px]"
@@ -245,12 +259,14 @@ export function StepSidebar({
     onAddStep,
     onAddTextStep,
     onImportFromExisting,
+    onDeleteMultipleSteps,
     sidebarWidth = "medium",
     onCycleWidth,
 }: StepSidebarProps) {
     const isCollapsed = sidebarWidth === "collapsed";
     const [editingStepId, setEditingStepId] = useState<string | null>(null);
     const [deletingStepId, setDeletingStepId] = useState<string | null>(null);
+    const [selectedStepIds, setSelectedStepIds] = useState<Set<string>>(new Set());
     const [editValue, setEditValue] = useState("");
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
@@ -258,6 +274,19 @@ export function StepSidebar({
     useEffect(() => {
         setDeletingStepId(null);
     }, [activeStepId]);
+
+    useEffect(() => {
+        setSelectedStepIds((prev) => {
+            const available = new Set(steps.map((step) => step.id));
+            const next = new Set<string>();
+            prev.forEach((id) => {
+                if (available.has(id)) {
+                    next.add(id);
+                }
+            });
+            return next;
+        });
+    }, [steps]);
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Drag and drop sensors
@@ -340,6 +369,31 @@ export function StepSidebar({
         }
     };
 
+    const handleToggleSelect = (stepId: string, checked: boolean) => {
+        setSelectedStepIds((prev) => {
+            const next = new Set(prev);
+            if (checked) {
+                next.add(stepId);
+            } else {
+                next.delete(stepId);
+            }
+            return next;
+        });
+    };
+
+    const handleClearSelection = () => {
+        setSelectedStepIds(new Set());
+    };
+
+    const handleDeleteSelected = () => {
+        const selectedIds = Array.from(selectedStepIds);
+        if (!selectedIds.length) return;
+        onDeleteMultipleSteps?.(selectedIds);
+        setSelectedStepIds(new Set());
+    };
+
+    const selectedCount = selectedStepIds.size;
+
     return (
         <div className={cn(
             "flex flex-col z-10 h-full transition-all duration-300 relative",
@@ -389,6 +443,36 @@ export function StepSidebar({
             ) : (
                 <ScrollArea className="flex-1">
                     <div className="p-4 space-y-6 pb-20 pt-6">
+                        {selectedCount > 0 && onDeleteMultipleSteps && (
+                            <div className="sticky top-0 z-20 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 shadow-sm backdrop-blur">
+                                <div className="flex items-center justify-between gap-2">
+                                    <span className="text-xs font-medium text-primary">
+                                        {selectedCount} step{selectedCount === 1 ? "" : "s"} selected
+                                    </span>
+                                    <div className="flex items-center gap-1.5">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-7 px-2 text-xs"
+                                            onClick={handleClearSelection}
+                                        >
+                                            <X className="w-3 h-3 mr-1" />
+                                            Clear
+                                        </Button>
+                                        <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            className="h-7 px-2 text-xs"
+                                            onClick={handleDeleteSelected}
+                                        >
+                                            <Trash2 className="w-3 h-3 mr-1" />
+                                            Delete
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <DndContext
                             sensors={sensors}
                             collisionDetection={closestCenter}
@@ -406,9 +490,11 @@ export function StepSidebar({
                                         isActive={activeStepId === step.id}
                                         isEditing={editingStepId === step.id}
                                         isDeleting={deletingStepId === step.id}
+                                        isSelected={selectedStepIds.has(step.id)}
                                         editValue={editValue}
                                         inputRef={inputRef}
                                         onStepSelect={onStepSelect}
+                                        onToggleSelect={handleToggleSelect}
                                         onStartEdit={handleStartEdit}
                                         onSave={handleSave}
                                         onEditChange={setEditValue}

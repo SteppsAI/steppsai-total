@@ -403,7 +403,7 @@ export function CarouselControls({
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">
                       <ZoomIn className="w-3 h-3 inline mr-1" />
-                      Scale
+                      Fine Scale
                     </Label>
                     <NudgeControl
                       value={currentSlide.imageScale || 1}
@@ -419,6 +419,39 @@ export function CarouselControls({
                       parse={(s) => {
                         const n = parseFloat(s.replace("%", ""));
                         return isNaN(n) ? null : n / 100;
+                      }}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <NudgeControl
+                      label="Width"
+                      value={currentSlide.imageWidthPercent || 100}
+                      onChange={(v) =>
+                        updateField({ imageWidthPercent: Math.round(v) })
+                      }
+                      step={5}
+                      min={20}
+                      max={140}
+                      format={(v) => `${Math.round(v)}%`}
+                      parse={(s) => {
+                        const n = parseFloat(s.replace("%", ""));
+                        return isNaN(n) ? null : n;
+                      }}
+                    />
+                    <NudgeControl
+                      label="Height"
+                      value={currentSlide.imageHeightPercent || 100}
+                      onChange={(v) =>
+                        updateField({ imageHeightPercent: Math.round(v) })
+                      }
+                      step={5}
+                      min={20}
+                      max={140}
+                      format={(v) => `${Math.round(v)}%`}
+                      parse={(s) => {
+                        const n = parseFloat(s.replace("%", ""));
+                        return isNaN(n) ? null : n;
                       }}
                     />
                   </div>
@@ -504,6 +537,37 @@ export function CarouselControls({
           {/* ━━━━━━━━━━ TEXT POSITION ━━━━━━━━━━ */}
           <Section title="Text Position">
             <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-1.5">
+                <NudgeControl
+                  label="Width"
+                  value={currentSlide.headingMaxWidth || 100}
+                  onChange={(v) => updateField({ headingMaxWidth: Math.round(v) })}
+                  step={5}
+                  min={35}
+                  max={100}
+                  format={(v) => `${Math.round(v)}%`}
+                  parse={(s) => {
+                    const n = parseFloat(s.replace("%", ""));
+                    return isNaN(n) ? null : n;
+                  }}
+                />
+                <NudgeControl
+                  label="Line"
+                  value={currentSlide.headingLineHeight || 1.15}
+                  onChange={(v) =>
+                    updateField({ headingLineHeight: Math.round(v * 100) / 100 })
+                  }
+                  step={0.05}
+                  min={0.8}
+                  max={1.8}
+                  format={(v) => `${v.toFixed(2)}`}
+                  parse={(s) => {
+                    const n = parseFloat(s);
+                    return isNaN(n) ? null : n;
+                  }}
+                />
+              </div>
+
               {/* Position */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">

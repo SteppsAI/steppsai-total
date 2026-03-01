@@ -16,7 +16,9 @@
 		"run_worker_first": [
 			"/api/auth/*",
 			"/api/webhooks/*",
-			"/trpc/*"
+			"/trpc/*",
+			"/robots.txt",
+			"/sitemap.xml"
 		]
 	},
 	"observability": {

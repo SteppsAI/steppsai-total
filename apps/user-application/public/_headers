@@ -6,6 +6,18 @@
   Pragma: no-cache
   Expires: 0
 
+/app/*
+  X-Robots-Tag: noindex, nofollow
+
+/auth/*
+  X-Robots-Tag: noindex, nofollow
+
+/payment/success
+  X-Robots-Tag: noindex, nofollow
+
+/payment/cancel
+  X-Robots-Tag: noindex, nofollow
+
 /index.html
   Cache-Control: no-cache, no-store, must-revalidate
   Pragma: no-cache

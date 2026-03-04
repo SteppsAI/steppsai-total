@@ -277,11 +277,16 @@ function EditorPage() {
       });
 
       const ext = stepData.file.type.split('/')[1] || 'png';
-      const imageKey = `screenshots/${guideId}/${Date.now()}-${newStepId}.${ext}`;
+      const r2Key = `screenshots/${guideId}/${Date.now()}-${newStepId}.${ext}`;
 
-      const uploadResult = await uploadImageMutation.mutateAsync({ key: imageKey, dataUrl });
+      const uploadResult = await uploadImageMutation.mutateAsync({ key: r2Key, dataUrl });
       if (uploadResult.success) {
-        session.updateStep(newStepId, { imageKey });
+        // Derive full URL from an existing step's imageKey (which already has ASSETS_URL prepended by tRPC)
+        const referenceUrl = session.guide?.steps?.find(s => s.imageKey?.startsWith('http'))?.imageKey;
+        const fullImageUrl = referenceUrl
+          ? buildImportedImageUrl(referenceUrl, uploadResult.key)
+          : uploadResult.key;
+        session.updateStep(newStepId, { imageKey: fullImageUrl });
       }
     } catch (error) {
       console.error('Failed to upload step image:', error);

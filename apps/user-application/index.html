@@ -17,10 +17,9 @@
     />
     <meta name="keywords" content="step-by-step guide creator, tutorial maker, scribe alternative, tango alternative, guidejar alternative, workflow documentation, how-to guide generator, automated tutorial creator, process documentation tool, screen recorder with instructions, AI documentation assistant" />
     <meta name="author" content="SteppsAI" />
-    <link rel="canonical" href="https://stepps.ai" />
 
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://stepps.ai" />
+    <meta property="og:url" content="https://stepps.ai/" />
     <meta property="og:title" content="SteppsAI | Turn Actions Into Instructions" />
     <meta property="og:description" content="Create step-by-step guides and tutorials automatically. Record your workflow once and SteppsAI generates beautiful, shareable instructions." />
     <meta property="og:image" content="https://stepps.ai/website/turn-actions-into-instructions.png" />
@@ -30,14 +29,131 @@
     <meta property="og:site_name" content="SteppsAI" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://stepps.ai" />
+    <meta name="twitter:url" content="https://stepps.ai/" />
     <meta name="twitter:title" content="SteppsAI | Turn Actions Into Instructions" />
     <meta name="twitter:description" content="Create step-by-step guides and tutorials automatically. Record your workflow once and SteppsAI generates beautiful, shareable instructions." />
     <meta name="twitter:image" content="https://stepps.ai/website/turn-actions-into-instructions.png" />
     <meta name="twitter:image:alt" content="SteppsAI | Turn Actions Into Instructions" />
 
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="language" content="English" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "SteppsAI",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "url": "https://stepps.ai/",
+        "description": "Create step-by-step guides and tutorials automatically by recording workflows once and exporting shareable instructions."
+      }
+    </script>
+    <script>
+      (function () {
+        var pathname = window.location.pathname;
+        var canonicalUrl = window.location.origin + pathname;
+
+        function upsertMeta(selector, createAttr, createValue, content) {
+          var tag = document.querySelector(selector);
+          if (!tag) {
+            tag = document.createElement("meta");
+            tag.setAttribute(createAttr, createValue);
+            document.head.appendChild(tag);
+          }
+          tag.setAttribute("content", content);
+        }
+
+        var routeMeta = {
+          "/": {
+            title: "SteppsAI | Turn Actions Into Instructions",
+            description:
+              "Create step-by-step guides and tutorials automatically. Record your workflow once and SteppsAI generates beautiful, shareable instructions.",
+          },
+          "/guides": {
+            title: "Public Guides | SteppsAI",
+            description:
+              "Browse public step-by-step guides created with SteppsAI and learn workflows faster.",
+          },
+          "/payments": {
+            title: "Pricing | SteppsAI",
+            description:
+              "Explore SteppsAI pricing and plans to create, edit, and share workflow documentation.",
+          },
+          "/webinar": {
+            title: "Webinar | SteppsAI",
+            description:
+              "Join the SteppsAI webinar and learn how to create onboarding guides users actually finish.",
+          },
+          "/privacy": {
+            title: "Privacy Policy | SteppsAI",
+            description:
+              "Read how SteppsAI handles your data, privacy, and security.",
+          },
+          "/terms": {
+            title: "Terms of Service | SteppsAI",
+            description:
+              "Review the terms and conditions for using SteppsAI.",
+          },
+        };
+
+        var currentMeta = routeMeta[pathname];
+        if (!currentMeta && pathname.indexOf("/shared/") === 0) {
+          currentMeta = {
+            title: "Shared Guide | SteppsAI",
+            description:
+              "View a step-by-step guide shared with SteppsAI.",
+          };
+        }
+
+        if (currentMeta) {
+          document.title = currentMeta.title;
+          upsertMeta('meta[name="description"]', "name", "description", currentMeta.description);
+          upsertMeta('meta[property="og:title"]', "property", "og:title", currentMeta.title);
+          upsertMeta(
+            'meta[property="og:description"]',
+            "property",
+            "og:description",
+            currentMeta.description,
+          );
+          upsertMeta('meta[name="twitter:title"]', "name", "twitter:title", currentMeta.title);
+          upsertMeta(
+            'meta[name="twitter:description"]',
+            "name",
+            "twitter:description",
+            currentMeta.description,
+          );
+        }
+
+        if (
+          pathname.indexOf("/app/") === 0 ||
+          pathname.indexOf("/auth/") === 0 ||
+          pathname === "/payment/success" ||
+          pathname === "/payment/cancel"
+        ) {
+          upsertMeta('meta[name="robots"]', "name", "robots", "noindex, nofollow");
+        }
+
+        var canonical = document.querySelector('link[rel="canonical"]');
+
+        if (!canonical) {
+          canonical = document.createElement("link");
+          canonical.setAttribute("rel", "canonical");
+          document.head.appendChild(canonical);
+        }
+
+        canonical.setAttribute("href", canonicalUrl);
+
+        var ogUrl = document.querySelector('meta[property="og:url"]');
+        if (ogUrl) {
+          ogUrl.setAttribute("content", canonicalUrl);
+        }
+
+        var twitterUrl = document.querySelector('meta[name="twitter:url"]');
+        if (twitterUrl) {
+          twitterUrl.setAttribute("content", canonicalUrl);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="app"></div>

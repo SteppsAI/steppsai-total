@@ -30,16 +30,17 @@ function RouteComponent() {
 
   // Check if we're on an editor route, guide view route, or carousel route
   const isEditorRoute = pathname.startsWith('/app/editor');
+  const isDocsRoute = pathname.startsWith('/app/docs');
   const isGuideViewRoute = /^\/app\/stepps\/[^/]+$/.test(pathname);
   const isCarouselRoute = pathname.startsWith('/app/carousel');
-  const isFullscreenRoute = isEditorRoute || isGuideViewRoute || isCarouselRoute;
+  const isFullscreenRoute = isEditorRoute || isDocsRoute || isGuideViewRoute || isCarouselRoute;
 
   // Fullscreen layout for editor/guide view (no sidebar, no dashboard chrome)
   if (isFullscreenRoute) {
     return (
       <SidebarProvider>
         {/* Editor/Carousel needs overflow-hidden for layout, Guide View needs auto scrolling */}
-        <div className={`h-screen w-full bg-background ${isEditorRoute || isCarouselRoute ? 'overflow-hidden' : 'overflow-y-auto custom-scrollbar'}`}>
+        <div className={`h-screen w-full bg-background ${isEditorRoute || isCarouselRoute || isDocsRoute ? 'overflow-hidden' : 'overflow-y-auto custom-scrollbar'}`}>
           <Outlet />
         </div>
       </SidebarProvider>

@@ -8,6 +8,8 @@ import { editorRouter } from "@/worker/trpc/routers/editor";
 import { recordingRouter } from "@/worker/trpc/routers/recording";
 import { notificationsRouter } from "@/worker/trpc/routers/notifications";
 import { publicGuidesRouter } from "@/worker/trpc/routers/public-guides";
+import { guideDocsRouter } from "@/worker/trpc/routers/guide-docs";
+import { publicGuideDocsRouter } from "@/worker/trpc/routers/public-guide-docs";
 import { configRouter } from "@/worker/trpc/routers/config";
 import { webinarRouter } from "@/worker/trpc/routers/webinar";
 import { teamRouter } from "@/worker/trpc/routers/team";
@@ -31,6 +33,8 @@ export const appRouter = t.router({
   recording: recordingRouter,
   notifications: notificationsRouter,
   publicGuides: publicGuidesRouter,
+  guideDocs: guideDocsRouter,
+  publicGuideDocs: publicGuideDocsRouter,
   config: configRouter,
   webinar: webinarRouter,
   team: teamRouter,
@@ -38,5 +42,4 @@ export const appRouter = t.router({
 });
 
 export type AppRouter = typeof appRouter;
-
 

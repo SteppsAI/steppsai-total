@@ -18,6 +18,9 @@
 			"vars": {
 				"ASSETS_URL": "https://stepps-assets-stage.stepps.ai",
 				"CLOUDFLARE_ACCOUNT_ID": "c2ed9b335ebebbe0fbfa7aa17935b3b5",
+				"OPENROUTER_MODEL": "minimax/minimax-m2.5",
+				"OPENROUTER_SITE_URL": "https://stage.stepps.ai",
+				"OPENROUTER_APP_NAME": "Stepps Docs Generator",
 			},
 			"routes": [
 				{
@@ -56,6 +59,12 @@
 					"remote": false
 				},
 				{
+					"name": "guide-docs-generate-workflow-stage",
+					"binding": "GUIDE_DOCS_WORKFLOW",
+					"class_name": "GuideDocsGenerateWorkflow",
+					"remote": false
+				},
+				{
 					"name": "webinar-reminder-workflow-stage",
 					"binding": "WEBINAR_REMINDER_WORKFLOW",
 					"class_name": "WebinarReminderWorkflow",
@@ -82,7 +91,10 @@
 		"production": {
 			"vars": {
 				"ASSETS_URL": "https://assets.stepps.ai",
-				"CLOUDFLARE_ACCOUNT_ID": "c2ed9b335ebebbe0fbfa7aa17935b3b5"
+				"CLOUDFLARE_ACCOUNT_ID": "c2ed9b335ebebbe0fbfa7aa17935b3b5",
+				"OPENROUTER_MODEL": "minimax/minimax-m2.5",
+				"OPENROUTER_SITE_URL": "https://stepps.ai",
+				"OPENROUTER_APP_NAME": "Stepps Docs Generator"
 			},
 			"routes": [
 				{
@@ -118,6 +130,12 @@
 					"name": "guide-pdf-export-workflow",
 					"binding": "GUIDE_EXPORT_WORKFLOW",
 					"class_name": "GuidePdfExportWorkflow",
+					"remote": false
+				},
+				{
+					"name": "guide-docs-generate-workflow",
+					"binding": "GUIDE_DOCS_WORKFLOW",
+					"class_name": "GuideDocsGenerateWorkflow",
 					"remote": false
 				},
 				{

@@ -11,12 +11,17 @@ declare namespace Cloudflare {
 		DATABASE_URL: string;
 		CLOUDFLARE_API_TOKEN_BROWSER: string;
 		CLOUDFLARE_ACCOUNT_ID: string;
+		OPENROUTER_API_KEY: string;
+		OPENROUTER_MODEL: string;
+		OPENROUTER_SITE_URL: string;
+		OPENROUTER_APP_NAME: string;
 		CREEM_TEST_API_KEY: string;
 		RESEND_API_KEY: string;
 		GUIDE_SESSION: DurableObjectNamespace<import("./src/index").GuideSession>;
 		BUCKET: R2Bucket;
 		QUEUE: Queue;
 		GUIDE_EXPORT_WORKFLOW: Workflow<Parameters<import("./src/index").GuidePdfExportWorkflow['run']>[0]['payload']>;
+		GUIDE_DOCS_WORKFLOW: Workflow<Parameters<import("./src/index").GuideDocsGenerateWorkflow['run']>[0]['payload']>;
 	}
 }
 interface BaseEnv extends Cloudflare.Env {}
@@ -24,7 +29,7 @@ type StringifyValues<EnvType extends Record<string, unknown>> = {
 	[Binding in keyof EnvType]: EnvType[Binding] extends string ? EnvType[Binding] : string;
 };
 declare namespace NodeJS {
-	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "ASSETS_URL" | "DATABASE_URL" | "CLOUDFLARE_API_TOKEN_BROWSER" | "CLOUDFLARE_ACCOUNT_ID" | "CREEM_TEST_API_KEY" | "RESEND_API_KEY">> {}
+	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "ASSETS_URL" | "DATABASE_URL" | "CLOUDFLARE_API_TOKEN_BROWSER" | "CLOUDFLARE_ACCOUNT_ID" | "OPENROUTER_API_KEY" | "OPENROUTER_MODEL" | "OPENROUTER_SITE_URL" | "OPENROUTER_APP_NAME" | "CREEM_TEST_API_KEY" | "RESEND_API_KEY">> {}
 }
 
 // Begin runtime types

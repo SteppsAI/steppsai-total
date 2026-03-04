@@ -4,8 +4,8 @@ export * from './users';
 export * from './exports';
 export * from './editor';
 export * from './images';
+export * from './guide-docs';
 export * from './auth';
 export * from './notifications';
 export * from './webinar';
-
 

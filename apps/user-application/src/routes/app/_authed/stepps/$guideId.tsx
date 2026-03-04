@@ -1,11 +1,12 @@
-import { createFileRoute, Link, useRouter, useNavigate } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useSuspenseQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Share2, Pencil, ChevronLeft, Download, MoreVertical, ExternalLink, Check, X, Loader2 } from "lucide-react";
+import { Share2, Pencil, ChevronLeft, Download, MoreVertical, ExternalLink, Check, X, Loader2, FileText, Rocket } from "lucide-react";
 import { ShareDialog } from "@/components/share-dialog";
 import { ExportDialog, PdfIcon, HtmlIcon, WordIcon } from "@/components/export-dialog";
+import { DocsGenerationWizard } from "@/components/docs/docs-generation-wizard";
 import { formatRelativeTime, cn } from "@/lib/utils";
 import { ViewerCanvas } from "@/components/viewer-canvas";
 import {
@@ -18,6 +19,8 @@ import {
 import { trpc } from "@/router";
 import { Step } from "@/types/db";
 import { z } from "zod";
+import { toast } from "sonner";
+import type { GuideDocsGenerationInput } from "@repo/data-ops/zod-schema";
 
 const searchSchema = z.object({
   exporting: z.enum(['pdf', 'html', 'docx']).optional(),
@@ -34,13 +37,14 @@ export const Route = createFileRoute("/app/_authed/stepps/$guideId")({
 });
 
 function GuideViewPage() {
-  const router = useRouter();
   const navigate = useNavigate();
   const { guideId } = Route.useParams();
   const { exporting } = Route.useSearch();
+  const queryClient = useQueryClient();
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDocsWizardOpen, setIsDocsWizardOpen] = useState(false);
   const [successAnimation, setSuccessAnimation] = useState<'pdf' | 'html' | 'docx' | null>(null);
   const [failureAnimation, setFailureAnimation] = useState<'pdf' | 'html' | 'docx' | null>(null);
   const exportStartTime = useRef<string | null>(null);
@@ -93,6 +97,22 @@ function GuideViewPage() {
   // Main guide data - fetch ONCE, no polling
   const queryOptions = trpc.guides.getById.queryOptions({ id: guideId });
   const { data: guide } = useSuspenseQuery(queryOptions);
+  const docsQuery = useQuery(trpc.guideDocs.getByGuideId.queryOptions({ guideId }));
+
+  const generateDocsMutation = useMutation({
+    ...trpc.guideDocs.generate.mutationOptions(),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: trpc.guideDocs.getByGuideId.queryOptions({ guideId }).queryKey,
+      });
+      toast.success("Docs generation started");
+      setIsDocsWizardOpen(false);
+      navigate({ to: "/app/docs/$guideId", params: { guideId } });
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to generate docs");
+    },
+  });
 
   // Merge polling result into guide object for display logic
   if (exportDocs) {
@@ -156,7 +176,7 @@ function GuideViewPage() {
               variant="ghost"
               size="icon"
               className="w-9 h-9 rounded-full btn-glass-secondary text-muted-foreground hover:text-foreground transition-all duration-300 hover:scale-105"
-              onClick={() => router.history.back()}
+              onClick={() => navigate({ to: "/app" })}
             >
               <ChevronLeft className="w-4 h-4" />
               <span className="sr-only">Back</span>
@@ -192,6 +212,29 @@ function GuideViewPage() {
                 <Pencil className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
                 <span className="hidden sm:inline">Edit</span>
               </Link>
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 btn-glass-secondary text-muted-foreground hover:text-[var(--primary)] transition-all duration-300 group rounded-lg"
+              onClick={() => {
+                if (docsQuery.data?.page) {
+                  navigate({ to: "/app/docs/$guideId", params: { guideId } });
+                  return;
+                }
+                setIsDocsWizardOpen(true);
+              }}
+              disabled={generateDocsMutation.isPending}
+            >
+              {docsQuery.data?.page ? (
+                <FileText className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+              ) : generateDocsMutation.isPending ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Rocket className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+              )}
+              <span className="hidden sm:inline">{docsQuery.data?.page ? "Open Docs" : "Generate Docs"}</span>
             </Button>
 
             <div className="h-6 w-px bg-gradient-to-b from-transparent via-[var(--color-200)] to-transparent mx-1 hidden sm:block"></div>
@@ -482,6 +525,17 @@ function GuideViewPage() {
         onOpenChange={setIsExportOpen}
         guideTitle={guide.title || ""}
         guideId={guide.guideId}
+      />
+
+      <DocsGenerationWizard
+        open={isDocsWizardOpen}
+        onOpenChange={setIsDocsWizardOpen}
+        guideTitle={guide.title || "Untitled guide"}
+        defaultValue={docsQuery.data?.page?.generationInput}
+        onSubmit={async (input: GuideDocsGenerationInput) => {
+          await generateDocsMutation.mutateAsync({ guideId, input });
+        }}
+        isSubmitting={generateDocsMutation.isPending}
       />
     </div>
   );

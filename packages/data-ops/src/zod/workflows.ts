@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { guideDocsGenerationInputSchema } from "./guide-docs";
 
 /**
  * Export Workflow Parameters
@@ -12,3 +13,11 @@ export const exportParamsSchema = z.object({
 
 // Type exports
 export type ExportParams = z.infer<typeof exportParamsSchema>;
+
+export const guideDocsGenerateParamsSchema = z.object({
+	guideId: z.string().uuid(),
+	input: guideDocsGenerationInputSchema,
+	section: z.enum(["all", "intro", "troubleshooting"]).default("all"),
+});
+
+export type GuideDocsGenerateParams = z.infer<typeof guideDocsGenerateParamsSchema>;

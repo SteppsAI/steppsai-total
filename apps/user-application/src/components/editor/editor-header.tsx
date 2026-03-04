@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Share2, Download, Save, Loader2, Check, AlertCircle, Camera } from "lucide-react";
+import { ArrowLeft, Share2, Download, Save, Loader2, Check, AlertCircle, Camera, FileText } from "lucide-react";
 import { useRouter } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
@@ -18,9 +18,11 @@ interface EditorHeaderProps {
     onTitleChange: (title: string) => void;
     onBrandLogoChange?: (file: File) => void;
     onSave?: () => void;
+    onGenerateDocs?: () => void;
     onShare?: () => void;
     onExport?: () => void;
     onBack?: () => void;
+    isGeneratingDocs?: boolean;
 }
 
 export function EditorHeader({
@@ -35,9 +37,11 @@ export function EditorHeader({
     onTitleChange,
     onBrandLogoChange,
     onSave,
+    onGenerateDocs,
     onShare,
     onExport,
-    onBack
+    onBack,
+    isGeneratingDocs = false,
 }: EditorHeaderProps) {
     const router = useRouter();
     const [localTitle, setLocalTitle] = useState(title || '');
@@ -273,6 +277,23 @@ export function EditorHeader({
                 )}
 
                 <div className="h-6 w-px bg-gradient-to-b from-transparent via-[var(--color-200)] to-transparent mx-1 hidden sm:block"></div>
+
+                {onGenerateDocs && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="gap-2 btn-glass-secondary text-muted-foreground hover:text-[var(--primary)] transition-all duration-300 group rounded-lg"
+                        onClick={onGenerateDocs}
+                        disabled={isGeneratingDocs}
+                    >
+                        {isGeneratingDocs ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                            <FileText className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+                        )}
+                        Docs
+                    </Button>
+                )}
 
                 <Button
                     variant="ghost"

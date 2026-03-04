@@ -1,4 +1,5 @@
 export * from "./guides";
+export * from "./guide-docs";
 export * from "./folders";
 export * from "./exports";
 export * from "./users";

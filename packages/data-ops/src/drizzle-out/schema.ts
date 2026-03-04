@@ -45,6 +45,31 @@ export const guides = pgTable("guides", {
 	index("guides_slug_idx").on(table.slug),
 ]);
 
+export const guideDocumentationPages = pgTable("guide_documentation_pages", {
+	guideId: uuid("guide_id")
+		.primaryKey()
+		.notNull()
+		.references(() => guides.guideId, { onDelete: "cascade" }),
+	status: text("status").notNull().default("not_started"),
+	slug: text("slug"),
+	generationInput: jsonb("generation_input").notNull().default({}),
+	generatedContent: jsonb("generated_content").notNull().default({}),
+	draftContent: jsonb("draft_content"),
+	publishedContent: jsonb("published_content"),
+	generationMeta: jsonb("generation_meta"),
+	generatedFromGuideUpdatedAt: timestamp("generated_from_guide_updated_at", {
+		withTimezone: true,
+		mode: "string",
+	}),
+	generatedAt: timestamp("generated_at", { withTimezone: true, mode: "string" }),
+	publishedAt: timestamp("published_at", { withTimezone: true, mode: "string" }),
+	generationError: text("generation_error"),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).defaultNow(),
+}, (table) => [
+	index("guideDocumentationPages_status_idx").on(table.status),
+]);
+
 // Exports - references guides.guideId (uuid)
 export const exportsTable = pgTable("exports", {
 	exportId: uuid("export_id").defaultRandom().primaryKey().notNull(),
@@ -88,4 +113,3 @@ export const pricingDeals = pgTable("pricing_deals", {
 }, (table) => [
 	index("pricing_deals_type_region_env_idx").on(table.type, table.region, table.environment),
 ]);
-

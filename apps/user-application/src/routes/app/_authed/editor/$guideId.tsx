@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { useSuspenseQuery, useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { EditorHeader } from "@/components/editor/editor-header";
 import { EditorToolbar, EditorTool } from "@/components/editor/editor-toolbar";
 import { Canvas } from "@/components/editor/canvas";
 import { StepSidebar, SidebarWidth } from "@/components/editor/step-sidebar";
 import { ImportExistingStepsDialog } from "@/components/editor/import-existing-steps-dialog";
+import { DocsGenerationWizard } from "@/components/docs/docs-generation-wizard";
 import { useState, useCallback, useEffect } from "react";
 import { ShareDialog } from "@/components/share-dialog";
 import { ExportDialog } from "@/components/export-dialog";
@@ -15,6 +16,7 @@ import { trpc } from "@/router";
 import { useDeleteStep, useUploadImage, useUpdateGuide } from "@/hooks/use-api";
 import { Step, Overlay, Guide } from "@/types/db";
 import { useEditorSession } from "@/hooks/use-editor-session";
+import type { GuideDocsGenerationInput } from "@repo/data-ops/zod-schema";
 
 export const Route = createFileRoute("/app/_authed/editor/$guideId")({
   component: EditorPage,
@@ -67,6 +69,7 @@ function EditorPage() {
   const queryClient = useQueryClient();
 
   const { data: fetchedGuide, refetch } = useSuspenseQuery(trpc.guides.getById.queryOptions({ id: guideId }));
+  const docsQuery = useQuery(trpc.guideDocs.getByGuideId.queryOptions({ guideId }));
 
   // Poll for data if guide is still processing (queue hasn't finished yet) or if not found yet (race condition)
   useEffect(() => {
@@ -95,8 +98,24 @@ function EditorPage() {
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [isDocsWizardOpen, setIsDocsWizardOpen] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState<SidebarWidth>("medium");
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+
+  const generateDocsMutation = useMutation({
+    ...trpc.guideDocs.generate.mutationOptions(),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: trpc.guideDocs.getByGuideId.queryOptions({ guideId }).queryKey,
+      });
+      toast.success("Docs generation started");
+      setIsDocsWizardOpen(false);
+      navigate({ to: "/app/docs/$guideId", params: { guideId } });
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to generate docs");
+    },
+  });
 
   // Cycle through sidebar widths: medium -> wide -> narrow -> collapsed -> medium
   const handleCycleWidth = useCallback(() => {
@@ -404,6 +423,10 @@ function EditorPage() {
     }
   }, [guideId, queryClient, uploadImageMutation, updateGuideMutation]);
 
+  const handleGenerateDocs = useCallback(async (input: GuideDocsGenerationInput) => {
+    await generateDocsMutation.mutateAsync({ guideId, input });
+  }, [generateDocsMutation, guideId]);
+
   // Loading state
   if (session.isLoading) {
     return (
@@ -445,9 +468,11 @@ function EditorPage() {
         onTitleChange={handleTitleChange}
         onBrandLogoChange={handleBrandLogoChange}
         onSave={handleSave}
+        onGenerateDocs={() => setIsDocsWizardOpen(true)}
         onShare={() => setIsShareOpen(true)}
         onExport={() => setIsExportOpen(true)}
         onBack={() => navigate({ to: "/app" })}
+        isGeneratingDocs={generateDocsMutation.isPending}
       />
 
       <div className="flex-1 flex overflow-hidden relative">
@@ -501,6 +526,15 @@ function EditorPage() {
         onOpenChange={setIsExportOpen}
         guideTitle={session.guide.title || "Untitled Guide"}
         guideId={guideId}
+      />
+
+      <DocsGenerationWizard
+        open={isDocsWizardOpen}
+        onOpenChange={setIsDocsWizardOpen}
+        guideTitle={session.guide.title || "Untitled Guide"}
+        defaultValue={docsQuery.data?.page?.generationInput}
+        onSubmit={handleGenerateDocs}
+        isSubmitting={generateDocsMutation.isPending}
       />
     </div>
   );

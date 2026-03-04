@@ -5,6 +5,7 @@ import { queueMessageSchema } from "@repo/data-ops/zod-schema/queue";
 import { handleStepsInsert } from './queue-handlers/recording-ingest';
 import * as rpc from './rpc-methods';
 export { GuidePdfExportWorkflow } from './workflows/guide-pdf-export';
+export { GuideDocsGenerateWorkflow } from './workflows/guide-docs-generate';
 export { WebinarReminderWorkflow } from './workflows/webinar-reminders';
 export { GuideSession } from './durable-objects/GuideSession';
 
@@ -43,7 +44,10 @@ export default class DataService extends WorkerEntrypoint<Env> {
 	deleteAvatar(userId: string) { return rpc.deleteAvatar(this.env, userId); }
 
 	// ===== EXPORTS =====
-	triggerExport(guideId: string, format: 'pdf' | 'html') { return rpc.triggerExport(this.env, guideId, format); }
+	triggerExport(guideId: string, format: 'pdf' | 'html' | 'docx') { return rpc.triggerExport(this.env, guideId, format); }
+	triggerGuideDocsGeneration(guideId: string, input: any, section?: "all" | "intro" | "troubleshooting") {
+		return rpc.triggerGuideDocsGeneration(this.env, guideId, input, section);
+	}
 
 	// ===== EDITOR =====
 	getEditorState(guideId: string) { return rpc.getEditorState(this.env, guideId); }
@@ -103,5 +107,3 @@ export default class DataService extends WorkerEntrypoint<Env> {
 		}
 	}
 }
-
-

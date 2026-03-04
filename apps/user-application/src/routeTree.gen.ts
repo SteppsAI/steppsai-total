@@ -28,6 +28,7 @@ import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-pas
 import { Route as AppUpgradeRouteImport } from './routes/app/upgrade'
 import { Route as AppAuthedRouteImport } from './routes/app/_authed'
 import { Route as AppAuthedIndexRouteImport } from './routes/app/_authed/index'
+import { Route as SharedDocsGuideIdRouteImport } from './routes/shared/docs/$guideId'
 import { Route as AppAuthedSteppsRouteImport } from './routes/app/_authed/stepps'
 import { Route as AppAuthedSettingsRouteImport } from './routes/app/_authed/settings'
 import { Route as AppAuthedSteppsIndexRouteImport } from './routes/app/_authed/stepps/index'
@@ -36,6 +37,7 @@ import { Route as AppAuthedCarouselIndexRouteImport } from './routes/app/_authed
 import { Route as AppAuthedSteppsGuideIdRouteImport } from './routes/app/_authed/stepps/$guideId'
 import { Route as AppAuthedFolderFolderIdRouteImport } from './routes/app/_authed/folder/$folderId'
 import { Route as AppAuthedEditorGuideIdRouteImport } from './routes/app/_authed/editor/$guideId'
+import { Route as AppAuthedDocsGuideIdRouteImport } from './routes/app/_authed/docs/$guideId'
 import { Route as AppAuthedCarouselEditorRouteImport } from './routes/app/_authed/carousel/editor'
 
 const AppRouteImport = createFileRoute('/app')()
@@ -129,6 +131,11 @@ const AppAuthedIndexRoute = AppAuthedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppAuthedRoute,
 } as any)
+const SharedDocsGuideIdRoute = SharedDocsGuideIdRouteImport.update({
+  id: '/shared/docs/$guideId',
+  path: '/shared/docs/$guideId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppAuthedSteppsRoute = AppAuthedSteppsRouteImport.update({
   id: '/stepps',
   path: '/stepps',
@@ -169,6 +176,11 @@ const AppAuthedEditorGuideIdRoute = AppAuthedEditorGuideIdRouteImport.update({
   path: '/editor/$guideId',
   getParentRoute: () => AppAuthedRoute,
 } as any)
+const AppAuthedDocsGuideIdRoute = AppAuthedDocsGuideIdRouteImport.update({
+  id: '/docs/$guideId',
+  path: '/docs/$guideId',
+  getParentRoute: () => AppAuthedRoute,
+} as any)
 const AppAuthedCarouselEditorRoute = AppAuthedCarouselEditorRouteImport.update({
   id: '/carousel/editor',
   path: '/carousel/editor',
@@ -194,8 +206,10 @@ export interface FileRoutesByFullPath {
   '/shared/$guideId': typeof SharedGuideIdRoute
   '/app/settings': typeof AppAuthedSettingsRoute
   '/app/stepps': typeof AppAuthedSteppsRouteWithChildren
+  '/shared/docs/$guideId': typeof SharedDocsGuideIdRoute
   '/app/': typeof AppAuthedIndexRoute
   '/app/carousel/editor': typeof AppAuthedCarouselEditorRoute
+  '/app/docs/$guideId': typeof AppAuthedDocsGuideIdRoute
   '/app/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
   '/app/folder/$folderId': typeof AppAuthedFolderFolderIdRoute
   '/app/stepps/$guideId': typeof AppAuthedSteppsGuideIdRoute
@@ -221,7 +235,9 @@ export interface FileRoutesByTo {
   '/payment/success': typeof PaymentSuccessRoute
   '/shared/$guideId': typeof SharedGuideIdRoute
   '/app/settings': typeof AppAuthedSettingsRoute
+  '/shared/docs/$guideId': typeof SharedDocsGuideIdRoute
   '/app/carousel/editor': typeof AppAuthedCarouselEditorRoute
+  '/app/docs/$guideId': typeof AppAuthedDocsGuideIdRoute
   '/app/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
   '/app/folder/$folderId': typeof AppAuthedFolderFolderIdRoute
   '/app/stepps/$guideId': typeof AppAuthedSteppsGuideIdRoute
@@ -250,8 +266,10 @@ export interface FileRoutesById {
   '/shared/$guideId': typeof SharedGuideIdRoute
   '/app/_authed/settings': typeof AppAuthedSettingsRoute
   '/app/_authed/stepps': typeof AppAuthedSteppsRouteWithChildren
+  '/shared/docs/$guideId': typeof SharedDocsGuideIdRoute
   '/app/_authed/': typeof AppAuthedIndexRoute
   '/app/_authed/carousel/editor': typeof AppAuthedCarouselEditorRoute
+  '/app/_authed/docs/$guideId': typeof AppAuthedDocsGuideIdRoute
   '/app/_authed/editor/$guideId': typeof AppAuthedEditorGuideIdRoute
   '/app/_authed/folder/$folderId': typeof AppAuthedFolderFolderIdRoute
   '/app/_authed/stepps/$guideId': typeof AppAuthedSteppsGuideIdRoute
@@ -280,8 +298,10 @@ export interface FileRouteTypes {
     | '/shared/$guideId'
     | '/app/settings'
     | '/app/stepps'
+    | '/shared/docs/$guideId'
     | '/app/'
     | '/app/carousel/editor'
+    | '/app/docs/$guideId'
     | '/app/editor/$guideId'
     | '/app/folder/$folderId'
     | '/app/stepps/$guideId'
@@ -307,7 +327,9 @@ export interface FileRouteTypes {
     | '/payment/success'
     | '/shared/$guideId'
     | '/app/settings'
+    | '/shared/docs/$guideId'
     | '/app/carousel/editor'
+    | '/app/docs/$guideId'
     | '/app/editor/$guideId'
     | '/app/folder/$folderId'
     | '/app/stepps/$guideId'
@@ -335,8 +357,10 @@ export interface FileRouteTypes {
     | '/shared/$guideId'
     | '/app/_authed/settings'
     | '/app/_authed/stepps'
+    | '/shared/docs/$guideId'
     | '/app/_authed/'
     | '/app/_authed/carousel/editor'
+    | '/app/_authed/docs/$guideId'
     | '/app/_authed/editor/$guideId'
     | '/app/_authed/folder/$folderId'
     | '/app/_authed/stepps/$guideId'
@@ -361,6 +385,7 @@ export interface RootRouteChildren {
   PaymentCancelRoute: typeof PaymentCancelRoute
   PaymentSuccessRoute: typeof PaymentSuccessRoute
   SharedGuideIdRoute: typeof SharedGuideIdRoute
+  SharedDocsGuideIdRoute: typeof SharedDocsGuideIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -491,6 +516,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthedIndexRouteImport
       parentRoute: typeof AppAuthedRoute
     }
+    '/shared/docs/$guideId': {
+      id: '/shared/docs/$guideId'
+      path: '/shared/docs/$guideId'
+      fullPath: '/shared/docs/$guideId'
+      preLoaderRoute: typeof SharedDocsGuideIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/_authed/stepps': {
       id: '/app/_authed/stepps'
       path: '/stepps'
@@ -547,6 +579,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthedEditorGuideIdRouteImport
       parentRoute: typeof AppAuthedRoute
     }
+    '/app/_authed/docs/$guideId': {
+      id: '/app/_authed/docs/$guideId'
+      path: '/docs/$guideId'
+      fullPath: '/app/docs/$guideId'
+      preLoaderRoute: typeof AppAuthedDocsGuideIdRouteImport
+      parentRoute: typeof AppAuthedRoute
+    }
     '/app/_authed/carousel/editor': {
       id: '/app/_authed/carousel/editor'
       path: '/carousel/editor'
@@ -576,6 +615,7 @@ interface AppAuthedRouteChildren {
   AppAuthedSteppsRoute: typeof AppAuthedSteppsRouteWithChildren
   AppAuthedIndexRoute: typeof AppAuthedIndexRoute
   AppAuthedCarouselEditorRoute: typeof AppAuthedCarouselEditorRoute
+  AppAuthedDocsGuideIdRoute: typeof AppAuthedDocsGuideIdRoute
   AppAuthedEditorGuideIdRoute: typeof AppAuthedEditorGuideIdRoute
   AppAuthedFolderFolderIdRoute: typeof AppAuthedFolderFolderIdRoute
   AppAuthedCarouselIndexRoute: typeof AppAuthedCarouselIndexRoute
@@ -587,6 +627,7 @@ const AppAuthedRouteChildren: AppAuthedRouteChildren = {
   AppAuthedSteppsRoute: AppAuthedSteppsRouteWithChildren,
   AppAuthedIndexRoute: AppAuthedIndexRoute,
   AppAuthedCarouselEditorRoute: AppAuthedCarouselEditorRoute,
+  AppAuthedDocsGuideIdRoute: AppAuthedDocsGuideIdRoute,
   AppAuthedEditorGuideIdRoute: AppAuthedEditorGuideIdRoute,
   AppAuthedFolderFolderIdRoute: AppAuthedFolderFolderIdRoute,
   AppAuthedCarouselIndexRoute: AppAuthedCarouselIndexRoute,
@@ -625,6 +666,7 @@ const rootRouteChildren: RootRouteChildren = {
   PaymentCancelRoute: PaymentCancelRoute,
   PaymentSuccessRoute: PaymentSuccessRoute,
   SharedGuideIdRoute: SharedGuideIdRoute,
+  SharedDocsGuideIdRoute: SharedDocsGuideIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

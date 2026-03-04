@@ -138,32 +138,6 @@ function EditorPage() {
     }
   }, [session.guide?.steps, activeStepId]);
 
-  // Auto-skip to next step with image if current step has no image
-  useEffect(() => {
-    if (!session.guide?.steps || !activeStepId) return;
-
-    const currentStep = session.guide.steps.find(s => s.id === activeStepId);
-    if (!currentStep || currentStep.imageKey) return; // Current step has image, no need to skip
-
-    // Find next step with an image
-    const sorted = [...session.guide.steps].sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
-    const currentIndex = sorted.findIndex(s => s.id === activeStepId);
-
-    // Look for next step with image (circular search)
-    let foundStepWithImage = null;
-    for (let i = 1; i < sorted.length; i++) {
-      const nextIndex = (currentIndex + i) % sorted.length;
-      if (sorted[nextIndex].imageKey) {
-        foundStepWithImage = sorted[nextIndex];
-        break;
-      }
-    }
-
-    if (foundStepWithImage) {
-      setActiveStepId(foundStepWithImage.id);
-    }
-  }, [activeStepId, session.guide?.steps]);
-
   // Handle title change - syncs to DO
   const handleTitleChange = useCallback((newTitle: string) => {
     session.updateTitle(newTitle);
@@ -270,13 +244,20 @@ function EditorPage() {
     session.updateSteps(reindexed);
   }, [session]);
 
-  // Handle add step with image - syncs to DO
-  const handleAddStep = useCallback((stepData: { title: string; file: File; previewUrl: string }) => {
+  // Handle add step with image - uploads to R2 via existing pipeline, then syncs to DO
+  const handleAddStep = useCallback(async (stepData: { title: string; file: File; previewUrl: string }) => {
+    const newStepId = crypto.randomUUID();
+    const orderIndex = session.guide?.steps?.length || 0;
+
+    // Create our own blob URL so the dialog's cleanup doesn't break the preview
+    const localPreviewUrl = URL.createObjectURL(stepData.file);
+
     const newStep: Step = {
-      id: crypto.randomUUID(),
+      id: newStepId,
+      type: 'click',
       caption: stepData.title,
-      imageKey: stepData.previewUrl,
-      orderIndex: (session.guide?.steps?.length || 0),
+      imageKey: localPreviewUrl,
+      orderIndex,
       overlays: [],
       pageUrl: "",
       domSelector: "",
@@ -284,8 +265,31 @@ function EditorPage() {
 
     const updatedSteps = [...(session.guide?.steps || []), newStep];
     session.updateSteps(updatedSteps);
-    setActiveStepId(newStep.id);
-  }, [session]);
+    setActiveStepId(newStepId);
+
+    // Upload to R2 via tRPC → BFF → data-service → base64toR2
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(stepData.file);
+      });
+
+      const ext = stepData.file.type.split('/')[1] || 'png';
+      const imageKey = `screenshots/${guideId}/${Date.now()}-${newStepId}.${ext}`;
+
+      const uploadResult = await uploadImageMutation.mutateAsync({ key: imageKey, dataUrl });
+      if (uploadResult.success) {
+        session.updateStep(newStepId, { imageKey });
+      }
+    } catch (error) {
+      console.error('Failed to upload step image:', error);
+      toast.error('Failed to upload image');
+    } finally {
+      URL.revokeObjectURL(localPreviewUrl);
+    }
+  }, [session, guideId, uploadImageMutation]);
 
   // Handle add text-only step - syncs to DO
   const handleAddTextStep = useCallback((title: string) => {

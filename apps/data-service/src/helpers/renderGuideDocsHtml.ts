@@ -18,6 +18,8 @@ export function renderGuideDocsHtml(
 	content: GuideDocumentationContent,
 	imageMap: Record<string, string>
 ) {
+	const gettingStartedGuideLabel =
+		content.gettingStarted.guideLabel?.trim() || "Open source guide";
 	const steps = ((guide.steps || []) as Step[]).filter((step) => !step.isExcluded);
 	const stepLookup = new Map(steps.map((step) => [step.id, step]));
 
@@ -89,6 +91,7 @@ export function renderGuideDocsHtml(
 			</section>
 			<section id="getting-started">
 				<h2>Get started</h2>
+				${content.gettingStarted.guideUrl ? `<p><a href="${escapeHtml(content.gettingStarted.guideUrl)}" target="_blank" rel="noreferrer">${escapeHtml(gettingStartedGuideLabel)}</a></p>` : ""}
 				<ul>${content.gettingStarted.bullets.map((bullet) => `<li>${escapeHtml(bullet)}</li>`).join("")}</ul>
 			</section>
 			${content.requirements ? `<section id="requirements"><h2>Requirements</h2><ul>${content.requirements.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></section>` : ""}

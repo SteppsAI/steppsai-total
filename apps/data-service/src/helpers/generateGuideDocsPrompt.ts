@@ -28,6 +28,7 @@ const guideDocumentationIntroCopySchema = z.object({
 	}),
 	gettingStarted: z.object({
 		bullets: z.array(z.string()).default([]),
+		guideUrl: z.string().url().optional(),
 	}),
 });
 
@@ -122,6 +123,10 @@ function buildRequirementsFallback(input: GuideDocsGenerationInput) {
 			"A modern desktop browser",
 		],
 	};
+}
+
+function normalizeGuideUrl(url?: string) {
+	return typeof url === "string" && url.trim() ? url.trim() : undefined;
 }
 
 function buildTroubleshootingFallback(input: GuideDocsGenerationInput) {
@@ -368,6 +373,8 @@ export function mergeGuideDocsCopyIntoContent(
 					introCopy.gettingStarted.bullets.filter(Boolean).length > 0
 						? introCopy.gettingStarted.bullets
 						: buildGettingStartedFallback(visibleSteps).bullets,
+				guideUrl: normalizeGuideUrl(introCopy.gettingStarted.guideUrl) || base.gettingStarted.guideUrl,
+				guideLabel: base.gettingStarted.guideLabel,
 			},
 		};
 	}
@@ -405,6 +412,8 @@ export function mergeGuideDocsCopyIntoContent(
 				fullCopy.gettingStarted.bullets.filter(Boolean).length > 0
 					? fullCopy.gettingStarted.bullets
 					: buildGettingStartedFallback(visibleSteps).bullets,
+			guideUrl: normalizeGuideUrl(fullCopy.gettingStarted.guideUrl) || base.gettingStarted.guideUrl,
+			guideLabel: base.gettingStarted.guideLabel,
 		},
 		requirements: input.includeRequirements
 			? fullCopy.requirements || buildRequirementsFallback(input)
@@ -446,16 +455,24 @@ export function mergeRegeneratedSectionIntoPage(
 	const currentDraft = existingPage?.draftContent || currentGenerated;
 
 	if (section === "all") {
-		const fullContent = mergeGuideDocsCopyIntoContent(
+		const fullGeneratedContent = mergeGuideDocsCopyIntoContent(
 			guide,
 			input,
 			copy as GuideDocumentationCopy,
-			"all"
+			"all",
+			currentGenerated
+		);
+		const fullDraftContent = mergeGuideDocsCopyIntoContent(
+			guide,
+			input,
+			copy as GuideDocumentationCopy,
+			"all",
+			currentDraft
 		);
 
 		return {
-			generatedContent: fullContent,
-			draftContent: fullContent,
+			generatedContent: fullGeneratedContent,
+			draftContent: fullDraftContent,
 		};
 	}
 

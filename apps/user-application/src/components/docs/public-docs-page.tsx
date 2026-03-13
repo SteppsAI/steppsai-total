@@ -67,6 +67,8 @@ export function DocumentationContentView({
   const steps = (guide.steps || []) as Step[];
   const docSteps = content.steps || [];
   const gettingStartedBullets = content.gettingStarted?.bullets || [];
+  const gettingStartedGuideLabel =
+    content.gettingStarted?.guideLabel?.trim() || "Open source guide";
   const heroStep = content.hero?.heroStepId
     ? steps.find((step) => step.id === content.hero.heroStepId)
     : steps.find((step) => step.imageKey);
@@ -116,6 +118,16 @@ export function DocumentationContentView({
 
       <section id="getting-started" className="scroll-mt-24 space-y-4">
         <h2 className="text-2xl font-semibold text-white">Get started</h2>
+        {content.gettingStarted?.guideUrl ? (
+          <a
+            href={content.gettingStarted.guideUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-orange-200 transition-colors hover:border-white/20 hover:text-white"
+          >
+            {gettingStartedGuideLabel}
+          </a>
+        ) : null}
         <ol className="space-y-3 rounded-3xl border border-white/10 bg-white/5 p-6">
           {gettingStartedBullets.map((bullet, index) => (
             <li key={index} className="flex gap-3 text-slate-200">

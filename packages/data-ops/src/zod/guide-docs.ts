@@ -1,5 +1,15 @@
 import { z } from "zod";
 
+const optionalUrlSchema = z.preprocess(
+	(value) =>
+		typeof value === "string" && !value.trim()
+			? undefined
+			: typeof value === "string"
+				? value.trim()
+				: value,
+	z.string().url().optional()
+);
+
 export const guideDocumentationStatusEnum = z.enum([
 	"not_started",
 	"generating",
@@ -58,6 +68,7 @@ export const guideDocumentationCopySchema = z.object({
 	}),
 	gettingStarted: z.object({
 		bullets: z.array(z.string()).default([]),
+		guideUrl: optionalUrlSchema,
 	}),
 	stepCopy: z.array(
 		z.object({
@@ -129,6 +140,8 @@ export const guideDocumentationContentSchema = z.object({
 	}),
 	gettingStarted: z.object({
 		bullets: z.array(z.string()).default([]),
+		guideUrl: optionalUrlSchema,
+		guideLabel: z.string().optional(),
 	}),
 	requirements: z
 		.object({

@@ -3,13 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DocsToc } from "@/components/docs/docs-toc";
 import { DocsShareDialog } from "@/components/docs/docs-share-dialog";
 import {
   DocumentationContentView,
   buildDocsTocItems,
 } from "@/components/docs/public-docs-page";
-import { downloadDocsReactExport } from "@/lib/docs-react-export";
+import { DocsExportTheme, downloadDocsReactExport } from "@/lib/docs-react-export";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Code2, Loader2, RefreshCw, Rocket, Save, Share2, Upload } from "lucide-react";
 import { toast } from "sonner";
@@ -60,6 +62,8 @@ function createFallbackContent(guide: Guide): GuideDocumentationContent {
     },
     gettingStarted: {
       bullets: [],
+      guideUrl: "",
+      guideLabel: "",
     },
     requirements: {
       items: [],
@@ -93,6 +97,8 @@ export function DocsEditor({
   const [draft, setDraft] = useState<GuideDocumentationContent | null>(baseContent);
   const [selectedSection, setSelectedSection] = useState<SelectedSection>("hero");
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [exportThemeDialogOpen, setExportThemeDialogOpen] = useState(false);
+  const [exportTheme, setExportTheme] = useState<DocsExportTheme>("dark");
 
   useEffect(() => {
     setDraft(baseContent);
@@ -113,12 +119,14 @@ export function DocsEditor({
   const generatedContent = page?.generatedContent || null;
   const isPublished = page?.status === "published" && Boolean(page?.publishedContent);
 
-  function handleExportReact() {
+  function handleExportReact(theme: DocsExportTheme) {
     try {
-      const exported = downloadDocsReactExport({ guide, content });
+      const exported = downloadDocsReactExport({ guide, content, theme });
       toast.success(`Downloaded ${exported.fileName}`);
+      setExportThemeDialogOpen(false);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to export React file");
+      setExportThemeDialogOpen(false);
     }
   }
 
@@ -132,7 +140,13 @@ export function DocsEditor({
       const next = structuredClone(current || createFallbackContent(guide));
       if (selectedSection === "hero") next.hero = structuredClone(generatedContent.hero);
       else if (selectedSection === "overview") next.overview = structuredClone(generatedContent.overview);
-      else if (selectedSection === "getting-started") next.gettingStarted = structuredClone(generatedContent.gettingStarted);
+      else if (selectedSection === "getting-started") {
+        next.gettingStarted = {
+          ...structuredClone(generatedContent.gettingStarted),
+          guideUrl: next.gettingStarted.guideUrl || generatedContent.gettingStarted.guideUrl,
+          guideLabel: next.gettingStarted.guideLabel || generatedContent.gettingStarted.guideLabel,
+        };
+      }
       else if (selectedSection === "requirements") next.requirements = structuredClone(generatedContent.requirements);
       else if (selectedSection === "troubleshooting") next.troubleshooting = structuredClone(generatedContent.troubleshooting);
       else if (selectedSection === "faq") next.faq = structuredClone(generatedContent.faq);
@@ -231,6 +245,36 @@ export function DocsEditor({
     if (selectedSection === "getting-started") {
       return (
         <div className="space-y-2">
+          <label className="text-sm font-medium">Get started guide URL</label>
+          <Input
+            value={draft.gettingStarted.guideUrl || ""}
+            onChange={(e) =>
+              updateContent((current) => ({
+                ...current,
+                gettingStarted: {
+                  ...current.gettingStarted,
+                  guideUrl: e.target.value,
+                },
+              }))
+            }
+            placeholder="https://..."
+          />
+
+          <label className="text-sm font-medium">Get started button label</label>
+          <Input
+            value={draft.gettingStarted.guideLabel || ""}
+            onChange={(e) =>
+              updateContent((current) => ({
+                ...current,
+                gettingStarted: {
+                  ...current.gettingStarted,
+                  guideLabel: e.target.value,
+                },
+              }))
+            }
+            placeholder="Open source guide"
+          />
+
           <label className="text-sm font-medium">Getting started bullets</label>
           <Textarea
             rows={10}
@@ -239,6 +283,7 @@ export function DocsEditor({
               updateContent((current) => ({
                 ...current,
                 gettingStarted: {
+                  ...current.gettingStarted,
                   bullets: e.target.value.split("\n").map((item) => item.trim()).filter(Boolean),
                 },
               }))
@@ -454,7 +499,11 @@ export function DocsEditor({
               <RefreshCw className="mr-2 h-4 w-4" />
               Troubleshooting
             </Button>
-            <Button variant="outline" onClick={handleExportReact} disabled={!draft}>
+            <Button
+              variant="outline"
+              onClick={() => setExportThemeDialogOpen(true)}
+              disabled={!draft}
+            >
               <Code2 className="mr-2 h-4 w-4" />
               Export React
             </Button>
@@ -548,6 +597,32 @@ export function DocsEditor({
         guideId={guide.guideId}
         isPublished={isPublished}
       />
+
+      <Dialog open={exportThemeDialogOpen} onOpenChange={setExportThemeDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Export React component</DialogTitle>
+            <DialogDescription>Select a theme for the downloaded file style.</DialogDescription>
+          </DialogHeader>
+          <Select value={exportTheme} onValueChange={(value) => setExportTheme(value as DocsExportTheme)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select theme" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="dark">Dark</SelectItem>
+              <SelectItem value="light">Light</SelectItem>
+            </SelectContent>
+          </Select>
+          <DialogFooter>
+            <Button variant="outline" type="button" onClick={() => setExportThemeDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={() => handleExportReact(exportTheme)}>
+              Download React file
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

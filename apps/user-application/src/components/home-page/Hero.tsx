@@ -6,6 +6,7 @@ import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Link } from '@tanstack/react-router'
+import { Demo } from './Demo'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -31,18 +32,20 @@ export function Hero() {
                 { opacity: 1, y: 0, duration: 0.6, stagger: 0.15 },
                 "-=0.4"
             )
-            // Demo animates on load (part of the sequence, not scroll-triggered)
-            .fromTo(".hero-demo-section",
-                { opacity: 0, y: 40, scale: 0.98 },
-                { opacity: 1, y: 0, scale: 1, duration: 1, ease: "power2.out" },
-                "-=0.3" // Slight overlap with CTAs for fluid feel
-            )
-            // Handwritten indicator animates separately, slightly after the video
-            .fromTo(".hero-indicator",
-                { opacity: 0, rotate: -5, x: -10, scale: 0.9 },
-                { opacity: 1, rotate: 0, x: 0, scale: 1, duration: 0.8, ease: "back.out(1.5)" },
-                "-=0.2"
-            )
+
+        gsap.from(".hero-indicator", {
+            scrollTrigger: {
+                trigger: "#demo",
+                start: "top 88%",
+                toggleActions: "play none none reverse"
+            },
+            opacity: 0,
+            rotate: -5,
+            x: -10,
+            scale: 0.9,
+            duration: 0.8,
+            ease: "back.out(1.5)"
+        })
 
         // ScrollTrigger only for Trust Bar (below the fold)
         gsap.from(".hero-trust-bar", {
@@ -114,13 +117,13 @@ export function Hero() {
                                     <ArrowRight className="ml-2 size-4 transition-transform duration-200 group-hover:translate-x-1" />
                                 </Link>
 
-                                <Link
-                                    to="/webinar"
+                                <a
+                                    href="#demo"
                                     className="btn-glass-secondary group inline-flex h-11 sm:h-12 items-center justify-center rounded-full px-6 sm:px-8 text-sm font-medium text-[var(--color-800)] transition-all duration-200 hover:-translate-y-0.5 hover:text-primary active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 >
                                     <Play className="mr-2 size-4 fill-current transition-transform duration-200 group-hover:scale-110" />
                                     Watch Demo
-                                </Link>
+                                </a>
 
                                 {/* 
                                 <a
@@ -137,7 +140,7 @@ export function Hero() {
 
                 </div>
 
-                {/* Webinar / Countdown Section (Mac Layout) */}
+                {/* Product Demo Section */}
                 <div id="demo" className="hero-demo-section relative max-w-5xl mx-auto z-20 px-2 sm:px-4 pt-8 md:pt-12">
                     {/* Decorative glow */}
                     <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-[100vw] bg-gradient-to-t from-primary/10 via-background to-transparent blur-[80px]" />
@@ -148,7 +151,7 @@ export function Hero() {
                             className="text-primary text-sm sm:text-lg lg:text-xl font-light whitespace-nowrap mb-1"
                             style={{ fontFamily: "'Kalam', cursive", transform: "rotate(-2deg)" }}
                         >
-                            Watch how it works
+                            See how it works
                         </p>
                         <svg
                             className="w-8 h-8 sm:w-12 sm:h-12 text-primary/80 translate-y-2 sm:translate-y-4"
@@ -165,61 +168,8 @@ export function Hero() {
                         </svg>
                     </div>
 
-                    <div className="relative mx-auto" style={{ perspective: '1200px' }}>
-                        {/* Browser Window Frame */}
-                        <div className="relative bg-background/80 backdrop-blur-xl rounded-xl md:rounded-2xl border border-border shadow-2xl overflow-hidden will-change-transform">
-
-                            {/* Browser Header */}
-                            <div className="h-8 md:h-10 bg-muted/80 border-b border-border flex items-center px-3 md:px-4 gap-2">
-                                <div className="flex gap-1.5">
-                                    <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-[#FF5F56] border border-[#E0443E]/50" />
-                                    <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-[#FFBD2E] border border-[#DEA123]/50" />
-                                    <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-[#27C93F] border border-[#1AAB29]/50" />
-                                </div>
-                                <div className="flex-1 flex justify-center">
-                                    <div className="h-5 md:h-6 w-32 md:w-48 bg-background/50 rounded-md border border-border/50 text-[9px] md:text-[10px] flex items-center justify-center text-muted-foreground gap-1.5 font-medium">
-                                        <div className="w-2 h-2 rounded-full bg-green-500/50" />
-                                        stepps.ai/webinar
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Content Area */}
-                            <div className="relative w-full py-16 px-6 md:px-12 bg-[var(--color-50)] backdrop-blur-xl flex flex-col items-center justify-center text-center cursor-default">
-                                {/* Background Effects */}
-                                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
-                                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px]" />
-                                <div className="absolute bottom-0 left-0 w-64 h-64 bg-secondary/5 rounded-full blur-[100px]" />
-
-                                <div className="relative z-10 flex flex-col items-center gap-8">
-                                    <div className="space-y-6">
-                                        <h3 className="text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight text-[var(--color-900)] leading-[0.95]">
-                                            How to create onboarding guides that users actually finish
-                                        </h3>
-                                        <p className="text-base md:text-lg text-[var(--color-600)] max-w-2xl mx-auto leading-relaxed font-medium">
-                                            We will show you how you can create proffesional onboarding guides in minutes using Stepps.ai.
-                                        </p>
-                                    </div>
-
-                                    <Link
-                                        to="/webinar"
-                                        className="btn-glass-primary btn-reserve group inline-flex h-12 md:h-14 items-center justify-center rounded-full px-6 md:px-8 text-sm md:text-base font-medium text-primary-foreground leading-none transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 mt-2"
-                                    >
-                                        <span className="flex items-center justify-center w-full">
-                                            <span className="relative flex items-center h-[1.2em] overflow-hidden">
-                                                <span className="block text-center whitespace-nowrap transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
-                                                    Reserve Your Free Spot
-                                                </span>
-                                                <span className="absolute inset-0 flex items-center justify-center text-center whitespace-nowrap transition-transform duration-500 ease-in-out translate-y-full group-hover:translate-y-0 w-full">
-                                                    Reserve Your Free Spot
-                                                </span>
-                                            </span>
-                                        </span>
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
-                        {/* Soft Glow Behind */}
+                    <div className="relative mx-auto">
+                        <Demo />
                         <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] h-[95%] bg-primary/10 blur-[80px] rounded-full" />
                     </div>
                 </div>

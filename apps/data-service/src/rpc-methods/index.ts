@@ -8,4 +8,4 @@ export * from './guide-docs';
 export * from './auth';
 export * from './notifications';
 export * from './webinar';
-
+export * from './agent-api';

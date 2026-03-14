@@ -5,6 +5,7 @@
     "description": "Turn any workflow into SOP in seconds.",
     "permissions": [
         "activeTab",
+        "alarms",
         "scripting",
         "sidePanel",
         "storage",

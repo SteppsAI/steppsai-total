@@ -1,5 +1,14 @@
 import { relations } from "drizzle-orm/relations";
-import { teamMembers, folders, guides, exportsTable, guideDocumentationPages } from "./schema";
+import {
+	teamMembers,
+	folders,
+	guides,
+	exportsTable,
+	guideDocumentationPages,
+	agentApiKeys,
+	browserSessions,
+	agentRuns,
+} from "./schema";
 import { user, session, account, creem_subscription } from "./auth-schema";
 
 // Better Auth Relations
@@ -11,6 +20,10 @@ export const userRelations = relations(user, ({ many }) => ({
 	folders: many(folders),
 	guides: many(guides),
 	guideDocumentationPages: many(guideDocumentationPages),
+	agentApiKeys: many(agentApiKeys),
+	browserSessions: many(browserSessions, { relationName: "browserSessions_ownerUserId" }),
+	extensionBrowserSessions: many(browserSessions, { relationName: "browserSessions_extensionUserId" }),
+	agentRuns: many(agentRuns),
 	subscriptions: many(creem_subscription),
 }));
 
@@ -70,6 +83,7 @@ export const guidesRelations = relations(guides, ({ one, many }) => ({
 		fields: [guides.guideId],
 		references: [guideDocumentationPages.guideId],
 	}),
+	agentRuns: many(agentRuns),
 }));
 
 export const exportsRelations = relations(exportsTable, ({ one }) => ({
@@ -82,6 +96,42 @@ export const exportsRelations = relations(exportsTable, ({ one }) => ({
 export const guideDocumentationPagesRelations = relations(guideDocumentationPages, ({ one }) => ({
 	guide: one(guides, {
 		fields: [guideDocumentationPages.guideId],
+		references: [guides.guideId],
+	}),
+}));
+
+export const agentApiKeysRelations = relations(agentApiKeys, ({ one }) => ({
+	owner: one(user, {
+		fields: [agentApiKeys.ownerUserId],
+		references: [user.id],
+	}),
+}));
+
+export const browserSessionsRelations = relations(browserSessions, ({ one, many }) => ({
+	owner: one(user, {
+		fields: [browserSessions.ownerUserId],
+		references: [user.id],
+		relationName: "browserSessions_ownerUserId",
+	}),
+	extensionUser: one(user, {
+		fields: [browserSessions.extensionUserId],
+		references: [user.id],
+		relationName: "browserSessions_extensionUserId",
+	}),
+	agentRuns: many(agentRuns),
+}));
+
+export const agentRunsRelations = relations(agentRuns, ({ one }) => ({
+	owner: one(user, {
+		fields: [agentRuns.ownerUserId],
+		references: [user.id],
+	}),
+	browserSession: one(browserSessions, {
+		fields: [agentRuns.browserSessionId],
+		references: [browserSessions.browserSessionId],
+	}),
+	guide: one(guides, {
+		fields: [agentRuns.guideId],
 		references: [guides.guideId],
 	}),
 }));

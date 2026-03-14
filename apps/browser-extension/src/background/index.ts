@@ -12,6 +12,14 @@ import {
     handleSelectionConfirmed,
     handleSelectionCancelled
 } from './handlers';
+import {
+    clearAgentBrowserSession,
+    getAgentRuntimeState,
+    initializeAgentRuntime,
+    pairAgentBrowserSession,
+    registerAgentRuntimeAlarmListener,
+    triggerAgentHeartbeat,
+} from './agent-runtime';
 
 // ===== MESSAGE LISTENERS =====
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -42,6 +50,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     } else if (message.type === 'SELECTION_CANCELLED') {
         sendResponse(handleSelectionCancelled());
         return false;
+    } else if (message.type === 'PAIR_AGENT_BROWSER_SESSION') {
+        pairAgentBrowserSession(message.pairingToken, message.displayName).then(sendResponse);
+        return true;
+    } else if (message.type === 'SYNC_AGENT_RUNTIME') {
+        triggerAgentHeartbeat().then(sendResponse);
+        return true;
+    } else if (message.type === 'GET_AGENT_RUNTIME_STATE') {
+        getAgentRuntimeState().then(sendResponse);
+        return true;
+    } else if (message.type === 'CLEAR_AGENT_BROWSER_SESSION') {
+        clearAgentBrowserSession().then(sendResponse);
+        return true;
     }
 });
 
@@ -72,5 +92,17 @@ chrome.runtime.onMessageExternal.addListener((message, _sender, sendResponse) =>
     } else if (message.type === 'AUTH_STATE_CHANGED') {
         chrome.storage.local.set({ authStateVersion: Date.now() });
         sendResponse({ success: true });
+    } else if (message.type === 'PAIR_AGENT_BROWSER_SESSION') {
+        pairAgentBrowserSession(message.pairingToken, message.displayName).then(sendResponse);
+        return true;
+    } else if (message.type === 'SYNC_AGENT_RUNTIME') {
+        triggerAgentHeartbeat().then(sendResponse);
+        return true;
+    } else if (message.type === 'GET_AGENT_RUNTIME_STATE') {
+        getAgentRuntimeState().then(sendResponse);
+        return true;
     }
 });
+
+registerAgentRuntimeAlarmListener();
+void initializeAgentRuntime();

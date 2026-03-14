@@ -12,3 +12,4 @@ export * from "./sessions";
 export * from "./workflows";
 export * from "./feedback";
 export * from "./webinar";
+export * from "./agent-api";

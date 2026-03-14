@@ -626,14 +626,13 @@ function resolveSection(id: string): { section: typeof agentApiSections[number] 
 
 function SectionContent({
   sectionId,
-  scrollToId,
   language,
   onLanguageChange,
   copiedKey,
   onCopy,
 }: {
   sectionId: string;
-  scrollToId: string | null;
+  scrollToId?: string | null;
   language: ApiCodeLanguage;
   onLanguageChange: (l: ApiCodeLanguage) => void;
   copiedKey: string | null;

@@ -12,6 +12,7 @@ import {
   PUBLIC_TRPC_ROUTES,
   SESSION_ONLY_ROUTES,
 } from "./helpers/trpc-routes";
+import { agentApiRoutes } from "./routes/agent-api";
 
 export const App = new Hono<{
   Bindings: ServiceBindings & {
@@ -131,6 +132,9 @@ App.on(["POST", "GET"], "/api/auth/*", authRateLimiter, async (c) => {
     }, 503);
   }
 });
+
+// ========== AGENT API ROUTES ==========
+App.route("/", agentApiRoutes);
 
 // ========== PUBLIC TRPC ROUTES (no auth, IP rate limited) ==========
 for (const route of PUBLIC_TRPC_ROUTES) {

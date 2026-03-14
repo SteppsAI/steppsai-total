@@ -70,6 +70,68 @@ export const guideDocumentationPages = pgTable("guide_documentation_pages", {
 	index("guideDocumentationPages_status_idx").on(table.status),
 ]);
 
+export const agentApiKeys = pgTable("agent_api_keys", {
+	apiKeyId: uuid("api_key_id").defaultRandom().primaryKey().notNull(),
+	ownerUserId: text("owner_user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+	label: text("label"),
+	keyPrefix: text("key_prefix").notNull().unique(),
+	keyHash: text("key_hash").notNull().unique(),
+	keyLast4: text("key_last4").notNull(),
+	lastUsedAt: timestamp("last_used_at", { withTimezone: true, mode: "string" }),
+	revokedAt: timestamp("revoked_at", { withTimezone: true, mode: "string" }),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).defaultNow(),
+}, (table) => [
+	index("agentApiKeys_ownerUserId_idx").on(table.ownerUserId),
+	index("agentApiKeys_keyHash_idx").on(table.keyHash),
+]);
+
+export const browserSessions = pgTable("browser_sessions", {
+	browserSessionId: uuid("browser_session_id").defaultRandom().primaryKey().notNull(),
+	ownerUserId: text("owner_user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+	extensionUserId: text("extension_user_id").references(() => user.id, { onDelete: "set null" }),
+	displayName: text("display_name"),
+	status: text("status").notNull().default("awaiting_pair"),
+	capabilities: jsonb("capabilities").notNull().default({}),
+	pairingTokenHash: text("pairing_token_hash"),
+	pairingCodeExpiresAt: timestamp("pairing_code_expires_at", { withTimezone: true, mode: "string" }),
+	sessionSecretHash: text("session_secret_hash"),
+	currentRunId: uuid("current_run_id"),
+	lastSeenAt: timestamp("last_seen_at", { withTimezone: true, mode: "string" }),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).defaultNow(),
+}, (table) => [
+	index("browserSessions_ownerUserId_idx").on(table.ownerUserId),
+	index("browserSessions_extensionUserId_idx").on(table.extensionUserId),
+	index("browserSessions_pairingTokenHash_idx").on(table.pairingTokenHash),
+]);
+
+export const agentRuns = pgTable("agent_runs", {
+	agentRunId: uuid("agent_run_id").defaultRandom().primaryKey().notNull(),
+	ownerUserId: text("owner_user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+	browserSessionId: uuid("browser_session_id")
+		.notNull()
+		.references(() => browserSessions.browserSessionId, { onDelete: "cascade" }),
+	guideId: uuid("guide_id").references(() => guides.guideId, { onDelete: "set null" }),
+	prompt: text("prompt").notNull(),
+	title: text("title"),
+	status: text("status").notNull().default("queued"),
+	failureCode: text("failure_code"),
+	failureMessage: text("failure_message"),
+	output: jsonb("output").notNull().default({}),
+	runtimeOptions: jsonb("runtime_options").notNull().default({}),
+	plannerOutput: jsonb("planner_output"),
+	artifacts: jsonb("artifacts").notNull().default({}),
+	stepCount: integer("step_count").notNull().default(0),
+	startedAt: timestamp("started_at", { withTimezone: true, mode: "string" }),
+	completedAt: timestamp("completed_at", { withTimezone: true, mode: "string" }),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).defaultNow(),
+}, (table) => [
+	index("agentRuns_ownerUserId_idx").on(table.ownerUserId),
+	index("agentRuns_browserSessionId_idx").on(table.browserSessionId),
+	index("agentRuns_status_idx").on(table.status),
+]);
+
 // Exports - references guides.guideId (uuid)
 export const exportsTable = pgTable("exports", {
 	exportId: uuid("export_id").defaultRandom().primaryKey().notNull(),

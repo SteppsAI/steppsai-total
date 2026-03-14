@@ -84,6 +84,100 @@ export default class DataService extends WorkerEntrypoint<Env> {
 		return rpc.joinWaitlist(this.env, data);
 	}
 
+	// ===== AGENT API =====
+	createAgentApiKey(ownerUserId: string, label?: string) {
+		return rpc.createAgentApiKey(this.env, ownerUserId, label);
+	}
+	listAgentApiKeys(ownerUserId: string) {
+		return rpc.listAgentApiKeys(this.env, ownerUserId);
+	}
+	revokeAgentApiKey(ownerUserId: string, apiKeyId: string) {
+		return rpc.revokeAgentApiKeyForOwner(this.env, ownerUserId, apiKeyId);
+	}
+	authenticateAgentApiKey(rawKey: string) {
+		return rpc.authenticateAgentApiKey(this.env, rawKey);
+	}
+	createBrowserSessionPairingToken(ownerUserId: string, displayName?: string) {
+		return rpc.createBrowserSessionPairingToken(this.env, ownerUserId, displayName);
+	}
+	listBrowserSessions(ownerUserId: string) {
+		return rpc.listBrowserSessions(this.env, ownerUserId);
+	}
+	claimBrowserSessionForOwner(ownerUserId: string, pairingToken: string, input?: { displayName?: string; capabilities?: Record<string, unknown> }) {
+		return rpc.claimBrowserSessionForOwner(this.env, ownerUserId, pairingToken, input);
+	}
+	claimBrowserSession(pairingToken: string, input?: { displayName?: string; extensionUserId?: string; capabilities?: Record<string, unknown> }) {
+		return rpc.claimBrowserSession(this.env, pairingToken, input);
+	}
+	heartbeatBrowserSessionForOwner(ownerUserId: string, browserSessionId: string, capabilities?: Record<string, unknown>) {
+		return rpc.heartbeatBrowserSessionForOwner(this.env, ownerUserId, browserSessionId, capabilities);
+	}
+	heartbeatBrowserSession(browserSessionId: string, sessionSecret: string, capabilities?: Record<string, unknown>) {
+		return rpc.heartbeatBrowserSession(this.env, browserSessionId, sessionSecret, capabilities);
+	}
+	createAgentRun(ownerUserId: string, input: { prompt: string; browserSessionId: string; output: any; runtime: any }) {
+		return rpc.createAgentRun(this.env, ownerUserId, input);
+	}
+	getAgentRun(ownerUserId: string, agentRunId: string) {
+		return rpc.getAgentRun(this.env, ownerUserId, agentRunId);
+	}
+	resumeAgentRun(ownerUserId: string, agentRunId: string) {
+		return rpc.resumeAgentRun(this.env, ownerUserId, agentRunId);
+	}
+	cancelAgentRun(ownerUserId: string, agentRunId: string) {
+		return rpc.cancelAgentRun(this.env, ownerUserId, agentRunId);
+	}
+	updateAgentRunStateForOwner(
+		ownerUserId: string,
+		browserSessionId: string,
+		agentRunId: string,
+		data: {
+			status: "running" | "paused_for_user" | "failed";
+			failureCode?: "auth_required" | "captcha_required" | "selector_not_found" | "browser_disconnected" | "run_timeout" | "upload_failed" | "planner_failed" | null;
+			failureMessage?: string | null;
+			stepCount?: number;
+		}
+	) {
+		return rpc.updateAgentRunStateForOwner(this.env, ownerUserId, browserSessionId, agentRunId, data);
+	}
+	updateAgentRunStateFromBrowser(
+		browserSessionId: string,
+		sessionSecret: string,
+		agentRunId: string,
+		data: {
+			status: "running" | "paused_for_user" | "failed";
+			failureCode?: "auth_required" | "captcha_required" | "selector_not_found" | "browser_disconnected" | "run_timeout" | "upload_failed" | "planner_failed" | null;
+			failureMessage?: string | null;
+			stepCount?: number;
+		}
+	) {
+		return rpc.updateAgentRunStateFromBrowser(this.env, browserSessionId, sessionSecret, agentRunId, data);
+	}
+	completeAgentRunForOwner(
+		ownerUserId: string,
+		browserSessionId: string,
+		agentRunId: string,
+		data: {
+			title?: string;
+			rawSteps: any[];
+			brandImageKey?: string | null;
+		}
+	) {
+		return rpc.completeAgentRunForOwner(this.env, ownerUserId, browserSessionId, agentRunId, data);
+	}
+	completeAgentRunFromBrowser(
+		browserSessionId: string,
+		sessionSecret: string,
+		agentRunId: string,
+		data: {
+			title?: string;
+			rawSteps: any[];
+			brandImageKey?: string | null;
+		}
+	) {
+		return rpc.completeAgentRunFromBrowser(this.env, browserSessionId, sessionSecret, agentRunId, data);
+	}
+
 	// ===== QUEUE =====
 	async queue(batch: MessageBatch<unknown>) {
 		initDatabase(this.env.DATABASE_URL);

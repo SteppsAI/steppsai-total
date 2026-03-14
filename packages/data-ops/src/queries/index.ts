@@ -7,3 +7,4 @@ export * from "./subscriptions";
 export * from "./webinar";
 export * from "./team-members";
 export * from "./pricing-deals";
+export * from "./agent-api";

@@ -14,6 +14,7 @@ import { configRouter } from "@/worker/trpc/routers/config";
 import { webinarRouter } from "@/worker/trpc/routers/webinar";
 import { teamRouter } from "@/worker/trpc/routers/team";
 import { pricingRouter } from "@/worker/trpc/routers/pricing";
+import { agentRuntimeRouter } from "@/worker/trpc/routers/agent-runtime";
 
 /**
  * tRPC Router
@@ -39,7 +40,7 @@ export const appRouter = t.router({
   webinar: webinarRouter,
   team: teamRouter,
   pricing: pricingRouter,
+  agentRuntime: agentRuntimeRouter,
 });
 
 export type AppRouter = typeof appRouter;
-

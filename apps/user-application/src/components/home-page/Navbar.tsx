@@ -14,7 +14,6 @@ import {
 
 
 const navigation = [
-  { name: "Webinar", link: "/webinar" },
   { name: "Why Stepps", link: "/#save-time" },
   { name: "How it works", link: "/#how-it-works" },
   { name: "Guides", link: "/guides" },

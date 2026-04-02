@@ -15,6 +15,7 @@ import { webinarRouter } from "@/worker/trpc/routers/webinar";
 import { teamRouter } from "@/worker/trpc/routers/team";
 import { pricingRouter } from "@/worker/trpc/routers/pricing";
 import { agentRuntimeRouter } from "@/worker/trpc/routers/agent-runtime";
+import { agentKeysRouter } from "@/worker/trpc/routers/agent-keys";
 
 /**
  * tRPC Router
@@ -41,6 +42,7 @@ export const appRouter = t.router({
   team: teamRouter,
   pricing: pricingRouter,
   agentRuntime: agentRuntimeRouter,
+  agentKeys: agentKeysRouter,
 });
 
 export type AppRouter = typeof appRouter;

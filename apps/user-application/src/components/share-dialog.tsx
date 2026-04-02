@@ -8,7 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Copy, Check, Link as LinkIcon, Share, Loader2, Shield, ShieldCheck } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Copy, Check, Link as LinkIcon, Share, Loader2, Shield, ShieldCheck, Globe } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -20,21 +21,25 @@ interface ShareDialogProps {
     guideTitle: string;
     guideId: string;
     guideStatus?: 'draft' | 'recording' | 'processing' | 'published';
+    guideVisibility?: 'public' | 'private' | null;
 }
 
-export function ShareDialog({ open, onOpenChange, guideTitle, guideId, guideStatus = 'draft' }: ShareDialogProps) {
+export function ShareDialog({ open, onOpenChange, guideTitle, guideId, guideStatus = 'draft', guideVisibility = 'private' }: ShareDialogProps) {
     const [copied, setCopied] = useState(false);
     const [email, setEmail] = useState("");
     const [internalStatus, setInternalStatus] = useState(guideStatus);
+    const [internalVisibility, setInternalVisibility] = useState<'public' | 'private'>(guideVisibility === 'public' ? 'public' : 'private');
     const queryClient = useQueryClient();
     const isPublished = internalStatus === 'published';
+    const isPubliclyListed = internalVisibility === 'public';
 
-    // Update internal status when prop changes (dialog reopens)
+    // Reset internal states from props when the dialog reopens
     useEffect(() => {
         if (open) {
             setInternalStatus(guideStatus);
+            setInternalVisibility(guideVisibility === 'public' ? 'public' : 'private');
         }
-    }, [open, guideStatus]);
+    }, [open, guideStatus, guideVisibility]);
 
     // Generate the public share URL
     const shareUrl = typeof window !== 'undefined'
@@ -45,16 +50,44 @@ export function ShareDialog({ open, onOpenChange, guideTitle, guideId, guideStat
     const publishMutation = useMutation({
         ...trpc.guides.publish.mutationOptions(),
         onSuccess: () => {
-            // Update internal state immediately for better UX
             setInternalStatus('published');
             toast.success("Guide published! The link is now ready to share.");
-            // Invalidate queries in background to sync state with server
             queryClient.invalidateQueries({
                 queryKey: trpc.guides.getById.queryOptions({ id: guideId }).queryKey
+            });
+            queryClient.invalidateQueries({
+                queryKey: trpc.guides.getAll.queryOptions().queryKey
             });
         },
         onError: () => {
             toast.error("Failed to publish guide");
+        }
+    });
+
+    // Mutation to toggle visibility
+    const visibilityMutation = useMutation({
+        ...trpc.guides.update.mutationOptions(),
+        onSuccess: (_data, variables) => {
+            const newVisibility = (variables as any).data?.visibility;
+            if (newVisibility) {
+                setInternalVisibility(newVisibility);
+            }
+            toast.success(newVisibility === 'public'
+                ? "Guide is now listed on the public Stepps guides page."
+                : "Guide removed from public listing."
+            );
+            queryClient.invalidateQueries({
+                queryKey: trpc.guides.getById.queryOptions({ id: guideId }).queryKey
+            });
+            queryClient.invalidateQueries({
+                queryKey: trpc.guides.getAll.queryOptions().queryKey
+            });
+            queryClient.invalidateQueries({
+                queryKey: trpc.publicGuides.getAllPublished.queryOptions().queryKey
+            });
+        },
+        onError: () => {
+            toast.error("Failed to update visibility");
         }
     });
 
@@ -82,6 +115,11 @@ export function ShareDialog({ open, onOpenChange, guideTitle, guideId, guideStat
         publishMutation.mutate({ id: guideId });
     };
 
+    const handleToggleVisibility = () => {
+        const newVisibility = isPubliclyListed ? 'private' : 'public';
+        visibilityMutation.mutate({ id: guideId, data: { visibility: newVisibility } });
+    };
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-md">
@@ -89,8 +127,8 @@ export function ShareDialog({ open, onOpenChange, guideTitle, guideId, guideStat
                     <DialogTitle>Share "{guideTitle}"</DialogTitle>
                     <DialogDescription>
                         {isPublished
-                            ? "Share this guide with your team or anyone with the link."
-                            : "Publish this guide to make it shareable with anyone."
+                            ? "This guide is shareable by link. Public website listing is controlled separately below."
+                            : "This guide is not shareable yet. Publish it to enable a direct share link."
                         }
                     </DialogDescription>
                 </DialogHeader>
@@ -101,7 +139,7 @@ export function ShareDialog({ open, onOpenChange, guideTitle, guideId, guideStat
                         <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200">
                             <Shield className="size-4 text-amber-600" />
                             <span className="text-sm text-amber-800">
-                                This guide is private. Publish to make it shareable.
+                                This guide is a draft. Publish to make it shareable by link.
                             </span>
                         </div>
                     )}
@@ -166,6 +204,28 @@ export function ShareDialog({ open, onOpenChange, guideTitle, guideId, guideStat
                         </Button>
                     )}
 
+                    {/* Public Listing Toggle - only show if published */}
+                    {isPublished && (
+                        <div className="flex items-center justify-between rounded-lg border p-3">
+                            <div className="flex items-center gap-3">
+                                <Globe className="size-4 text-muted-foreground" />
+                                <div>
+                                    <Label className="text-sm font-medium">
+                                        Listed on stepps.ai website
+                                    </Label>
+                                    <p className="text-xs text-muted-foreground mt-0.5">
+                                        Turn this on only if you want the guide discoverable on the public Stepps guides page.
+                                    </p>
+                                </div>
+                            </div>
+                            <Switch
+                                checked={isPubliclyListed}
+                                onCheckedChange={handleToggleVisibility}
+                                disabled={visibilityMutation.isPending}
+                            />
+                        </div>
+                    )}
+
                     <div className="relative">
                         <div className="absolute inset-0 flex items-center">
                             <span className="w-full border-t" />
@@ -208,4 +268,3 @@ export function ShareDialog({ open, onOpenChange, guideTitle, guideId, guideStat
         </Dialog>
     );
 }
-

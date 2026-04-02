@@ -528,6 +528,7 @@ function EditorPage() {
         guideTitle={session.guide.title || "Untitled Guide"}
         guideId={guideId}
         guideStatus={(fetchedGuide as Guide)?.status as 'draft' | 'recording' | 'processing' | 'published'}
+        guideVisibility={(fetchedGuide as Guide)?.visibility as 'public' | 'private' | null}
       />
 
       <ExportDialog

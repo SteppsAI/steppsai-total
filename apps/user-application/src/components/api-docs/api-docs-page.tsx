@@ -96,11 +96,22 @@ function stringifyPythonLiteral(value: unknown, indent = 0): string {
   return JSON.stringify(value);
 }
 
-/** Strip the /api/agent/v1 prefix from endpoint paths and build a full URL */
+function resolveApiReferenceBaseUrl() {
+  if (typeof window === "undefined") {
+    return API_REFERENCE_BASE_URL;
+  }
+
+  const hostname = window.location.hostname.toLowerCase();
+  if (hostname === "stage.stepps.ai") {
+    return "https://api.stage.stepps.ai";
+  }
+
+  return API_REFERENCE_BASE_URL;
+}
+
 function endpointUrl(endpoint: ApiEndpointDoc) {
-  const pathPart = (endpoint.pathExample || endpoint.path.replace(/:([A-Za-z]+)/g, (_m, name) => `{${name}}`))
-    .replace("/api/agent/v1", "");
-  return `${API_REFERENCE_BASE_URL}${pathPart}`;
+  const pathPart = endpoint.pathExample || endpoint.path.replace(/:([A-Za-z]+)/g, (_m, name) => `{${name}}`);
+  return `${resolveApiReferenceBaseUrl()}${pathPart}`;
 }
 
 function buildCurlSnippet(endpoint: ApiEndpointDoc) {
@@ -527,10 +538,10 @@ function QuickstartSection({
             <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Starter Flow</h3>
             <ol className="space-y-3">
               {[
-                { step: "1", text: "Create an agent API key from the Stepps dashboard" },
+                { step: "1", text: "Create an agent API key in Settings -> API" },
                 { step: "2", text: "Create a browser pairing token and pair the extension" },
-                { step: "3", text: "POST /api/agent/v1/runs with your prompt" },
-                { step: "4", text: "Poll GET /api/agent/v1/runs/:runId until completion" },
+                { step: "3", text: "POST /agent/v1/runs with your prompt" },
+                { step: "4", text: "Poll GET /agent/v1/runs/:runId until completion" },
                 { step: "5", text: "Open the returned shared guide URL" },
               ].map((item) => (
                 <li key={item.step} className="flex gap-3">
@@ -542,10 +553,10 @@ function QuickstartSection({
               ))}
             </ol>
             <Link
-              to="/auth/login"
+              to="/app/settings"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
             >
-              Open dashboard
+              Open settings
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
@@ -557,7 +568,7 @@ function QuickstartSection({
               Base URL
             </div>
             <code className="text-sm font-medium text-slate-800 dark:text-slate-200">
-              {API_REFERENCE_BASE_URL}
+              {resolveApiReferenceBaseUrl()}
             </code>
           </div>
 
@@ -569,13 +580,13 @@ function QuickstartSection({
             </div>
             <div className="space-y-2 text-sm">
               <div>
-                <span className="font-medium text-slate-800 dark:text-slate-200">Website session</span>
-                <span className="ml-2 text-slate-500 dark:text-slate-400">— API key management & browser pairing</span>
+                <span className="font-medium text-slate-800 dark:text-slate-200">Settings</span>
+                <span className="ml-2 text-slate-500 dark:text-slate-400">— create and revoke API keys in Settings -&gt; API</span>
               </div>
               <div>
                 <span className="font-medium text-slate-800 dark:text-slate-200">Bearer token</span>
                 <span className="ml-2 text-slate-500 dark:text-slate-400">
-                  — <code className="text-xs">Authorization: Bearer stpk_...</code> for run orchestration
+                  — <code className="text-xs">Authorization: Bearer stpk_...</code> for browser sessions, runs, and artifacts
                 </span>
               </div>
             </div>

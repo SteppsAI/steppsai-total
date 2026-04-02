@@ -85,7 +85,7 @@ function EmptyState() {
         </p>
         <a
           href="/#waitlist"
-          className="btn-glass-primary inline-flex h-12 items-center justify-center rounded-full px-10 text-base font-medium group"
+          className="btn-glass-primary inline-flex h-12 items-center justify-center rounded-full px-10 text-base font-medium text-white group"
         >
           <span className="mr-2">Join Waitlist</span>
           <img src="/icons/3d/rocket.png" alt="Rocket" className="w-5 h-5 object-contain group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />

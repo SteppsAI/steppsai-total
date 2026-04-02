@@ -518,6 +518,7 @@ function GuideViewPage() {
         guideTitle={guide.title || ""}
         guideId={guide.guideId}
         guideStatus={guide.status as 'draft' | 'recording' | 'processing' | 'published'}
+        guideVisibility={guide.visibility as 'public' | 'private' | null}
       />
 
       <ExportDialog

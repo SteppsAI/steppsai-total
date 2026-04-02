@@ -176,7 +176,7 @@ export async function getAllPublishedGuides(): Promise<Guide[]> {
 	const result = await db
 		.select()
 		.from(guides)
-		.where(eq(guides.status, 'published'))
+		.where(and(eq(guides.status, 'published'), eq(guides.visibility, 'public')))
 		.orderBy(desc(guides.updatedAt));
 
 	return result.map(guide => ({

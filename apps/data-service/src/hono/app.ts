@@ -7,6 +7,7 @@ import { guideDocsRouter } from './routes/guide-docs';
 import { editorRouter } from './routes/editor';
 import { authRouter } from './routes/auth';
 import { webhooksRouter } from './routes/webhooks';
+import { agentRouter } from './routes/agent';
 // import { cors } from 'hono/cors';
 
 export const App = new Hono<{ Bindings: Env }>();
@@ -22,5 +23,6 @@ App.route('/exports', exportsRouter);
 App.route('/guide-docs', guideDocsRouter);
 App.route('/api/editor', editorRouter);
 App.route('/webhooks', webhooksRouter);
+App.route('/agent', agentRouter);
 
 App.get('/', (c) => c.text('SteppsAI Data Service'));

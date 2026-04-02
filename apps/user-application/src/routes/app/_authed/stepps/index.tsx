@@ -80,7 +80,7 @@ function SteppsPage() {
     const [deleteSteppOpen, setDeleteSteppOpen] = useState(false);
     const [moveSteppOpen, setMoveSteppOpen] = useState(false);
 
-    const [selectedGuide, setSelectedGuide] = useState<{ id: string, title: string, status?: string } | null>(null);
+    const [selectedGuide, setSelectedGuide] = useState<{ id: string, title: string, status?: string, visibility?: string | null } | null>(null);
     const [shareDialogOpen, setShareDialogOpen] = useState(false);
     const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
@@ -242,7 +242,7 @@ function SteppsPage() {
     };
 
     const handleShare = (guide: LocalGuideWithFolder) => {
-        setSelectedGuide({ id: guide.guideId, title: guide.title || "Untitled" });
+        setSelectedGuide({ id: guide.guideId, title: guide.title || "Untitled", status: guide.status || undefined, visibility: guide.visibility });
         setShareDialogOpen(true);
     };
 
@@ -587,6 +587,7 @@ function SteppsPage() {
                         guideTitle={selectedGuide.title}
                         guideId={selectedGuide.id}
                         guideStatus={selectedGuide.status as 'draft' | 'recording' | 'processing' | 'published'}
+                        guideVisibility={selectedGuide.visibility as 'public' | 'private' | null}
                     />
                     <ExportDialog
                         open={exportDialogOpen}

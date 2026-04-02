@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { buttonVariants } from "@/components/ui/button";
-import { User as UserIcon, CreditCard, Bell, MessageSquare, Users } from "lucide-react";
+import { User as UserIcon, CreditCard, Bell, MessageSquare, Users, KeyRound } from "lucide-react";
 import { useState } from "react";
 import { trpc } from "@/router";
 import { User } from "@/types/db";
@@ -12,6 +12,7 @@ import {
     TeamSection,
     NotificationsSection,
     FeedbackSection,
+    ApiSection,
 } from "@/components/settings";
 
 export const Route = createFileRoute("/app/_authed/settings")({
@@ -21,7 +22,7 @@ export const Route = createFileRoute("/app/_authed/settings")({
     },
 });
 
-type TabId = "profile" | "billing" | "team" | "notifications" | "feedback";
+type TabId = "profile" | "billing" | "team" | "notifications" | "feedback" | "api";
 
 const sidebarNavItems: { title: string; id: TabId; icon: typeof UserIcon }[] = [
     {
@@ -49,6 +50,11 @@ const sidebarNavItems: { title: string; id: TabId; icon: typeof UserIcon }[] = [
         id: "feedback",
         icon: MessageSquare,
     },
+    {
+        title: "API",
+        id: "api",
+        icon: KeyRound,
+    },
 ];
 
 function SettingsPage() {
@@ -68,6 +74,8 @@ function SettingsPage() {
                 return <NotificationsSection user={user} />;
             case "feedback":
                 return <FeedbackSection />;
+            case "api":
+                return <ApiSection />;
             default:
                 return null;
         }

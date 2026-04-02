@@ -35,112 +35,18 @@ export interface ApiSectionDoc {
   endpointIds?: string[];
 }
 
-export const API_REFERENCE_BASE_URL = "https://api.stepps.ai/agent/v1";
+export const API_REFERENCE_BASE_URL = "https://api.stepps.ai";
 
 export const agentApiEndpoints: ApiEndpointDoc[] = [
-  {
-    id: "create-api-key",
-    title: "Create API key",
-    method: "POST",
-    path: "/api/agent/v1/api-keys",
-    summary: "Create a workspace-scoped agent API key from the logged-in Stepps dashboard.",
-    description:
-      "Use this from the authenticated website to mint a new agent key. The plaintext key is only returned once.",
-    authMode: "session",
-    bodyFields: [
-      {
-        name: "label",
-        type: "string",
-        required: false,
-        description: "Optional human-readable label to identify the key in the dashboard.",
-      },
-    ],
-    bodyExample: {
-      label: "Shopify browser agent",
-    },
-    responseExample: {
-      apiKey: {
-        apiKeyId: "8e111a4c-7a35-4f1f-b4f0-653cdd9a9012",
-        ownerUserId: "user_123",
-        label: "Shopify browser agent",
-        keyPrefix: "stpk_v1_abcd",
-        keyLast4: "9x2q",
-        lastUsedAt: null,
-        revokedAt: null,
-        createdAt: "2026-03-13T09:12:11.000Z",
-      },
-      key: "stpk_v1_abcd1234verysecretkey9x2q",
-    },
-    notes: [
-      "This endpoint uses the normal Stepps website session, not a bearer API key.",
-      "Persist the plaintext key immediately. It is not returned again on future reads.",
-    ],
-  },
-  {
-    id: "list-api-keys",
-    title: "List API keys",
-    method: "GET",
-    path: "/api/agent/v1/api-keys",
-    summary: "List agent API keys for the current workspace owner session.",
-    description:
-      "Use this to show existing keys, prefixes, and revocation state in the dashboard or internal tooling.",
-    authMode: "session",
-    responseExample: {
-      apiKeys: [
-        {
-          apiKeyId: "8e111a4c-7a35-4f1f-b4f0-653cdd9a9012",
-          ownerUserId: "user_123",
-          label: "Shopify browser agent",
-          keyPrefix: "stpk_v1_abcd",
-          keyLast4: "9x2q",
-          lastUsedAt: "2026-03-13T09:18:44.000Z",
-          revokedAt: null,
-          createdAt: "2026-03-13T09:12:11.000Z",
-        },
-      ],
-    },
-  },
-  {
-    id: "revoke-api-key",
-    title: "Revoke API key",
-    method: "DELETE",
-    path: "/api/agent/v1/api-keys/:apiKeyId",
-    pathExample: "/api/agent/v1/api-keys/8e111a4c-7a35-4f1f-b4f0-653cdd9a9012",
-    summary: "Revoke an agent API key so it can no longer create or fetch runs.",
-    description:
-      "Use this when rotating credentials or disabling an integration. Revoked keys remain visible for auditability.",
-    authMode: "session",
-    pathFields: [
-      {
-        name: "apiKeyId",
-        type: "string",
-        required: true,
-        description: "The key identifier returned by the create/list endpoints.",
-      },
-    ],
-    responseExample: {
-      success: true,
-      apiKey: {
-        apiKeyId: "8e111a4c-7a35-4f1f-b4f0-653cdd9a9012",
-        ownerUserId: "user_123",
-        label: "Shopify browser agent",
-        keyPrefix: "stpk_v1_abcd",
-        keyLast4: "9x2q",
-        lastUsedAt: "2026-03-13T09:18:44.000Z",
-        revokedAt: "2026-03-13T09:20:19.000Z",
-        createdAt: "2026-03-13T09:12:11.000Z",
-      },
-    },
-  },
   {
     id: "create-pairing-token",
     title: "Create browser session pairing token",
     method: "POST",
-    path: "/api/agent/v1/browser-sessions/pairing-tokens",
+    path: "/agent/v1/browser-sessions/pairing-tokens",
     summary: "Create a short-lived pairing token for a Stepps browser runtime.",
     description:
-      "Use this from the website or an internal pairing screen to connect a logged-in browser extension session to your workspace.",
-    authMode: "session",
+      "Use this with your agent API key to connect a browser extension session to your workspace.",
+    authMode: "bearer",
     bodyFields: [
       {
         name: "displayName",
@@ -153,23 +59,10 @@ export const agentApiEndpoints: ApiEndpointDoc[] = [
       displayName: "Werner MacBook Pro",
     },
     responseExample: {
-      browserSession: {
-        browserSessionId: "2d5cc4df-6d74-4d84-9d93-c462f3061fd7",
-        ownerUserId: "user_123",
-        extensionUserId: null,
-        displayName: "Werner MacBook Pro",
-        status: "awaiting_pair",
-        capabilities: {
-          actions: [],
-          supportsLiveBroker: false,
-          supportsManualRecording: true,
-        },
-        currentRunId: null,
-        lastSeenAt: null,
-        pairingCodeExpiresAt: "2026-03-13T09:36:00.000Z",
-        createdAt: "2026-03-13T09:21:00.000Z",
-        updatedAt: "2026-03-13T09:21:00.000Z",
-      },
+      browserSessionId: "2d5cc4df-6d74-4d84-9d93-c462f3061fd7",
+      status: "awaiting_pair",
+      displayName: "Werner MacBook Pro",
+      expiresAt: "2026-03-13T09:36:00.000Z",
       pairingToken: "stpair_1b4a51f15fca43749afbb6dc8b3c6f2d",
     },
     notes: [
@@ -180,11 +73,11 @@ export const agentApiEndpoints: ApiEndpointDoc[] = [
     id: "list-browser-sessions",
     title: "List browser sessions",
     method: "GET",
-    path: "/api/agent/v1/browser-sessions",
+    path: "/agent/v1/browser-sessions",
     summary: "List browser sessions currently registered to the workspace.",
     description:
       "Use this to see which paired browsers are available to receive autonomous prompt-to-guide runs.",
-    authMode: "session",
+    authMode: "bearer",
     responseExample: {
       browserSessions: [
         {
@@ -225,7 +118,7 @@ export const agentApiEndpoints: ApiEndpointDoc[] = [
     id: "create-run",
     title: "Create run",
     method: "POST",
-    path: "/api/agent/v1/runs",
+    path: "/agent/v1/runs",
     summary: "Create a prompt-to-guide agent run for a paired browser session.",
     description:
       "This is the primary orchestration endpoint. It compiles the prompt into a bounded browser plan and queues the run for the paired Stepps browser runtime.",
@@ -363,8 +256,8 @@ export const agentApiEndpoints: ApiEndpointDoc[] = [
     id: "get-run",
     title: "Get run",
     method: "GET",
-    path: "/api/agent/v1/runs/:runId",
-    pathExample: "/api/agent/v1/runs/dc7bc2a4-b581-4e30-b50e-42d22486987f",
+    path: "/agent/v1/runs/:runId",
+    pathExample: "/agent/v1/runs/dc7bc2a4-b581-4e30-b50e-42d22486987f",
     summary: "Fetch the latest state for an agent run.",
     description:
       "Poll this endpoint to drive your UI or agent loop until the run completes, pauses, fails, or is cancelled.",
@@ -418,8 +311,8 @@ export const agentApiEndpoints: ApiEndpointDoc[] = [
     id: "resume-run",
     title: "Resume run",
     method: "POST",
-    path: "/api/agent/v1/runs/:runId/resume",
-    pathExample: "/api/agent/v1/runs/dc7bc2a4-b581-4e30-b50e-42d22486987f/resume",
+    path: "/agent/v1/runs/:runId/resume",
+    pathExample: "/agent/v1/runs/dc7bc2a4-b581-4e30-b50e-42d22486987f/resume",
     summary: "Resume a run after user intervention on an auth wall or similar blocker.",
     description:
       "Use this when the extension paused because the user needed to sign in, clear a CAPTCHA, or otherwise unblock the flow.",
@@ -472,8 +365,8 @@ export const agentApiEndpoints: ApiEndpointDoc[] = [
     id: "cancel-run",
     title: "Cancel run",
     method: "POST",
-    path: "/api/agent/v1/runs/:runId/cancel",
-    pathExample: "/api/agent/v1/runs/dc7bc2a4-b581-4e30-b50e-42d22486987f/cancel",
+    path: "/agent/v1/runs/:runId/cancel",
+    pathExample: "/agent/v1/runs/dc7bc2a4-b581-4e30-b50e-42d22486987f/cancel",
     summary: "Cancel an in-flight or paused run.",
     description:
       "Use this to stop execution and release the paired browser session for other work.",
@@ -526,8 +419,8 @@ export const agentApiEndpoints: ApiEndpointDoc[] = [
     id: "get-run-artifacts",
     title: "Get run artifacts",
     method: "GET",
-    path: "/api/agent/v1/runs/:runId/artifacts",
-    pathExample: "/api/agent/v1/runs/dc7bc2a4-b581-4e30-b50e-42d22486987f/artifacts",
+    path: "/agent/v1/runs/:runId/artifacts",
+    pathExample: "/agent/v1/runs/dc7bc2a4-b581-4e30-b50e-42d22486987f/artifacts",
     summary: "Fetch the durable output artifacts for a run.",
     description:
       "Use this when you only need final links or exported content without re-fetching the entire run payload.",
@@ -569,22 +462,30 @@ export const agentApiSections: ApiSectionDoc[] = [
   {
     id: "authentication",
     title: "Authentication",
-    summary: "Two auth modes: website session for setup, bearer API key for orchestration.",
+    summary: "The public Agent API uses bearer API keys.",
     paragraphs: [
-      "The setup surface uses the normal Stepps website session. That includes API key management and browser session pairing setup.",
-      "The orchestration surface uses bearer API keys. Those calls are what external agents, cron jobs, or internal backends should use once setup is complete.",
+      "Create and rotate API keys in Settings -> API inside the Stepps app.",
+      "The public Agent API on api.stepps.ai uses bearer API keys for browser session setup, run orchestration, and artifact retrieval.",
     ],
     bullets: [
-      "Website session: `/api/agent/v1/api-keys` and `/api/agent/v1/browser-sessions/*`",
-      "Bearer token: `/api/agent/v1/runs/*`",
-      "Use `Authorization: Bearer <agent_api_key>` for run orchestration",
+      "Create keys in Settings -> API",
+      "Bearer token: `/agent/v1/browser-sessions/*` and `/agent/v1/runs/*`",
+      "Use `Authorization: Bearer <agent_api_key>` for browser session setup and run orchestration",
     ],
   },
   {
     id: "api-keys",
     title: "API keys",
-    summary: "Create, list, and revoke workspace-scoped agent credentials.",
-    endpointIds: ["create-api-key", "list-api-keys", "revoke-api-key"],
+    summary: "Manage workspace-scoped agent credentials from the Stepps app.",
+    paragraphs: [
+      "API keys are created and revoked in Settings -> API in the authenticated Stepps app.",
+      "The public Agent API itself does not expose session-based key-management endpoints on api.stepps.ai.",
+    ],
+    bullets: [
+      "Plaintext keys are shown only once on creation",
+      "Revoked keys remain visible in Settings for auditability",
+      "Use the created key as a bearer token against the public Agent API",
+    ],
   },
   {
     id: "browser-sessions",
@@ -613,12 +514,12 @@ export const agentApiSections: ApiSectionDoc[] = [
     title: "Examples",
     summary: "Typical end-to-end flow for prompt-to-guide automation.",
     bullets: [
-      "Create an API key from the logged-in Stepps website",
-      "Create a browser pairing token and pair the extension",
-      "List browser sessions and pick an active browserSessionId",
+      "Create an API key in Settings -> API",
+      "Use that API key to create a browser pairing token and pair the extension",
+      "List browser sessions with bearer auth and pick an active browserSessionId",
       "Create a run with a prompt like: Record me how to integrate Claude + Shopify using the Stepps skill",
       "Poll the run until it completes or pauses for user input",
-      "Fetch the shared guide URL or docs artifacts",
+      "Open the returned shared guide URL",
     ],
   },
 ];

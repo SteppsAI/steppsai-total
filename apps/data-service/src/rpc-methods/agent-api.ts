@@ -263,7 +263,7 @@ export async function createAgentRun(
 		description: `Agent planned workflow for: ${fallbackTitle}`,
 		slug: buildGuideSlug(fallbackTitle),
 		status: "recording",
-		visibility: input.output.shareGuide ? "public" : "private",
+		visibility: "private",
 	});
 
 	const run = await createAgentRunRecord({
@@ -450,7 +450,6 @@ export async function completeAgentRunFromBrowser(
 	await updateGuide(run.guideId, {
 		title: data.title || run.title || promptToFallbackTitle(run.prompt),
 		status: run.output.shareGuide ? "published" : "draft",
-		visibility: run.output.shareGuide ? "public" : "private",
 		...(data.brandImageKey ? { brandImageKey: data.brandImageKey } : {}),
 	});
 
@@ -516,7 +515,6 @@ export async function completeAgentRunForOwner(
 	await updateGuide(run.guideId, {
 		title: data.title || run.title || promptToFallbackTitle(run.prompt),
 		status: run.output.shareGuide ? "published" : "draft",
-		visibility: run.output.shareGuide ? "public" : "private",
 		...(data.brandImageKey ? { brandImageKey: data.brandImageKey } : {}),
 	});
 

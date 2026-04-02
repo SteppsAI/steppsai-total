@@ -123,7 +123,7 @@ function FolderPage() {
   // Share/Export Dialog State
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
-  const [selectedGuide, setSelectedGuide] = useState<{ id: string; title: string; status?: 'draft' | 'recording' | 'processing' | 'published' } | null>(null);
+  const [selectedGuide, setSelectedGuide] = useState<{ id: string; title: string; status?: 'draft' | 'recording' | 'processing' | 'published'; visibility?: string | null } | null>(null);
 
   // Dialog States
   const [deleteSteppOpen, setDeleteSteppOpen] = useState(false);
@@ -186,7 +186,8 @@ function FolderPage() {
     setSelectedGuide({
       id: guide.guideId,
       title: guide.title || "Untitled",
-      status: guide.status as 'draft' | 'recording' | 'processing' | 'published'
+      status: guide.status as 'draft' | 'recording' | 'processing' | 'published',
+      visibility: guide.visibility,
     });
     setShareDialogOpen(true);
   };
@@ -494,6 +495,7 @@ function FolderPage() {
             guideTitle={selectedGuide.title}
             guideId={selectedGuide.id}
             guideStatus={selectedGuide.status}
+            guideVisibility={selectedGuide.visibility as 'public' | 'private' | null}
           />
           <ExportDialog
             open={exportDialogOpen}
